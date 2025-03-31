@@ -50,7 +50,7 @@ const Login = () => {
         duration: 0.8,
         ease: "easeInOut"
       }} className="w-full max-w-md">
-          <div className="card backdrop-blur-md border border-black/10 rounded-xl p-8 shadow-xl relative bg-zinc-950">
+          <div className="card backdrop-blur-md border border-black/10 rounded-xl p-8 shadow-xl relative bg-black">
             <div className="absolute top-4 left-4">
               <Link to="/" className="inline-flex items-center text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors group">
                 <Home className="mr-1.5 h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
