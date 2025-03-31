@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
@@ -8,62 +7,38 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/Navbar';
 import MoodMeter from '@/components/MoodMeter';
-
 const Dashboard = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
   const [moodReason, setMoodReason] = useState('');
   const [moodFeeling, setMoodFeeling] = useState('');
   const [showDetails, setShowDetails] = useState(false);
-
   const handleMoodSelect = (mood: string) => {
     setCurrentMood(mood);
     setShowDetails(true);
   };
-
   const handleGoBack = () => {
     setShowDetails(false);
     setCurrentMood(null);
   };
-
-  return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
+  return <div className="min-h-screen bg-black relative overflow-hidden">
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <WavyBackground 
-          colors={["#FF8A48", "#D5D5F1", "#3DFDFF", "#F5DF4D", "#FC68B3", "#2AC20E"]} 
-          waveWidth={100} 
-          backgroundFill="black" 
-          blur={10} 
-          speed="fast" 
-          waveOpacity={0.5} 
-          className="w-full h-full" 
-        />
+        <WavyBackground colors={["#FF8A48", "#D5D5F1", "#3DFDFF", "#F5DF4D", "#FC68B3", "#2AC20E"]} waveWidth={100} backgroundFill="black" blur={10} speed="fast" waveOpacity={0.5} className="w-full h-full" />
       </div>
       
       <Navbar />
       
       <div className="relative z-10 container mx-auto px-4 py-20">
         <div className="flex justify-center items-center min-h-[80vh]">
-          {!showDetails ? (
-            <MoodMeter onMoodSelect={handleMoodSelect} />
-          ) : (
-            <div className="w-full max-w-md bg-black/40 backdrop-blur-lg rounded-2xl p-6 animate-fade-in">
+          {!showDetails ? <MoodMeter onMoodSelect={handleMoodSelect} /> : <div className="w-full max-w-md bg-black/40 backdrop-blur-lg rounded-2xl p-6 animate-fade-in">
               <div className="flex items-center mb-8">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-white" 
-                  onClick={handleGoBack}
-                >
+                <Button variant="ghost" size="icon" className="text-white" onClick={handleGoBack}>
                   <ChevronLeft className="h-6 w-6" />
                 </Button>
                 <div className="flex-1 text-center">
-                  <div 
-                    className="h-20 w-20 rounded-full mx-auto mb-4"
-                    style={{ 
-                      background: getMoodColor(currentMood || 'neutral'),
-                      boxShadow: '0 0 20px rgba(255, 255, 255, 0.2)'
-                    }}
-                  ></div>
+                  <div className="h-20 w-20 rounded-full mx-auto mb-4" style={{
+                background: getMoodColor(currentMood || 'neutral'),
+                boxShadow: '0 0 20px rgba(255, 255, 255, 0.2)'
+              }}></div>
                 </div>
                 <div className="w-10"></div> {/* For balance */}
               </div>
@@ -73,23 +48,12 @@ const Dashboard = () => {
               </h2>
               
               <div className="mt-6 mb-4">
-                <Input 
-                  type="text" 
-                  placeholder="Because..." 
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                  value={moodReason}
-                  onChange={(e) => setMoodReason(e.target.value)}
-                />
+                <Input type="text" placeholder="Because..." className="bg-white/10 border-white/20 text-white placeholder:text-white/50" value={moodReason} onChange={e => setMoodReason(e.target.value)} />
                 <p className="text-white/60 text-xs text-center mt-2">Your mood crew can see this</p>
               </div>
               
               <div className="mt-6 mb-4">
-                <Textarea 
-                  placeholder="How are you feeling? (optional)" 
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[100px]"
-                  value={moodFeeling}
-                  onChange={(e) => setMoodFeeling(e.target.value)}
-                />
+                <Textarea placeholder="How are you feeling? (optional)" className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[100px]" value={moodFeeling} onChange={e => setMoodFeeling(e.target.value)} />
               </div>
               
               <div className="mt-8 space-y-4">
@@ -113,32 +77,28 @@ const Dashboard = () => {
                 <p className="text-white/60 text-xs mb-4">Only you can see this</p>
                 
                 <div className="flex space-x-4 mb-6">
-                  <Button className="bg-purple-700 hover:bg-purple-800 text-white flex-1">
-                    Guided Questions
-                  </Button>
-                  <Button variant="outline" className="border-purple-700 text-purple-300 flex-1">
-                    Venting Space
-                  </Button>
+                  
+                  
                 </div>
                 
                 <Button className="w-full bg-purple-100/20 hover:bg-purple-100/30 text-purple-200 py-6">
                   Save mood
                 </Button>
               </div>
-            </div>
-          )}
+            </div>}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
 
 // Helper component for mood-related tags
-const MoodTag = ({ label }: { label: string }) => (
-  <button className="px-4 py-2 rounded-full border border-purple-500/30 text-purple-300 text-sm hover:bg-purple-500/10 transition-colors">
+const MoodTag = ({
+  label
+}: {
+  label: string;
+}) => <button className="px-4 py-2 rounded-full border border-purple-500/30 text-purple-300 text-sm hover:bg-purple-500/10 transition-colors">
     {label}
-  </button>
-);
+  </button>;
 
 // Helper function to get color based on mood
 const getMoodColor = (mood: string): string => {
@@ -152,8 +112,6 @@ const getMoodColor = (mood: string): string => {
     'Overwhelmed': 'linear-gradient(135deg, #FF8A48, #F5DF4D)',
     'neutral': 'linear-gradient(135deg, #D5D5F1, #3DFDFF)'
   };
-  
   return moodColors[mood] || moodColors.neutral;
 };
-
 export default Dashboard;
