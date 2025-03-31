@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -8,13 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Mail, Lock, AlertCircle, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
-
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -35,7 +32,6 @@ const Login = () => {
       setLoading(false);
     }
   };
-
   return <div className="min-h-screen flex flex-col bg-black relative">
       <Navbar />
       
@@ -100,5 +96,4 @@ const Login = () => {
       </div>
     </div>;
 };
-
 export default Login;
