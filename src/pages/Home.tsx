@@ -44,13 +44,16 @@ const Home = () => {
           className="mt-6 max-w-2xl mx-auto text-center"
         >
           <div className="text-xl md:text-2xl text-white backdrop-blur-sm bg-black/30 p-4 rounded-lg">
-            <span className="text-[#F5DF4D]">Empowering minds </span>
+            <span className="text-[#F5DF4D]">You're </span>
             <Typewriter 
               text={[
-                "through resilience",
-                "with meaningful connections",
-                "by bridging communication gaps",
-                "for better mental health",
+                "allowed to feel exactly how you feel.",
+                "more than your struggles.",
+                "growing, even on the hard days.",
+                "not alone, and you never have to be.",
+                "doing better than you think.",
+                "worthy of love and kindness—especially from yourself.",
+                "enough, exactly as you are."
               ]}
               speed={70}
               className="text-[#3DFDFF]"
