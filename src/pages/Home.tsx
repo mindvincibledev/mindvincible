@@ -1,9 +1,11 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
 import { Typewriter } from '@/components/ui/typewriter';
+import { Button } from '@/components/ui/button';
 
 const Home = () => {
   return (
@@ -18,7 +20,7 @@ const Home = () => {
         blur={10}
         speed="fast"
         waveOpacity={0.5}
-        className="max-w-4xl mx-auto"
+        className="max-w-4xl mx-auto flex flex-col items-center justify-center"
       >
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
@@ -66,6 +68,25 @@ const Home = () => {
           <p className="mt-4 text-lg text-white bg-black/30 backdrop-blur-sm p-3 rounded-lg">
             Bridging communication gaps between teens, parents, and educators while building resilience.
           </p>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: 0.7,
+              duration: 0.8,
+              ease: "easeInOut",
+            }}
+            className="mt-8"
+          >
+            <Link to="/login">
+              <Button
+                className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:from-[#FF8A48] hover:to-[#FC68B3] text-white px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                Get Started
+              </Button>
+            </Link>
+          </motion.div>
         </motion.div>
       </WavyBackground>
     </div>
