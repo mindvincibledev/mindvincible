@@ -37,6 +37,26 @@ export const LampContainer = ({
     return () => clearInterval(interval);
   }, [colors.length]);
 
+  // Create wave animation with the lamp glow
+  const waveVariants = {
+    animate: {
+      x: [0, -20, 0],
+      y: [0, -5, 0],
+      transition: {
+        x: {
+          repeat: Infinity,
+          duration: 6,
+          ease: "easeInOut",
+        },
+        y: {
+          repeat: Infinity,
+          duration: 3.5,
+          ease: "easeInOut",
+        },
+      },
+    },
+  };
+
   return (
     <div
       className={cn(
@@ -48,6 +68,8 @@ export const LampContainer = ({
         <motion.div
           initial={{ opacity: 0.5, width: "15rem" }}
           whileInView={{ opacity: 1, width: "30rem" }}
+          animate="animate"
+          variants={waveVariants}
           transition={{
             delay: 0.3,
             duration: 0.8,
@@ -64,6 +86,8 @@ export const LampContainer = ({
         <motion.div
           initial={{ opacity: 0.5, width: "15rem" }}
           whileInView={{ opacity: 1, width: "30rem" }}
+          animate="animate"
+          variants={waveVariants}
           transition={{
             delay: 0.3,
             duration: 0.8,
@@ -83,7 +107,19 @@ export const LampContainer = ({
         <motion.div
           initial={{ width: "8rem" }}
           whileInView={{ width: "16rem" }}
+          animate={{
+            boxShadow: [
+              `0 0 20px 5px ${colors[colorIndex].slice(5, -1)}`,
+              `0 0 40px 10px ${colors[colorIndex].slice(5, -1)}`,
+              `0 0 20px 5px ${colors[colorIndex].slice(5, -1)}`
+            ],
+          }}
           transition={{
+            boxShadow: {
+              repeat: Infinity,
+              duration: 2,
+              ease: "easeInOut"
+            },
             delay: 0.3,
             duration: 0.8,
             ease: "easeInOut",
@@ -93,7 +129,19 @@ export const LampContainer = ({
         <motion.div
           initial={{ width: "15rem" }}
           whileInView={{ width: "30rem" }}
+          animate={{
+            boxShadow: [
+              `0 0 10px 2px ${colors[colorIndex].slice(5, -1)}`,
+              `0 0 20px 5px ${colors[colorIndex].slice(5, -1)}`,
+              `0 0 10px 2px ${colors[colorIndex].slice(5, -1)}`
+            ],
+          }}
           transition={{
+            boxShadow: {
+              repeat: Infinity,
+              duration: 1.5,
+              ease: "easeInOut"
+            },
             delay: 0.3,
             duration: 0.8,
             ease: "easeInOut",
