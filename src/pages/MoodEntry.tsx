@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/Navbar';
 import MoodMeter from '@/components/MoodMeter';
+import { getMoodColor } from '@/utils/moodUtils';
 
 const MoodEntry = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
@@ -112,20 +113,5 @@ const MoodTag = ({ label }: { label: string }) => (
     {label}
   </button>
 );
-
-// Helper function to get color based on mood
-const getMoodColor = (mood: string): string => {
-  const moodColors: Record<string, string> = {
-    'Happy': 'linear-gradient(135deg, #FFD36B, #FF8A48)',
-    'Excited': 'linear-gradient(135deg, #FF8A48, #FC68B3)',
-    'Calm': 'linear-gradient(135deg, #3DFDFF, #D5D5F1)',
-    'Sad': 'linear-gradient(135deg, #D5D5F1, #9F9FD5)',
-    'Angry': 'linear-gradient(135deg, #FF5757, #FF8A48)',
-    'Anxious': 'linear-gradient(135deg, #FC68B3, #D5D5F1)',
-    'Overwhelmed': 'linear-gradient(135deg, #FF8A48, #F5DF4D)',
-    'neutral': 'linear-gradient(135deg, #D5D5F1, #3DFDFF)'
-  };
-  return moodColors[mood] || moodColors.neutral;
-};
 
 export default MoodEntry;
