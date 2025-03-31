@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
 
@@ -56,7 +56,7 @@ const Login = () => {
             className="w-full max-w-md"
           >
             <div className="card bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-8 shadow-xl">
-              <h2 className="text-2xl font-bold text-center mb-6 text-white">Welcome Back</h2>
+              <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] bg-clip-text text-transparent">Welcome Back</h2>
               
               {error && (
                 <div className="bg-red-500/20 backdrop-blur-sm border border-red-400 text-white px-4 py-3 rounded-lg mb-4 flex items-center">
@@ -65,16 +65,16 @@ const Login = () => {
                 </div>
               )}
               
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <Label htmlFor="email" className="text-white">Email</Label>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <Label htmlFor="email" className="text-white mb-1.5 block">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                     <Input
                       id="email"
                       type="email"
                       placeholder="Enter your email"
-                      className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                      className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-[#3DFDFF] focus:ring-[#3DFDFF]/30"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -82,10 +82,10 @@ const Login = () => {
                   </div>
                 </div>
                 
-                <div className="mb-6">
-                  <div className="flex justify-between items-center">
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
                     <Label htmlFor="password" className="text-white">Password</Label>
-                    <Link to="/forgot-password" className="text-sm text-[#3DFDFF] hover:underline">
+                    <Link to="/forgot-password" className="text-sm text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors hover:underline">
                       Forgot Password?
                     </Link>
                   </div>
@@ -95,7 +95,7 @@ const Login = () => {
                       id="password"
                       type="password"
                       placeholder="Enter your password"
-                      className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                      className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-[#3DFDFF] focus:ring-[#3DFDFF]/30"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
@@ -105,18 +105,18 @@ const Login = () => {
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:from-[#FF8A48] hover:to-[#FC68B3] text-white transition-all duration-300" 
+                  className="w-full bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:from-[#FF8A48] hover:to-[#FC68B3] text-white transition-all duration-300 py-6" 
                   disabled={loading}
                 >
                   {loading ? 'Logging in...' : 'Login'}
                 </Button>
                 
                 <div className="mt-4 text-center text-white">
-                  <p>Don't have an account? <Link to="/register" className="text-[#3DFDFF] hover:underline">Sign up</Link></p>
+                  <p>Don't have an account? <Link to="/register" className="text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors hover:underline">Sign up</Link></p>
                 </div>
               </form>
               
-              <div className="mt-6">
+              <div className="mt-8">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-white/20"></div>
@@ -140,6 +140,13 @@ const Login = () => {
                     Facebook
                   </button>
                 </div>
+              </div>
+
+              <div className="mt-8 text-center">
+                <Link to="/" className="inline-flex items-center text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors group">
+                  <Home className="mr-1.5 h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
+                  Back to Home
+                </Link>
               </div>
             </div>
           </motion.div>
