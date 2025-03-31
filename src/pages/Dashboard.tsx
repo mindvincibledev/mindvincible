@@ -73,7 +73,7 @@ const Dashboard = () => {
               </div>
               
               <div className="mt-10">
-                <h3 className="text-purple-800 text-xl font-bold mb-2">Add a note</h3>
+                
                 <p className="text-white/60 text-xs mb-4">Only you can see this</p>
                 
                 <div className="flex space-x-4 mb-6">
