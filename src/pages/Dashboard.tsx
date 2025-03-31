@@ -74,7 +74,7 @@ const Dashboard = () => {
               
               <div className="mt-10">
                 
-                <p className="text-white/60 text-xs mb-4">Only you can see this</p>
+                
                 
                 <div className="flex space-x-4 mb-6">
                   
