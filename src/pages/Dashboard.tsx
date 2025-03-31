@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
@@ -8,23 +7,19 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/Navbar';
 import MoodMeter from '@/components/MoodMeter';
-
 const Dashboard = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
   const [moodReason, setMoodReason] = useState('');
   const [moodFeeling, setMoodFeeling] = useState('');
   const [showDetails, setShowDetails] = useState(false);
-
   const handleMoodSelect = (mood: string) => {
     setCurrentMood(mood);
     setShowDetails(true);
   };
-
   const handleGoBack = () => {
     setShowDetails(false);
     setCurrentMood(null);
   };
-
   return <div className="min-h-screen bg-black relative overflow-hidden">
       <div className="absolute inset-0 z-0 overflow-hidden">
         <WavyBackground colors={["#FF8A48", "#D5D5F1", "#3DFDFF", "#F5DF4D", "#FC68B3", "#2AC20E"]} waveWidth={100} backgroundFill="black" blur={10} speed="fast" waveOpacity={0.5} className="w-full h-full" />
@@ -54,7 +49,7 @@ const Dashboard = () => {
               
               {/* Moved "What's contributing to these feelings?" section here */}
               <div className="mt-4 mb-6 space-y-4">
-                <h3 className="text-white/80 text-sm font-medium mb-2">What's contributing to these feelings?</h3>
+                <h3 className="text-white/80 text-sm font-medium mb-2 text-center">What's contributing to these feelings?</h3>
                 <div className="flex flex-wrap gap-2">
                   <MoodTag label="Physical or mental health" />
                   <MoodTag label="Family" />
@@ -113,5 +108,4 @@ const getMoodColor = (mood: string): string => {
   };
   return moodColors[mood] || moodColors.neutral;
 };
-
 export default Dashboard;
