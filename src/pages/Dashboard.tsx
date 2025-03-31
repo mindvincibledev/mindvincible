@@ -48,7 +48,7 @@ const Dashboard = () => {
               </h2>
               
               <div className="mt-6 mb-4">
-                <Input type="text" placeholder="Because..." className="bg-white/10 border-white/20 text-white placeholder:text-white/50" value={moodReason} onChange={e => setMoodReason(e.target.value)} />
+                
                 <p className="text-white/60 text-xs text-center mt-2">Your mood crew can see this</p>
               </div>
               
