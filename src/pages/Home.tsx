@@ -3,6 +3,7 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
+import { Typewriter } from '@/components/ui/typewriter';
 
 const Home = () => {
   return (
@@ -32,7 +33,7 @@ const Home = () => {
           Welcome to <span className="text-primary">M(in)dvincible</span>
         </motion.h1>
         
-        <motion.p
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{
@@ -40,10 +41,29 @@ const Home = () => {
             duration: 0.8,
             ease: "easeInOut",
           }}
-          className="mt-6 max-w-2xl text-lg text-white"
+          className="mt-6 max-w-2xl mx-auto text-center"
         >
-          Bridging communication gaps between teens, parents, and educators while building resilience.
-        </motion.p>
+          <div className="text-xl md:text-2xl text-white backdrop-blur-sm bg-black/30 p-4 rounded-lg">
+            <span className="text-[#F5DF4D]">Empowering minds </span>
+            <Typewriter 
+              text={[
+                "through resilience",
+                "with meaningful connections",
+                "by bridging communication gaps",
+                "for better mental health",
+              ]}
+              speed={70}
+              className="text-[#3DFDFF]"
+              waitTime={1500}
+              deleteSpeed={40}
+              cursorChar="|"
+              cursorClassName="text-[#FC68B3] ml-1"
+            />
+          </div>
+          <p className="mt-4 text-lg text-white bg-black/30 backdrop-blur-sm p-3 rounded-lg">
+            Bridging communication gaps between teens, parents, and educators while building resilience.
+          </p>
+        </motion.div>
       </WavyBackground>
     </div>
   );
