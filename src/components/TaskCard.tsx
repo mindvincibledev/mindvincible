@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trash2, Edit, CheckCircle, Clock, InProgress } from 'lucide-react';
+import { Trash2, Edit, CheckCircle, Clock, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Task } from '@/types/task';
 import { format } from 'date-fns';
@@ -19,7 +19,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit }) => {
 
   const statusIcons = {
     'pending': <Clock className="h-4 w-4 mr-1" />,
-    'in-progress': <InProgress className="h-4 w-4 mr-1" />,
+    'in-progress': <Activity className="h-4 w-4 mr-1" />,
     'completed': <CheckCircle className="h-4 w-4 mr-1" />
   };
 
