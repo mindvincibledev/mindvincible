@@ -5,12 +5,14 @@ import { WavyBackground } from '@/components/ui/wavy-background';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/Navbar';
 import MoodMeter from '@/components/MoodMeter';
 
 const Dashboard = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
   const [moodReason, setMoodReason] = useState('');
+  const [moodFeeling, setMoodFeeling] = useState('');
   const [showDetails, setShowDetails] = useState(false);
 
   const handleMoodSelect = (mood: string) => {
@@ -81,8 +83,17 @@ const Dashboard = () => {
                 <p className="text-white/60 text-xs text-center mt-2">Your mood crew can see this</p>
               </div>
               
+              <div className="mt-6 mb-4">
+                <Textarea 
+                  placeholder="How are you feeling? (optional)" 
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[100px]"
+                  value={moodFeeling}
+                  onChange={(e) => setMoodFeeling(e.target.value)}
+                />
+              </div>
+              
               <div className="mt-8 space-y-4">
-                <h3 className="text-white/80 text-sm font-medium mb-2">Select what this relates to:</h3>
+                <h3 className="text-white/80 text-sm font-medium mb-2">What's contributing to these feelings?</h3>
                 <div className="flex flex-wrap gap-2">
                   <MoodTag label="Physical or mental health" />
                   <MoodTag label="Family" />
@@ -111,7 +122,7 @@ const Dashboard = () => {
                 </div>
                 
                 <Button className="w-full bg-purple-100/20 hover:bg-purple-100/30 text-purple-200 py-6">
-                  Finish check-in
+                  Save mood
                 </Button>
               </div>
             </div>
