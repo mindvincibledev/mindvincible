@@ -3,9 +3,6 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Affirmation from '@/components/Affirmation';
 import WaveBackground from '@/components/WaveBackground';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 
 const Home = () => {
   return (
@@ -23,19 +20,6 @@ const Home = () => {
         </p>
         
         <Affirmation />
-        
-        <div className="flex flex-col sm:flex-row gap-4 mt-8">
-          <Link to="/login">
-            <Button size="lg">
-              Get Started <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-          <Link to="/about">
-            <Button variant="outline" size="lg">
-              Learn More
-            </Button>
-          </Link>
-        </div>
       </section>
     </div>
   );
