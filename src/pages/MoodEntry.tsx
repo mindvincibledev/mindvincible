@@ -10,13 +10,19 @@ import MoodMeter from '@/components/MoodMeter';
 import { getMoodColor } from '@/utils/moodUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/context/AuthContext';
+import { useMoodData } from '@/hooks/useMoodData';
+import { toast } from 'sonner';
 
 const MoodEntry = () => {
+  const { user } = useAuth();
+  const { saveMoodEntry } = useMoodData();
   const [currentMood, setCurrentMood] = useState<string | null>(null);
   const [moodReason, setMoodReason] = useState('');
   const [moodFeeling, setMoodFeeling] = useState('');
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
 
   const handleMoodSelect = (mood: string) => {
     setCurrentMood(mood);
@@ -34,6 +40,46 @@ const MoodEntry = () => {
       setSelectedTags(selectedTags.filter(t => t !== tag));
     } else {
       setSelectedTags([...selectedTags, tag]);
+    }
+  };
+
+  const handleSaveMood = async () => {
+    if (!currentMood || !user) return;
+    
+    try {
+      setSaving(true);
+      
+      // Map mood to intensity (1-10)
+      const moodIntensityMap: Record<string, number> = {
+        'Angry': 2,
+        'Sad': 3, 
+        'Anxious': 4,
+        'Calm': 6,
+        'Happy': 8,
+        'Excited': 9,
+        'Overwhelmed': 5
+      };
+      
+      const intensity = moodIntensityMap[currentMood] || 5;
+      
+      await saveMoodEntry(
+        currentMood,
+        intensity,
+        moodFeeling,
+        selectedTags.length > 0 ? selectedTags : undefined
+      );
+      
+      // Reset form
+      setCurrentMood(null);
+      setMoodFeeling('');
+      setSelectedTags([]);
+      setShowDetails(false);
+      
+      toast.success('Your mood has been recorded!');
+    } catch (error) {
+      toast.error('Failed to save mood entry');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -217,16 +263,18 @@ const MoodEntry = () => {
                       transition={{ delay: 0.5 }}
                       className="mt-10"
                     >
-                      <p className="text-white/60 text-xs text-center mb-4">Your mood crew can see this</p>
-                      
                       <Button 
                         className="w-full py-6 transition-all duration-300 relative overflow-hidden group"
                         style={{
                           background: `linear-gradient(135deg, ${getMoodColor(currentMood || 'neutral')}99, ${getMoodColor(currentMood || 'neutral')}66)`,
                         }}
+                        onClick={handleSaveMood}
+                        disabled={saving}
                       >
                         <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                        <span className="relative z-10 text-white font-medium">Save mood</span>
+                        <span className="relative z-10 text-white font-medium">
+                          {saving ? 'Saving mood...' : 'Save mood'}
+                        </span>
                       </Button>
                       
                       <div className="mt-4 flex justify-center">
