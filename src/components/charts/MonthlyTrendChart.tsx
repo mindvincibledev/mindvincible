@@ -32,16 +32,26 @@ const MonthlyTrendChart = ({ weeklyTrend }: MonthlyTrendChartProps) => {
         <CardDescription className="text-white/60">Your average mood over time</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
+        <div className="h-60 md:h-80">
           <ResponsiveContainer width="100%" height="100%">
             {weeklyTrend.some(week => week.average > 0) ? (
               <RechartsLineChart
                 data={weeklyTrend}
-                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                <XAxis dataKey="week" stroke="#fff" />
-                <YAxis stroke="#fff" domain={[0, 10]} />
+                <XAxis 
+                  dataKey="week" 
+                  stroke="#fff"
+                  tick={{ fontSize: 12 }}
+                  tickMargin={10}
+                />
+                <YAxis 
+                  stroke="#fff" 
+                  domain={[0, 10]}
+                  tick={{ fontSize: 12 }}
+                  width={30}
+                />
                 <Tooltip
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
