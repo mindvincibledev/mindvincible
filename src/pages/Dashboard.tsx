@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
@@ -11,6 +10,7 @@ import MonthlyTrendChart from '@/components/charts/MonthlyTrendChart';
 import { useAuth } from '@/context/AuthContext';
 import { useMoodData } from '@/hooks/useMoodData';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { getMoodColor } from '@/utils/moodUtils';
 
 const Dashboard = () => {
   const { user } = useAuth();
