@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,32 +10,40 @@ import MoodMeter from '@/components/MoodMeter';
 import { getMoodColor } from '@/utils/moodUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
+import { useMoodEntry } from '@/hooks/useMoodEntry';
 
 const MoodEntry = () => {
-  const [currentMood, setCurrentMood] = useState<string | null>(null);
-  const [moodReason, setMoodReason] = useState('');
-  const [moodFeeling, setMoodFeeling] = useState('');
-  const [showDetails, setShowDetails] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  
+  const {
+    currentMood,
+    moodFeeling,
+    showDetails,
+    selectedTags,
+    isSubmitting,
+    setMoodFeeling,
+    handleMoodSelect,
+    handleGoBack,
+    toggleTag,
+    saveMood
+  } = useMoodEntry();
 
-  const handleMoodSelect = (mood: string) => {
-    setCurrentMood(mood);
-    setShowDetails(true);
-  };
-
-  const handleGoBack = () => {
-    setShowDetails(false);
-    setCurrentMood(null);
-    setSelectedTags([]);
-  };
-
-  const toggleTag = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login');
     }
-  };
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -217,16 +225,18 @@ const MoodEntry = () => {
                       transition={{ delay: 0.5 }}
                       className="mt-10"
                     >
-                      <p className="text-white/60 text-xs text-center mb-4">Your mood crew can see this</p>
-                      
                       <Button 
                         className="w-full py-6 transition-all duration-300 relative overflow-hidden group"
                         style={{
                           background: `linear-gradient(135deg, ${getMoodColor(currentMood || 'neutral')}99, ${getMoodColor(currentMood || 'neutral')}66)`,
                         }}
+                        onClick={saveMood}
+                        disabled={isSubmitting}
                       >
                         <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                        <span className="relative z-10 text-white font-medium">Save mood</span>
+                        <span className="relative z-10 text-white font-medium">
+                          {isSubmitting ? 'Saving...' : 'Save mood'}
+                        </span>
                       </Button>
                       
                       <div className="mt-4 flex justify-center">

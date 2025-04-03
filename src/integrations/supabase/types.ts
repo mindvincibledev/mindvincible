@@ -9,7 +9,74 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      mood_entries: {
+        Row: {
+          created_at: string
+          id: string
+          mood: string
+          notes: string | null
+          tags: string[] | null
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mood: string
+          notes?: string | null
+          tags?: string[] | null
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mood?: string
+          notes?: string | null
+          tags?: string[] | null
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mood_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          guardian_contact_1: string | null
+          guardian_contact_2: string | null
+          id: string
+          name: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          guardian_contact_1?: string | null
+          guardian_contact_2?: string | null
+          id: string
+          name: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          guardian_contact_1?: string | null
+          guardian_contact_2?: string | null
+          id?: string
+          name?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
