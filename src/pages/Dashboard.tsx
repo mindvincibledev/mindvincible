@@ -59,18 +59,27 @@ const Dashboard = () => {
     try {
       setLoading(true);
       
+      console.log('Fetching mood data for user:', user?.id);
+      
       // Fetch recent mood entries
       const { data: moodEntries, error } = await supabase
         .from('mood_data')
         .select('*')
+        .eq('user_id', user?.id)
         .order('created_at', { ascending: false })
-        .limit(7);
+        .limit(30);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching mood data:', error);
+        throw error;
+      }
+      
+      console.log('Fetched mood entries:', moodEntries);
       
       if (moodEntries && moodEntries.length > 0) {
-        // Process data for charts
-        const dailyData = moodEntries.map(entry => ({
+        // Process data for daily chart (last 7 days)
+        const recentEntries = moodEntries.slice(0, 7);
+        const dailyData = recentEntries.map(entry => ({
           date: new Date(entry.created_at).toLocaleDateString('en-US', { weekday: 'short' }),
           mood: entry.mood,
           value: entry.mood_value
@@ -91,20 +100,32 @@ const Dashboard = () => {
           return { name, value: percentage };
         });
         
-        // Calculate weekly averages (using the available data)
-        // In a real app, you'd want to query data for a longer period and group by week
-        const weeklyAverages = [
-          { week: 'This Week', average: calculateAverageMood(moodEntries) }
-        ];
+        // Group entries by week for weekly trend
+        const weeklyData: Record<string, number[]> = {};
+        moodEntries.forEach(entry => {
+          const date = new Date(entry.created_at);
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay()); // Start of week (Sunday)
+          const weekKey = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          
+          if (!weeklyData[weekKey]) {
+            weeklyData[weekKey] = [];
+          }
+          
+          weeklyData[weekKey].push(entry.mood_value);
+        });
         
-        // Last week could be approximated or fetched separately in a real app
-        // For now, we'll just add some simulated data for visualization purposes
-        if (moodEntries.length > 0) {
-          const currentAvg = calculateAverageMood(moodEntries);
-          weeklyAverages.push({ week: 'Last Week', average: Math.max(1, Math.min(10, currentAvg + (Math.random() * 2 - 1))) });
-          weeklyAverages.push({ week: '2 Weeks Ago', average: Math.max(1, Math.min(10, currentAvg + (Math.random() * 2 - 1))) });
-          weeklyAverages.push({ week: '3 Weeks Ago', average: Math.max(1, Math.min(10, currentAvg + (Math.random() * 2 - 1))) });
-        }
+        // Calculate weekly averages
+        const weeklyAverages = Object.entries(weeklyData).map(([week, values]) => {
+          const sum = values.reduce((acc, val) => acc + val, 0);
+          const average = Math.round((sum / values.length) * 10) / 10;
+          return { week, average };
+        }).sort((a, b) => {
+          // Sort by week date
+          const dateA = new Date(a.week);
+          const dateB = new Date(b.week);
+          return dateA.getTime() - dateB.getTime();
+        }).slice(-4); // Get last 4 weeks
         
         setMoodData(dailyData);
         setMoodDistribution(distributionData);
@@ -116,7 +137,7 @@ const Dashboard = () => {
         setWeeklyTrend([]);
       }
     } catch (err) {
-      console.error('Error fetching mood data:', err);
+      console.error('Error processing mood data:', err);
       toast({
         variant: "destructive",
         title: "Failed to load data",

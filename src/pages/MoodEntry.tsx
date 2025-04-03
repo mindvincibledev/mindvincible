@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
@@ -88,6 +87,14 @@ const MoodEntry = () => {
           break;
       }
       
+      console.log('Saving mood data:', {
+        user_id: user.id,
+        mood: currentMood,
+        mood_value: moodValue,
+        notes: moodFeeling,
+        tags: selectedTags
+      });
+      
       const { error } = await supabase
         .from('mood_data')
         .insert({
@@ -98,7 +105,10 @@ const MoodEntry = () => {
           tags: selectedTags.length > 0 ? selectedTags : null
         });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
       
       toast({
         title: "Mood saved!",
