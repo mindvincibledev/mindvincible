@@ -32,55 +32,39 @@ const MonthlyTrendChart = ({ weeklyTrend }: MonthlyTrendChartProps) => {
         <CardDescription className="text-white/60">Your average mood over time</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-60 md:h-80">
+        <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            {weeklyTrend.some(week => week.average > 0) ? (
-              <RechartsLineChart
-                data={weeklyTrend}
-                margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                <XAxis 
-                  dataKey="week" 
-                  stroke="#fff"
-                  tick={{ fontSize: 12 }}
-                  tickMargin={10}
-                />
-                <YAxis 
-                  stroke="#fff" 
-                  domain={[0, 10]}
-                  tick={{ fontSize: 12 }}
-                  width={30}
-                />
-                <Tooltip
-                  content={({ active, payload, label }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-black/80 backdrop-blur-md p-3 rounded-lg border border-purple-500/30">
-                          <p className="text-white font-semibold">{label}</p>
-                          <p className="text-[#FF8A48]">
-                            Average: {payload[0].value}
-                          </p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="average" 
-                  stroke="#3DFDFF" 
-                  strokeWidth={2}
-                  dot={{ fill: '#3DFDFF', r: 6 }}
-                  activeDot={{ r: 8, fill: '#FC68B3' }}
-                />
-              </RechartsLineChart>
-            ) : (
-              <div className="h-full flex items-center justify-center text-white/70">
-                <p>No trend data to display yet</p>
-              </div>
-            )}
+            <RechartsLineChart
+              data={weeklyTrend}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+              <XAxis dataKey="week" stroke="#fff" />
+              <YAxis stroke="#fff" />
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-black/80 backdrop-blur-md p-3 rounded-lg border border-purple-500/30">
+                        <p className="text-white font-semibold">{label}</p>
+                        <p className="text-[#FF8A48]">
+                          Average: {payload[0].value}
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="average" 
+                stroke="#3DFDFF" 
+                strokeWidth={2}
+                dot={{ fill: '#3DFDFF', r: 6 }}
+                activeDot={{ r: 8, fill: '#FC68B3' }}
+              />
+            </RechartsLineChart>
           </ResponsiveContainer>
         </div>
       </CardContent>

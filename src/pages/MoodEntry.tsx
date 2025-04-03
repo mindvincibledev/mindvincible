@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,42 +10,13 @@ import MoodMeter from '@/components/MoodMeter';
 import { getMoodColor } from '@/utils/moodUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/context/AuthContext';
-import { useMoodData } from '@/hooks/useMoodData';
-import { toast } from 'sonner';
-
-// Helper function to map mood strings to numerical values for the database
-const getMoodValue = (mood: string): number => {
-  const moodValues: Record<string, number> = {
-    'Happy': 8,
-    'Excited': 9,
-    'Calm': 7,
-    'Sad': 3,
-    'Angry': 2,
-    'Anxious': 4,
-    'Overwhelmed': 1,
-    'neutral': 5
-  };
-  return moodValues[mood] || 5;
-};
 
 const MoodEntry = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
-  const [moodNotes, setMoodNotes] = useState('');
+  const [moodReason, setMoodReason] = useState('');
+  const [moodFeeling, setMoodFeeling] = useState('');
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { isAuthenticated, user } = useAuth();
-  const { saveMood } = useMoodData();
-  const navigate = useNavigate();
-  
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, navigate]);
 
   const handleMoodSelect = (mood: string) => {
     setCurrentMood(mood);
@@ -63,42 +34,6 @@ const MoodEntry = () => {
       setSelectedTags(selectedTags.filter(t => t !== tag));
     } else {
       setSelectedTags([...selectedTags, tag]);
-    }
-  };
-  
-  const handleSaveMood = async () => {
-    if (!currentMood) {
-      toast.error('Please select a mood');
-      return;
-    }
-    
-    if (!user) {
-      toast.error('You must be logged in to save your mood');
-      navigate('/login');
-      return;
-    }
-    
-    try {
-      setIsSubmitting(true);
-      await saveMood(
-        currentMood,
-        getMoodValue(currentMood),
-        selectedTags,
-        moodNotes
-      );
-      
-      // Reset form and redirect to dashboard
-      setCurrentMood(null);
-      setMoodNotes('');
-      setSelectedTags([]);
-      setShowDetails(false);
-      
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Error saving mood:', error);
-      toast.error('Failed to save your mood');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -271,8 +206,8 @@ const MoodEntry = () => {
                         placeholder="How are you feeling? (optional)" 
                         className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[100px] focus:border-opacity-100 transition-colors"
                         style={{ borderColor: `${getMoodColor(currentMood || 'neutral')}44` }}
-                        value={moodNotes} 
-                        onChange={e => setMoodNotes(e.target.value)} 
+                        value={moodFeeling} 
+                        onChange={e => setMoodFeeling(e.target.value)} 
                       />
                     </motion.div>
                     
@@ -282,18 +217,16 @@ const MoodEntry = () => {
                       transition={{ delay: 0.5 }}
                       className="mt-10"
                     >
+                      <p className="text-white/60 text-xs text-center mb-4">Your mood crew can see this</p>
+                      
                       <Button 
                         className="w-full py-6 transition-all duration-300 relative overflow-hidden group"
                         style={{
                           background: `linear-gradient(135deg, ${getMoodColor(currentMood || 'neutral')}99, ${getMoodColor(currentMood || 'neutral')}66)`,
                         }}
-                        disabled={isSubmitting}
-                        onClick={handleSaveMood}
                       >
                         <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                        <span className="relative z-10 text-white font-medium">
-                          {isSubmitting ? 'Saving...' : 'Save mood'}
-                        </span>
+                        <span className="relative z-10 text-white font-medium">Save mood</span>
                       </Button>
                       
                       <div className="mt-4 flex justify-center">
