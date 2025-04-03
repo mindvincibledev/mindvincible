@@ -29,8 +29,9 @@ export type DailyMoodItem = {
 
 // Fetch all mood entries for the current user
 export const fetchUserMoods = async (): Promise<MoodEntry[]> => {
-  const { data, error } = await supabase
-    .from('mood_entries')
+  // Use type assertion to bypass TypeScript's strict typing
+  const { data, error } = await (supabase
+    .from('mood_entries') as any)
     .select('*')
     .order('created_at', { ascending: false });
     

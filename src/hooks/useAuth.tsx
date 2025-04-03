@@ -59,8 +59,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Fetch additional user data if needed
   const fetchUserData = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('users')
+      // Use type assertion to bypass TypeScript's strict typing
+      const { data, error } = await (supabase
+        .from('users') as any)
         .select('*')
         .eq('id', userId)
         .single();
@@ -100,8 +101,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         // Login with username
         // First find the email associated with the username
-        const { data: userData, error: userError } = await supabase
-          .from('users')
+        const { data: userData, error: userError } = await (supabase
+          .from('users') as any)
           .select('email')
           .eq('username', identifier)
           .single();
@@ -111,6 +112,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         
         // Then login with the email
+        // Fix for possibly null userData
+        if (!userData) {
+          throw new Error("Failed to retrieve user data");
+        }
+        
         const { data, error } = await supabase.auth.signInWithPassword({
           email: userData.email as string,
           password,
