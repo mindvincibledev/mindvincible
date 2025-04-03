@@ -1,35 +1,38 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Lock, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
-import { useAuth } from '@/context/AuthContext';
-import { toast } from 'sonner';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { signIn, signUp, loading, error } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
-  const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError('');
+    setLoading(true);
     try {
-      if (isLogin) {
-        await signIn(email, password);
-      } else {
-        await signUp(email, password);
-        toast.success("Account created! Please verify your email if required.");
-        setIsLogin(true);
-      }
+      // Here we would typically connect to Supabase for authentication
+      // For now, just simulate a login process
+      console.log('Logging in with:', {
+        email,
+        password
+      });
+      setTimeout(() => {
+        setLoading(false);
+        // Redirect would happen here after successful login
+      }, 1500);
     } catch (err) {
-      console.error('Authentication error:', err);
+      setError('Invalid email or password');
+      setLoading(false);
     }
   };
 
@@ -63,14 +66,8 @@ const Login = () => {
             </div>
             
             <h2 className="text-2xl font-bold text-center mt-8 mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-              {isLogin ? "Welcome Back" : "Create Account"}
+              Welcome Back
             </h2>
-            
-            {error && (
-              <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-md text-white text-sm">
-                {error}
-              </div>
-            )}
             
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
@@ -92,11 +89,9 @@ const Login = () => {
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <Label htmlFor="password" className="text-white">Password</Label>
-                  {isLogin && (
-                    <Link to="/forgot-password" className="text-sm text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors hover:underline">
-                      Forgot Password?
-                    </Link>
-                  )}
+                  <Link to="/forgot-password" className="text-sm text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors hover:underline">
+                    Forgot Password?
+                  </Link>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -117,18 +112,8 @@ const Login = () => {
                 className="w-full bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:from-[#FF8A48] hover:to-[#FC68B3] text-white transition-all duration-300 py-6" 
                 disabled={loading}
               >
-                {loading ? 'Processing...' : isLogin ? 'Login' : 'Sign Up'}
+                {loading ? 'Logging in...' : 'Login'}
               </Button>
-              
-              <div className="text-center mt-4">
-                <button 
-                  type="button"
-                  onClick={() => setIsLogin(!isLogin)} 
-                  className="text-[#3DFDFF] hover:text-[#3DFDFF]/80 text-sm"
-                >
-                  {isLogin ? "Need an account? Sign up" : "Already have an account? Login"}
-                </button>
-              </div>
             </form>
           </div>
         </motion.div>
