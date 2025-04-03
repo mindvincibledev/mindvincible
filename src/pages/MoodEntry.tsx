@@ -13,6 +13,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
+
+type MoodType = Database['public']['Enums']['mood_type'];
 
 const MoodEntry = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
@@ -89,7 +92,7 @@ const MoodEntry = () => {
         .from('mood_data')
         .insert({
           user_id: user.id,
-          mood: currentMood,
+          mood: currentMood as MoodType,
           mood_value: moodValue,
           notes: moodFeeling,
           tags: selectedTags.length > 0 ? selectedTags : null

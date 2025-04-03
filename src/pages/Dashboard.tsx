@@ -11,6 +11,7 @@ import MonthlyTrendChart from '@/components/charts/MonthlyTrendChart';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
 
 // Type definitions for mood data
 interface MoodData {
@@ -28,6 +29,8 @@ interface WeeklyTrend {
   week: string;
   average: number;
 }
+
+type MoodEntry = Database['public']['Tables']['mood_data']['Row'];
 
 const Dashboard = () => {
   const [moodData, setMoodData] = useState<MoodData[]>([]);
@@ -125,7 +128,7 @@ const Dashboard = () => {
   };
   
   // Helper function to calculate average mood value
-  const calculateAverageMood = (entries: any[]) => {
+  const calculateAverageMood = (entries: MoodEntry[]) => {
     if (entries.length === 0) return 5;
     const sum = entries.reduce((acc, entry) => acc + entry.mood_value, 0);
     return Math.round((sum / entries.length) * 10) / 10;

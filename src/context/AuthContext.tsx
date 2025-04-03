@@ -98,14 +98,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (authError) throw authError;
       
       if (authData.user) {
-        // Then insert the profile data
+        // Then insert the user data
         const { error: profileError } = await supabase
           .from('users')
           .insert({
             id: authData.user.id,
             email: userData.email,
             name: userData.name,
-            password: userData.password, // Note: In production, you'd handle password securely
+            password: userData.password,
             guardian1_phone: userData.guardian1_phone || null,
             guardian2_phone: userData.guardian2_phone || null,
             guardian1_name: userData.guardian1_name || null,
