@@ -38,31 +38,12 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="w-full min-h-[calc(100vh-120px)] text-center flex flex-col items-center justify-between relative overflow-hidden pb-8" 
+      className="w-full h-full text-center flex flex-col items-center justify-between relative overflow-hidden" 
       style={{
         background: `linear-gradient(135deg, ${moodColor} 0%, ${moodColor}99 50%, ${moodColor}66 100%)`,
         transition: 'background 0.7s ease'
       }}
     >
-      {/* Animated wave background */}
-      <motion.div 
-        className="absolute top-0 left-0 w-full h-full opacity-20 z-0"
-        initial={{ backgroundPosition: '0% 0%' }}
-        animate={{ 
-          backgroundPosition: ['0% 0%', '100% 100%']
-        }}
-        transition={{ 
-          repeat: Infinity, 
-          repeatType: "mirror", 
-          duration: 20,
-          ease: "linear"
-        }}
-        style={{
-          background: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M0 50 Q 25 25, 50 50 T 100 50 T 150 50' stroke='white' fill='none' stroke-width='5' opacity='0.5' /%3E%3Cpath d='M0 60 Q 25 35, 50 60 T 100 60 T 150 60' stroke='white' fill='none' stroke-width='4' opacity='0.4' /%3E%3Cpath d='M0 70 Q 25 45, 50 70 T 100 70 T 150 70' stroke='white' fill='none' stroke-width='3' opacity='0.3' /%3E%3C/svg%3E")`,
-          backgroundSize: '300px 300px',
-        }}
-      />
-      
       {/* Mood Display Component */}
       <MoodDisplay selectedMood={selectedMood} />
       
@@ -81,33 +62,26 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
         handleTouchEnd={handleTouchEnd}
       />
       
-      {/* Background decorative elements with motion */}
-      <motion.div 
-        className="absolute top-20 left-10 w-20 h-20 rounded-full bg-white/5 backdrop-blur-sm"
-        animate={{
-          scale: [1, 1.1, 1],
-          opacity: [0.5, 0.7, 0.5]
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          repeatType: "reverse"
-        }}
-      />
+      {/* Background decorative elements */}
+      <div className="absolute top-20 left-10 w-20 h-20 rounded-full bg-white/5 backdrop-blur-sm"></div>
+      <div className="absolute top-40 right-10 w-16 h-16 rounded-full bg-white/5 backdrop-blur-sm"></div>
       
+      {/* Additional decorative wave elements */}
       <motion.div 
-        className="absolute top-40 right-10 w-16 h-16 rounded-full bg-white/5 backdrop-blur-sm"
+        className="absolute bottom-1/2 left-0 w-full h-32 opacity-30"
+        style={{ 
+          background: `linear-gradient(to bottom, transparent, ${moodColor}50, transparent)`,
+          transform: "rotate(-3deg)"
+        }}
         animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.4, 0.6, 0.4]
+          translateY: [0, 10, 0],
         }}
         transition={{
-          duration: 4,
-          delay: 1,
+          duration: 8,
           repeat: Infinity,
           repeatType: "reverse"
         }}
-      />
+      ></motion.div>
     </motion.div>
   );
 };
