@@ -67,9 +67,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error && !identifier.includes('@')) {
-        // Try to find the user by username - use a type assertion to handle the type error
+        // Try to find the user by username using type assertion for the users table
         const { data: userData, error: userError } = await supabase
-          .from('users')
+          .from('users' as any)
           .select('email')
           .eq('username', identifier)
           .single();
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (userData) {
           // Sign in with the email we found
           ({ data, error } = await supabase.auth.signInWithPassword({
-            email: userData.email as string,
+            email: (userData as any).email,
             password,
           }));
         } else {
