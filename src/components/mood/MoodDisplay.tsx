@@ -9,7 +9,13 @@ interface MoodDisplayProps {
 const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
   return (
     <div className="flex-1 flex flex-col justify-center items-center w-full px-6 pt-20 pb-12">
-      <h2 className="text-2xl font-bold text-white/90 mb-8 tracking-wide">I'm feeling</h2>
+      <motion.h2 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-2xl font-bold text-white/90 mb-8 tracking-wide"
+      >
+        I'm feeling
+      </motion.h2>
       
       <AnimatePresence mode="wait">
         <motion.div 
@@ -39,6 +45,10 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
           }}
         >
           {selectedMood}
+          
+          {/* Decorative elements */}
+          <div className="absolute -top-10 -left-10 w-20 h-20 rounded-full bg-white/5 backdrop-blur-sm -z-10"></div>
+          <div className="absolute -bottom-8 -right-8 w-16 h-16 rounded-full bg-white/5 backdrop-blur-sm -z-10"></div>
         </motion.div>
       </AnimatePresence>
     </div>
