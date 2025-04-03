@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +27,11 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleSignOut = () => {
+    signOut();
+    setIsMenuOpen(false);
   };
 
   return (
@@ -51,14 +58,27 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex md:items-center">
-            <Link to="/dashboard" className="text-foreground hover:text-primary mx-4">
-              Dashboard
-            </Link>
-            <Link to="/login">
-              <Button variant="default" className="ml-4">
-                Login
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link to="/dashboard" className="text-foreground hover:text-primary mx-4">
+                  Dashboard
+                </Link>
+                <Button 
+                  variant="outline" 
+                  className="ml-4 text-foreground border-foreground hover:bg-foreground hover:text-background"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <Link to="/login">
+                <Button variant="default" className="ml-4">
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -66,20 +86,32 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden bg-white bg-opacity-95 backdrop-blur-md mt-3 py-4 px-2 rounded-lg shadow-lg animate-fade-in">
             <div className="flex flex-col space-y-4">
-              <Link 
-                to="/dashboard" 
-                className="px-4 py-2 hover:bg-gray-100 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-              <Link 
-                to="/login" 
-                className="px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Login
-              </Link>
+              {user ? (
+                <>
+                  <Link 
+                    to="/dashboard" 
+                    className="px-4 py-2 hover:bg-gray-100 rounded-md transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <button 
+                    className="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded-md transition-colors flex items-center"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <Link 
+                  to="/login" 
+                  className="px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-md transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         )}

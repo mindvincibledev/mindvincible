@@ -1,40 +1,41 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, Lock, Home } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
+import { useAuth } from '@/hooks/useAuth';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { user, loading, signInWithEmail } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    
+    if (!identifier || !password) {
+      setError('Please provide both username/email and password');
+      return;
+    }
+    
     try {
-      // Here we would typically connect to Supabase for authentication
-      // For now, just simulate a login process
-      console.log('Logging in with:', {
-        email,
-        password
-      });
-      setTimeout(() => {
-        setLoading(false);
-        // Redirect would happen here after successful login
-      }, 1500);
-    } catch (err) {
-      setError('Invalid email or password');
-      setLoading(false);
+      await signInWithEmail(identifier, password);
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during login');
     }
   };
+
+  // If user is already logged in, redirect to dashboard
+  if (user && !loading) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-black relative overflow-hidden">
@@ -57,42 +58,30 @@ const Login = () => {
           transition={{ duration: 0.8, ease: "easeInOut" }} 
           className="w-full max-w-md"
         >
-          <div className="bg-black/50 backdrop-blur-md border border-white/10 rounded-xl p-8 shadow-xl relative">
-            <div className="absolute top-4 left-4">
-              <Link to="/" className="inline-flex items-center text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors group">
-                <Home className="mr-1.5 h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
-                Home
-              </Link>
-            </div>
-            
-            <h2 className="text-2xl font-bold text-center mt-8 mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-              Welcome Back
+          <div className="bg-black/50 backdrop-blur-md border border-white/10 rounded-xl p-8 shadow-xl">
+            <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+              Login to M(in)dvincible
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <Label htmlFor="email" className="text-white mb-1.5 block">Email</Label>
+                <Label htmlFor="identifier" className="text-white mb-1.5 block">Username or Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="Enter your email" 
+                    id="identifier" 
+                    type="text" 
+                    placeholder="Enter your username or email" 
                     className="pl-10 bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF] focus:ring-[#3DFDFF]/30" 
-                    value={email} 
-                    onChange={e => setEmail(e.target.value)} 
+                    value={identifier} 
+                    onChange={e => setIdentifier(e.target.value)} 
                     required 
                   />
                 </div>
               </div>
               
               <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <Label htmlFor="password" className="text-white">Password</Label>
-                  <Link to="/forgot-password" className="text-sm text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors hover:underline">
-                    Forgot Password?
-                  </Link>
-                </div>
+                <Label htmlFor="password" className="text-white mb-1.5 block">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input 
@@ -106,6 +95,12 @@ const Login = () => {
                   />
                 </div>
               </div>
+              
+              {error && (
+                <div className="text-[#FC68B3] text-sm p-2 bg-[#FC68B3]/10 rounded border border-[#FC68B3]/20">
+                  {error}
+                </div>
+              )}
               
               <Button 
                 type="submit" 
