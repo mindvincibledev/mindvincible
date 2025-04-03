@@ -19,6 +19,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  session: boolean; // Added session property
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (userData: {
     email: string;
@@ -39,6 +40,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState(false); // Added session state
   const { toast } = useToast();
 
   // Check for stored user on initial load
@@ -47,9 +49,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
+        setSession(true); // Set session to true when user exists
       } catch (error) {
         console.error('Failed to parse stored user data', error);
         localStorage.removeItem('mindvincible_user');
+        setSession(false); // Set session to false on error
       }
     }
     setLoading(false);
@@ -73,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Store user in state and localStorage
       setUser(userData as User);
+      setSession(true); // Set session to true on successful sign in
       localStorage.setItem('mindvincible_user', JSON.stringify(userData));
       
       toast({
@@ -140,6 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Store the new user in state and localStorage
       setUser(newUser as User);
+      setSession(true); // Set session to true on successful sign up
       localStorage.setItem('mindvincible_user', JSON.stringify(newUser));
       
       toast({
@@ -162,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setUser(null);
+      setSession(false); // Set session to false on sign out
       localStorage.removeItem('mindvincible_user');
       
       toast({
@@ -180,7 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, session, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
