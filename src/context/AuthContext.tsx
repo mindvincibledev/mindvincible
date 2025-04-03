@@ -54,7 +54,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      // First, check if the user exists in our custom users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .single();
+      
+      if (userError) {
+        throw new Error('User not found');
+      }
+      
+      // Check if password matches (in a real application, use bcrypt or another hashing method)
+      if (userData.password !== password) {
+        throw new Error('Invalid password');
+      }
+      
+      // Use Supabase Auth only for session management
+      const { error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
       
       if (error) {
         throw error;
@@ -90,28 +111,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       
-      // First, create the auth user
+      // First, check if the user already exists
+      const { data: existingUser, error: checkError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', userData.email)
+        .maybeSingle();
+      
+      if (existingUser) {
+        throw new Error('User with this email already exists');
+      }
+      
+      // Still use Supabase Auth for managing sessions
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
-        options: {
-          data: {
-            name: userData.name, // Store name in user metadata
-          }
-        }
       });
       
       if (authError) throw authError;
       
       if (authData.user) {
-        // Then insert the user data in our custom table, but don't store the password again
+        // Then insert the user data in our custom table, including the password
         const { error: profileError } = await supabase
           .from('users')
           .insert({
             id: authData.user.id,
             email: userData.email,
             name: userData.name,
-            // Important: We're removing the password field here as it's already handled by Supabase Auth
+            password: userData.password, // Store password in our custom table
             guardian1_phone: userData.guardian1_phone || null,
             guardian2_phone: userData.guardian2_phone || null,
             guardian1_name: userData.guardian1_name || null,
