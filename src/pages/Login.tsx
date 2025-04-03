@@ -1,32 +1,39 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, Lock, Home, User } from 'lucide-react';
+import { Mail, Lock, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
-import { useAuth } from '@/hooks/useAuth';
 
 const Login = () => {
-  const [identifier, setIdentifier] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
-  const { login, loading, user } = useAuth();
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user) {
-      navigate('/mood-entry');
-    }
-  }, [user, navigate]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identifier || !password) return;
-    
-    await login(identifier, password);
+    setError('');
+    setLoading(true);
+    try {
+      // Here we would typically connect to Supabase for authentication
+      // For now, just simulate a login process
+      console.log('Logging in with:', {
+        email,
+        password
+      });
+      setTimeout(() => {
+        setLoading(false);
+        // Redirect would happen here after successful login
+      }, 1500);
+    } catch (err) {
+      setError('Invalid email or password');
+      setLoading(false);
+    }
   };
 
   return (
@@ -64,16 +71,16 @@ const Login = () => {
             
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <Label htmlFor="identifier" className="text-white mb-1.5 block">Email or Username</Label>
+                <Label htmlFor="email" className="text-white mb-1.5 block">Email</Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input 
-                    id="identifier" 
-                    type="text" 
-                    placeholder="Enter your email or username" 
+                    id="email" 
+                    type="email" 
+                    placeholder="Enter your email" 
                     className="pl-10 bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF] focus:ring-[#3DFDFF]/30" 
-                    value={identifier} 
-                    onChange={e => setIdentifier(e.target.value)} 
+                    value={email} 
+                    onChange={e => setEmail(e.target.value)} 
                     required 
                   />
                 </div>

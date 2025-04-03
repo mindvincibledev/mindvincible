@@ -1,6 +1,6 @@
 
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,68 +8,9 @@ import Navbar from '@/components/Navbar';
 import DailyMoodChart from '@/components/charts/DailyMoodChart';
 import MoodDistributionChart from '@/components/charts/MoodDistributionChart';
 import MonthlyTrendChart from '@/components/charts/MonthlyTrendChart';
-import { useAuth } from '@/hooks/useAuth';
-import { 
-  getDailyMoodData, 
-  getMoodDistribution, 
-  getWeeklyTrend, 
-  DailyMoodItem, 
-  MoodDistributionItem, 
-  MoodTrendItem 
-} from '@/services/moodService';
+import { moodData, moodDistribution, weeklyTrend } from '@/utils/moodUtils';
 
 const Dashboard = () => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  
-  const [dailyMoods, setDailyMoods] = useState<DailyMoodItem[]>([]);
-  const [distribution, setDistribution] = useState<MoodDistributionItem[]>([]);
-  const [trend, setTrend] = useState<MoodTrendItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login');
-    }
-  }, [user, loading, navigate]);
-
-  // Fetch mood data
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
-      
-      try {
-        setIsLoading(true);
-        
-        // Fetch data in parallel
-        const [dailyData, distributionData, trendData] = await Promise.all([
-          getDailyMoodData(),
-          getMoodDistribution(),
-          getWeeklyTrend()
-        ]);
-        
-        setDailyMoods(dailyData);
-        setDistribution(distributionData);
-        setTrend(trendData);
-      } catch (error) {
-        console.error('Error fetching mood data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [user]);
-
-  if (loading || isLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
       <div className="absolute inset-0 z-0 overflow-hidden">
@@ -98,28 +39,16 @@ const Dashboard = () => {
             </Link>
           </div>
           
-          {dailyMoods.length === 0 ? (
-            <div className="bg-black/40 backdrop-blur-md p-8 rounded-xl border border-white/10 text-center">
-              <h2 className="text-xl text-white mb-4">No mood data yet</h2>
-              <p className="text-white/70 mb-6">Start tracking your moods to see your patterns and trends over time.</p>
-              <Link to="/mood-entry">
-                <Button className="bg-gradient-to-r from-[#3DFDFF] to-[#F5DF4D] text-black font-medium">
-                  Record Your First Mood
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Daily Mood Chart */}
-              <DailyMoodChart moodData={dailyMoods} />
-              
-              {/* Mood Distribution Pie Chart */}
-              <MoodDistributionChart moodDistribution={distribution} />
-              
-              {/* Monthly Trend Chart */}
-              <MonthlyTrendChart weeklyTrend={trend} />
-            </div>
-          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Daily Mood Chart */}
+            <DailyMoodChart moodData={moodData} />
+            
+            {/* Mood Distribution Pie Chart */}
+            <MoodDistributionChart moodDistribution={moodDistribution} />
+            
+            {/* Monthly Trend Chart */}
+            <MonthlyTrendChart weeklyTrend={weeklyTrend} />
+          </div>
         </div>
       </div>
     </div>
