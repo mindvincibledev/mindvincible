@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,9 @@ import MoodMeter from '@/components/MoodMeter';
 import { getMoodColor } from '@/utils/moodUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const MoodEntry = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
@@ -17,6 +20,18 @@ const MoodEntry = () => {
   const [moodFeeling, setMoodFeeling] = useState('');
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  const { user, session } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Redirect to login if not authenticated
+  React.useEffect(() => {
+    if (!session) {
+      navigate('/login', { replace: true });
+    }
+  }, [session, navigate]);
 
   const handleMoodSelect = (mood: string) => {
     setCurrentMood(mood);
@@ -36,6 +51,76 @@ const MoodEntry = () => {
       setSelectedTags([...selectedTags, tag]);
     }
   };
+
+  const handleSaveMood = async () => {
+    if (!currentMood || !user) return;
+    
+    try {
+      setIsSaving(true);
+      
+      // Calculate mood value from 1-10 based on mood
+      let moodValue = 5; // Default middle value
+      
+      switch (currentMood) {
+        case 'Angry':
+          moodValue = 2;
+          break;
+        case 'Sad':
+          moodValue = 3;
+          break;
+        case 'Anxious':
+          moodValue = 4;
+          break;
+        case 'Calm':
+          moodValue = 6;
+          break;
+        case 'Happy':
+          moodValue = 8;
+          break;
+        case 'Excited':
+          moodValue = 9;
+          break;
+        case 'Overwhelmed':
+          moodValue = 3;
+          break;
+      }
+      
+      const { error } = await supabase
+        .from('mood_data')
+        .insert({
+          user_id: user.id,
+          mood: currentMood,
+          mood_value: moodValue,
+          notes: moodFeeling,
+          tags: selectedTags.length > 0 ? selectedTags : null
+        });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Mood saved!",
+        description: "Your mood has been recorded successfully.",
+      });
+      
+      // Navigate to dashboard after successful save
+      navigate('/dashboard');
+      
+    } catch (err) {
+      console.error('Error saving mood:', err);
+      toast({
+        variant: "destructive",
+        title: "Failed to save mood",
+        description: "There was an error saving your mood. Please try again.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Guard clause for unauthenticated users
+  if (!user) {
+    return null; // Will redirect in useEffect
+  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -217,16 +302,18 @@ const MoodEntry = () => {
                       transition={{ delay: 0.5 }}
                       className="mt-10"
                     >
-                      <p className="text-white/60 text-xs text-center mb-4">Your mood crew can see this</p>
-                      
                       <Button 
                         className="w-full py-6 transition-all duration-300 relative overflow-hidden group"
                         style={{
                           background: `linear-gradient(135deg, ${getMoodColor(currentMood || 'neutral')}99, ${getMoodColor(currentMood || 'neutral')}66)`,
                         }}
+                        onClick={handleSaveMood}
+                        disabled={isSaving}
                       >
                         <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                        <span className="relative z-10 text-white font-medium">Save mood</span>
+                        <span className="relative z-10 text-white font-medium">
+                          {isSaving ? 'Saving...' : 'Save mood'}
+                        </span>
                       </Button>
                       
                       <div className="mt-4 flex justify-center">

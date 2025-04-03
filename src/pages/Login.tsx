@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,30 +8,37 @@ import { Label } from '@/components/ui/label';
 import { Mail, Lock, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
+import { useAuth } from '@/context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { signIn, session } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If user is already logged in, redirect to dashboard
+    if (session) {
+      navigate('/dashboard');
+    }
+  }, [session, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    
     try {
-      // Here we would typically connect to Supabase for authentication
-      // For now, just simulate a login process
-      console.log('Logging in with:', {
-        email,
-        password
-      });
-      setTimeout(() => {
-        setLoading(false);
-        // Redirect would happen here after successful login
-      }, 1500);
+      await signIn(email, password);
+      // Redirect happens automatically with the useEffect hook above
     } catch (err) {
-      setError('Invalid email or password');
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to log in. Please check your credentials.');
+      }
       setLoading(false);
     }
   };
@@ -68,6 +75,12 @@ const Login = () => {
             <h2 className="text-2xl font-bold text-center mt-8 mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
               Welcome Back
             </h2>
+            
+            {error && (
+              <div className="bg-red-500/20 border border-red-500/50 text-white rounded-md p-3 mb-4">
+                {error}
+              </div>
+            )}
             
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
@@ -114,6 +127,15 @@ const Login = () => {
               >
                 {loading ? 'Logging in...' : 'Login'}
               </Button>
+              
+              <div className="mt-4 text-center">
+                <p className="text-white/70">
+                  Don't have an account?{' '}
+                  <Link to="/register" className="text-[#3DFDFF] hover:underline">
+                    Register now
+                  </Link>
+                </p>
+              </div>
             </form>
           </div>
         </motion.div>

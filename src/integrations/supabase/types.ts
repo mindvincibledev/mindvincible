@@ -9,7 +9,89 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      mood_data: {
+        Row: {
+          created_at: string
+          id: string
+          mood: Database["public"]["Enums"]["mood_type"]
+          mood_value: number
+          notes: string | null
+          tags: string[] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mood: Database["public"]["Enums"]["mood_type"]
+          mood_value: number
+          notes?: string | null
+          tags?: string[] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mood?: Database["public"]["Enums"]["mood_type"]
+          mood_value?: number
+          notes?: string | null
+          tags?: string[] | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mood_data_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string
+          guardian1_name: string | null
+          guardian1_phone: string | null
+          guardian2_name: string | null
+          guardian2_phone: string | null
+          id: string
+          name: string
+          password: string
+          updated_at: string
+          user_phone: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email: string
+          guardian1_name?: string | null
+          guardian1_phone?: string | null
+          guardian2_name?: string | null
+          guardian2_phone?: string | null
+          id?: string
+          name: string
+          password: string
+          updated_at?: string
+          user_phone?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string
+          guardian1_name?: string | null
+          guardian1_phone?: string | null
+          guardian2_name?: string | null
+          guardian2_phone?: string | null
+          id?: string
+          name?: string
+          password?: string
+          updated_at?: string
+          user_phone?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +100,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      mood_type:
+        | "Angry"
+        | "Calm"
+        | "Sad"
+        | "Anxious"
+        | "Happy"
+        | "Excited"
+        | "Overwhelmed"
     }
     CompositeTypes: {
       [_ in never]: never
