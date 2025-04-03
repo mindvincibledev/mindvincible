@@ -14,27 +14,27 @@ export type Database = {
           created_at: string
           id: string
           mood: Database["public"]["Enums"]["mood_type"]
-          mood_value: number
           notes: string | null
           tags: string[] | null
+          time_of_day: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           mood: Database["public"]["Enums"]["mood_type"]
-          mood_value: number
           notes?: string | null
           tags?: string[] | null
+          time_of_day?: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           mood?: Database["public"]["Enums"]["mood_type"]
-          mood_value?: number
           notes?: string | null
           tags?: string[] | null
+          time_of_day?: string
           user_id?: string
         }
         Relationships: [

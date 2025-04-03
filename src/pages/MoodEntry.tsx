@@ -60,39 +60,15 @@ const MoodEntry = () => {
     try {
       setIsSaving(true);
       
-      // Calculate mood value from 1-10 based on mood
-      let moodValue = 5; // Default middle value
-      
-      switch (currentMood) {
-        case 'Angry':
-          moodValue = 2;
-          break;
-        case 'Sad':
-          moodValue = 3;
-          break;
-        case 'Anxious':
-          moodValue = 4;
-          break;
-        case 'Calm':
-          moodValue = 6;
-          break;
-        case 'Happy':
-          moodValue = 8;
-          break;
-        case 'Excited':
-          moodValue = 9;
-          break;
-        case 'Overwhelmed':
-          moodValue = 3;
-          break;
-      }
+      const now = new Date();
+      const currentTime = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
       
       console.log('Saving mood data:', {
         user_id: user.id,
         mood: currentMood,
-        mood_value: moodValue,
         notes: moodFeeling,
-        tags: selectedTags
+        tags: selectedTags,
+        time_of_day: currentTime
       });
       
       const { error } = await supabase
@@ -100,9 +76,9 @@ const MoodEntry = () => {
         .insert({
           user_id: user.id,
           mood: currentMood as MoodType,
-          mood_value: moodValue,
           notes: moodFeeling,
-          tags: selectedTags.length > 0 ? selectedTags : null
+          tags: selectedTags.length > 0 ? selectedTags : null,
+          time_of_day: currentTime
         });
       
       if (error) {

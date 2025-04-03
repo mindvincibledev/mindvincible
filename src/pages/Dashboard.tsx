@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import DailyMoodChart from '@/components/charts/DailyMoodChart';
 import MoodDistributionChart from '@/components/charts/MoodDistributionChart';
-import MonthlyTrendChart from '@/components/charts/MonthlyTrendChart';
+import MoodTagsTable from '@/components/charts/MoodTagsTable';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -17,7 +17,7 @@ import { Database } from '@/integrations/supabase/types';
 interface MoodData {
   date: string;
   mood: string;
-  value: number;
+  time: string;
 }
 
 interface MoodDistribution {
@@ -25,9 +25,10 @@ interface MoodDistribution {
   value: number;
 }
 
-interface WeeklyTrend {
-  week: string;
-  average: number;
+interface MoodTagCount {
+  mood: string;
+  tag: string;
+  count: number;
 }
 
 type MoodEntry = Database['public']['Tables']['mood_data']['Row'];
@@ -35,7 +36,7 @@ type MoodEntry = Database['public']['Tables']['mood_data']['Row'];
 const Dashboard = () => {
   const [moodData, setMoodData] = useState<MoodData[]>([]);
   const [moodDistribution, setMoodDistribution] = useState<MoodDistribution[]>([]);
-  const [weeklyTrend, setWeeklyTrend] = useState<WeeklyTrend[]>([]);
+  const [moodTags, setMoodTags] = useState<MoodTagCount[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, session, signOut } = useAuth();
   const navigate = useNavigate();
@@ -78,12 +79,32 @@ const Dashboard = () => {
       
       if (moodEntries && moodEntries.length > 0) {
         // Process data for daily chart (last 7 days)
-        const recentEntries = moodEntries.slice(0, 7);
-        const dailyData = recentEntries.map(entry => ({
-          date: new Date(entry.created_at).toLocaleDateString('en-US', { weekday: 'short' }),
-          mood: entry.mood,
-          value: entry.mood_value
-        })).reverse();
+        // Group entries by day for stacking
+        const groupedByDay: Record<string, MoodData[]> = {};
+        
+        moodEntries.forEach(entry => {
+          const date = new Date(entry.created_at).toLocaleDateString('en-US', { weekday: 'short' });
+          
+          if (!groupedByDay[date]) {
+            groupedByDay[date] = [];
+          }
+          
+          const timeString = new Date(entry.created_at).toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit' 
+          });
+          
+          groupedByDay[date].push({
+            date,
+            mood: entry.mood,
+            time: timeString
+          });
+        });
+        
+        // Convert grouped data to array format for chart
+        const dailyData: MoodData[] = Object.values(groupedByDay)
+          .flat()
+          .slice(0, 20); // Limit to 20 most recent mood entries for chart clarity
         
         // Calculate mood distribution
         const distribution: Record<string, number> = {};
@@ -100,41 +121,48 @@ const Dashboard = () => {
           return { name, value: percentage };
         });
         
-        // Group entries by week for weekly trend
-        const weeklyData: Record<string, number[]> = {};
+        // Process tags by mood
+        const tagsByMood: Record<string, Record<string, number>> = {};
+        
         moodEntries.forEach(entry => {
-          const date = new Date(entry.created_at);
-          const weekStart = new Date(date);
-          weekStart.setDate(date.getDate() - date.getDay()); // Start of week (Sunday)
-          const weekKey = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const mood = entry.mood;
           
-          if (!weeklyData[weekKey]) {
-            weeklyData[weekKey] = [];
+          if (!tagsByMood[mood]) {
+            tagsByMood[mood] = {};
           }
           
-          weeklyData[weekKey].push(entry.mood_value);
+          // Process tags if they exist
+          if (entry.tags && entry.tags.length > 0) {
+            entry.tags.forEach(tag => {
+              if (tagsByMood[mood][tag]) {
+                tagsByMood[mood][tag]++;
+              } else {
+                tagsByMood[mood][tag] = 1;
+              }
+            });
+          }
         });
         
-        // Calculate weekly averages
-        const weeklyAverages = Object.entries(weeklyData).map(([week, values]) => {
-          const sum = values.reduce((acc, val) => acc + val, 0);
-          const average = Math.round((sum / values.length) * 10) / 10;
-          return { week, average };
-        }).sort((a, b) => {
-          // Sort by week date
-          const dateA = new Date(a.week);
-          const dateB = new Date(b.week);
-          return dateA.getTime() - dateB.getTime();
-        }).slice(-4); // Get last 4 weeks
+        // Convert tag data to array format for table
+        const tagCountsData: MoodTagCount[] = [];
+        
+        Object.entries(tagsByMood).forEach(([mood, tags]) => {
+          Object.entries(tags).forEach(([tag, count]) => {
+            tagCountsData.push({ mood, tag, count });
+          });
+        });
+        
+        // Sort by count (descending)
+        tagCountsData.sort((a, b) => b.count - a.count);
         
         setMoodData(dailyData);
         setMoodDistribution(distributionData);
-        setWeeklyTrend(weeklyAverages);
+        setMoodTags(tagCountsData);
       } else {
         // If no data, set empty arrays
         setMoodData([]);
         setMoodDistribution([]);
-        setWeeklyTrend([]);
+        setMoodTags([]);
       }
     } catch (err) {
       console.error('Error processing mood data:', err);
@@ -146,13 +174,6 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
-  
-  // Helper function to calculate average mood value
-  const calculateAverageMood = (entries: MoodEntry[]) => {
-    if (entries.length === 0) return 5;
-    const sum = entries.reduce((acc, entry) => acc + entry.mood_value, 0);
-    return Math.round((sum / entries.length) * 10) / 10;
   };
   
   const handleSignOut = async () => {
@@ -235,8 +256,8 @@ const Dashboard = () => {
               {/* Mood Distribution Pie Chart */}
               <MoodDistributionChart moodDistribution={moodDistribution} />
               
-              {/* Monthly Trend Chart */}
-              <MonthlyTrendChart weeklyTrend={weeklyTrend} />
+              {/* Mood Tags Table */}
+              <MoodTagsTable moodTags={moodTags} />
             </div>
           )}
         </div>
