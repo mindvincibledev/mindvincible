@@ -1,12 +1,22 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
 
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  guardian1_phone?: string | null;
+  guardian2_phone?: string | null;
+  guardian1_name?: string | null;
+  guardian2_name?: string | null;
+  user_phone?: string | null;
+  address?: string | null;
+}
+
 interface AuthContextType {
-  session: Session | null;
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
@@ -28,58 +38,42 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  // Check for stored user on initial load
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+    const storedUser = localStorage.getItem('mindvincible_user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Failed to parse stored user data', error);
+        localStorage.removeItem('mindvincible_user');
       }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    }
+    setLoading(false);
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
       
-      // First, check if the user exists in our custom users table
+      // Find user with matching email and password
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('*')
         .eq('email', email)
+        .eq('password', password) // Direct password comparison
         .single();
       
-      if (userError) {
-        throw new Error('User not found');
+      if (userError || !userData) {
+        throw new Error('Invalid email or password');
       }
       
-      // Check if password matches (in a real application, use bcrypt or another hashing method)
-      if (userData.password !== password) {
-        throw new Error('Invalid password');
-      }
-      
-      // Use Supabase Auth only for session management
-      const { error } = await supabase.auth.signInWithPassword({ 
-        email, 
-        password 
-      });
-      
-      if (error) {
-        throw error;
-      }
+      // Store user in state and localStorage
+      setUser(userData as User);
+      localStorage.setItem('mindvincible_user', JSON.stringify(userData));
       
       toast({
         title: "Success!",
@@ -111,10 +105,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       
-      // First, check if the user already exists
+      // Check if user already exists
       const { data: existingUser, error: checkError } = await supabase
         .from('users')
-        .select('*')
+        .select('id')
         .eq('email', userData.email)
         .maybeSingle();
       
@@ -122,38 +116,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('User with this email already exists');
       }
       
-      // Still use Supabase Auth for managing sessions
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-      });
-      
-      if (authError) throw authError;
-      
-      if (authData.user) {
-        // Then insert the user data in our custom table, including the password
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert({
-            id: authData.user.id,
-            email: userData.email,
-            name: userData.name,
-            password: userData.password, // Store password in our custom table
-            guardian1_phone: userData.guardian1_phone || null,
-            guardian2_phone: userData.guardian2_phone || null,
-            guardian1_name: userData.guardian1_name || null,
-            guardian2_name: userData.guardian2_name || null,
-            user_phone: userData.user_phone || null,
-            address: userData.address || null,
-          } as Database['public']['Tables']['users']['Insert']);
-          
-        if (profileError) throw profileError;
+      // Insert the new user directly into users table
+      const { data: newUser, error: insertError } = await supabase
+        .from('users')
+        .insert({
+          email: userData.email,
+          name: userData.name,
+          password: userData.password,
+          guardian1_phone: userData.guardian1_phone || null,
+          guardian2_phone: userData.guardian2_phone || null,
+          guardian1_name: userData.guardian1_name || null,
+          guardian2_name: userData.guardian2_name || null,
+          user_phone: userData.user_phone || null,
+          address: userData.address || null,
+        } as Database['public']['Tables']['users']['Insert'])
+        .select()
+        .single();
         
-        toast({
-          title: "Account created!",
-          description: "Welcome to M(in)dvincible! You've been signed in.",
-        });
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        throw new Error('Failed to create account. Please try again.');
       }
+      
+      // Store the new user in state and localStorage
+      setUser(newUser as User);
+      localStorage.setItem('mindvincible_user', JSON.stringify(newUser));
+      
+      toast({
+        title: "Account created!",
+        description: "Welcome to M(in)dvincible! You've been signed in.",
+      });
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -169,7 +161,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       setLoading(true);
-      await supabase.auth.signOut();
+      setUser(null);
+      localStorage.removeItem('mindvincible_user');
+      
       toast({
         title: "Signed out",
         description: "You've been successfully signed out.",
@@ -186,7 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

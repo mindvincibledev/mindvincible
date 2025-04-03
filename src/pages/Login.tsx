@@ -14,15 +14,15 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, session } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     // If user is already logged in, redirect to dashboard
-    if (session) {
+    if (user) {
       navigate('/dashboard');
     }
-  }, [session, navigate]);
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,13 +31,14 @@ const Login = () => {
     
     try {
       await signIn(email, password);
-      // Redirect happens automatically with the useEffect hook above
+      navigate('/dashboard');
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError('Failed to log in. Please check your credentials.');
       }
+    } finally {
       setLoading(false);
     }
   };
