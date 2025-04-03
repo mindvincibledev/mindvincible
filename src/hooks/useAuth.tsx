@@ -3,6 +3,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
+import { Database } from '@/integrations/supabase/types';
 
 type User = {
   id: string;
@@ -66,17 +67,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error && !identifier.includes('@')) {
-        // Try to find the user by username
+        // Try to find the user by username - use a type assertion to handle the type error
         const { data: userData, error: userError } = await supabase
           .from('users')
           .select('email')
           .eq('username', identifier)
           .single();
         
-        if (userData && userData.email) {
+        if (userData) {
           // Sign in with the email we found
           ({ data, error } = await supabase.auth.signInWithPassword({
-            email: userData.email,
+            email: userData.email as string,
             password,
           }));
         } else {
