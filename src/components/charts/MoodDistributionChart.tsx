@@ -61,50 +61,58 @@ const MoodDistributionChart = ({ moodDistribution }: MoodDistributionChartProps)
       <CardContent>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <RechartsPieChart>
-              <Pie
-                data={moodDistribution}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={renderCustomizedLabel}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {moodDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={getMoodColor(entry.name)} />
-                ))}
-              </Pie>
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="bg-black/80 backdrop-blur-md p-3 rounded-lg border border-purple-500/30">
-                        <p className="text-white font-semibold">{payload[0].name}</p>
-                        <p className="text-[#FF8A48]">
-                          {payload[0].value}%
-                        </p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-            </RechartsPieChart>
+            {moodDistribution.length > 0 ? (
+              <RechartsPieChart>
+                <Pie
+                  data={moodDistribution}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={renderCustomizedLabel}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {moodDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={getMoodColor(entry.name)} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-black/80 backdrop-blur-md p-3 rounded-lg border border-purple-500/30">
+                          <p className="text-white font-semibold">{payload[0].name}</p>
+                          <p className="text-[#FF8A48]">
+                            {payload[0].value}%
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+              </RechartsPieChart>
+            ) : (
+              <div className="h-full flex items-center justify-center text-white/70">
+                <p>No mood distribution data to display</p>
+              </div>
+            )}
           </ResponsiveContainer>
         </div>
-        <div className="flex flex-wrap gap-2 justify-center mt-4">
-          {moodDistribution.map((entry) => (
-            <div key={entry.name} className="flex items-center gap-1">
-              <div 
-                className="w-3 h-3 rounded-full" 
-                style={{ backgroundColor: getMoodColor(entry.name) }}
-              ></div>
-              <span className="text-xs text-white/70">{entry.name}</span>
-            </div>
-          ))}
-        </div>
+        {moodDistribution.length > 0 && (
+          <div className="flex flex-wrap gap-2 justify-center mt-4">
+            {moodDistribution.map((entry) => (
+              <div key={entry.name} className="flex items-center gap-1">
+                <div 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: getMoodColor(entry.name) }}
+                ></div>
+                <span className="text-xs text-white/70">{entry.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

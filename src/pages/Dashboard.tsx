@@ -1,16 +1,28 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import DailyMoodChart from '@/components/charts/DailyMoodChart';
 import MoodDistributionChart from '@/components/charts/MoodDistributionChart';
 import MonthlyTrendChart from '@/components/charts/MonthlyTrendChart';
-import { moodData, moodDistribution, weeklyTrend } from '@/utils/moodUtils';
+import { useMoodData } from '@/hooks/useMoodData';
+import { useAuth } from '@/context/AuthContext';
 
 const Dashboard = () => {
+  const { moodData, moodDistribution, weeklyTrend, isLoading } = useMoodData();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
       <div className="absolute inset-0 z-0 overflow-hidden">
@@ -39,16 +51,35 @@ const Dashboard = () => {
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Daily Mood Chart */}
-            <DailyMoodChart moodData={moodData} />
-            
-            {/* Mood Distribution Pie Chart */}
-            <MoodDistributionChart moodDistribution={moodDistribution} />
-            
-            {/* Monthly Trend Chart */}
-            <MonthlyTrendChart weeklyTrend={weeklyTrend} />
-          </div>
+          {isLoading ? (
+            <div className="h-[60vh] flex items-center justify-center">
+              <Loader2 className="h-12 w-12 text-[#3DFDFF] animate-spin" />
+              <span className="ml-4 text-white text-xl">Loading your mood data...</span>
+            </div>
+          ) : moodData.length === 0 ? (
+            <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-10 text-center border border-white/10">
+              <h2 className="text-2xl font-semibold text-white mb-4">No mood entries yet</h2>
+              <p className="text-white/70 mb-6">
+                Start tracking your moods to see insights and patterns here.
+              </p>
+              <Link to="/mood-entry">
+                <Button className="bg-gradient-to-r from-[#3DFDFF] to-[#F5DF4D] text-black hover:opacity-90">
+                  Record Your First Mood
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Daily Mood Chart */}
+              <DailyMoodChart moodData={moodData} />
+              
+              {/* Mood Distribution Pie Chart */}
+              <MoodDistributionChart moodDistribution={moodDistribution} />
+              
+              {/* Monthly Trend Chart */}
+              <MonthlyTrendChart weeklyTrend={weeklyTrend} />
+            </div>
+          )}
         </div>
       </div>
     </div>
