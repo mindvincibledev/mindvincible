@@ -1,38 +1,40 @@
 
 import React, { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Lock, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
-import { useAuth } from '@/context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
-  const { signIn, signUp, user, loading } = useAuth();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError('');
+    setLoading(true);
     try {
-      if (isSignUp) {
-        await signUp(email, password);
-      } else {
-        await signIn(email, password);
-      }
-    } catch (error) {
-      // Error is handled in the auth context
+      // Here we would typically connect to Supabase for authentication
+      // For now, just simulate a login process
+      console.log('Logging in with:', {
+        email,
+        password
+      });
+      setTimeout(() => {
+        setLoading(false);
+        // Redirect would happen here after successful login
+      }, 1500);
+    } catch (err) {
+      setError('Invalid email or password');
+      setLoading(false);
     }
   };
-
-  // If user is already logged in, redirect to dashboard
-  if (user && !loading) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-black relative overflow-hidden">
@@ -64,7 +66,7 @@ const Login = () => {
             </div>
             
             <h2 className="text-2xl font-bold text-center mt-8 mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-              {isSignUp ? 'Create Account' : 'Welcome Back'}
+              Welcome Back
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -87,11 +89,9 @@ const Login = () => {
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <Label htmlFor="password" className="text-white">Password</Label>
-                  {!isSignUp && (
-                    <Link to="/forgot-password" className="text-sm text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors hover:underline">
-                      Forgot Password?
-                    </Link>
-                  )}
+                  <Link to="/forgot-password" className="text-sm text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors hover:underline">
+                    Forgot Password?
+                  </Link>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -112,18 +112,8 @@ const Login = () => {
                 className="w-full bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:from-[#FF8A48] hover:to-[#FC68B3] text-white transition-all duration-300 py-6" 
                 disabled={loading}
               >
-                {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Login'}
+                {loading ? 'Logging in...' : 'Login'}
               </Button>
-              
-              <div className="text-center mt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors text-sm"
-                >
-                  {isSignUp ? 'Already have an account? Log in' : "Don't have an account? Sign up"}
-                </button>
-              </div>
             </form>
           </div>
         </motion.div>
