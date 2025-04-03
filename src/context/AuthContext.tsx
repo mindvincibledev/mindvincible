@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
 
 interface AuthContextType {
   session: Session | null;
@@ -93,26 +94,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
+        options: {
+          data: {
+            name: userData.name, // Store name in user metadata
+          }
+        }
       });
       
       if (authError) throw authError;
       
       if (authData.user) {
-        // Then insert the user data
+        // Then insert the user data in our custom table, but don't store the password again
         const { error: profileError } = await supabase
           .from('users')
           .insert({
             id: authData.user.id,
             email: userData.email,
             name: userData.name,
-            password: userData.password,
+            // Important: We're removing the password field here as it's already handled by Supabase Auth
             guardian1_phone: userData.guardian1_phone || null,
             guardian2_phone: userData.guardian2_phone || null,
             guardian1_name: userData.guardian1_name || null,
             guardian2_name: userData.guardian2_name || null,
             user_phone: userData.user_phone || null,
             address: userData.address || null,
-          });
+          } as Database['public']['Tables']['users']['Insert']);
           
         if (profileError) throw profileError;
         
