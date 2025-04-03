@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,31 +8,39 @@ import { Label } from '@/components/ui/label';
 import { Mail, Lock, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const { user, signIn, signUp, isLoading } = useAuth();
+
+  // Redirect if user is already logged in
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    
+    if (!email || !password) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    
     try {
-      // Here we would typically connect to Supabase for authentication
-      // For now, just simulate a login process
-      console.log('Logging in with:', {
-        email,
-        password
-      });
-      setTimeout(() => {
-        setLoading(false);
-        // Redirect would happen here after successful login
-      }, 1500);
+      if (isSignUp) {
+        await signUp(email, password);
+        // After signup, switch to login view
+        setIsSignUp(false);
+      } else {
+        await signIn(email, password);
+      }
     } catch (err) {
-      setError('Invalid email or password');
-      setLoading(false);
+      console.error('Authentication error:', err);
+      // Error is handled in the auth context
     }
   };
 
@@ -66,7 +74,7 @@ const Login = () => {
             </div>
             
             <h2 className="text-2xl font-bold text-center mt-8 mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-              Welcome Back
+              {isSignUp ? 'Create Account' : 'Welcome Back'}
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -89,9 +97,11 @@ const Login = () => {
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <Label htmlFor="password" className="text-white">Password</Label>
-                  <Link to="/forgot-password" className="text-sm text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors hover:underline">
-                    Forgot Password?
-                  </Link>
+                  {!isSignUp && (
+                    <Link to="/forgot-password" className="text-sm text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors hover:underline">
+                      Forgot Password?
+                    </Link>
+                  )}
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -110,10 +120,20 @@ const Login = () => {
               <Button 
                 type="submit" 
                 className="w-full bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:from-[#FF8A48] hover:to-[#FC68B3] text-white transition-all duration-300 py-6" 
-                disabled={loading}
+                disabled={isLoading}
               >
-                {loading ? 'Logging in...' : 'Login'}
+                {isLoading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Login'}
               </Button>
+              
+              <div className="text-center mt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-[#3DFDFF] hover:text-[#3DFDFF]/80 text-sm transition-colors hover:underline"
+                >
+                  {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
+                </button>
+              </div>
             </form>
           </div>
         </motion.div>

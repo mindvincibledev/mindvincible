@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,13 +10,18 @@ import MoodMeter from '@/components/MoodMeter';
 import { getMoodColor } from '@/utils/moodUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
+import { saveMoodEntry } from '@/services/moodService';
+import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 
 const MoodEntry = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
-  const [moodReason, setMoodReason] = useState('');
-  const [moodFeeling, setMoodFeeling] = useState('');
-  const [showDetails, setShowDetails] = useState(false);
+  const [moodNotes, setMoodNotes] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [showDetails, setShowDetails] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleMoodSelect = (mood: string) => {
     setCurrentMood(mood);
@@ -34,6 +39,25 @@ const MoodEntry = () => {
       setSelectedTags(selectedTags.filter(t => t !== tag));
     } else {
       setSelectedTags([...selectedTags, tag]);
+    }
+  };
+
+  const handleSaveMood = async () => {
+    if (!currentMood) {
+      toast.error('Please select a mood');
+      return;
+    }
+    
+    try {
+      setIsSaving(true);
+      await saveMoodEntry(currentMood, selectedTags, moodNotes);
+      toast.success('Mood saved successfully!');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error saving mood:', error);
+      toast.error('Failed to save your mood. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -206,8 +230,8 @@ const MoodEntry = () => {
                         placeholder="How are you feeling? (optional)" 
                         className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[100px] focus:border-opacity-100 transition-colors"
                         style={{ borderColor: `${getMoodColor(currentMood || 'neutral')}44` }}
-                        value={moodFeeling} 
-                        onChange={e => setMoodFeeling(e.target.value)} 
+                        value={moodNotes} 
+                        onChange={e => setMoodNotes(e.target.value)} 
                       />
                     </motion.div>
                     
@@ -217,16 +241,20 @@ const MoodEntry = () => {
                       transition={{ delay: 0.5 }}
                       className="mt-10"
                     >
-                      <p className="text-white/60 text-xs text-center mb-4">Your mood crew can see this</p>
+                      <p className="text-white/60 text-xs text-center mb-4">Your mood will be saved to your personal dashboard</p>
                       
                       <Button 
                         className="w-full py-6 transition-all duration-300 relative overflow-hidden group"
                         style={{
                           background: `linear-gradient(135deg, ${getMoodColor(currentMood || 'neutral')}99, ${getMoodColor(currentMood || 'neutral')}66)`,
                         }}
+                        onClick={handleSaveMood}
+                        disabled={isSaving}
                       >
                         <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                        <span className="relative z-10 text-white font-medium">Save mood</span>
+                        <span className="relative z-10 text-white font-medium">
+                          {isSaving ? 'Saving...' : 'Save mood'}
+                        </span>
                       </Button>
                       
                       <div className="mt-4 flex justify-center">
