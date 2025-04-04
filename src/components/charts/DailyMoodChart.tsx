@@ -1,15 +1,5 @@
 
-import React from 'react';
-import { 
-  ResponsiveContainer, 
-  BarChart as RechartsBarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid,
-  Tooltip,
-  Cell
-} from 'recharts';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -18,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getMoodColor } from '@/utils/moodUtils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type DailyMoodChartProps = {
   moodData: Array<{
@@ -30,6 +21,8 @@ type DailyMoodChartProps = {
 const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
   // Group the data by date to organize for our custom layout
   const groupedData: Record<string, Array<{mood: string, time: string}>> = {};
+  const isMobile = useIsMobile();
+  const [tabHeight, setTabHeight] = useState<number>(12); // Default height
   
   moodData.forEach(entry => {
     if (!groupedData[entry.date]) {
@@ -48,6 +41,31 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return days.indexOf(a) - days.indexOf(b);
   });
+
+  // Calculate dynamic tab height based on number of entries
+  useEffect(() => {
+    const maxEntriesPerDay = Math.max(
+      ...Object.values(groupedData).map(entries => entries.length),
+      1 // Ensure we have at least 1 as a default
+    );
+    
+    // Calculate the available height and adjust tab height
+    // Base height of container is around 320px (h-80 = 20rem = 320px)
+    const availableHeight = 320 - 40; // Subtract header space
+    
+    // Calculate tab height (with a minimum of 8px and a maximum of 48px)
+    let calculatedHeight = Math.min(
+      Math.max(Math.floor(availableHeight / (maxEntriesPerDay + 1)), 8),
+      48
+    );
+    
+    // Reduce size further on mobile
+    if (isMobile && calculatedHeight > 10) {
+      calculatedHeight = Math.max(calculatedHeight * 0.8, 10);
+    }
+    
+    setTabHeight(calculatedHeight);
+  }, [moodData, groupedData, isMobile]);
   
   return (
     <Card className="col-span-1 md:col-span-2 bg-black/40 backdrop-blur-lg border-purple-500/20 shadow-xl">
@@ -66,15 +84,27 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
                     {groupedData[date]?.map((item, index) => (
                       <div 
                         key={`${date}-${index}`}
-                        className="w-full rounded-md mb-1 h-12 relative group hover:opacity-90 transition-opacity"
-                        style={{ backgroundColor: getMoodColor(item.mood) }}
+                        className={`w-full rounded-md mb-1 relative group hover:opacity-90 transition-opacity`}
+                        style={{ 
+                          backgroundColor: getMoodColor(item.mood),
+                          height: `${tabHeight}px`
+                        }}
                       >
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-md">
-                          <div className="text-white text-xs font-medium">{item.time}</div>
+                          <div className={`text-white ${tabHeight < 20 ? 'text-[0.6rem]' : 'text-xs'} font-medium truncate px-1`}>
+                            {item.time}
+                          </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 h-2 bg-black/20 rounded-b-md"></div>
+                        {tabHeight >= 16 && (
+                          <div className="absolute bottom-0 left-0 right-0 h-2 bg-black/20 rounded-b-md"></div>
+                        )}
                       </div>
                     ))}
+                    {groupedData[date]?.length === 0 && (
+                      <div className="flex-1 flex items-center justify-center">
+                        <span className="text-white/30 text-xs">No data</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
