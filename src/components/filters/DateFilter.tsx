@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CalendarIcon, ChevronDown } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Select,
@@ -55,7 +55,7 @@ const DateFilter: React.FC<DateFilterProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-3 p-2 rounded-lg bg-black/30 backdrop-blur-md border border-white/10">
+    <div className="flex flex-col sm:flex-row items-center gap-3 p-2 rounded-lg bg-black/30 backdrop-blur-md border border-white/10 mb-2">
       <Select
         value={filterOption}
         onValueChange={(value) => onFilterChange(value as DateFilterOption)}
@@ -92,7 +92,7 @@ const DateFilter: React.FC<DateFilterProps> = ({
               selected={selectedDate}
               onSelect={(date) => date && onDateChange(date)}
               initialFocus
-              className="bg-transparent"
+              className="bg-transparent pointer-events-auto"
             />
           </PopoverContent>
         </Popover>
