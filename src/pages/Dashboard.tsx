@@ -8,10 +8,23 @@ import Navbar from '@/components/Navbar';
 import DailyMoodChart from '@/components/charts/DailyMoodChart';
 import MoodDistributionChart from '@/components/charts/MoodDistributionChart';
 import MoodTagsTable from '@/components/charts/MoodTagsTable';
+import DateFilter, { DateFilterOption } from '@/components/filters/DateFilter';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+  format,
+  subMonths,
+} from 'date-fns';
 
 // Type definitions for mood data
 interface MoodData {
@@ -38,6 +51,8 @@ const Dashboard = () => {
   const [moodDistribution, setMoodDistribution] = useState<MoodDistribution[]>([]);
   const [moodTags, setMoodTags] = useState<MoodTagCount[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dateFilter, setDateFilter] = useState<DateFilterOption>('month');
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { user, session, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -53,7 +68,39 @@ const Dashboard = () => {
     if (user) {
       fetchMoodData();
     }
-  }, [user]);
+  }, [user, dateFilter, selectedDate]);
+
+  // Calculate filter date range
+  const getDateRange = () => {
+    switch (dateFilter) {
+      case 'day':
+        return {
+          start: startOfDay(selectedDate),
+          end: endOfDay(selectedDate)
+        };
+      case 'week':
+        return {
+          start: startOfWeek(selectedDate, { weekStartsOn: 1 }),
+          end: endOfWeek(selectedDate, { weekStartsOn: 1 })
+        };
+      case 'month':
+        return {
+          start: startOfMonth(selectedDate),
+          end: endOfMonth(selectedDate)
+        };
+      case 'year':
+        return {
+          start: startOfYear(selectedDate),
+          end: endOfYear(selectedDate)
+        };
+      default:
+        // For 'all', we'll get the last 6 months of data as a reasonable default
+        return {
+          start: subMonths(new Date(), 6),
+          end: new Date()
+        };
+    }
+  };
 
   // Fetch mood data from Supabase
   const fetchMoodData = async () => {
@@ -62,13 +109,23 @@ const Dashboard = () => {
       
       console.log('Fetching mood data for user:', user?.id);
       
-      // Fetch recent mood entries
-      const { data: moodEntries, error } = await supabase
+      const { start, end } = getDateRange();
+      
+      // Fetch mood entries based on the selected date range
+      let query = supabase
         .from('mood_data')
         .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false })
-        .limit(30);
+        .eq('user_id', user?.id);
+      
+      // Only apply date filtering if not viewing all time
+      if (dateFilter !== 'all') {
+        query = query
+          .gte('created_at', start.toISOString())
+          .lte('created_at', end.toISOString());
+      }
+      
+      const { data: moodEntries, error } = await query
+        .order('created_at', { ascending: false });
       
       if (error) {
         console.error('Error fetching mood data:', error);
@@ -78,8 +135,7 @@ const Dashboard = () => {
       console.log('Fetched mood entries:', moodEntries);
       
       if (moodEntries && moodEntries.length > 0) {
-        // Process data for daily chart (last 7 days)
-        // Group entries by day for stacking
+        // Process data for daily chart
         const groupedByDay: Record<string, MoodData[]> = {};
         
         moodEntries.forEach(entry => {
@@ -228,11 +284,21 @@ const Dashboard = () => {
                 onClick={handleSignOut}
               >
                 <LogOut size={18} />
-                <span>Sign Out</span>
+                <span className="inline-block">Sign Out</span>
               </Button>
             </div>
           </div>
           
+          {/* Date filter */}
+          <div className="flex justify-end">
+            <DateFilter 
+              filterOption={dateFilter}
+              selectedDate={selectedDate}
+              onFilterChange={setDateFilter}
+              onDateChange={setSelectedDate}
+            />
+          </div>
+
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="text-white/70 text-lg">Loading your mood data...</div>
@@ -240,7 +306,10 @@ const Dashboard = () => {
           ) : moodData.length === 0 ? (
             <div className="flex flex-col items-center justify-center bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-8 my-8">
               <div className="text-white text-lg mb-6 text-center">
-                You haven't recorded any moods yet. Start tracking your emotional well-being today!
+                {dateFilter === 'all' 
+                  ? "You haven't recorded any moods yet. Start tracking your emotional well-being today!"
+                  : `No mood data found for the selected ${dateFilter}.`
+                }
               </div>
               <Link to="/mood-entry">
                 <Button className="bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:opacity-90 text-white">
