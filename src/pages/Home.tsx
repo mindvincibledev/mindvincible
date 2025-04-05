@@ -1,13 +1,25 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
 import { Typewriter } from '@/components/ui/typewriter';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
 
 const Home = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/mood-entry');
+    } else {
+      navigate('/login');
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col relative">
       <Navbar />
@@ -77,13 +89,12 @@ const Home = () => {
               }}
               className="relative z-10"
             >
-              <Link to="/login">
-                <Button
-                  className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:from-[#FF8A48] hover:to-[#FC68B3] text-white px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  Get Started
-                </Button>
-              </Link>
+              <Button
+                onClick={handleGetStarted}
+                className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:from-[#FF8A48] hover:to-[#FC68B3] text-white px-8 py-6 text-lg rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                Get Started
+              </Button>
             </motion.div>
           </motion.div>
         </WavyBackground>

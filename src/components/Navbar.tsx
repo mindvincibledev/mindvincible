@@ -1,15 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,6 +30,24 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+      });
+      navigate('/');
+    } catch (error) {
+      console.error("Error logging out:", error);
+      toast({
+        variant: "destructive",
+        title: "Logout failed",
+        description: "There was a problem logging you out. Please try again.",
+      });
+    }
   };
 
   return (
@@ -62,6 +82,14 @@ const Navbar = () => {
                 <Link to="/mood-entry" className="text-foreground hover:text-primary mx-4">
                   Mood Entry
                 </Link>
+                <Button 
+                  variant="outline" 
+                  className="ml-4 flex items-center gap-2 border-red-400 text-red-400 hover:bg-red-400/10" 
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
               </>
             ) : (
               location.pathname !== '/login' && (
@@ -95,6 +123,16 @@ const Navbar = () => {
                   >
                     Mood Entry
                   </Link>
+                  <button 
+                    className="px-4 py-2 text-left text-red-500 hover:bg-red-50 rounded-md transition-colors flex items-center"
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </button>
                 </>
               ) : (
                 location.pathname !== '/login' && (
