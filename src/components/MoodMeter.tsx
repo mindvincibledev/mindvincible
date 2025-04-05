@@ -50,8 +50,8 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative w-full max-w-md z-10 rounded-2xl overflow-hidden p-6"
-        style={{ backgroundColor: moodColor }}
+        className="relative w-full max-w-md z-10 rounded-2xl overflow-hidden p-6 backdrop-blur-sm"
+        style={{ backgroundColor: `${moodColor}CC` }} // CC = 80% opacity in hex
       >
         {/* App name */}
         <motion.h1
