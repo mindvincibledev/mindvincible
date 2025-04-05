@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -19,17 +18,7 @@ import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-
-interface JournalEntry {
-  id: string;
-  title: string;
-  content: string | null;
-  audio_path: string | null;
-  drawing_path: string | null;
-  entry_type: string;
-  created_at: string;
-  updated_at: string;
-}
+import { JournalEntry } from '@/types/journal';
 
 const JournalDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -74,31 +63,17 @@ const JournalDetail = () => {
         return;
       }
       
-      setEntry(data);
+      // Use type assertion to tell TypeScript that data is a JournalEntry
+      const journalEntry = data as JournalEntry;
+      setEntry(journalEntry);
       
       // Fetch audio or drawing file if needed
-      if (data.audio_path) {
-        const { data: audioData, error: audioError } = await supabase.storage
-          .from('journal_files')
-          .createSignedUrl(data.audio_path, 3600); // 1 hour expiration
-          
-        if (audioError) {
-          console.error('Error fetching audio:', audioError);
-        } else if (audioData) {
-          setAudioUrl(audioData.signedUrl);
-        }
+      if (journalEntry.audio_path) {
+        setAudioUrl(journalEntry.audio_path);
       }
       
-      if (data.drawing_path) {
-        const { data: drawingData, error: drawingError } = await supabase.storage
-          .from('journal_files')
-          .createSignedUrl(data.drawing_path, 3600); // 1 hour expiration
-          
-        if (drawingError) {
-          console.error('Error fetching drawing:', drawingError);
-        } else if (drawingData) {
-          setDrawingUrl(drawingData.signedUrl);
-        }
+      if (journalEntry.drawing_path) {
+        setDrawingUrl(journalEntry.drawing_path);
       }
     } catch (error: any) {
       console.error('Error fetching journal entry:', error);
@@ -119,15 +94,21 @@ const JournalDetail = () => {
     try {
       // Delete associated files if present
       if (entry.audio_path) {
+        const pathParts = entry.audio_path.split('/');
+        const fileName = pathParts[pathParts.length - 1];
+        
         await supabase.storage
           .from('journal_files')
-          .remove([entry.audio_path]);
+          .remove([`${user?.id}/${fileName}`]);
       }
       
       if (entry.drawing_path) {
+        const pathParts = entry.drawing_path.split('/');
+        const fileName = pathParts[pathParts.length - 1];
+        
         await supabase.storage
           .from('journal_files')
-          .remove([entry.drawing_path]);
+          .remove([`${user?.id}/${fileName}`]);
       }
       
       // Delete the entry

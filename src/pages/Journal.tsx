@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,16 +8,7 @@ import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import JournalCard from '@/components/journal/JournalCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-
-interface JournalEntry {
-  id: string;
-  title: string;
-  content: string | null;
-  audio_path: string | null;
-  drawing_path: string | null;
-  entry_type: string;
-  created_at: string;
-}
+import { JournalEntry } from '@/types/journal';
 
 const Journal = () => {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -47,7 +37,8 @@ const Journal = () => {
         
       if (error) throw error;
       
-      setEntries(data || []);
+      // Use type assertion to tell TypeScript that data is JournalEntry[]
+      setEntries((data || []) as JournalEntry[]);
     } catch (error: any) {
       console.error('Error fetching journal entries:', error);
       toast({
