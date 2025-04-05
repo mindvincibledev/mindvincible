@@ -1,5 +1,5 @@
 
-import { useState, useEffect, RefObject } from 'react';
+import { useState, useEffect, useRef, RefObject } from 'react';
 
 interface UseMoodWheelProps {
   moodsCount: number;
@@ -16,23 +16,30 @@ export const useMoodWheel = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
   // Create audio for scroll sound effect
-  const [scrollSound] = useState(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const audio = new Audio();
-      audio.src = '/click.mp3'; // We'll add this file later
+      audio.src = '/click.mp3';
       audio.volume = 0.2;
-      return audio;
+      audio.load();
+      audioRef.current = audio;
+      
+      // Clean up
+      return () => {
+        audio.pause();
+        audio.src = '';
+      };
     }
-    return null;
-  });
+  }, []);
   
   // Play sound effect when scrolling
   const playScrollSound = () => {
-    if (scrollSound) {
-      scrollSound.currentTime = 0;
-      scrollSound.play().catch(err => console.log('Audio play error:', err));
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(err => console.log('Audio play error:', err));
     }
   };
 

@@ -40,19 +40,6 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
     transition: 'background 0.7s ease'
   };
 
-  // Create wave effect for background
-  const waveVariants = {
-    animate: {
-      y: [0, 5, 0],
-      opacity: [0.7, 0.9, 0.7],
-      transition: {
-        duration: 8,
-        repeat: Infinity,
-        repeatType: "reverse",
-      }
-    }
-  };
-
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -61,11 +48,18 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
       className="w-full h-full text-center flex flex-col items-center justify-between relative overflow-hidden" 
       style={gradientStyle}
     >
-      {/* Animated background waves */}
+      {/* Animated background waves - Fixing the animation type error */}
       <motion.div
         className="absolute inset-0 z-0"
-        variants={waveVariants}
-        animate="animate"
+        animate={{ 
+          y: [0, 5, 0],
+          opacity: [0.7, 0.9, 0.7]
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          repeatType: "reverse"
+        }}
       >
         <svg width="100%" height="100%" viewBox="0 0 1000 1000" preserveAspectRatio="none">
           <motion.path

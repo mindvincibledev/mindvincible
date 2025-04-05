@@ -31,12 +31,11 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
   handleTouchMove,
   handleTouchEnd
 }) => {
-  // Get mood position in the arc
+  // Get mood position in the wheel
   const getMoodPosition = (index: number, totalMoods: number): MoodPosition => {
     // Calculate the angle based on index within the semi-circle
-    // We want the moods to be shown in an arc at the bottom of the screen
-    const startAngle = -135; // Begin from bottom left
-    const endAngle = -45; // End at bottom right
+    const startAngle = -120; // Begin from bottom left
+    const endAngle = -60; // End at bottom right
     const angleRange = endAngle - startAngle;
     const angleStep = angleRange / (totalMoods - 1);
     const angle = startAngle + (index * angleStep);
@@ -50,27 +49,31 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
 
     // Distance from selected mood (closest mood is largest)
     const distFromSelected = Math.abs(index - selectedMoodIndex);
-    const sizeMultiplier = distFromSelected === 0 ? 1 : Math.max(0.6, 1 - (distFromSelected * 0.15));
+    const sizeMultiplier = distFromSelected === 0 ? 1 : Math.max(0.5, 1 - (distFromSelected * 0.2));
 
     // Scale and adjust positions to fit in our container
     return {
-      x: 50 + x * 50, // 50% is center, 50% is the radius in percentage
-      y: 90 + y * 50, // 90% from top for the center of the arc
+      x: 50 + x * 40, // 50% is center, 40% is the radius in percentage
+      y: 95 + y * 40, // 95% from top for the center of the arc
       angle: angle + 90, // Rotate text to follow arc tangent
       size: sizeMultiplier
     };
   };
 
+  // Determine how many moods to show on each side of the selected mood
+  const visibleMoodsOnEachSide = 2;
+
   // Calculate whether a mood should be visible based on distance from selected mood
   const isMoodVisible = (index: number) => {
     const distFromSelected = Math.abs(index - selectedMoodIndex);
-    return distFromSelected <= 3; // Show only nearby moods
+    return distFromSelected <= visibleMoodsOnEachSide; // Show limited moods for clearer visibility
   };
 
+  // Apply perspective and wheel styling
   return (
     <div 
       ref={wheelRef} 
-      className="w-full h-60 relative mt-auto overflow-hidden" 
+      className="w-full h-64 relative mt-auto overflow-hidden perspective-1000" 
       onTouchStart={handleTouchStart} 
       onTouchMove={handleTouchMove as any} 
       onTouchEnd={handleTouchEnd} 
@@ -79,10 +82,23 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
       onMouseUp={handleTouchEnd} 
       onMouseLeave={handleTouchEnd}
     >
-      {/* Semi-circle background */}
-      <div className="absolute bottom-0 left-0 right-0 h-60 w-full bg-gradient-to-t from-white/20 to-transparent rounded-t-[50%]"></div>
+      {/* Wheel background with 3D effect */}
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[120%] h-48 bg-gradient-to-t from-white/20 to-transparent rounded-t-[50%] overflow-hidden">
+        {/* Wheel lines/segments */}
+        <div className="absolute bottom-0 left-0 w-full h-full">
+          {Array.from({ length: moods.length + 1 }).map((_, i) => (
+            <div 
+              key={i} 
+              className="absolute bottom-0 left-1/2 h-full w-[1px] bg-white/10 origin-bottom"
+              style={{
+                transform: `translateX(-50%) rotate(${-120 + (i * (60 / (moods.length - 1)))}deg)`
+              }}
+            />
+          ))}
+        </div>
+      </div>
       
-      {/* Moods arranged in an arc */}
+      {/* Moods arranged in wheel */}
       {moods.map((mood, index) => {
         const position = getMoodPosition(index, moods.length);
         const isSelected = index === selectedMoodIndex;
@@ -110,7 +126,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           >
             <div className="relative">
               <span 
-                className={`text-xl md:text-3xl font-bold transition-all ${isSelected ? 'text-white drop-shadow-lg' : 'text-white/70'}`}
+                className={`text-xl md:text-2xl font-bold transition-all whitespace-nowrap ${isSelected ? 'text-white drop-shadow-lg' : 'text-white/70'}`}
                 style={{
                   textShadow: isSelected ? '0 2px 6px rgba(0,0,0,0.3)' : 'none'
                 }}
@@ -148,16 +164,18 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
         );
       })}
       
-      {/* Progress indicator arc at the bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
-        <motion.div 
-          className="h-full bg-white"
-          style={{
-            width: `${100 / moods.length}%`,
-            marginLeft: `${(selectedMoodIndex / moods.length) * 100}%`,
-            transition: "margin-left 0.3s ease-out"
-          }}
-        />
+      {/* Current position indicator */}
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-white rounded-full shadow-lg"></div>
+      
+      {/* Dots for navigation */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-1">
+        {moods.map((_, i) => (
+          <div
+            key={i}
+            className={`w-2 h-2 rounded-full transition-all ${i === selectedMoodIndex ? 'bg-white scale-125' : 'bg-white/40'}`}
+            onClick={() => onMoodSelect(i)}
+          />
+        ))}
       </div>
     </div>
   );
