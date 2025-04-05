@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { WavyBackground } from '@/components/ui/wavy-background';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
@@ -12,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
+import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import {
   startOfDay,
   endOfDay,
@@ -277,94 +277,81 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Background gradient always visible */}
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/20 to-transparent z-[1] pointer-events-none"></div>
-      
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <WavyBackground 
-          colors={["#FF8A48", "#D5D5F1", "#3DFDFF", "#F5DF4D", "#FC68B3", "#2AC20E"]} 
-          waveWidth={100} 
-          backgroundFill="black" 
-          blur={10} 
-          speed="fast" 
-          waveOpacity={0.5} 
-          className="w-full h-full" 
-        />
-      </div>
-      
-      <Navbar />
-      
-      <div className="relative z-10 container mx-auto px-4 py-20">
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">Your Mood Dashboard</h1>
-              <p className="text-white mt-2">Welcome, {user.name}</p>
+    <BackgroundWithEmojis>
+      <div className="min-h-screen relative">
+        <Navbar />
+        
+        <div className="relative z-10 container mx-auto px-4 py-20">
+          <div className="flex flex-col gap-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-white">Your Mood Dashboard</h1>
+                <p className="text-white mt-2">Welcome, {user.name}</p>
+              </div>
+              
+              <div>
+                <Link to="/mood-entry">
+                  <Button className="flex items-center gap-2 bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:opacity-90 text-white">
+                    <PlusCircle size={18} />
+                    <span>New Mood Entry</span>
+                  </Button>
+                </Link>
+              </div>
             </div>
             
-            <div>
-              <Link to="/mood-entry">
-                <Button className="flex items-center gap-2 bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:opacity-90 text-white">
-                  <PlusCircle size={18} />
-                  <span>New Mood Entry</span>
-                </Button>
-              </Link>
+            {/* Date filter - affects only MoodDistributionChart and MoodTagsTable */}
+            <div className="flex justify-end">
+              <DateFilter 
+                filterOption={dateFilter}
+                selectedDate={selectedDate}
+                onFilterChange={setDateFilter}
+                onDateChange={setSelectedDate}
+              />
             </div>
-          </div>
-          
-          {/* Date filter - affects only MoodDistributionChart and MoodTagsTable */}
-          <div className="flex justify-end">
-            <DateFilter 
-              filterOption={dateFilter}
-              selectedDate={selectedDate}
-              onFilterChange={setDateFilter}
-              onDateChange={setSelectedDate}
-            />
-          </div>
 
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="text-[#F5DF4D] text-lg">Loading your mood data...</div>
-            </div>
-          ) : allMoodEntries.length === 0 ? (
-            <div className="flex flex-col items-center justify-center bg-black/60 backdrop-blur-md rounded-xl border border-[#3DFDFF]/30 p-8 my-8">
-              <div className="text-[#F5DF4D] text-lg mb-6 text-center">
-                You haven't recorded any moods yet. Start tracking your emotional well-being today!
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="text-[#F5DF4D] text-lg">Loading your mood data...</div>
               </div>
-              <Link to="/mood-entry">
-                <Button className="bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:opacity-90 text-white">
-                  Record Your First Mood
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Daily Mood Chart - Always shows weekly data regardless of filter */}
-              <DailyMoodChart moodData={weeklyMoodData} />
-              
-              {/* Mood Distribution Pie Chart - Changes based on filter */}
-              {filteredMoodDistribution.length > 0 ? (
-                <MoodDistributionChart moodDistribution={filteredMoodDistribution} />
-              ) : (
-                <div className="bg-black/60 backdrop-blur-lg border border-[#FC68B3]/30 shadow-xl rounded-lg p-6 flex items-center justify-center">
-                  <p className="text-[#D5D5F1]">No mood data for this period</p>
+            ) : allMoodEntries.length === 0 ? (
+              <div className="flex flex-col items-center justify-center bg-black/60 backdrop-blur-md rounded-xl border border-[#3DFDFF]/30 p-8 my-8">
+                <div className="text-[#F5DF4D] text-lg mb-6 text-center">
+                  You haven't recorded any moods yet. Start tracking your emotional well-being today!
                 </div>
-              )}
-              
-              {/* Mood Tags Table - Changes based on filter */}
-              {filteredMoodTags.length > 0 ? (
-                <MoodTagsTable moodTags={filteredMoodTags} />
-              ) : (
-                <div className="col-span-1 md:col-span-3 bg-black/60 backdrop-blur-lg border border-[#FC68B3]/30 shadow-xl rounded-lg p-6 flex items-center justify-center">
-                  <p className="text-[#D5D5F1]">No tag data for this period</p>
-                </div>
-              )}
-            </div>
-          )}
+                <Link to="/mood-entry">
+                  <Button className="bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:opacity-90 text-white">
+                    Record Your First Mood
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Daily Mood Chart - Always shows weekly data regardless of filter */}
+                <DailyMoodChart moodData={weeklyMoodData} />
+                
+                {/* Mood Distribution Pie Chart - Changes based on filter */}
+                {filteredMoodDistribution.length > 0 ? (
+                  <MoodDistributionChart moodDistribution={filteredMoodDistribution} />
+                ) : (
+                  <div className="bg-black/60 backdrop-blur-lg border border-[#FC68B3]/30 shadow-xl rounded-lg p-6 flex items-center justify-center">
+                    <p className="text-[#D5D5F1]">No mood data for this period</p>
+                  </div>
+                )}
+                
+                {/* Mood Tags Table - Changes based on filter */}
+                {filteredMoodTags.length > 0 ? (
+                  <MoodTagsTable moodTags={filteredMoodTags} />
+                ) : (
+                  <div className="col-span-1 md:col-span-3 bg-black/60 backdrop-blur-lg border border-[#FC68B3]/30 shadow-xl rounded-lg p-6 flex items-center justify-center">
+                    <p className="text-[#D5D5F1]">No tag data for this period</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </BackgroundWithEmojis>
   );
 };
 
