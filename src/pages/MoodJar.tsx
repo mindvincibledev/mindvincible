@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Paintbrush, Save, RotateCcw } from 'lucide-react';
@@ -15,7 +14,6 @@ import { getBase64FromCanvas, generateJarFilename } from '@/utils/jarUtils';
 const MoodJar = () => {
   const [selectedColor, setSelectedColor] = useState<string>('#F5DF4D');
   const [selectedEmotion, setSelectedEmotion] = useState<string>('Happy');
-  const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -23,7 +21,7 @@ const MoodJar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Colors from custom instructions
+  // Colors directly from the colorEmotions array
   const colors = [
     '#F5DF4D', // Yellow (Happy)
     '#FF8A48', // Orange (Angry)

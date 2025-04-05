@@ -103,6 +103,7 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       setIsDrawing(false);
     };
 
+    // Fix mouse drawing to be continuous
     const handleMouseDown = (e: MouseEvent) => {
       setIsDrawing(true);
       
@@ -117,6 +118,7 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       drawDot(x, y);
     };
 
+    // Updated mouse move handler to draw even without clicking
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDrawing) return;
       

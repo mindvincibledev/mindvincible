@@ -30,9 +30,9 @@ const ColorPalette: React.FC<ColorPaletteProps> = ({
         Select an emotion color to fill your jar
       </h3>
       <div className="flex flex-wrap gap-3 justify-center mb-4">
-        {colorEmotions.map((item, index) => {
-          const isSelected = colors[index % colors.length] === selectedColor;
-          const buttonColor = colors[index % colors.length];
+        {colorEmotions.map((item) => {
+          const isSelected = item.color === selectedColor;
+          const buttonColor = item.color;
           const textColor = buttonColor === '#F5DF4D' || buttonColor === '#2AC20E' || buttonColor === '#D6F6D5' ? 'text-black' : 'text-white';
           
           return (
@@ -49,7 +49,7 @@ const ColorPalette: React.FC<ColorPaletteProps> = ({
                 backgroundColor: isSelected ? `${buttonColor}` : `${buttonColor}70`,
                 boxShadow: isSelected ? `0 0 15px ${buttonColor}90` : ''
               }}
-              onClick={() => onSelectColor(colors[index % colors.length], item.name)}
+              onClick={() => onSelectColor(item.color, item.name)}
               aria-label={`Select ${item.name} color`}
             >
               {item.icon}
