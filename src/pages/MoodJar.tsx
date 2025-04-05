@@ -127,7 +127,7 @@ const MoodJar = () => {
         throw new Error("Failed to get public URL for uploaded image");
       }
 
-      // Use a direct insert to avoid type issues with RPC
+      // Use a direct insert with explicit typing
       const { error: dbError } = await supabase
         .from('mood_jar_table')
         .insert({
