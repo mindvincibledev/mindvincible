@@ -18,6 +18,7 @@ export const useMoodWheel = ({
   const [startX, setStartX] = useState(0);
   const [dragThreshold, setDragThreshold] = useState(30); // Adjustable drag threshold
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const requestRef = useRef<number | null>(null); // For animation frame
   
   // Create audio for scroll sound effect
   useEffect(() => {
@@ -84,7 +85,7 @@ export const useMoodWheel = ({
     }, 300);
   };
 
-  // Alternative direct selection handler to ensure proper centering
+  // Direct selection handler with improved centering
   const handleDirectMoodSelect = (index: number) => {
     if (isAnimating || index === selectedMoodIndex) return;
     
@@ -92,6 +93,7 @@ export const useMoodWheel = ({
     setSelectedMoodIndex(index);
     playScrollSound();
     
+    // Reset animation flag after transition completes
     setTimeout(() => {
       setIsAnimating(false);
     }, 300);
@@ -157,44 +159,74 @@ export const useMoodWheel = ({
     };
   }, [selectedMoodIndex, isAnimating, moodsCount, wheelRef]);
 
-  // Handle touch/mouse events for swiping
+  // Enhanced touch/mouse events for swiping
   const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+    if (isAnimating) return;
+    
     setIsDragging(true);
     if ('touches' in e) {
       setStartX(e.touches[0].clientX);
     } else {
       setStartX(e.clientX);
     }
+    
+    // Cancel any ongoing animation frame
+    if (requestRef.current) {
+      cancelAnimationFrame(requestRef.current);
+    }
   };
   
   const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isDragging) return;
     
-    let currentX: number;
-    if ('touches' in e) {
-      currentX = e.touches[0].clientX;
-    } else {
-      currentX = e.clientX;
-    }
-    
-    const diff = currentX - startX;
-    if (Math.abs(diff) > dragThreshold) {
-      // Pass the drag threshold
-      if (diff > 0) {
-        changeMood('left');
+    // Use requestAnimationFrame for smoother performance
+    requestRef.current = requestAnimationFrame(() => {
+      let currentX: number;
+      if ('touches' in e) {
+        currentX = e.touches[0].clientX;
       } else {
-        changeMood('right');
+        currentX = e.clientX;
       }
       
-      // Reset drag state
-      setIsDragging(false);
-      setStartX(0);
-    }
+      const diff = currentX - startX;
+      if (Math.abs(diff) > dragThreshold) {
+        // Pass the drag threshold
+        if (diff > 0) {
+          changeMood('left');
+        } else {
+          changeMood('right');
+        }
+        
+        // Reset drag state
+        setIsDragging(false);
+        setStartX(0);
+        
+        if (requestRef.current) {
+          cancelAnimationFrame(requestRef.current);
+          requestRef.current = null;
+        }
+      }
+    });
   };
   
   const handleTouchEnd = () => {
     setIsDragging(false);
+    
+    // Cancel any ongoing animation frame
+    if (requestRef.current) {
+      cancelAnimationFrame(requestRef.current);
+      requestRef.current = null;
+    }
   };
+
+  // Clean up animation frames on unmount
+  useEffect(() => {
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+    };
+  }, []);
 
   return {
     selectedMoodIndex,

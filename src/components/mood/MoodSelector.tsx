@@ -31,11 +31,11 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
   const extendedMoods = [...moods, ...moods, ...moods]; // Triple the array for infinite scrolling effect
   const offsetIndex = moods.length + selectedMoodIndex; // Current position in the extended array
 
-  // Ensure the selected mood is visible and centered
+  // Center the selected mood whenever it changes
   useEffect(() => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
-      const selectedElement = container.children[offsetIndex] as HTMLElement;
+      const selectedElement = container.querySelector(`[data-index="${offsetIndex}"]`) as HTMLElement;
       
       if (selectedElement) {
         const containerWidth = container.offsetWidth;
@@ -54,6 +54,8 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
     }
   }, [selectedMoodIndex, offsetIndex]);
 
+  const moodColor = getMoodColor(moods[selectedMoodIndex]);
+
   return (
     <div 
       ref={wheelRef} 
@@ -71,7 +73,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
         {/* Decorative circle elements */}
         <motion.div 
           className="absolute bottom-8 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full opacity-20 blur-md"
-          style={{ background: `radial-gradient(circle, ${getMoodColor(moods[selectedMoodIndex])} 0%, transparent 70%)` }}
+          style={{ background: `radial-gradient(circle, ${moodColor} 0%, transparent 70%)` }}
           animate={{
             scale: [1, 1.1, 1],
             opacity: [0.2, 0.3, 0.2]
@@ -84,32 +86,68 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
         />
       </div>
       
+      {/* Arched selector track */}
+      <div className="absolute bottom-24 left-0 w-full px-4 py-2 pointer-events-none">
+        <div 
+          className="relative h-16 mx-auto" 
+          style={{
+            maxWidth: "calc(100% - 1.5rem)"
+          }}
+        >
+          {/* Arched Track Background */}
+          <svg 
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0" 
+            viewBox="0 0 400 80" 
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="trackGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor={`${moodColor}33`} />
+                <stop offset="45%" stopColor={`${moodColor}66`} />
+                <stop offset="55%" stopColor={`${moodColor}66`} />
+                <stop offset="100%" stopColor={`${moodColor}33`} />
+              </linearGradient>
+            </defs>
+            <path 
+              d="M 0,60 C 130,30 270,30 400,60" 
+              stroke="url(#trackGradient)" 
+              strokeWidth="6"
+              fill="none"
+              strokeLinecap="round"
+              opacity="0.8"
+            />
+          </svg>
+          
+          {/* Selection Highlight */}
+          <div 
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full z-0 pointer-events-none"
+            style={{
+              background: `radial-gradient(circle, ${moodColor}66 0%, ${moodColor}22 50%, transparent 70%)`,
+              filter: "blur(4px)"
+            }}
+          />
+        </div>
+      </div>
+      
       {/* Scroll wheel UI */}
       <div className="absolute bottom-24 left-0 w-full px-12">
         <div className="relative">
-          {/* Left navigation button - Fixed position */}
-          <motion.button
-            className="absolute -left-2 top-1/2 -translate-y-1/2 transform-gpu z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
-            style={{ 
-              transform: "translateY(-50%)", 
-              WebkitTransform: "translateY(-50%)",
-              position: "absolute",
-              top: "50%",
-              left: "-0.5rem"
-            }}
-            whileTap={{ scale: 0.9, opacity: 0.8 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onChangeMood('left');
-            }}
-          >
-            <ChevronLeft className="text-white w-6 h-6" />
-          </motion.button>
+          {/* Left navigation button - Fixed in absolute position */}
+          <div className="absolute -left-2 top-1/2 -translate-y-1/2 z-10">
+            <motion.button
+              className="w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20 transform-gpu"
+              whileTap={{ scale: 0.9, opacity: 0.8 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onChangeMood('left');
+              }}
+            >
+              <ChevronLeft className="text-white w-6 h-6" />
+            </motion.button>
+          </div>
           
           {/* The scroll wheel */}
           <div className="relative overflow-hidden mx-10 py-4">
-            {/* Center line indicator - removed */}
-            
             {/* Mood options container */}
             <div 
               ref={scrollContainerRef}
@@ -129,10 +167,12 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
                 return (
                   <motion.div 
                     key={`${mood}-${index}`}
+                    data-index={index}
                     className="flex flex-col items-center justify-center cursor-pointer transition-all shrink-0"
                     animate={{ 
                       opacity: isSelected ? 1 : 0.6,
                       scale: isSelected ? 1.2 : 1,
+                      y: isSelected ? -6 : 0,
                       transition: { duration: 0.3 }
                     }}
                     onClick={() => {
@@ -157,6 +197,16 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
                     >
                       {mood}
                     </motion.span>
+                    
+                    {/* Selection indicator dot */}
+                    {isSelected && (
+                      <motion.div
+                        className="w-1.5 h-1.5 rounded-full bg-white mt-1"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.1 }}
+                      />
+                    )}
                   </motion.div>
                 );
               })}
@@ -166,24 +216,19 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
             </div>
           </div>
           
-          {/* Right navigation button - Fixed position */}
-          <motion.button
-            className="absolute -right-2 top-1/2 -translate-y-1/2 transform-gpu z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
-            style={{ 
-              transform: "translateY(-50%)", 
-              WebkitTransform: "translateY(-50%)",
-              position: "absolute",
-              top: "50%", 
-              right: "-0.5rem"
-            }}
-            whileTap={{ scale: 0.9, opacity: 0.8 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onChangeMood('right');
-            }}
-          >
-            <ChevronRight className="text-white w-6 h-6" />
-          </motion.button>
+          {/* Right navigation button - Fixed in absolute position */}
+          <div className="absolute -right-2 top-1/2 -translate-y-1/2 z-10">
+            <motion.button
+              className="w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20 transform-gpu"
+              whileTap={{ scale: 0.9, opacity: 0.8 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onChangeMood('right');
+              }}
+            >
+              <ChevronRight className="text-white w-6 h-6" />
+            </motion.button>
+          </div>
         </div>
       </div>
       
@@ -203,7 +248,8 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
         ))}
       </div>
       
-      <style>{`
+      <style>
+        {`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
         }
@@ -211,7 +257,8 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
