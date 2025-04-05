@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { getMoodColor } from '@/utils/moodUtils';
 import MoodDisplay from './mood/MoodDisplay';
 import MoodButton from './mood/MoodButton';
@@ -16,6 +16,7 @@ interface MoodMeterProps {
 
 const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
   const wheelRef = useRef<HTMLDivElement>(null);
+  const [hoveredMoodIndex, setHoveredMoodIndex] = useState<number | null>(null);
   
   const {
     selectedMoodIndex,
@@ -32,7 +33,10 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
 
   // Calculate selected mood based on index
   const selectedMood = moods[selectedMoodIndex];
-  const moodColor = getMoodColor(selectedMood);
+  // Use hovered mood color if available, otherwise use selected mood color
+  const moodColor = hoveredMoodIndex !== null 
+    ? getMoodColor(moods[hoveredMoodIndex]) 
+    : getMoodColor(selectedMood);
 
   return (
     <motion.div 
@@ -50,6 +54,8 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
           className="bg-black/40 backdrop-blur-lg rounded-2xl shadow-xl border border-white/10 overflow-hidden p-6"
           style={{
             boxShadow: `0 8px 32px ${moodColor}33`,
+            background: `radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.6) 100%)`,
+            transition: 'box-shadow 0.5s ease, background 0.5s ease',
           }}
         >
           {/* App name */}
@@ -77,6 +83,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
             handleTouchStart={handleTouchStart}
             handleTouchMove={handleTouchMove}
             handleTouchEnd={handleTouchEnd}
+            onMoodHover={setHoveredMoodIndex}
           />
         </motion.div>
       </div>

@@ -13,6 +13,7 @@ interface MoodSelectorProps {
   handleTouchStart: (e: React.TouchEvent | React.MouseEvent) => void;
   handleTouchMove: (e: React.TouchEvent | React.MouseEvent) => void;
   handleTouchEnd: () => void;
+  onMoodHover: (index: number | null) => void;
 }
 
 const MoodSelector: React.FC<MoodSelectorProps> = ({
@@ -23,7 +24,8 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
   wheelRef,
   handleTouchStart,
   handleTouchMove,
-  handleTouchEnd
+  handleTouchEnd,
+  onMoodHover
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -66,7 +68,10 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
       onMouseDown={handleTouchStart} 
       onMouseMove={handleTouchMove as any} 
       onMouseUp={handleTouchEnd} 
-      onMouseLeave={handleTouchEnd}
+      onMouseLeave={() => {
+        handleTouchEnd();
+        onMoodHover(null);
+      }}
     >
       {/* Wheel background with gradient */}
       <div className="absolute bottom-0 left-0 w-full h-52 bg-gradient-to-t from-white/20 via-white/10 to-transparent rounded-t-2xl">
@@ -175,6 +180,8 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
                       y: isSelected ? -6 : 0,
                       transition: { duration: 0.3 }
                     }}
+                    onMouseEnter={() => onMoodHover(actualIndex)}
+                    onMouseLeave={() => onMoodHover(null)}
                     onClick={() => {
                       const adjustedIndex = (actualIndex >= 0) ? actualIndex : moods.length + actualIndex;
                       onMoodSelect(adjustedIndex);
@@ -244,6 +251,8 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
             }}
             whileHover={{ scale: 1.3 }}
             onClick={() => onMoodSelect(i)}
+            onMouseEnter={() => onMoodHover(i)}
+            onMouseLeave={() => onMoodHover(null)}
           />
         ))}
       </div>
