@@ -141,7 +141,7 @@ const Navbar = () => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Login
-                  </Button>
+                  </Link>
                 )
               )}
             </div>
