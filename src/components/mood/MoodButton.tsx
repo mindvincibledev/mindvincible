@@ -9,6 +9,8 @@ interface MoodButtonProps {
 }
 
 const MoodButton: React.FC<MoodButtonProps> = ({ selectedMood, onSelectMood }) => {
+  const moodColor = getMoodColor(selectedMood);
+  
   const playClickSound = () => {
     const audio = new Audio('/click.mp3');
     audio.volume = 0.2;
