@@ -2,14 +2,14 @@
 // Helper function to get color based on mood
 export const getMoodColor = (mood: string): string => {
   const moodColors: Record<string, string> = {
-    'Happy': '#FFD700',      // Bright gold
-    'Excited': '#FF8A48',    // Vibrant orange (as shown in reference)
-    'Calm': '#3DFDFF',       // Bright cyan
-    'Sad': '#6A7FDB',        // Blue-purple
-    'Angry': '#FF5757',      // Bright red
-    'Anxious': '#BDC0FF',    // Soft lavender
+    'Happy': '#FFD36B',     // Enhanced bright yellow
+    'Excited': '#FF8A48',   // Vibrant orange
+    'Calm': '#3DFDFF',      // Bright cyan
+    'Sad': '#7B84DB',       // Blue-purple
+    'Angry': '#FF5757',     // Bright red
+    'Anxious': '#BDC0FF',   // Soft lavender
     'Overwhelmed': '#F5DF4D', // Rich yellow
-    'neutral': '#D5D5F1'     // Default lavender
+    'neutral': '#D5D5F1'    // Default lavender
   };
   return moodColors[mood] || moodColors.neutral;
 };
