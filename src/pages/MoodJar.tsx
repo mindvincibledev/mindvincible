@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Paintbrush, Save, RotateCcw } from 'lucide-react';
@@ -234,19 +235,25 @@ const MoodJar = () => {
                 
                 <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
                   <Button
-                    className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-white flex items-center gap-2"
+                    className="bg-black/40 hover:bg-black/60 text-white border border-white/20 backdrop-blur-sm
+                             transition-all duration-300 hover:scale-105 group"
                     onClick={handleReset}
                   >
-                    <RotateCcw size={18} />
+                    <RotateCcw size={18} className="group-hover:rotate-180 transition-transform duration-500"/>
                     Reset
                   </Button>
                   
                   <Button
-                    className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] hover:opacity-90 text-black font-medium flex items-center gap-2"
+                    className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] hover:opacity-90
+                             text-black font-medium flex items-center gap-2 shadow-lg
+                             transition-all duration-300 hover:scale-105 hover:shadow-[#3DFDFF]/20 
+                             relative overflow-hidden group"
                     onClick={handleSave}
                     disabled={isSaving}
                   >
-                    <Save size={18} />
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent 
+                                  -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                    <Save size={18} className="group-hover:scale-110 transition-transform duration-300"/>
                     {isSaving ? 'Saving...' : 'Complete Activity'}
                   </Button>
                 </div>

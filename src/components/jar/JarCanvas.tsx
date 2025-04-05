@@ -11,25 +11,33 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
   ({ selectedColor, selectedEmotion, drawJarOutline }, ref) => {
     const [isDrawing, setIsDrawing] = useState(false);
     const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
+    const [isCanvasInitialized, setIsCanvasInitialized] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasSize = { width: 300, height: 400 };
 
     // Forward the ref to parent component
     useImperativeHandle(ref, () => canvasRef.current as HTMLCanvasElement);
 
+    // Initialize canvas once on mount
     useEffect(() => {
       const canvas = canvasRef.current;
-      if (!canvas) return;
+      if (!canvas || isCanvasInitialized) return;
 
       const context = canvas.getContext('2d');
       if (!context) return;
 
-      // Initial setup - clear canvas
+      // Initial setup - clear canvas and draw jar outline
       context.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw jar outline
       drawJarOutline(context, canvas.width, canvas.height);
+      setIsCanvasInitialized(true);
       
+    }, [drawJarOutline, isCanvasInitialized]);
+
+    // Setup event listeners
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
       // Setup for mobile
       const setupTouch = () => {
         canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -57,7 +65,7 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
         canvas.removeEventListener('mouseup', handleMouseUp);
         canvas.removeEventListener('mouseleave', handleMouseUp);
       };
-    }, [drawJarOutline]);
+    }, []);
 
     const handleTouchStart = (e: TouchEvent) => {
       e.preventDefault();
@@ -162,11 +170,20 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
           ref={canvasRef}
           width={canvasSize.width}
           height={canvasSize.height}
-          className="border rounded-md touch-none bg-white"
+          className="border rounded-md touch-none bg-white shadow-lg"
         />
-        <p className="text-white text-center text-sm mt-4">
-          Currently coloring with: <span className="font-bold">{selectedEmotion}</span>
-        </p>
+        <div className="flex items-center justify-center mt-4 gap-2">
+          <div 
+            className="h-5 w-5 rounded-full transition-all duration-300"
+            style={{ 
+              backgroundColor: selectedColor,
+              boxShadow: `0 0 10px ${selectedColor}90` 
+            }}
+          />
+          <p className="text-white text-center text-sm">
+            Currently coloring with: <span className="font-bold">{selectedEmotion}</span>
+          </p>
+        </div>
       </div>
     );
   }
