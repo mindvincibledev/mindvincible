@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Paintbrush, Save, RotateCcw } from 'lucide-react';
@@ -17,6 +16,7 @@ const MoodJar = () => {
   const [selectedEmotion, setSelectedEmotion] = useState<string>('Happy');
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -32,6 +32,33 @@ const MoodJar = () => {
     '#F5DF4D', // Yellow (Disgusted - using yellow again)
     '#FC68B3', // Pink (Love)
   ];
+
+  // Effect to check if user is available and get user ID
+  useEffect(() => {
+    const checkUser = async () => {
+      // If user is available from AuthContext, use that ID
+      if (user) {
+        setUserId(user.id);
+        return;
+      }
+
+      // Otherwise, try to get the session directly from supabase
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        setUserId(session.user.id);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Authentication required",
+          description: "Please log in to use the Mood Jar",
+        });
+        navigate("/login");
+      }
+    };
+
+    checkUser();
+  }, [user, navigate, toast]);
 
   const handleColorSelect = (color: string, emotion: string) => {
     setSelectedColor(color);
@@ -84,7 +111,7 @@ const MoodJar = () => {
   };
 
   const handleSave = async () => {
-    if (!user) {
+    if (!userId) {
       toast({
         variant: "destructive",
         title: "Authentication required",
@@ -103,8 +130,20 @@ const MoodJar = () => {
         throw new Error("Could not get image data from canvas");
       }
       
+      // First, verify the user exists in the users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', userId)
+        .single();
+      
+      if (userError || !userData) {
+        console.error("User verification error:", userError);
+        throw new Error("Could not verify user in database");
+      }
+      
       // Generate a unique filename
-      const fileName = generateJarFilename(user.id);
+      const fileName = generateJarFilename(userId);
       
       // Upload the image to Supabase storage
       const { data: uploadData, error: uploadError } = await supabase
@@ -130,11 +169,11 @@ const MoodJar = () => {
         throw new Error("Failed to get public URL for uploaded image");
       }
 
-      // Insert into mood_jar_table - use the id as is since we're not changing the schema
+      // Insert into mood_jar_table with the verified user ID
       const { error: dbError } = await supabase
         .from('mood_jar_table')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           image_path: urlData.publicUrl
         });
 
@@ -161,18 +200,6 @@ const MoodJar = () => {
       setIsSaving(false);
     }
   };
-
-  // Effect to check if user is authenticated when component mounts
-  useEffect(() => {
-    if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Authentication required",
-        description: "Please log in to use the Mood Jar",
-      });
-      navigate("/login");
-    }
-  }, [user, navigate, toast]);
 
   return (
     <BackgroundWithEmojis>
