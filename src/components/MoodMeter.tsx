@@ -45,53 +45,42 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
       exit={{ opacity: 0 }}
       className="w-full h-full text-center flex flex-col items-center justify-center px-4 py-8"
     >
-      {/* Full screen background that changes with mood - no gradient, solid color with slight transparency */}
-      <motion.div 
-        className="absolute inset-0 -z-10"
-        animate={{ 
-          backgroundColor: moodColor
-        }}
-        transition={{ duration: 0.3 }}
-        style={{ opacity: 0.9 }} // Higher opacity for stronger colors
-      />
-      
-      <div className="relative w-full max-w-md z-10">
-        {/* Card container */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+      {/* Container with mood color instead of full screen background */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative w-full max-w-md z-10 rounded-2xl overflow-hidden p-6"
+        style={{ backgroundColor: moodColor }}
+      >
+        {/* App name */}
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="rounded-2xl overflow-hidden p-6"
+          className="text-xl font-bold text-white mb-8"
         >
-          {/* App name */}
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-xl font-bold text-white mb-8"
-          >
-            M(in)dvincible
-          </motion.h1>
-          
-          {/* Mood Display Component */}
-          <MoodDisplay selectedMood={selectedMood} />
-          
-          {/* Mood Selection Button */}
-          <MoodButton selectedMood={selectedMood} onSelectMood={onMoodSelect} />
-          
-          {/* Horizontally scrollable Mood Selector Component */}
-          <MoodSelector 
-            moods={moods}
-            selectedMoodIndex={selectedMoodIndex}
-            onMoodSelect={setSelectedMoodIndex}
-            onChangeMood={changeMood}
-            wheelRef={wheelRef}
-            handleTouchStart={handleTouchStart}
-            handleTouchMove={handleTouchMove}
-            handleTouchEnd={handleTouchEnd}
-            onMoodHover={setHoveredMoodIndex}
-          />
-        </motion.div>
-      </div>
+          M(in)dvincible
+        </motion.h1>
+        
+        {/* Mood Display Component */}
+        <MoodDisplay selectedMood={selectedMood} />
+        
+        {/* Mood Selection Button */}
+        <MoodButton selectedMood={selectedMood} onSelectMood={onMoodSelect} />
+        
+        {/* Horizontally scrollable Mood Selector Component */}
+        <MoodSelector 
+          moods={moods}
+          selectedMoodIndex={selectedMoodIndex}
+          onMoodSelect={setSelectedMoodIndex}
+          onChangeMood={changeMood}
+          wheelRef={wheelRef}
+          handleTouchStart={handleTouchStart}
+          handleTouchMove={handleTouchMove}
+          handleTouchEnd={handleTouchEnd}
+          onMoodHover={setHoveredMoodIndex}
+        />
+      </motion.div>
     </motion.div>
   );
 };
