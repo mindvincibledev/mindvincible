@@ -1,3 +1,4 @@
+
 // components/Wave.tsx
 const Wave = () => {
   return (

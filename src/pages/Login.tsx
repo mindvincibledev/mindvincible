@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Lock, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { WavyBackground } from '@/components/ui/wavy-background';
 import { useAuth } from '@/context/AuthContext';
 import BackgroundWithEmojis from "@/components/BackgroundWithEmojis";
 
@@ -47,19 +46,6 @@ const Login = () => {
 
   return (
     <BackgroundWithEmojis>
-    <div className="min-h-screen flex flex-col bg-black relative overflow-hidden">
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <WavyBackground 
-          colors={["#FF8A48", "#D5D5F1", "#3DFDFF", "#F5DF4D", "#FC68B3", "#2AC20E"]} 
-          waveWidth={50} 
-          backgroundFill="black" 
-          blur={10} 
-          speed="fast" 
-          waveOpacity={0.5} 
-          className="w-full h-full" 
-        />
-      </div>
-      
       <div className="flex-grow flex items-center justify-center px-4 py-12 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }} 
@@ -143,7 +129,6 @@ const Login = () => {
           </div>
         </motion.div>
       </div>
-    </div>
     </BackgroundWithEmojis>
   );
 };
