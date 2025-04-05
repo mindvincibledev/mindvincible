@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
@@ -279,6 +278,9 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Background gradient for better visibility */}
+      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-white/20 to-transparent z-[1] pointer-events-none"></div>
+      
       <div className="absolute inset-0 z-0 overflow-hidden">
         <WavyBackground 
           colors={["#FF8A48", "#D5D5F1", "#3DFDFF", "#F5DF4D", "#FC68B3", "#2AC20E"]} 
@@ -301,22 +303,13 @@ const Dashboard = () => {
               <p className="text-white mt-2">Welcome back, {user.email}</p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div>
               <Link to="/mood-entry">
                 <Button className="flex items-center gap-2 bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:opacity-90 text-white">
                   <PlusCircle size={18} />
                   <span>New Mood Entry</span>
                 </Button>
               </Link>
-              
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 border-[#3DFDFF] text-[#3DFDFF] hover:bg-[#3DFDFF]/10" 
-                onClick={handleSignOut}
-              >
-                <LogOut size={18} />
-                <span>Sign Out</span>
-              </Button>
             </div>
           </div>
           
