@@ -94,13 +94,13 @@ const RecentMoodJars = ({ userId }: { userId: string }) => {
             {moodJars.map((jar) => (
               <CarouselItem key={jar.id} className="md:basis-1/2 lg:basis-1/3">
                 <div className="p-1">
-                  <div className="bg-black/40 rounded-lg overflow-hidden flex flex-col items-center p-2">
+                  <div className="bg-white/90 rounded-lg overflow-hidden flex flex-col items-center p-2 shadow-md">
                     <img 
                       src={jar.image_path} 
                       alt="Mood Jar" 
                       className="w-full h-48 object-contain mb-2 rounded"
                     />
-                    <p className="text-sm text-[#D5D5F1]">
+                    <p className="text-sm text-gray-600">
                       {new Date(jar.created_at).toLocaleDateString()}
                     </p>
                   </div>
