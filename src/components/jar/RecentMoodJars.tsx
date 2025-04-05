@@ -26,7 +26,7 @@ const RecentMoodJars = ({ userId }: { userId: string }) => {
         
         const { data, error } = await supabase
           .from('mood_jar_table')
-          .select('*')
+          .select('id, image_path, created_at')
           .eq('user_id', userId)
           .order('created_at', { ascending: false })
           .limit(5);
