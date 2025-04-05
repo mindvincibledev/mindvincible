@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Jar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import DailyMoodChart from '@/components/charts/DailyMoodChart';
@@ -297,12 +296,21 @@ const Dashboard = () => {
                   <StreakCounter userId={user.id} />
                 </div>
                 
-                <Link to="/mood-entry" className="w-full sm:w-auto">
-                  <Button className="flex items-center gap-2 bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:opacity-90 text-white w-full">
-                    <PlusCircle size={18} />
-                    <span>New Mood Entry</span>
-                  </Button>
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                  <Link to="/mood-entry" className="w-full sm:w-auto">
+                    <Button className="flex items-center gap-2 bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:opacity-90 text-white w-full">
+                      <PlusCircle size={18} />
+                      <span>New Mood Entry</span>
+                    </Button>
+                  </Link>
+                  
+                  <Link to="/mood-jar" className="w-full sm:w-auto">
+                    <Button className="flex items-center gap-2 bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] hover:opacity-90 text-black font-medium w-full">
+                      <Jar size={18} />
+                      <span>Mood Jar</span>
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
             

@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import MoodEntry from "./pages/MoodEntry";
+import MoodJar from "./pages/MoodJar";
 import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
@@ -43,6 +44,11 @@ const AppRoutes = () => {
       <Route path="/mood-entry" element={
         <ProtectedRoute>
           <MoodEntry />
+        </ProtectedRoute>
+      } />
+      <Route path="/mood-jar" element={
+        <ProtectedRoute>
+          <MoodJar />
         </ProtectedRoute>
       } />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

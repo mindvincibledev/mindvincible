@@ -47,6 +47,27 @@ export type Database = {
           },
         ]
       }
+      mood_jar_table: {
+        Row: {
+          created_at: string
+          id: string
+          image_path: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_path: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_path?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           address: string | null
