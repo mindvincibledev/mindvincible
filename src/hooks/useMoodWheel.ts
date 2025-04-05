@@ -62,7 +62,7 @@ export const useMoodWheel = ({
     }
   };
 
-  // Handle changing the mood
+  // Handle changing the mood with proper centralization
   const changeMood = (direction: 'left' | 'right') => {
     if (isAnimating) return;
     
@@ -79,6 +79,19 @@ export const useMoodWheel = ({
     playScrollSound();
 
     // Reset animation flag after transition completes
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 300);
+  };
+
+  // Alternative direct selection handler to ensure proper centering
+  const handleDirectMoodSelect = (index: number) => {
+    if (isAnimating || index === selectedMoodIndex) return;
+    
+    setIsAnimating(true);
+    setSelectedMoodIndex(index);
+    playScrollSound();
+    
     setTimeout(() => {
       setIsAnimating(false);
     }, 300);
@@ -185,7 +198,7 @@ export const useMoodWheel = ({
 
   return {
     selectedMoodIndex,
-    setSelectedMoodIndex,
+    setSelectedMoodIndex: handleDirectMoodSelect,
     isAnimating,
     changeMood,
     handleTouchStart,

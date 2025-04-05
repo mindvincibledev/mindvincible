@@ -87,21 +87,29 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
       {/* Scroll wheel UI */}
       <div className="absolute bottom-24 left-0 w-full px-12">
         <div className="relative">
-          {/* Left navigation button */}
+          {/* Left navigation button - Fixed position */}
           <motion.button
-            className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+            className="absolute -left-2 top-1/2 -translate-y-1/2 transform-gpu z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+            style={{ 
+              transform: "translateY(-50%)", 
+              WebkitTransform: "translateY(-50%)",
+              position: "absolute",
+              top: "50%",
+              left: "-0.5rem"
+            }}
             whileTap={{ scale: 0.9, opacity: 0.8 }}
             onClick={(e) => {
               e.stopPropagation();
               onChangeMood('left');
             }}
-            style={{ transform: "translateY(-50%)", WebkitTransform: "translateY(-50%)" }} // Fixed position styling
           >
             <ChevronLeft className="text-white w-6 h-6" />
           </motion.button>
           
           {/* The scroll wheel */}
           <div className="relative overflow-hidden mx-10 py-4">
+            {/* Center line indicator - removed */}
+            
             {/* Mood options container */}
             <div 
               ref={scrollContainerRef}
@@ -158,15 +166,21 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
             </div>
           </div>
           
-          {/* Right navigation button */}
+          {/* Right navigation button - Fixed position */}
           <motion.button
-            className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+            className="absolute -right-2 top-1/2 -translate-y-1/2 transform-gpu z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+            style={{ 
+              transform: "translateY(-50%)", 
+              WebkitTransform: "translateY(-50%)",
+              position: "absolute",
+              top: "50%", 
+              right: "-0.5rem"
+            }}
             whileTap={{ scale: 0.9, opacity: 0.8 }}
             onClick={(e) => {
               e.stopPropagation();
               onChangeMood('right');
             }}
-            style={{ transform: "translateY(-50%)", WebkitTransform: "translateY(-50%)" }} // Fixed position styling
           >
             <ChevronRight className="text-white w-6 h-6" />
           </motion.button>
@@ -192,6 +206,10 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
       <style>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </div>
