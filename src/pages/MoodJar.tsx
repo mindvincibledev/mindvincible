@@ -12,8 +12,6 @@ import ColorPalette from '@/components/jar/ColorPalette';
 import { getBase64FromCanvas, generateJarFilename } from '@/utils/jarUtils';
 
 const MoodJar = () => {
-  const [selectedColor, setSelectedColor] = useState<string>('#F5DF4D');
-  const [selectedEmotion, setSelectedEmotion] = useState<string>('Happy');
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
