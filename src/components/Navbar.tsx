@@ -54,7 +54,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-[#222222] shadow-md">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold text-white">
+          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
             M(in)dvincible
           </Link>
 
@@ -76,14 +76,14 @@ const Navbar = () => {
           <div className="hidden md:flex md:items-center">
             {user ? (
               <>
-                <Link to="/dashboard" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4">
+                <Link to="/dashboard" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
                   Dashboard
                 </Link>
-                <Link to="/mood-entry" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4">
+                <Link to="/mood-entry" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
                   Mood Entry
                 </Link>
                 <Button 
-                  className="ml-4 flex items-center gap-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-white" 
+                  className="ml-4 flex items-center gap-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-white transition-transform hover:scale-105" 
                   onClick={handleLogout}
                 >
                   <LogOut className="h-4 w-4" />
@@ -93,7 +93,7 @@ const Navbar = () => {
             ) : (
               location.pathname !== '/login' && (
                 <Link to="/login">
-                  <Button variant="default" className="ml-4">
+                  <Button variant="default" className="ml-4 transition-transform hover:scale-105">
                     Login
                   </Button>
                 </Link>
@@ -110,20 +110,20 @@ const Navbar = () => {
                 <>
                   <Link 
                     to="/dashboard" 
-                    className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-colors"
+                    className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Dashboard
                   </Link>
                   <Link 
                     to="/mood-entry" 
-                    className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-colors"
+                    className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Mood Entry
                   </Link>
                   <button 
-                    className="px-4 py-2 text-left text-white bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 rounded-md transition-colors flex items-center"
+                    className="px-4 py-2 text-left text-white bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 rounded-md transition-all hover:scale-105 flex items-center"
                     onClick={() => {
                       handleLogout();
                       setIsMenuOpen(false);
@@ -137,7 +137,7 @@ const Navbar = () => {
                 location.pathname !== '/login' && (
                   <Link 
                     to="/login" 
-                    className="px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-md transition-colors"
+                    className="px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-md transition-all hover:scale-105"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Login
