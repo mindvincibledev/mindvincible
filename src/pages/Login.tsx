@@ -8,6 +8,7 @@ import { Mail, Lock, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WavyBackground } from '@/components/ui/wavy-background';
 import { useAuth } from '@/context/AuthContext';
+import BackgroundWithEmojis from "@/components/BackgroundWithEmojis";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -45,6 +46,7 @@ const Login = () => {
   };
 
   return (
+    <BackgroundWithEmojis>
     <div className="min-h-screen flex flex-col bg-black relative overflow-hidden">
       <div className="absolute inset-0 z-0 overflow-hidden">
         <WavyBackground 
@@ -142,6 +144,7 @@ const Login = () => {
         </motion.div>
       </div>
     </div>
+    </BackgroundWithEmojis>
   );
 };
 
