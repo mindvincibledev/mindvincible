@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Happy, Flame, Cloud, Eye, Zap, X, Heart } from 'lucide-react';
+import { Smile, Flame, Cloud, Eye, Zap, X, Heart } from 'lucide-react';
 
 interface ColorPaletteProps {
   colors: string[];
@@ -10,7 +10,7 @@ interface ColorPaletteProps {
 
 // Map of emotions associated with each color
 const colorEmotions = [
-  { color: '#F5DF4D', name: 'Happy', icon: <Happy className="h-5 w-5" /> },
+  { color: '#F5DF4D', name: 'Happy', icon: <Smile className="h-5 w-5" /> },
   { color: '#FF8A48', name: 'Angry', icon: <Flame className="h-5 w-5" /> },
   { color: '#3DFDFF', name: 'Sad', icon: <Cloud className="h-5 w-5" /> },
   { color: '#D5D5F1', name: 'Fearful', icon: <Eye className="h-5 w-5" /> },
