@@ -44,10 +44,6 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="w-full h-full text-center flex flex-col items-center justify-center px-4 py-8"
-      style={{
-        background: `linear-gradient(145deg, ${moodColor} 0%, ${moodColor}CC 100%)`,
-        transition: 'background 0.5s ease',
-      }}
     >
       <div className="relative w-full max-w-md z-10">
         {/* Card container similar to the mood details screen */}
@@ -55,16 +51,19 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="overflow-hidden p-6"
+          className="bg-black/40 backdrop-blur-lg rounded-2xl shadow-xl border border-white/10 overflow-hidden p-6"
           style={{
-            transition: 'background 0.5s ease',
+            boxShadow: `0 8px 32px ${moodColor}80`,
+            background: `radial-gradient(circle at center, ${moodColor}25 0%, rgba(0,0,0,0.6) 90%)`,
+            transition: 'box-shadow 0.5s ease, background 0.5s ease',
+            borderColor: `${moodColor}50`,
           }}
         >
           {/* App name */}
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 0.7, y: 0 }}
-            className="text-xl font-bold text-white/80 mb-8"
+            className="text-xl font-bold text-white/70 mb-8"
           >
             M(in)dvincible
           </motion.h1>
