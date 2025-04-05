@@ -96,6 +96,8 @@ const MoodJar = () => {
     try {
       setIsSaving(true);
       
+      console.log("Current user:", user); // Debug: Log user object to see structure
+      
       // Get blob image data from canvas
       const blobImage = await getBase64FromCanvas(canvasRef.current);
       if (!blobImage) {
@@ -127,11 +129,15 @@ const MoodJar = () => {
         throw new Error("Failed to get public URL for uploaded image");
       }
 
-      // Use a direct insert with explicit typing
+      // Make sure we're using the correct user ID field
+      const userId = user.id;
+      console.log("Using user ID for database insert:", userId); // Debug: Log the user ID being used
+      
+      // Insert into mood_jar_table with explicit user_id
       const { error: dbError } = await supabase
         .from('mood_jar_table')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           image_path: urlData.publicUrl
         });
 
@@ -158,6 +164,18 @@ const MoodJar = () => {
       setIsSaving(false);
     }
   };
+
+  // Effect to check if user is authenticated when component mounts
+  useEffect(() => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication required",
+        description: "Please log in to use the Mood Jar",
+      });
+      navigate("/login");
+    }
+  }, [user, navigate, toast]);
 
   return (
     <BackgroundWithEmojis>
