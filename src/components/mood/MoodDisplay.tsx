@@ -8,8 +8,6 @@ interface MoodDisplayProps {
 }
 
 const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
-  const moodColor = getMoodColor(selectedMood);
-  
   return (
     <div className="flex-1 flex flex-col justify-center items-center w-full px-4 pt-4 pb-6 z-10">
       <motion.h2 
@@ -42,61 +40,12 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
             duration: 0.4,
             ease: "easeOut"
           }} 
-          className="relative text-5xl md:text-6xl lg:text-7xl font-bold text-white my-4 md:my-6 tracking-tight" 
+          className="relative text-5xl md:text-6xl lg:text-7xl font-bold text-white my-4 md:my-6 tracking-tight"
           style={{
-            textShadow: `0 2px 15px ${moodColor}80`,
-            color: `white`
+            textShadow: `0 2px 10px rgba(0,0,0,0.3)`,
           }}
         >
           {selectedMood}
-          
-          {/* Animated circle decorative elements */}
-          <motion.div 
-            className="absolute -top-8 -left-8 w-32 h-32 rounded-full bg-white/10 blur-2xl -z-10"
-            animate={{
-              scale: [1, 1.05, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              repeatType: "reverse"
-            }}
-            style={{
-              backgroundColor: `${moodColor}30`
-            }}
-          />
-          
-          <motion.div 
-            className="absolute -bottom-8 -right-8 w-24 h-24 rounded-full bg-white/10 blur-2xl -z-10"
-            animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.2, 0.4, 0.2],
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              repeatType: "reverse",
-              delay: 1
-            }}
-            style={{
-              backgroundColor: `${moodColor}30`
-            }}
-          />
-          
-          {/* Highlight glow effect that matches the mood color */}
-          <motion.div 
-            className="absolute inset-0 blur-xl -z-20 opacity-50"
-            style={{ background: moodColor }}
-            animate={{
-              opacity: [0.4, 0.6, 0.4],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              repeatType: "reverse"
-            }}
-          />
         </motion.div>
       </AnimatePresence>
     </div>
