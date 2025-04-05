@@ -9,22 +9,22 @@ interface JarCanvasProps {
 
 const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
   ({ selectedColor, selectedEmotion, drawJarOutline }, ref) => {
-    const [isDrawing, setIsDrawing] = useState(false);
-    const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
-    const [isCanvasInitialized, setIsCanvasInitialized] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [isCanvasInitialized, setIsCanvasInitialized] = useState(false);
     const canvasSize = { width: 300, height: 400 };
     
-    // Track current drawing color to avoid unexpected color changes
-    const currentColorRef = useRef(selectedColor);
+    // Store current color and previous position for drawing
+    const currentColor = useRef(selectedColor);
+    const lastPosition = useRef({ x: 0, y: 0 });
+    
+    // Forward the ref to parent component
+    useImperativeHandle(ref, () => canvasRef.current as HTMLCanvasElement);
 
     // Update the color ref when selectedColor changes
     useEffect(() => {
-      currentColorRef.current = selectedColor;
+      currentColor.current = selectedColor;
     }, [selectedColor]);
-
-    // Forward the ref to parent component
-    useImperativeHandle(ref, () => canvasRef.current as HTMLCanvasElement);
 
     // Initialize canvas once on mount
     useEffect(() => {
@@ -38,112 +38,28 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       context.clearRect(0, 0, canvas.width, canvas.height);
       drawJarOutline(context, canvas.width, canvas.height);
       setIsCanvasInitialized(true);
-      
     }, [drawJarOutline, isCanvasInitialized]);
 
-    // Setup event listeners
-    useEffect(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      // Setup for mobile
-      const setupTouch = () => {
-        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-        canvas.addEventListener('touchend', handleTouchEnd);
-      };
-      
-      // Setup for desktop
-      const setupMouse = () => {
-        canvas.addEventListener('mousedown', handleMouseDown);
-        canvas.addEventListener('mousemove', handleMouseMove);
-        canvas.addEventListener('mouseup', handleMouseUp);
-        canvas.addEventListener('mouseleave', handleMouseUp);
-      };
-      
-      setupTouch();
-      setupMouse();
-      
-      return () => {
-        canvas.removeEventListener('touchstart', handleTouchStart);
-        canvas.removeEventListener('touchmove', handleTouchMove);
-        canvas.removeEventListener('touchend', handleTouchEnd);
-        canvas.removeEventListener('mousedown', handleMouseDown);
-        canvas.removeEventListener('mousemove', handleMouseMove);
-        canvas.removeEventListener('mouseup', handleMouseUp);
-        canvas.removeEventListener('mouseleave', handleMouseUp);
-      };
-    }, []);
-
-    const handleTouchStart = (e: TouchEvent) => {
-      e.preventDefault();
+    // Handle starting a drawing action
+    const startDrawing = (x: number, y: number) => {
       setIsDrawing(true);
-      
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      
-      const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      
-      setLastPos({ x, y });
+      lastPosition.current = { x, y };
       drawDot(x, y);
     };
 
-    const handleTouchMove = (e: TouchEvent) => {
+    // Handle moving while drawing
+    const moveDrawing = (x: number, y: number) => {
       if (!isDrawing) return;
-      e.preventDefault();
-      
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      
-      const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      
-      drawLine(lastPos.x, lastPos.y, x, y);
-      setLastPos({ x, y });
+      drawLine(lastPosition.current.x, lastPosition.current.y, x, y);
+      lastPosition.current = { x, y };
     };
 
-    const handleTouchEnd = () => {
+    // Handle end of drawing
+    const endDrawing = () => {
       setIsDrawing(false);
     };
 
-    // Improved mouse drawing for continuous strokes
-    const handleMouseDown = (e: MouseEvent) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      
-      setIsDrawing(true);
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      setLastPos({ x, y });
-      drawDot(x, y);
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      // Only proceed if we're in drawing mode
-      if (!isDrawing) return;
-      
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      drawLine(lastPos.x, lastPos.y, x, y);
-      setLastPos({ x, y });
-    };
-
-    const handleMouseUp = () => {
-      setIsDrawing(false);
-    };
-
+    // Draw a dot at the specified position
     const drawDot = (x: number, y: number) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -151,13 +67,13 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       const context = canvas.getContext('2d');
       if (!context) return;
       
-      // Use the current color reference to ensure consistency
-      context.fillStyle = currentColorRef.current;
+      context.fillStyle = currentColor.current;
       context.beginPath();
       context.arc(x, y, 10, 0, Math.PI * 2);
       context.fill();
     };
 
+    // Draw a line between two points
     const drawLine = (fromX: number, fromY: number, toX: number, toY: number) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -165,15 +81,100 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       const context = canvas.getContext('2d');
       if (!context) return;
       
-      // Use the current color reference to ensure consistency
-      context.strokeStyle = currentColorRef.current;
+      context.strokeStyle = currentColor.current;
       context.lineWidth = 20;
       context.lineCap = 'round';
+      context.lineJoin = 'round';
+      
       context.beginPath();
       context.moveTo(fromX, fromY);
       context.lineTo(toX, toY);
       context.stroke();
     };
+
+    // Touch event handlers
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      // Touch events
+      const handleTouchStart = (e: TouchEvent) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        startDrawing(x, y);
+      };
+
+      const handleTouchMove = (e: TouchEvent) => {
+        e.preventDefault();
+        if (!isDrawing) return;
+        
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        moveDrawing(x, y);
+      };
+
+      const handleTouchEnd = () => {
+        endDrawing();
+      };
+
+      canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+      canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+      canvas.addEventListener('touchend', handleTouchEnd);
+
+      return () => {
+        canvas.removeEventListener('touchstart', handleTouchStart);
+        canvas.removeEventListener('touchmove', handleTouchMove);
+        canvas.removeEventListener('touchend', handleTouchEnd);
+      };
+    }, [isDrawing]);
+
+    // Mouse event handlers
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      // Mouse events
+      const handleMouseDown = (e: MouseEvent) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        startDrawing(x, y);
+      };
+
+      const handleMouseMove = (e: MouseEvent) => {
+        if (!isDrawing) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        moveDrawing(x, y);
+      };
+
+      const handleMouseUp = () => {
+        endDrawing();
+      };
+
+      const handleMouseLeave = () => {
+        endDrawing();
+      };
+
+      canvas.addEventListener('mousedown', handleMouseDown);
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('mouseup', handleMouseUp);
+      canvas.addEventListener('mouseleave', handleMouseLeave);
+
+      return () => {
+        canvas.removeEventListener('mousedown', handleMouseDown);
+        canvas.removeEventListener('mousemove', handleMouseMove);
+        canvas.removeEventListener('mouseup', handleMouseUp);
+        canvas.removeEventListener('mouseleave', handleMouseLeave);
+      };
+    }, [isDrawing]);
 
     return (
       <div className="flex flex-col items-center">
