@@ -51,7 +51,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'navbar-scrolled' : 'navbar-transparent'}`}>
+    <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white shadow-md">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold text-primary">
@@ -76,10 +76,10 @@ const Navbar = () => {
           <div className="hidden md:flex md:items-center">
             {user ? (
               <>
-                <Link to="/dashboard" className="text-foreground hover:text-primary mx-4">
+                <Link to="/dashboard" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4">
                   Dashboard
                 </Link>
-                <Link to="/mood-entry" className="text-foreground hover:text-primary mx-4">
+                <Link to="/mood-entry" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4">
                   Mood Entry
                 </Link>
                 <Button 
@@ -110,14 +110,14 @@ const Navbar = () => {
                 <>
                   <Link 
                     to="/dashboard" 
-                    className="px-4 py-2 hover:bg-gray-100 rounded-md transition-colors"
+                    className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Dashboard
                   </Link>
                   <Link 
                     to="/mood-entry" 
-                    className="px-4 py-2 hover:bg-gray-100 rounded-md transition-colors"
+                    className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Mood Entry
