@@ -7,6 +7,7 @@ interface MoodPosition {
   x: number;
   y: number;
   angle: number;
+  size: number;
 }
 
 interface MoodSelectorProps {
@@ -31,31 +32,45 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
   handleTouchEnd
 }) => {
   // Get mood position in the arc
-  const getMoodPosition = (index: number): MoodPosition => {
+  const getMoodPosition = (index: number, totalMoods: number): MoodPosition => {
     // Calculate the angle based on index within the semi-circle
-    const totalAngle = 180; // semi-circle angle range
-    const anglePerItem = totalAngle / (moods.length - 1);
-    const angle = index * anglePerItem;
+    // We want the moods to be shown in an arc at the bottom of the screen
+    const startAngle = -135; // Begin from bottom left
+    const endAngle = -45; // End at bottom right
+    const angleRange = endAngle - startAngle;
+    const angleStep = angleRange / (totalMoods - 1);
+    const angle = startAngle + (index * angleStep);
 
     // Convert angle to radians for calculating x, y positions
     const angleRad = angle * Math.PI / 180;
 
-    // Calculate position on semi-circle (r=1 for unit circle)
-    const x = Math.sin(angleRad);
-    const y = -Math.cos(angleRad); // Negative because we want the arc to be at the bottom
+    // Calculate position on arc (r=1 for unit circle)
+    const x = Math.cos(angleRad);
+    const y = Math.sin(angleRad);
+
+    // Distance from selected mood (closest mood is largest)
+    const distFromSelected = Math.abs(index - selectedMoodIndex);
+    const sizeMultiplier = distFromSelected === 0 ? 1 : Math.max(0.6, 1 - (distFromSelected * 0.15));
 
     // Scale and adjust positions to fit in our container
     return {
-      x: 50 + x * 42, // 50% is center, 42% is the radius in percentage
-      y: 85 + y * 35, // 85% from top for the center of the arc
-      angle: angle - 90 // Rotate text to be tangent to the arc
+      x: 50 + x * 50, // 50% is center, 50% is the radius in percentage
+      y: 90 + y * 50, // 90% from top for the center of the arc
+      angle: angle + 90, // Rotate text to follow arc tangent
+      size: sizeMultiplier
     };
+  };
+
+  // Calculate whether a mood should be visible based on distance from selected mood
+  const isMoodVisible = (index: number) => {
+    const distFromSelected = Math.abs(index - selectedMoodIndex);
+    return distFromSelected <= 3; // Show only nearby moods
   };
 
   return (
     <div 
       ref={wheelRef} 
-      className="w-full h-48 relative mt-auto overflow-hidden pb-8" 
+      className="w-full h-60 relative mt-auto overflow-hidden" 
       onTouchStart={handleTouchStart} 
       onTouchMove={handleTouchMove as any} 
       onTouchEnd={handleTouchEnd} 
@@ -64,96 +79,86 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
       onMouseUp={handleTouchEnd} 
       onMouseLeave={handleTouchEnd}
     >
-      {/* Semi-circle background with light blur */}
-      <div className="absolute bottom-0 left-0 right-0 h-72 w-full bg-white/20 backdrop-blur-sm rounded-t-full"></div>
+      {/* Semi-circle background */}
+      <div className="absolute bottom-0 left-0 right-0 h-60 w-full bg-gradient-to-t from-white/20 to-transparent rounded-t-[50%]"></div>
       
-      {/* Moods arranged in a semi-circle */}
+      {/* Moods arranged in an arc */}
       {moods.map((mood, index) => {
-        const position = getMoodPosition(index);
+        const position = getMoodPosition(index, moods.length);
         const isSelected = index === selectedMoodIndex;
+        const isVisible = isMoodVisible(index);
+        
+        if (!isVisible) return null;
+        
         return (
-          <div 
+          <motion.div 
             key={mood} 
-            className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer" 
-            style={{
-              left: `${position.x}%`,
-              top: `${position.y}%`,
+            className="absolute transform cursor-pointer select-none"
+            initial={{ opacity: 0 }}
+            animate={{ 
               opacity: isSelected ? 1 : 0.6,
-              transition: 'all 0.3s ease',
-              transform: `translate(-50%, -50%) rotate(${position.angle}deg)`,
+              x: `${position.x}%`,
+              y: `${position.y}%`,
+              scale: position.size,
+              transition: { duration: 0.4, ease: "easeInOut" }
+            }}
+            style={{
+              transformOrigin: "center",
               zIndex: isSelected ? 10 : 5
             }} 
             onClick={() => onMoodSelect(index)}
           >
-            <div 
-              style={{
-                transform: `rotate(${-position.angle}deg)`,
-                transition: 'all 0.3s ease'
-              }} 
-              className={`relative py-1 px-2 ${isSelected ? 'bg-white/20 backdrop-blur-sm rounded-full shadow-lg' : ''}`}
-            >
+            <div className="relative">
               <span 
-                className={`text-lg md:text-xl font-bold transition-all ${isSelected ? 'text-white scale-110' : 'text-white/80'}`} 
+                className={`text-xl md:text-3xl font-bold transition-all ${isSelected ? 'text-white drop-shadow-lg' : 'text-white/70'}`}
                 style={{
-                  textShadow: isSelected ? '0 2px 4px rgba(0,0,0,0.2)' : 'none'
+                  textShadow: isSelected ? '0 2px 6px rgba(0,0,0,0.3)' : 'none'
                 }}
               >
                 {mood}
               </span>
-              {isSelected && index > 0 && (
-                <motion.div 
-                  initial={{
-                    opacity: 0,
-                    x: 5
-                  }} 
-                  animate={{
-                    opacity: 1,
-                    x: 0
-                  }} 
-                  className="absolute -left-8 top-1/2 transform -translate-y-1/2"
-                >
-                  <ChevronLeft 
-                    className="text-white cursor-pointer hover:scale-110 transition-transform" 
-                    size={24} 
+              
+              {isSelected && (
+                <div className="flex justify-between items-center absolute w-full top-1/2 -translate-y-1/2">
+                  <motion.button
+                    className="absolute -left-12 flex items-center justify-center"
+                    whileTap={{ scale: 0.9 }}
                     onClick={e => {
                       e.stopPropagation();
                       onChangeMood('left');
-                    }} 
-                  />
-                </motion.div>
-              )}
-              {isSelected && index < moods.length - 1 && (
-                <motion.div 
-                  initial={{
-                    opacity: 0,
-                    x: -5
-                  }} 
-                  animate={{
-                    opacity: 1,
-                    x: 0
-                  }} 
-                  className="absolute -right-8 top-1/2 transform -translate-y-1/2"
-                >
-                  <ChevronRight 
-                    className="text-white cursor-pointer hover:scale-110 transition-transform" 
-                    size={24} 
+                    }}
+                  >
+                    <ChevronLeft className="text-white drop-shadow-md w-8 h-8 md:w-10 md:h-10" />
+                  </motion.button>
+                  
+                  <motion.button
+                    className="absolute -right-12 flex items-center justify-center"
+                    whileTap={{ scale: 0.9 }}
                     onClick={e => {
                       e.stopPropagation();
                       onChangeMood('right');
-                    }} 
-                  />
-                </motion.div>
+                    }}
+                  >
+                    <ChevronRight className="text-white drop-shadow-md w-8 h-8 md:w-10 md:h-10" />
+                  </motion.button>
+                </div>
               )}
             </div>
-          </div>
+          </motion.div>
         );
       })}
       
-      {/* Decorative dots */}
-      <div className="absolute bottom-6 left-1/4 w-2 h-2 rounded-full bg-white/40"></div>
-      <div className="absolute bottom-8 left-1/3 w-1 h-1 rounded-full bg-white/30"></div>
-      <div className="absolute bottom-10 right-1/4 w-2 h-2 rounded-full bg-white/40"></div>
-      <div className="absolute bottom-5 right-1/3 w-1 h-1 rounded-full bg-white/30"></div>
+      {/* Progress indicator arc at the bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
+        <motion.div 
+          className="h-full bg-white"
+          style={{
+            width: `${100 / moods.length}%`,
+            marginLeft: `${(selectedMoodIndex / moods.length) * 100}%`,
+            transition: "margin-left 0.3s ease-out"
+          }}
+        />
+      </div>
     </div>
   );
 };

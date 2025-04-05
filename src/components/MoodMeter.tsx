@@ -7,6 +7,7 @@ import MoodSelector from './mood/MoodSelector';
 import { useMoodWheel } from '@/hooks/useMoodWheel';
 import { motion } from 'framer-motion';
 
+// Define the moods in a consistent order
 const moods = ['Angry', 'Sad', 'Anxious', 'Calm', 'Happy', 'Excited', 'Overwhelmed'];
 
 interface MoodMeterProps {
@@ -33,17 +34,60 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
   const selectedMood = moods[selectedMoodIndex];
   const moodColor = getMoodColor(selectedMood);
 
+  // Create dynamic background gradient based on mood
+  const gradientStyle = {
+    background: `radial-gradient(circle at center, ${moodColor} 0%, ${moodColor}dd 60%, ${moodColor}aa 100%)`,
+    transition: 'background 0.7s ease'
+  };
+
+  // Create wave effect for background
+  const waveVariants = {
+    animate: {
+      y: [0, 5, 0],
+      opacity: [0.7, 0.9, 0.7],
+      transition: {
+        duration: 8,
+        repeat: Infinity,
+        repeatType: "reverse",
+      }
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="w-full h-full text-center flex flex-col items-center justify-between relative overflow-hidden" 
-      style={{
-        background: `linear-gradient(135deg, ${moodColor} 0%, ${moodColor}99 50%, ${moodColor}66 100%)`,
-        transition: 'background 0.7s ease'
-      }}
+      style={gradientStyle}
     >
+      {/* Animated background waves */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        variants={waveVariants}
+        animate="animate"
+      >
+        <svg width="100%" height="100%" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+          <motion.path
+            d="M0,800 C300,700 400,900 1000,800 L1000,1000 L0,1000 Z"
+            fill={`${moodColor}33`}
+            animate={{
+              d: [
+                "M0,800 C300,700 400,900 1000,800 L1000,1000 L0,1000 Z",
+                "M0,850 C300,750 400,950 1000,850 L1000,1000 L0,1000 Z",
+                "M0,800 C300,700 400,900 1000,800 L1000,1000 L0,1000 Z"
+              ]
+            }}
+            transition={{
+              repeat: Infinity,
+              repeatType: "reverse",
+              duration: 10,
+              ease: "easeInOut"
+            }}
+          />
+        </svg>
+      </motion.div>
+
       {/* Mood Display Component */}
       <MoodDisplay selectedMood={selectedMood} />
       
@@ -61,27 +105,6 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
         handleTouchMove={handleTouchMove}
         handleTouchEnd={handleTouchEnd}
       />
-      
-      {/* Background decorative elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 rounded-full bg-white/5 backdrop-blur-sm"></div>
-      <div className="absolute top-40 right-10 w-16 h-16 rounded-full bg-white/5 backdrop-blur-sm"></div>
-      
-      {/* Additional decorative wave elements */}
-      <motion.div 
-        className="absolute bottom-1/2 left-0 w-full h-32 opacity-30"
-        style={{ 
-          background: `linear-gradient(to bottom, transparent, ${moodColor}50, transparent)`,
-          transform: "rotate(-3deg)"
-        }}
-        animate={{
-          translateY: [0, 10, 0],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          repeatType: "reverse"
-        }}
-      ></motion.div>
     </motion.div>
   );
 };

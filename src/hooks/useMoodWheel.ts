@@ -16,6 +16,25 @@ export const useMoodWheel = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
+  
+  // Create audio for scroll sound effect
+  const [scrollSound] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio();
+      audio.src = '/click.mp3'; // We'll add this file later
+      audio.volume = 0.2;
+      return audio;
+    }
+    return null;
+  });
+  
+  // Play sound effect when scrolling
+  const playScrollSound = () => {
+    if (scrollSound) {
+      scrollSound.currentTime = 0;
+      scrollSound.play().catch(err => console.log('Audio play error:', err));
+    }
+  };
 
   // Handle changing the mood
   const changeMood = (direction: 'left' | 'right') => {
@@ -28,12 +47,30 @@ export const useMoodWheel = ({
       newIndex = (selectedMoodIndex + 1) % moodsCount;
     }
     setSelectedMoodIndex(newIndex);
+    playScrollSound();
 
     // Reset animation flag after transition completes
     setTimeout(() => {
       setIsAnimating(false);
     }, 300);
   };
+
+  // Handle keyboard navigation with arrow keys
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        changeMood('left');
+      } else if (e.key === "ArrowRight") {
+        changeMood('right');
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedMoodIndex, isAnimating, moodsCount]);
 
   // Handle wheel scroll event
   useEffect(() => {
