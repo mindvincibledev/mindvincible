@@ -82,7 +82,10 @@ export const useMoodWheel = ({
   // Handle wheel scroll event
   useEffect(() => {
     const handleWheelScroll = (e: WheelEvent) => {
+      // Prevent scrolling if already animating
       if (isAnimating) return;
+      
+      e.preventDefault();
       if (e.deltaX > 0 || e.deltaY > 0) {
         changeMood('right');
       } else {
@@ -92,8 +95,9 @@ export const useMoodWheel = ({
     
     const wheelElement = wheelRef.current;
     if (wheelElement) {
+      // Use passive: false to be able to call preventDefault
       wheelElement.addEventListener('wheel', handleWheelScroll, {
-        passive: true
+        passive: false
       });
     }
     

@@ -12,7 +12,7 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
       <motion.h2 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-2xl font-medium text-white mb-8"
+        className="text-2xl font-medium text-white mb-4"
       >
         I'm feeling
       </motion.h2>
@@ -39,7 +39,7 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
             duration: 0.4,
             ease: "easeOut"
           }} 
-          className="relative text-7xl md:text-8xl lg:text-9xl font-bold text-white my-10 md:my-12 tracking-tight" 
+          className="relative text-7xl md:text-8xl lg:text-9xl font-bold text-white my-6 md:my-8 tracking-tight" 
           style={{
             textShadow: '0 2px 10px rgba(0,0,0,0.15)'
           }}

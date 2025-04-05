@@ -48,7 +48,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
       className="w-full h-full text-center flex flex-col items-center justify-between relative overflow-hidden" 
       style={gradientStyle}
     >
-      {/* Animated background waves - Fixing the animation type error */}
+      {/* Animated background waves */}
       <motion.div
         className="absolute inset-0 z-0"
         animate={{ 
@@ -82,13 +82,22 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
         </svg>
       </motion.div>
 
+      {/* App name */}
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 0.7, y: 0 }}
+        className="absolute top-4 left-0 w-full text-xl font-bold text-white/70"
+      >
+        M(in)dvincible
+      </motion.h1>
+
       {/* Mood Display Component */}
       <MoodDisplay selectedMood={selectedMood} />
       
       {/* Mood Selection Button */}
       <MoodButton selectedMood={selectedMood} onSelectMood={onMoodSelect} />
       
-      {/* Mood Selector Component */}
+      {/* Horizontally scrollable Mood Selector Component */}
       <MoodSelector 
         moods={moods}
         selectedMoodIndex={selectedMoodIndex}
