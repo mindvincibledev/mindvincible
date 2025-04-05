@@ -10,7 +10,7 @@ import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import JarCanvas from '@/components/jar/JarCanvas';
 import ColorPalette from '@/components/jar/ColorPalette';
-import { getBase64FromCanvas } from '@/utils/jarUtils';
+import { getBase64FromCanvas, generateJarFilename } from '@/utils/jarUtils';
 
 const MoodJar = () => {
   const [selectedColor, setSelectedColor] = useState<string>('#FF8A48');
@@ -93,18 +93,18 @@ const MoodJar = () => {
     try {
       setIsSaving(true);
       
-      // Get base64 image data from canvas
-      const base64Image = getBase64FromCanvas(canvasRef.current);
-      if (!base64Image) {
+      // Get blob image data from canvas
+      const blobImage = await getBase64FromCanvas(canvasRef.current);
+      if (!blobImage) {
         throw new Error("Could not get image data from canvas");
       }
       
       // Upload the image to Supabase storage
-      const fileName = `jar_${user.id}_${Date.now()}.png`;
+      const fileName = generateJarFilename(user.id);
       const { data: uploadData, error: uploadError } = await supabase
         .storage
         .from('mood_jars')
-        .upload(fileName, base64Image, {
+        .upload(fileName, blobImage, {
           contentType: 'image/png',
           cacheControl: '3600',
         });
@@ -119,13 +119,13 @@ const MoodJar = () => {
         .from('mood_jars')
         .getPublicUrl(fileName);
 
-      // Save the record in the database
+      // Save the record in the database - use custom query to work around type issues
       const { error: dbError } = await supabase
         .from('mood_jar_table')
         .insert({
           user_id: user.id,
           image_path: urlData.publicUrl,
-        });
+        } as any);
 
       if (dbError) {
         throw dbError;

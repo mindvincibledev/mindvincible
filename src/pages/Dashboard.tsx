@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { PlusCircle, Jar } from 'lucide-react';
+import { PlusCircle, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import DailyMoodChart from '@/components/charts/DailyMoodChart';
@@ -306,7 +306,7 @@ const Dashboard = () => {
                   
                   <Link to="/mood-jar" className="w-full sm:w-auto">
                     <Button className="flex items-center gap-2 bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] hover:opacity-90 text-black font-medium w-full">
-                      <Jar size={18} />
+                      <Archive size={18} />
                       <span>Mood Jar</span>
                     </Button>
                   </Link>
