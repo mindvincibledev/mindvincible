@@ -2,7 +2,6 @@
 import React, { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { getMoodColor } from '@/utils/moodUtils';
 
 interface MoodSelectorProps {
@@ -28,11 +27,15 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Create an infinite mood array by repeating the moods
+  const extendedMoods = [...moods, ...moods, ...moods]; // Triple the array for infinite scrolling effect
+  const offsetIndex = moods.length + selectedMoodIndex; // Current position in the extended array
+
   // Ensure the selected mood is visible and centered
   useEffect(() => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
-      const selectedElement = container.children[selectedMoodIndex] as HTMLElement;
+      const selectedElement = container.children[offsetIndex] as HTMLElement;
       
       if (selectedElement) {
         const containerWidth = container.offsetWidth;
@@ -49,7 +52,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
         });
       }
     }
-  }, [selectedMoodIndex]);
+  }, [selectedMoodIndex, offsetIndex]);
 
   return (
     <div 
@@ -87,28 +90,21 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           {/* Left navigation button */}
           <motion.button
             className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.9, opacity: 0.8 }}
             onClick={(e) => {
               e.stopPropagation();
               onChangeMood('left');
             }}
+            style={{ transform: "translateY(-50%)" }} // Fixed position styling
           >
             <ChevronLeft className="text-white w-6 h-6" />
           </motion.button>
           
           {/* The scroll wheel */}
           <div className="relative overflow-hidden mx-10 py-4">
-            {/* Indicator line showing the selection zone */}
+            {/* Indicator line showing the center point */}
             <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/30 -translate-x-1/2 z-10" />
             
-            {/* Highlight zone */}
-            <div 
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-14 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 z-0"
-              style={{
-                boxShadow: `0 0 20px ${getMoodColor(moods[selectedMoodIndex])}50`
-              }}
-            />
-
             {/* Mood options container */}
             <div 
               ref={scrollContainerRef}
@@ -121,19 +117,23 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
               {/* Insert extra space at start for better UI balance */}
               <div className="w-[calc(50vw-60px)] shrink-0" />
               
-              {moods.map((mood, index) => {
-                const isSelected = index === selectedMoodIndex;
+              {extendedMoods.map((mood, index) => {
+                const actualIndex = index % moods.length; // Map back to original index
+                const isSelected = index === offsetIndex;
                 
                 return (
                   <motion.div 
-                    key={mood}
+                    key={`${mood}-${index}`}
                     className="flex flex-col items-center justify-center cursor-pointer transition-all shrink-0"
                     animate={{ 
                       opacity: isSelected ? 1 : 0.6,
-                      scale: isSelected ? 1.1 : 1,
+                      scale: isSelected ? 1.2 : 1,
                       transition: { duration: 0.3 }
                     }}
-                    onClick={() => onMoodSelect(index)}
+                    onClick={() => {
+                      const adjustedIndex = (actualIndex >= 0) ? actualIndex : moods.length + actualIndex;
+                      onMoodSelect(adjustedIndex);
+                    }}
                   >
                     <motion.span 
                       className="text-xl font-bold whitespace-nowrap px-4 py-2"
@@ -164,11 +164,12 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           {/* Right navigation button */}
           <motion.button
             className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.9, opacity: 0.8 }}
             onClick={(e) => {
               e.stopPropagation();
               onChangeMood('right');
             }}
+            style={{ transform: "translateY(-50%)" }} // Fixed position styling
           >
             <ChevronRight className="text-white w-6 h-6" />
           </motion.button>
