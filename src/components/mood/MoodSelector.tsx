@@ -96,16 +96,9 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           
           {/* The curved scroll wheel container */}
           <div className="relative w-full h-full overflow-hidden">
-            {/* Center selection indicator line */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/50 -translate-x-1/2 z-10 h-full" />
+            {/* Removed center selection indicator line */}
             
-            {/* Highlight zone */}
-            <div 
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-16 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 z-0"
-              style={{
-                boxShadow: `0 0 20px ${getMoodColor(moods[selectedMoodIndex])}40`
-              }}
-            />
+            {/* Removed highlight zone */}
 
             {/* The actual curved wheel */}
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full">
@@ -166,12 +159,9 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
                       <motion.div
                         className="whitespace-nowrap px-5 py-3 backdrop-blur-sm rounded-lg"
                         style={{
-                          color: isSelected ? 'white' : 'rgba(255, 255, 255, 0.8)',
-                          textShadow: isSelected ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
+                          color: 'transparent', // Make text invisible
                           background: isSelected ? `${getMoodColor(mood)}20` : 'transparent',
                           border: isSelected ? `1px solid ${getMoodColor(mood)}40` : '1px solid transparent',
-                          fontSize: isSelected ? '1.25rem' : '1rem',
-                          fontWeight: isSelected ? 'bold' : 'normal'
                         }}
                       >
                         {mood}
