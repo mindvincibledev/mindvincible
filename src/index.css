@@ -177,6 +177,12 @@
   100% { transform: translate3d(85px, 0, 0); }
 }
 
+.galaxy-bg {
+  background: linear-gradient(135deg, #3DFDFF 0%, #FC68B3 50%, #FF8A48 100%);
+  position: relative;
+  overflow: hidden;
+}
+
 .animate-wave1 {
   animation: wave1 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
 }
