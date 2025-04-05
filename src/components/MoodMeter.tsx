@@ -51,19 +51,17 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-black/40 backdrop-blur-lg rounded-2xl shadow-xl border border-white/10 overflow-hidden p-6"
+          className="backdrop-blur-lg rounded-2xl shadow-md border border-white/20 overflow-hidden p-6"
           style={{
-            boxShadow: `0 8px 32px ${moodColor}80`,
-            background: `radial-gradient(circle at center, ${moodColor}25 0%, rgba(0,0,0,0.6) 90%)`,
-            transition: 'box-shadow 0.5s ease, background 0.5s ease',
-            borderColor: `${moodColor}50`,
+            backgroundColor: `${moodColor}90`, // More visible but still translucent
+            transition: 'background-color 0.5s ease',
           }}
         >
           {/* App name */}
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 0.7, y: 0 }}
-            className="text-xl font-bold text-white/70 mb-8"
+            animate={{ opacity: 0.9, y: 0 }}
+            className="text-xl font-bold text-white mb-8"
           >
             M(in)dvincible
           </motion.h1>

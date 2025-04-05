@@ -44,17 +44,17 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
           }} 
           className="relative text-5xl md:text-6xl lg:text-7xl font-bold text-white my-4 md:my-6 tracking-tight" 
           style={{
-            textShadow: '0 2px 10px rgba(0,0,0,0.15)'
+            textShadow: '0 2px 10px rgba(0,0,0,0.2)'
           }}
         >
           {selectedMood}
           
-          {/* Animated circle decorative elements */}
+          {/* Simple decorative elements without glow or blur */}
           <motion.div 
-            className="absolute -top-8 -left-8 w-32 h-32 rounded-full bg-white/10 blur-2xl -z-10"
+            className="absolute -top-8 -left-8 w-32 h-32 rounded-full bg-white/10 -z-10"
             animate={{
               scale: [1, 1.05, 1],
-              opacity: [0.3, 0.5, 0.3],
+              opacity: [0.2, 0.3, 0.2],
             }}
             transition={{
               duration: 8,
@@ -64,30 +64,16 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
           />
           
           <motion.div 
-            className="absolute -bottom-8 -right-8 w-24 h-24 rounded-full bg-white/10 blur-2xl -z-10"
+            className="absolute -bottom-8 -right-8 w-24 h-24 rounded-full bg-white/10 -z-10"
             animate={{
               scale: [1, 1.1, 1],
-              opacity: [0.2, 0.4, 0.2],
+              opacity: [0.1, 0.2, 0.1],
             }}
             transition={{
               duration: 6,
               repeat: Infinity,
               repeatType: "reverse",
               delay: 1
-            }}
-          />
-          
-          {/* Highlight glow effect that matches the mood color */}
-          <motion.div 
-            className="absolute inset-0 blur-xl -z-20 opacity-30"
-            style={{ background: moodColor }}
-            animate={{
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              repeatType: "reverse"
             }}
           />
         </motion.div>
