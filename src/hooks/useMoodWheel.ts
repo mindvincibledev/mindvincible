@@ -17,7 +17,25 @@ export const useMoodWheel = ({
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [dragThreshold, setDragThreshold] = useState(30); // Adjustable drag threshold
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
+  // Create audio for scroll sound effect
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const audio = new Audio();
+      audio.src = '/click.mp3';
+      audio.volume = 0.2;
+      audio.load();
+      audioRef.current = audio;
+      
+      // Clean up
+      return () => {
+        audio.pause();
+        audio.src = '';
+      };
+    }
+  }, []);
+
   // Handle screen size changes for touch sensitivity
   useEffect(() => {
     const updateDragThreshold = () => {
@@ -35,12 +53,12 @@ export const useMoodWheel = ({
   
   // Play sound effect when scrolling
   const playScrollSound = () => {
-    try {
-      const audio = new Audio('/click.mp3');
-      audio.volume = 0.2;
-      audio.play().catch(err => console.log('Audio play error:', err));
-    } catch (error) {
-      console.error('Sound playback error:', error);
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(err => {
+        // Silently handle autoplay restrictions
+        console.log('Audio play error:', err);
+      });
     }
   };
 

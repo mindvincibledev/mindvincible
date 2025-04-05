@@ -1,7 +1,8 @@
 
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { getMoodColor } from '@/utils/moodUtils';
 
 interface MoodSelectorProps {
@@ -25,32 +26,35 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
   handleTouchMove,
   handleTouchEnd
 }) => {
-  // Create an extended array of moods for infinite scroll effect
-  const wheelItems = useMemo(() => {
-    // Create a triple-repeated array to give the impression of infinite scrolling
-    return [...moods, ...moods, ...moods];
-  }, [moods]);
-  
-  // Calculate the visually centered index in our extended array
-  const extendedSelectedIndex = useMemo(() => {
-    return selectedMoodIndex + moods.length;
-  }, [selectedMoodIndex, moods.length]);
-  
-  // Play a sound when changing moods
-  const playScrollSound = () => {
-    try {
-      const audio = new Audio('/click.mp3');
-      audio.volume = 0.2;
-      audio.play().catch(err => console.log('Audio play error:', err));
-    } catch (error) {
-      console.error('Sound playback error:', error);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Ensure the selected mood is visible and centered
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const selectedElement = container.children[selectedMoodIndex] as HTMLElement;
+      
+      if (selectedElement) {
+        const containerWidth = container.offsetWidth;
+        const selectedWidth = selectedElement.offsetWidth;
+        const selectedLeft = selectedElement.offsetLeft;
+        
+        // Calculate scroll position to center the selected element
+        const scrollPosition = selectedLeft - (containerWidth / 2) + (selectedWidth / 2);
+        
+        // Smooth scroll to the position
+        container.scrollTo({
+          left: scrollPosition,
+          behavior: 'smooth'
+        });
+      }
     }
-  };
+  }, [selectedMoodIndex]);
 
   return (
     <div 
       ref={wheelRef} 
-      className="w-full h-64 relative mt-auto select-none"
+      className="w-full h-64 relative mt-auto"
       onTouchStart={handleTouchStart} 
       onTouchMove={handleTouchMove as any} 
       onTouchEnd={handleTouchEnd} 
@@ -60,7 +64,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
       onMouseLeave={handleTouchEnd}
     >
       {/* Wheel background with gradient */}
-      <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-white/20 via-white/10 to-transparent rounded-t-3xl">
+      <div className="absolute bottom-0 left-0 w-full h-52 bg-gradient-to-t from-white/20 via-white/10 to-transparent rounded-t-2xl">
         {/* Decorative circle elements */}
         <motion.div 
           className="absolute bottom-8 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full opacity-20 blur-md"
@@ -77,110 +81,92 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
         />
       </div>
       
-      {/* Curved Scroll Wheel UI */}
-      <div className="absolute bottom-16 left-0 w-full px-4">
-        <div className="relative h-24">
+      {/* Scroll wheel UI */}
+      <div className="absolute bottom-24 left-0 w-full px-12">
+        <div className="relative">
           {/* Left navigation button */}
           <motion.button
-            className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20 shadow-lg"
-            whileHover={{ scale: 1.1 }}
+            className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.stopPropagation();
-              playScrollSound();
               onChangeMood('left');
             }}
           >
             <ChevronLeft className="text-white w-6 h-6" />
           </motion.button>
           
-          {/* The curved scroll wheel container */}
-          <div className="relative w-full h-full overflow-hidden">
-            {/* Removed center selection indicator line */}
+          {/* The scroll wheel */}
+          <div className="relative overflow-hidden mx-10 py-4">
+            {/* Indicator line showing the selection zone */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/30 -translate-x-1/2 z-10" />
             
-            {/* Removed highlight zone */}
+            {/* Highlight zone */}
+            <div 
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-14 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 z-0"
+              style={{
+                boxShadow: `0 0 20px ${getMoodColor(moods[selectedMoodIndex])}50`
+              }}
+            />
 
-            {/* The actual curved wheel */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full">
-              <div className="relative h-48 w-full">
-                {wheelItems.map((mood, index) => {
-                  // Calculate position along the arc
-                  const totalItems = wheelItems.length;
-                  const centerIndex = extendedSelectedIndex;
-                  
-                  // Calculate distance from center item (positive or negative)
-                  const distanceFromCenter = index - centerIndex;
-                  
-                  // Define how many items to show on each side of the center
-                  const visibleRange = 5;
-                  
-                  // Only render items within the visible range
-                  if (Math.abs(distanceFromCenter) > visibleRange) {
-                    return null;
-                  }
-                  
-                  // Calculate angle based on position relative to center
-                  const angle = distanceFromCenter * 15; // 15 degrees spacing
-                  
-                  // Calculate horizontal position along the arc
-                  const radius = 150; // Radius of the arc
-                  const x = Math.sin(angle * Math.PI / 180) * radius;
-                  
-                  // Calculate vertical position (y) with a curve effect
-                  // Items further from center move up to create an arch
-                  const y = Math.abs(distanceFromCenter) * 8; // Increase for more curve
-                  
-                  // Calculate opacity based on distance from center
-                  const opacity = 1 - Math.min(Math.abs(distanceFromCenter) * 0.15, 0.7);
-                  
-                  // Calculate scale based on distance from center
-                  const scale = 1 - Math.min(Math.abs(distanceFromCenter) * 0.08, 0.4);
-                  
-                  const isSelected = index === centerIndex;
-                  
-                  return (
-                    <motion.div 
-                      key={`${mood}-${index}`}
-                      className="absolute left-1/2 cursor-pointer flex flex-col items-center justify-center"
-                      initial={false}
-                      animate={{
-                        x: x,
-                        y: -y - 20, // Base offset plus dynamic curve
-                        scale: isSelected ? scale * 1.2 : scale,
-                        opacity
+            {/* Mood options container */}
+            <div 
+              ref={scrollContainerRef}
+              className="flex items-center space-x-10 py-2 px-4 overflow-x-auto hide-scrollbar"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}
+            >
+              {/* Insert extra space at start for better UI balance */}
+              <div className="w-[calc(50vw-60px)] shrink-0" />
+              
+              {moods.map((mood, index) => {
+                const isSelected = index === selectedMoodIndex;
+                
+                return (
+                  <motion.div 
+                    key={mood}
+                    className="flex flex-col items-center justify-center cursor-pointer transition-all shrink-0"
+                    animate={{ 
+                      opacity: isSelected ? 1 : 0.6,
+                      scale: isSelected ? 1.1 : 1,
+                      transition: { duration: 0.3 }
+                    }}
+                    onClick={() => onMoodSelect(index)}
+                  >
+                    <motion.span 
+                      className="text-xl font-bold whitespace-nowrap px-4 py-2"
+                      style={{
+                        color: isSelected ? 'white' : 'rgba(255, 255, 255, 0.7)',
+                        textShadow: isSelected ? '0 2px 8px rgba(0,0,0,0.3)' : 'none'
                       }}
-                      onClick={() => {
-                        // Find the actual mood index in the original array
-                        const actualIndex = index % moods.length;
-                        playScrollSound();
-                        onMoodSelect(actualIndex);
+                      animate={{
+                        y: isSelected ? [0, -2, 0] : 0
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: isSelected ? Infinity : 0,
+                        repeatType: "reverse"
                       }}
                     >
-                      <motion.div
-                        className="whitespace-nowrap px-5 py-3 backdrop-blur-sm rounded-lg"
-                        style={{
-                          color: 'transparent', // Make text invisible
-                          background: isSelected ? `${getMoodColor(mood)}20` : 'transparent',
-                          border: isSelected ? `1px solid ${getMoodColor(mood)}40` : '1px solid transparent',
-                        }}
-                      >
-                        {mood}
-                      </motion.div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+                      {mood}
+                    </motion.span>
+                  </motion.div>
+                );
+              })}
+              
+              {/* Insert extra space at end for better UI balance */}
+              <div className="w-[calc(50vw-60px)] shrink-0" />
             </div>
           </div>
           
           {/* Right navigation button */}
           <motion.button
-            className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20 shadow-lg"
-            whileHover={{ scale: 1.1 }}
+            className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.stopPropagation();
-              playScrollSound();
               onChangeMood('right');
             }}
           >
@@ -190,7 +176,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
       </div>
       
       {/* Current position indicator dots */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {moods.map((_, i) => (
           <motion.div
             key={i}
@@ -200,13 +186,17 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
               backgroundColor: i === selectedMoodIndex ? 'rgb(255, 255, 255)' : 'rgba(255, 255, 255, 0.4)'
             }}
             whileHover={{ scale: 1.3 }}
-            onClick={() => {
-              playScrollSound();
-              onMoodSelect(i);
-            }}
+            onClick={() => onMoodSelect(i)}
           />
         ))}
       </div>
+      
+      {/* Custom CSS to hide scrollbars */}
+      <style jsx>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 };

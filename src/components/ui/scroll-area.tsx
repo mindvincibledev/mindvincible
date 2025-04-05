@@ -20,7 +20,7 @@ const ScrollArea = React.forwardRef<
     <ScrollAreaPrimitive.Corner />
     
     {/* Global style to hide scrollbars for custom UI elements */}
-    <style dangerouslySetInnerHTML={{ __html: `
+    <style jsx global>{`
       /* Hide scrollbar for Chrome, Safari and Opera */
       .hide-scrollbar::-webkit-scrollbar {
         display: none;
@@ -30,7 +30,7 @@ const ScrollArea = React.forwardRef<
         -ms-overflow-style: none;  /* IE and Edge */
         scrollbar-width: none;  /* Firefox */
       }
-    `}} />
+    `}</style>
   </ScrollAreaPrimitive.Root>
 ))
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
