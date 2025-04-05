@@ -13,7 +13,7 @@ import ColorPalette from '@/components/jar/ColorPalette';
 import { getBase64FromCanvas, generateJarFilename } from '@/utils/jarUtils';
 
 const MoodJar = () => {
-  const [selectedColor, setSelectedColor] = useState<string>('#FF8A48');
+  const [selectedColor, setSelectedColor] = useState<string>('#F5DF4D');
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -23,12 +23,13 @@ const MoodJar = () => {
 
   // Colors from custom instructions
   const colors = [
-    '#FF8A48', // Orange
-    '#D5D5F1', // Lavender
-    '#3DFDFF', // Cyan
-    '#F5DF4D', // Yellow
-    '#FC68B3', // Pink
-    '#2AC20E', // Green
+    '#F5DF4D', // Yellow (Happy)
+    '#FF8A48', // Orange (Angry)
+    '#3DFDFF', // Cyan (Sad)
+    '#D5D5F1', // Lavender (Fearful)
+    '#2AC20E', // Green (Surprised)
+    '#F5DF4D', // Yellow (Disgusted - using yellow again)
+    '#FC68B3', // Pink (Love)
   ];
 
   const handleColorSelect = (color: string) => {
@@ -110,6 +111,7 @@ const MoodJar = () => {
         });
 
       if (uploadError) {
+        console.error("Upload error:", uploadError);
         throw uploadError;
       }
 
@@ -119,15 +121,21 @@ const MoodJar = () => {
         .from('mood_jars')
         .getPublicUrl(fileName);
 
-      // Save the record in the database - use custom query to work around type issues
-      const { error: dbError } = await supabase
-        .from('mood_jar_table')
-        .insert({
-          user_id: user.id,
-          image_path: urlData.publicUrl,
-        } as any);
+      if (!urlData.publicUrl) {
+        throw new Error("Failed to get public URL for uploaded image");
+      }
+
+      // Insert directly using SQL query to bypass type checking issues
+      const { error: dbError } = await supabase.rpc(
+        'insert_mood_jar',
+        { 
+          user_id_param: user.id,
+          image_path_param: urlData.publicUrl
+        }
+      );
 
       if (dbError) {
+        console.error("Database error:", dbError);
         throw dbError;
       }
 
@@ -157,11 +165,17 @@ const MoodJar = () => {
         <div className="container mx-auto px-4 py-20">
           <div className="flex flex-col gap-6 items-center">
             <h1 className="text-3xl md:text-4xl font-bold text-white text-center">
-              Create Your Mood Jar
+              Feelings Jar Activity
             </h1>
             
             <div className="w-full max-w-2xl bg-black/60 backdrop-blur-lg p-6 rounded-xl border border-[#3DFDFF]/30 shadow-xl">
               <div className="flex flex-col gap-6">
+                <p className="text-white text-center text-lg">
+                  Check-in with yourself to understand your feelings. Fill
+                  the jar with feelings colours to see how much of each
+                  feeling you have right now.
+                </p>
+                
                 <ColorPalette 
                   colors={colors} 
                   selectedColor={selectedColor} 
@@ -191,7 +205,7 @@ const MoodJar = () => {
                     disabled={isSaving}
                   >
                     <Save size={18} />
-                    {isSaving ? 'Saving...' : 'Save Jar'}
+                    {isSaving ? 'Saving...' : 'Complete Activity'}
                   </Button>
                 </div>
               </div>

@@ -9,6 +9,7 @@ interface JarCanvasProps {
 const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
   ({ selectedColor, drawJarOutline }, ref) => {
     const [isDrawing, setIsDrawing] = useState(false);
+    const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasSize = { width: 300, height: 400 };
 
@@ -30,8 +31,8 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       
       // Setup for mobile
       const setupTouch = () => {
-        canvas.addEventListener('touchstart', handleTouchStart);
-        canvas.addEventListener('touchmove', handleTouchMove);
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
         canvas.addEventListener('touchend', handleTouchEnd);
       };
       
@@ -69,6 +70,7 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       const x = touch.clientX - rect.left;
       const y = touch.clientY - rect.top;
       
+      setLastPos({ x, y });
       drawDot(x, y);
     };
 
@@ -84,7 +86,8 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       const x = touch.clientX - rect.left;
       const y = touch.clientY - rect.top;
       
-      drawDot(x, y);
+      drawLine(lastPos.x, lastPos.y, x, y);
+      setLastPos({ x, y });
     };
 
     const handleTouchEnd = () => {
@@ -101,6 +104,7 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
+      setLastPos({ x, y });
       drawDot(x, y);
     };
 
@@ -114,7 +118,8 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
-      drawDot(x, y);
+      drawLine(lastPos.x, lastPos.y, x, y);
+      setLastPos({ x, y });
     };
 
     const handleMouseUp = () => {
@@ -134,14 +139,34 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       context.fill();
     };
 
+    const drawLine = (fromX: number, fromY: number, toX: number, toY: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      
+      const context = canvas.getContext('2d');
+      if (!context) return;
+      
+      context.strokeStyle = selectedColor;
+      context.lineWidth = 20;
+      context.lineCap = 'round';
+      context.beginPath();
+      context.moveTo(fromX, fromY);
+      context.lineTo(toX, toY);
+      context.stroke();
+    };
+
     return (
-      <canvas
-        ref={canvasRef}
-        width={canvasSize.width}
-        height={canvasSize.height}
-        className="border rounded-md touch-none"
-        style={{ backgroundColor: 'white' }}
-      />
+      <div className="flex flex-col items-center">
+        <canvas
+          ref={canvasRef}
+          width={canvasSize.width}
+          height={canvasSize.height}
+          className="border rounded-md touch-none bg-white"
+        />
+        <p className="text-white text-center text-sm mt-4">
+          Select an emotion color to start coloring the jar
+        </p>
+      </div>
     );
   }
 );
