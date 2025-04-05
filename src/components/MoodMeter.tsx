@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { getMoodColor } from '@/utils/moodUtils';
 import MoodDisplay from './mood/MoodDisplay';
 import MoodButton from './mood/MoodButton';
@@ -49,8 +49,46 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
       style={gradientStyle}
     >
       {/* Animated background waves */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <WaveBackground moodColor={moodColor} />
+      </div>
+
+      {/* App name */}
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 0.7, y: 0 }}
+        className="absolute top-4 left-0 w-full text-xl font-bold text-white/70"
+      >
+        M(in)dvincible
+      </motion.h1>
+
+      {/* Mood Display Component */}
+      <MoodDisplay selectedMood={selectedMood} />
+      
+      {/* Mood Selection Button */}
+      <MoodButton selectedMood={selectedMood} onSelectMood={onMoodSelect} />
+      
+      {/* Horizontally scrollable Mood Selector Component */}
+      <MoodSelector 
+        moods={moods}
+        selectedMoodIndex={selectedMoodIndex}
+        onMoodSelect={setSelectedMoodIndex}
+        onChangeMood={changeMood}
+        wheelRef={wheelRef}
+        handleTouchStart={handleTouchStart}
+        handleTouchMove={handleTouchMove}
+        handleTouchEnd={handleTouchEnd}
+      />
+    </motion.div>
+  );
+};
+
+// Wave background component for animation
+const WaveBackground: React.FC<{ moodColor: string }> = ({ moodColor }) => {
+  return (
+    <>
       <motion.div
-        className="absolute inset-0 z-0"
+        className="absolute inset-0"
         animate={{ 
           y: [0, 5, 0],
           opacity: [0.7, 0.9, 0.7]
@@ -82,33 +120,40 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
         </svg>
       </motion.div>
 
-      {/* App name */}
-      <motion.h1
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 0.7, y: 0 }}
-        className="absolute top-4 left-0 w-full text-xl font-bold text-white/70"
+      <motion.div
+        className="absolute inset-0"
+        animate={{ 
+          y: [0, -8, 0],
+          opacity: [0.5, 0.7, 0.5]
+        }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          repeatType: "reverse",
+          delay: 0.5
+        }}
       >
-        M(in)dvincible
-      </motion.h1>
-
-      {/* Mood Display Component */}
-      <MoodDisplay selectedMood={selectedMood} />
-      
-      {/* Mood Selection Button */}
-      <MoodButton selectedMood={selectedMood} onSelectMood={onMoodSelect} />
-      
-      {/* Horizontally scrollable Mood Selector Component */}
-      <MoodSelector 
-        moods={moods}
-        selectedMoodIndex={selectedMoodIndex}
-        onMoodSelect={setSelectedMoodIndex}
-        onChangeMood={changeMood}
-        wheelRef={wheelRef}
-        handleTouchStart={handleTouchStart}
-        handleTouchMove={handleTouchMove}
-        handleTouchEnd={handleTouchEnd}
-      />
-    </motion.div>
+        <svg width="100%" height="100%" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+          <motion.path
+            d="M0,700 C250,650 350,720 1000,680 L1000,1000 L0,1000 Z"
+            fill={`${moodColor}22`}
+            animate={{
+              d: [
+                "M0,700 C250,650 350,720 1000,680 L1000,1000 L0,1000 Z",
+                "M0,720 C250,670 350,740 1000,700 L1000,1000 L0,1000 Z",
+                "M0,700 C250,650 350,720 1000,680 L1000,1000 L0,1000 Z"
+              ]
+            }}
+            transition={{
+              repeat: Infinity,
+              repeatType: "reverse",
+              duration: 12,
+              ease: "easeInOut"
+            }}
+          />
+        </svg>
+      </motion.div>
+    </>
   );
 };
 

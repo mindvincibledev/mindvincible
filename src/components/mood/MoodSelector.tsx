@@ -1,8 +1,9 @@
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { getMoodColor } from '@/utils/moodUtils';
 
 interface MoodSelectorProps {
   moods: string[];
@@ -25,6 +26,31 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
   handleTouchMove,
   handleTouchEnd
 }) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Ensure the selected mood is visible and centered
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const selectedElement = container.children[selectedMoodIndex] as HTMLElement;
+      
+      if (selectedElement) {
+        const containerWidth = container.offsetWidth;
+        const selectedWidth = selectedElement.offsetWidth;
+        const selectedLeft = selectedElement.offsetLeft;
+        
+        // Calculate scroll position to center the selected element
+        const scrollPosition = selectedLeft - (containerWidth / 2) + (selectedWidth / 2);
+        
+        // Smooth scroll to the position
+        container.scrollTo({
+          left: scrollPosition,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [selectedMoodIndex]);
+
   return (
     <div 
       ref={wheelRef} 
@@ -37,15 +63,30 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
       onMouseUp={handleTouchEnd} 
       onMouseLeave={handleTouchEnd}
     >
-      {/* Background gradient */}
-      <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-white/20 to-transparent rounded-t-lg"></div>
+      {/* Wheel background with gradient */}
+      <div className="absolute bottom-0 left-0 w-full h-52 bg-gradient-to-t from-white/20 via-white/10 to-transparent rounded-t-2xl">
+        {/* Decorative circle elements */}
+        <motion.div 
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full opacity-20 blur-md"
+          style={{ background: `radial-gradient(circle, ${getMoodColor(moods[selectedMoodIndex])} 0%, transparent 70%)` }}
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.2, 0.3, 0.2]
+          }}
+          transition={{ 
+            duration: 4, 
+            repeat: Infinity, 
+            repeatType: "reverse" 
+          }}
+        />
+      </div>
       
-      {/* Horizontal scrollable mood selector */}
-      <div className="absolute bottom-12 left-0 w-full">
-        <div className="relative px-8 py-4">
+      {/* Scroll wheel UI */}
+      <div className="absolute bottom-24 left-0 w-full px-12">
+        <div className="relative">
           {/* Left navigation button */}
           <motion.button
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+            className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.stopPropagation();
@@ -55,18 +96,38 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
             <ChevronLeft className="text-white w-6 h-6" />
           </motion.button>
           
-          {/* Mood options */}
-          <ScrollArea className="w-full overflow-x-auto px-10">
-            <div className="flex items-center space-x-8 py-2 px-4 min-w-max">
+          {/* The scroll wheel */}
+          <div className="relative overflow-hidden mx-10 py-4">
+            {/* Indicator line showing the selection zone */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/30 -translate-x-1/2 z-10" />
+            
+            {/* Highlight zone */}
+            <div 
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-14 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 z-0"
+              style={{
+                boxShadow: `0 0 20px ${getMoodColor(moods[selectedMoodIndex])}50`
+              }}
+            />
+
+            {/* Mood options container */}
+            <div 
+              ref={scrollContainerRef}
+              className="flex items-center space-x-10 py-2 px-4 overflow-x-auto hide-scrollbar"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}
+            >
+              {/* Insert extra space at start for better UI balance */}
+              <div className="w-[calc(50vw-60px)] shrink-0" />
+              
               {moods.map((mood, index) => {
                 const isSelected = index === selectedMoodIndex;
                 
                 return (
                   <motion.div 
                     key={mood}
-                    className={`flex flex-col items-center cursor-pointer transition-all px-2 py-1 rounded-lg ${
-                      isSelected ? 'bg-white/10 backdrop-blur-sm' : ''
-                    }`}
+                    className="flex flex-col items-center justify-center cursor-pointer transition-all shrink-0"
                     animate={{ 
                       opacity: isSelected ? 1 : 0.6,
                       scale: isSelected ? 1.1 : 1,
@@ -74,25 +135,35 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
                     }}
                     onClick={() => onMoodSelect(index)}
                   >
-                    <span 
-                      className={`text-xl md:text-2xl font-bold whitespace-nowrap ${
-                        isSelected ? 'text-white' : 'text-white/70'
-                      }`}
+                    <motion.span 
+                      className="text-xl font-bold whitespace-nowrap px-4 py-2"
                       style={{
-                        textShadow: isSelected ? '0 2px 6px rgba(0,0,0,0.3)' : 'none'
+                        color: isSelected ? 'white' : 'rgba(255, 255, 255, 0.7)',
+                        textShadow: isSelected ? '0 2px 8px rgba(0,0,0,0.3)' : 'none'
+                      }}
+                      animate={{
+                        y: isSelected ? [0, -2, 0] : 0
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: isSelected ? Infinity : 0,
+                        repeatType: "reverse"
                       }}
                     >
                       {mood}
-                    </span>
+                    </motion.span>
                   </motion.div>
                 );
               })}
+              
+              {/* Insert extra space at end for better UI balance */}
+              <div className="w-[calc(50vw-60px)] shrink-0" />
             </div>
-          </ScrollArea>
+          </div>
           
           {/* Right navigation button */}
           <motion.button
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+            className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.stopPropagation();
@@ -105,7 +176,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
       </div>
       
       {/* Current position indicator dots */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {moods.map((_, i) => (
           <motion.div
             key={i}
@@ -119,6 +190,13 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           />
         ))}
       </div>
+      
+      {/* Custom CSS to hide scrollbars */}
+      <style jsx>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 };

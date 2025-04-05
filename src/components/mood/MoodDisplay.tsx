@@ -1,14 +1,17 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getMoodColor } from '@/utils/moodUtils';
 
 interface MoodDisplayProps {
   selectedMood: string;
 }
 
 const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
+  const moodColor = getMoodColor(selectedMood);
+  
   return (
-    <div className="flex-1 flex flex-col justify-center items-center w-full px-6 pt-20 pb-6">
+    <div className="flex-1 flex flex-col justify-center items-center w-full px-6 pt-20 pb-6 z-10">
       <motion.h2 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -46,7 +49,7 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
         >
           {selectedMood}
           
-          {/* Bubble decorative elements */}
+          {/* Animated circle decorative elements */}
           <motion.div 
             className="absolute -top-10 -left-10 w-60 h-60 rounded-full bg-white/10 blur-2xl -z-10"
             animate={{
@@ -59,6 +62,7 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
               repeatType: "reverse"
             }}
           />
+          
           <motion.div 
             className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl -z-10"
             animate={{
@@ -70,6 +74,20 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
               repeat: Infinity,
               repeatType: "reverse",
               delay: 1
+            }}
+          />
+          
+          {/* Highlight glow effect that matches the mood color */}
+          <motion.div 
+            className="absolute inset-0 blur-xl -z-20 opacity-30"
+            style={{ background: moodColor }}
+            animate={{
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              repeatType: "reverse"
             }}
           />
         </motion.div>

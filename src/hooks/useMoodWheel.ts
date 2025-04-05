@@ -16,6 +16,7 @@ export const useMoodWheel = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
+  const [dragThreshold, setDragThreshold] = useState(30); // Adjustable drag threshold
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   // Create audio for scroll sound effect
@@ -34,25 +35,46 @@ export const useMoodWheel = ({
       };
     }
   }, []);
+
+  // Handle screen size changes for touch sensitivity
+  useEffect(() => {
+    const updateDragThreshold = () => {
+      // Make drag less sensitive on larger screens
+      setDragThreshold(window.innerWidth > 768 ? 50 : 30);
+    };
+    
+    updateDragThreshold();
+    window.addEventListener('resize', updateDragThreshold);
+    
+    return () => {
+      window.removeEventListener('resize', updateDragThreshold);
+    };
+  }, []);
   
   // Play sound effect when scrolling
   const playScrollSound = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(err => console.log('Audio play error:', err));
+      audioRef.current.play().catch(err => {
+        // Silently handle autoplay restrictions
+        console.log('Audio play error:', err);
+      });
     }
   };
 
   // Handle changing the mood
   const changeMood = (direction: 'left' | 'right') => {
     if (isAnimating) return;
+    
     setIsAnimating(true);
     let newIndex = selectedMoodIndex;
+    
     if (direction === 'left') {
       newIndex = (selectedMoodIndex - 1 + moodsCount) % moodsCount;
     } else {
       newIndex = (selectedMoodIndex + 1) % moodsCount;
     }
+    
     setSelectedMoodIndex(newIndex);
     playScrollSound();
 
@@ -85,11 +107,25 @@ export const useMoodWheel = ({
       // Prevent scrolling if already animating
       if (isAnimating) return;
       
+      // Prevent default browser scrolling behavior
       e.preventDefault();
-      if (e.deltaX > 0 || e.deltaY > 0) {
-        changeMood('right');
+      
+      // Detect horizontal scroll or vertical scroll (most common)
+      // For trackpads and touch devices, deltaX is often used for horizontal scrolling
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        // Horizontal scroll detection (trackpads typically)
+        if (e.deltaX > 0) {
+          changeMood('right');
+        } else {
+          changeMood('left');
+        }
       } else {
-        changeMood('left');
+        // Vertical scroll detection (mouse wheels typically)
+        if (e.deltaY > 0) {
+          changeMood('right');
+        } else {
+          changeMood('left');
+        }
       }
     };
     
@@ -120,21 +156,26 @@ export const useMoodWheel = ({
   
   const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isDragging) return;
-    let currentX;
+    
+    let currentX: number;
     if ('touches' in e) {
       currentX = e.touches[0].clientX;
     } else {
       currentX = e.clientX;
     }
+    
     const diff = currentX - startX;
-    if (Math.abs(diff) > 30) {
-      // Threshold for swipe
+    if (Math.abs(diff) > dragThreshold) {
+      // Pass the drag threshold
       if (diff > 0) {
         changeMood('left');
       } else {
         changeMood('right');
       }
+      
+      // Reset drag state
       setIsDragging(false);
+      setStartX(0);
     }
   };
   
