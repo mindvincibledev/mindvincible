@@ -18,9 +18,9 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard
+    // If user is already logged in, redirect to mood entry instead of dashboard
     if (user) {
-      navigate('/dashboard');
+      navigate('/mood-entry');
     }
   }, [user, navigate]);
 
@@ -31,7 +31,8 @@ const Login = () => {
     
     try {
       await signIn(email, password);
-      navigate('/dashboard');
+      // Redirect to mood entry page instead of dashboard
+      navigate('/mood-entry');
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
