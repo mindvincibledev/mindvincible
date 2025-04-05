@@ -10,6 +10,7 @@ import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import JarCanvas from '@/components/jar/JarCanvas';
 import ColorPalette from '@/components/jar/ColorPalette';
 import { getBase64FromCanvas, generateJarFilename } from '@/utils/jarUtils';
+import { drawJarOutline } from '@/utils/canvasDrawingUtils';
 
 const MoodJar = () => {
   const [selectedColor, setSelectedColor] = useState<string>('#F5DF4D');
@@ -64,6 +65,11 @@ const MoodJar = () => {
     setSelectedEmotion(emotion);
   };
 
+  // Draw jar outline wrapper function that uses our utility
+  const handleDrawJarOutline = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    drawJarOutline(ctx, width, height);
+  };
+
   const handleReset = () => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
@@ -80,33 +86,6 @@ const MoodJar = () => {
       title: "Canvas Reset",
       description: "Your jar canvas has been reset",
     });
-  };
-
-  const drawJarOutline = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Drawing the jar outline in black
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    
-    // Jar neck
-    const neckWidth = width * 0.3;
-    const neckHeight = height * 0.2;
-    ctx.moveTo(width/2 - neckWidth/2, height * 0.1);
-    ctx.lineTo(width/2 - neckWidth/2, height * 0.1 + neckHeight);
-    ctx.lineTo(width * 0.2, height * 0.3); // Left shoulder
-    ctx.lineTo(width * 0.2, height * 0.8); // Left side
-    ctx.quadraticCurveTo(width * 0.2, height * 0.9, width * 0.5, height * 0.9); // Bottom curve left
-    ctx.quadraticCurveTo(width * 0.8, height * 0.9, width * 0.8, height * 0.8); // Bottom curve right
-    ctx.lineTo(width * 0.8, height * 0.3); // Right side
-    ctx.lineTo(width/2 + neckWidth/2, height * 0.1 + neckHeight); // Right shoulder
-    ctx.lineTo(width/2 + neckWidth/2, height * 0.1); // Top right of neck
-    ctx.closePath();
-    ctx.stroke();
-    
-    // Jar lid
-    ctx.beginPath();
-    ctx.arc(width/2, height * 0.07, neckWidth * 0.7, 0, Math.PI * 2);
-    ctx.stroke();
   };
 
   const handleSave = async () => {
@@ -225,7 +204,7 @@ const MoodJar = () => {
                 <div className="flex justify-center">
                   <JarCanvas 
                     ref={canvasRef}
-                    drawJarOutline={drawJarOutline}
+                    drawJarOutline={handleDrawJarOutline}
                     selectedEmotion={selectedEmotion}
                     selectedColor={selectedColor}
                   />

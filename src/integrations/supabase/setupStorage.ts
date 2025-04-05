@@ -1,10 +1,10 @@
 
 import { supabase } from './client';
 
-// This function sets up the Supabase storage bucket for journal files
+// This function sets up the Supabase storage buckets for the application
 export async function setupJournalStorage() {
   try {
-    // Check if the bucket already exists
+    // Check if the buckets already exist
     const { data: buckets, error: listError } = await supabase.storage.listBuckets();
     
     if (listError) {
@@ -12,9 +12,10 @@ export async function setupJournalStorage() {
       return;
     }
     
-    const bucketExists = buckets?.some(bucket => bucket.name === 'journal_files');
+    // Setup journal_files bucket if it doesn't exist
+    const journalBucketExists = buckets?.some(bucket => bucket.name === 'journal_files');
     
-    if (!bucketExists) {
+    if (!journalBucketExists) {
       // Create the journal_files bucket
       const { error: createError } = await supabase.storage.createBucket('journal_files', {
         public: false, // Files are not public by default
@@ -37,7 +38,24 @@ export async function setupJournalStorage() {
         console.error('Error setting up bucket policies:', policyError);
       }
     }
+    
+    // Setup mood_jars bucket if it doesn't exist
+    const moodJarBucketExists = buckets?.some(bucket => bucket.name === 'mood_jars');
+    
+    if (!moodJarBucketExists) {
+      // Create the mood_jars bucket
+      const { error: createError } = await supabase.storage.createBucket('mood_jars', {
+        public: true, // Jar images can be public
+      });
+      
+      if (createError) {
+        console.error('Error creating mood_jars bucket:', createError);
+        return;
+      }
+      
+      console.log('Created mood_jars bucket successfully');
+    }
   } catch (error) {
-    console.error('Error setting up journal storage:', error);
+    console.error('Error setting up storage:', error);
   }
 }
