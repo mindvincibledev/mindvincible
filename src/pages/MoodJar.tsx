@@ -14,6 +14,7 @@ import { getBase64FromCanvas, generateJarFilename } from '@/utils/jarUtils';
 
 const MoodJar = () => {
   const [selectedColor, setSelectedColor] = useState<string>('#F5DF4D');
+  const [selectedEmotion, setSelectedEmotion] = useState<string>('Happy');
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -32,8 +33,9 @@ const MoodJar = () => {
     '#FC68B3', // Pink (Love)
   ];
 
-  const handleColorSelect = (color: string) => {
+  const handleColorSelect = (color: string, emotion: string) => {
     setSelectedColor(color);
+    setSelectedEmotion(emotion);
   };
 
   const handleReset = () => {
@@ -125,14 +127,13 @@ const MoodJar = () => {
         throw new Error("Failed to get public URL for uploaded image");
       }
 
-      // Use RPC call instead of direct table access
-      const { error: dbError } = await supabase.rpc(
-        'insert_mood_jar',
-        { 
-          user_id_param: user.id,
-          image_path_param: urlData.publicUrl
-        }
-      );
+      // Use a direct insert to avoid type issues with RPC
+      const { error: dbError } = await supabase
+        .from('mood_jar_table')
+        .insert({
+          user_id: user.id,
+          image_path: urlData.publicUrl
+        });
 
       if (dbError) {
         console.error("Database error:", dbError);
@@ -179,7 +180,7 @@ const MoodJar = () => {
                 <ColorPalette 
                   colors={colors} 
                   selectedColor={selectedColor} 
-                  onSelectColor={handleColorSelect} 
+                  onSelectColor={(color, emotion) => handleColorSelect(color, emotion)} 
                 />
                 
                 <div className="flex justify-center">
@@ -187,6 +188,7 @@ const MoodJar = () => {
                     ref={canvasRef}
                     selectedColor={selectedColor}
                     drawJarOutline={drawJarOutline}
+                    selectedEmotion={selectedEmotion}
                   />
                 </div>
                 

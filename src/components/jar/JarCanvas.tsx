@@ -3,11 +3,12 @@ import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle } f
 
 interface JarCanvasProps {
   selectedColor: string;
+  selectedEmotion: string;
   drawJarOutline: (ctx: CanvasRenderingContext2D, width: number, height: number) => void;
 }
 
 const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
-  ({ selectedColor, drawJarOutline }, ref) => {
+  ({ selectedColor, selectedEmotion, drawJarOutline }, ref) => {
     const [isDrawing, setIsDrawing] = useState(false);
     const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -164,7 +165,7 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
           className="border rounded-md touch-none bg-white"
         />
         <p className="text-white text-center text-sm mt-4">
-          Select an emotion color to start coloring the jar
+          Currently coloring with: <span className="font-bold">{selectedEmotion}</span>
         </p>
       </div>
     );

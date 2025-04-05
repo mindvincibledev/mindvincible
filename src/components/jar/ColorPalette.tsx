@@ -5,7 +5,7 @@ import { Smile, Flame, Cloud, Eye, Zap, X, Heart } from 'lucide-react';
 interface ColorPaletteProps {
   colors: string[];
   selectedColor: string;
-  onSelectColor: (color: string) => void;
+  onSelectColor: (color: string, emotion: string) => void;
 }
 
 // Map of emotions associated with each color
@@ -39,7 +39,7 @@ const ColorPalette: React.FC<ColorPaletteProps> = ({
                 : 'hover:scale-105'
             }`}
             style={{ backgroundColor: colors[index % colors.length] }}
-            onClick={() => onSelectColor(colors[index % colors.length])}
+            onClick={() => onSelectColor(colors[index % colors.length], item.name)}
             aria-label={`Select ${item.name} color`}
           >
             {item.icon}
