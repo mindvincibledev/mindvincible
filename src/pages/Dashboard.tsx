@@ -300,7 +300,7 @@ const Dashboard = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-white">Your Mood Dashboard</h1>
-              <p className="text-white mt-2">Welcome back, {user.email}</p>
+              <p className="text-white mt-2">Welcome, {user.name}</p>
             </div>
             
             <div>
