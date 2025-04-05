@@ -41,3 +41,72 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Wave animations */
+@keyframes wave1 {
+  0% {
+    transform: translateX(-90px);
+  }
+  100% {
+    transform: translateX(85px);
+  }
+}
+
+@keyframes wave2 {
+  0% {
+    transform: translateX(-90px);
+  }
+  100% {
+    transform: translateX(85px);
+  }
+}
+
+@keyframes wave3 {
+  0% {
+    transform: translateX(85px);
+  }
+  100% {
+    transform: translateX(-90px);
+  }
+}
+
+@keyframes wave4 {
+  0% {
+    transform: translateX(-90px);
+  }
+  100% {
+    transform: translateX(85px);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-wave1 {
+  animation: wave1 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.animate-wave2 {
+  animation: wave2 10s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.animate-wave3 {
+  animation: wave3 13s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.animate-wave4 {
+  animation: wave4 16s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}

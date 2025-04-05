@@ -46,7 +46,7 @@ const Login = () => {
 
   return (
     <BackgroundWithEmojis>
-      <div className="flex-grow flex items-center justify-center px-4 py-12 relative z-10">
+      <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }} 
           animate={{ opacity: 1, y: 0 }} 
@@ -61,7 +61,7 @@ const Login = () => {
               </Link>
             </div>
             
-            <h2 className="text-2xl font-bold text-center mt-8 mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
               Welcome Back
             </h2>
             
