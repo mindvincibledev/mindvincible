@@ -58,7 +58,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_path: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -66,7 +66,15 @@ export type Database = {
           image_path?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "mood_jar_table_user_id_fkey1"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {
