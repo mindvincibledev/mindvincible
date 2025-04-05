@@ -262,6 +262,10 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been signed out of your account",
+      });
       navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
@@ -294,7 +298,7 @@ const Dashboard = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-white">Your Mood Dashboard</h1>
-              <p className="text-white/70 mt-2">Welcome back, {user.email}</p>
+              <p className="text-white mt-2">Welcome back, {user.email}</p>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-3">
@@ -307,7 +311,7 @@ const Dashboard = () => {
               
               <Button 
                 variant="outline" 
-                className="flex items-center gap-2 border-white/20 text-white/90 hover:bg-white/10" 
+                className="flex items-center gap-2 border-[#3DFDFF] text-[#3DFDFF] hover:bg-[#3DFDFF]/10" 
                 onClick={handleSignOut}
               >
                 <LogOut size={18} />
@@ -328,11 +332,11 @@ const Dashboard = () => {
 
           {loading ? (
             <div className="flex justify-center items-center h-64">
-              <div className="text-white/70 text-lg">Loading your mood data...</div>
+              <div className="text-[#F5DF4D] text-lg">Loading your mood data...</div>
             </div>
           ) : allMoodEntries.length === 0 ? (
-            <div className="flex flex-col items-center justify-center bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-8 my-8">
-              <div className="text-white text-lg mb-6 text-center">
+            <div className="flex flex-col items-center justify-center bg-black/60 backdrop-blur-md rounded-xl border border-[#3DFDFF]/30 p-8 my-8">
+              <div className="text-[#F5DF4D] text-lg mb-6 text-center">
                 You haven't recorded any moods yet. Start tracking your emotional well-being today!
               </div>
               <Link to="/mood-entry">
@@ -350,8 +354,8 @@ const Dashboard = () => {
               {filteredMoodDistribution.length > 0 ? (
                 <MoodDistributionChart moodDistribution={filteredMoodDistribution} />
               ) : (
-                <div className="bg-black/40 backdrop-blur-lg border-purple-500/20 shadow-xl rounded-lg p-6 flex items-center justify-center">
-                  <p className="text-white/70">No mood data for this period</p>
+                <div className="bg-black/60 backdrop-blur-lg border border-[#FC68B3]/30 shadow-xl rounded-lg p-6 flex items-center justify-center">
+                  <p className="text-[#D5D5F1]">No mood data for this period</p>
                 </div>
               )}
               
@@ -359,8 +363,8 @@ const Dashboard = () => {
               {filteredMoodTags.length > 0 ? (
                 <MoodTagsTable moodTags={filteredMoodTags} />
               ) : (
-                <div className="col-span-1 md:col-span-3 bg-black/40 backdrop-blur-lg border-purple-500/20 shadow-xl rounded-lg p-6 flex items-center justify-center">
-                  <p className="text-white/70">No tag data for this period</p>
+                <div className="col-span-1 md:col-span-3 bg-black/60 backdrop-blur-lg border border-[#FC68B3]/30 shadow-xl rounded-lg p-6 flex items-center justify-center">
+                  <p className="text-[#D5D5F1]">No tag data for this period</p>
                 </div>
               )}
             </div>
