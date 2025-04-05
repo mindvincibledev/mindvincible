@@ -44,7 +44,8 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
           }} 
           className="relative text-5xl md:text-6xl lg:text-7xl font-bold text-white my-4 md:my-6 tracking-tight" 
           style={{
-            textShadow: '0 2px 10px rgba(0,0,0,0.15)'
+            textShadow: `0 2px 15px ${moodColor}80`,
+            color: `white`
           }}
         >
           {selectedMood}
@@ -61,6 +62,9 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
               repeat: Infinity,
               repeatType: "reverse"
             }}
+            style={{
+              backgroundColor: `${moodColor}30`
+            }}
           />
           
           <motion.div 
@@ -75,14 +79,17 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
               repeatType: "reverse",
               delay: 1
             }}
+            style={{
+              backgroundColor: `${moodColor}30`
+            }}
           />
           
           {/* Highlight glow effect that matches the mood color */}
           <motion.div 
-            className="absolute inset-0 blur-xl -z-20 opacity-30"
+            className="absolute inset-0 blur-xl -z-20 opacity-50"
             style={{ background: moodColor }}
             animate={{
-              opacity: [0.3, 0.5, 0.3],
+              opacity: [0.4, 0.6, 0.4],
             }}
             transition={{
               duration: 3,
