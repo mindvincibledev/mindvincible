@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      journal_entries: {
+        Row: {
+          audio_path: string | null
+          content: string | null
+          created_at: string
+          drawing_path: string | null
+          entry_type: string
+          id: string
+          journal_area: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audio_path?: string | null
+          content?: string | null
+          created_at?: string
+          drawing_path?: string | null
+          entry_type: string
+          id?: string
+          journal_area?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audio_path?: string | null
+          content?: string | null
+          created_at?: string
+          drawing_path?: string | null
+          entry_type?: string
+          id?: string
+          journal_area?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mood_data: {
         Row: {
           created_at: string

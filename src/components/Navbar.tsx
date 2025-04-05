@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, Heart, Archive } from 'lucide-react';
+import { Menu, X, LogOut, Heart, Archive, Book } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -85,6 +85,9 @@ const Navbar = () => {
                 <Link to="/mood-jar" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
                   Mood Jar
                 </Link>
+                <Link to="/journal" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
+                  Journal
+                </Link>
                 <Button 
                   className="ml-4 flex items-center gap-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-white transition-transform hover:scale-105" 
                   onClick={handleLogout}
@@ -123,6 +126,7 @@ const Navbar = () => {
                     className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
                     onClick={() => setIsMenuOpen(false)}
                   >
+                    <Heart className="h-4 w-4 mr-2 inline-block" />
                     Mood Entry
                   </Link>
                   <Link 
@@ -130,7 +134,16 @@ const Navbar = () => {
                     className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
                     onClick={() => setIsMenuOpen(false)}
                   >
+                    <Archive className="h-4 w-4 mr-2 inline-block" />
                     Mood Jar
+                  </Link>
+                  <Link 
+                    to="/journal" 
+                    className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Book className="h-4 w-4 mr-2 inline-block" />
+                    Journal
                   </Link>
                   <button 
                     className="px-4 py-2 text-left text-white bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 rounded-md transition-all hover:scale-105 flex items-center"
