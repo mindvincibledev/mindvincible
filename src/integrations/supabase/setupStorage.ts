@@ -15,7 +15,7 @@ export async function setupJournalStorage() {
     // Check for journal_files bucket
     const journalBucketExists = buckets?.some(bucket => bucket.id === 'journal_files');
     if (!journalBucketExists) {
-      console.warn('journal_files bucket not found. It should have been created by SQL migration.');
+      console.warn('journal_files bucket not found. Please make sure it exists in Supabase.');
     } else {
       console.log('journal_files bucket exists');
     }
@@ -23,7 +23,7 @@ export async function setupJournalStorage() {
     // Check for mood_jars bucket
     const moodJarBucketExists = buckets?.some(bucket => bucket.id === 'mood_jars');
     if (!moodJarBucketExists) {
-      console.warn('mood_jars bucket not found. It should have been created by SQL migration.');
+      console.warn('mood_jars bucket not found. Please make sure it exists in Supabase.');
     } else {
       console.log('mood_jars bucket exists');
     }

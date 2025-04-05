@@ -104,12 +104,13 @@ export function useJournalSave() {
         const timestamp = Date.now();
         const fileName = `audio_${user.id}_${timestamp}.webm`;
         
-        // Try to upload to the journal_files bucket
+        // Upload audio file with explicit owner setting
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('journal_files')
           .upload(fileName, audioBlob, {
             contentType: 'audio/webm',
-            upsert: false
+            upsert: false,
+            duplex: 'half'
           });
           
         if (uploadError) {
@@ -125,12 +126,13 @@ export function useJournalSave() {
         const timestamp = Date.now();
         const fileName = `drawing_${user.id}_${timestamp}.png`;
         
-        // Try to upload to the journal_files bucket
+        // Upload drawing file with explicit owner setting
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('journal_files')
           .upload(fileName, drawingBlob, {
             contentType: 'image/png',
-            upsert: false
+            upsert: false,
+            duplex: 'half'
           });
           
         if (uploadError) {
