@@ -90,13 +90,12 @@ const MoodJar = () => {
         title: "Authentication required",
         description: "Please log in to save your mood jar",
       });
+      navigate("/login");
       return;
     }
 
     try {
       setIsSaving(true);
-      
-      console.log("Current user:", user); // Debug: Log user object to see structure
       
       // Get blob image data from canvas
       const blobImage = await getBase64FromCanvas(canvasRef.current);
@@ -104,8 +103,10 @@ const MoodJar = () => {
         throw new Error("Could not get image data from canvas");
       }
       
-      // Upload the image to Supabase storage
+      // Generate a unique filename
       const fileName = generateJarFilename(user.id);
+      
+      // Upload the image to Supabase storage
       const { data: uploadData, error: uploadError } = await supabase
         .storage
         .from('mood_jars')
@@ -129,15 +130,11 @@ const MoodJar = () => {
         throw new Error("Failed to get public URL for uploaded image");
       }
 
-      // Make sure we're using the correct user ID field
-      const userId = user.id;
-      console.log("Using user ID for database insert:", userId); // Debug: Log the user ID being used
-      
-      // Insert into mood_jar_table with explicit user_id
+      // Insert into mood_jar_table - use the id as is since we're not changing the schema
       const { error: dbError } = await supabase
         .from('mood_jar_table')
         .insert({
-          user_id: userId,
+          user_id: user.id,
           image_path: urlData.publicUrl
         });
 
