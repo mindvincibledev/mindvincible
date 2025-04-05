@@ -85,23 +85,43 @@ const JournalEntry = () => {
       if (journalType === 'audio' && audioBlob) {
         const timestamp = Date.now();
         const fileName = `audio_${user.id}_${timestamp}.webm`;
-        const { error: uploadError } = await supabase.storage
+        
+        // Try to upload to the journal_files bucket
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('journal_files')
-          .upload(fileName, audioBlob);
+          .upload(fileName, audioBlob, {
+            contentType: 'audio/webm',
+            upsert: false
+          });
           
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Error uploading audio:', uploadError);
+          throw new Error(`Failed to upload audio: ${uploadError.message}`);
+        }
+        
         audioPath = fileName;
+        console.log('Audio uploaded successfully:', uploadData);
       }
       
       if (journalType === 'drawing' && drawingBlob) {
         const timestamp = Date.now();
         const fileName = `drawing_${user.id}_${timestamp}.png`;
-        const { error: uploadError } = await supabase.storage
+        
+        // Try to upload to the journal_files bucket
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('journal_files')
-          .upload(fileName, drawingBlob);
+          .upload(fileName, drawingBlob, {
+            contentType: 'image/png',
+            upsert: false
+          });
           
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Error uploading drawing:', uploadError);
+          throw new Error(`Failed to upload drawing: ${uploadError.message}`);
+        }
+        
         drawingPath = fileName;
+        console.log('Drawing uploaded successfully:', uploadData);
       }
       
       // Insert journal entry

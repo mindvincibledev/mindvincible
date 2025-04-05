@@ -12,48 +12,20 @@ export async function setupJournalStorage() {
       return;
     }
     
-    // Setup journal_files bucket if it doesn't exist
-    const journalBucketExists = buckets?.some(bucket => bucket.name === 'journal_files');
-    
+    // Check for journal_files bucket
+    const journalBucketExists = buckets?.some(bucket => bucket.id === 'journal_files');
     if (!journalBucketExists) {
-      // Create the journal_files bucket
-      const { error: createError } = await supabase.storage.createBucket('journal_files', {
-        public: false, // Files are not public by default
-      });
-      
-      if (createError) {
-        console.error('Error creating journal_files bucket:', createError);
-        return;
-      }
-      
-      console.log('Created journal_files bucket successfully');
-      
-      // Set up bucket policies
-      const { error: policyError } = await supabase.storage.from('journal_files').createSignedUrls(
-        ['dummy-path'],
-        60
-      );
-      
-      if (policyError && !policyError.message.includes('The resource was not found')) {
-        console.error('Error setting up bucket policies:', policyError);
-      }
+      console.warn('journal_files bucket not found. It should have been created by SQL migration.');
+    } else {
+      console.log('journal_files bucket exists');
     }
     
-    // Setup mood_jars bucket if it doesn't exist
-    const moodJarBucketExists = buckets?.some(bucket => bucket.name === 'mood_jars');
-    
+    // Check for mood_jars bucket
+    const moodJarBucketExists = buckets?.some(bucket => bucket.id === 'mood_jars');
     if (!moodJarBucketExists) {
-      // Create the mood_jars bucket
-      const { error: createError } = await supabase.storage.createBucket('mood_jars', {
-        public: true, // Jar images can be public
-      });
-      
-      if (createError) {
-        console.error('Error creating mood_jars bucket:', createError);
-        return;
-      }
-      
-      console.log('Created mood_jars bucket successfully');
+      console.warn('mood_jars bucket not found. It should have been created by SQL migration.');
+    } else {
+      console.log('mood_jars bucket exists');
     }
   } catch (error) {
     console.error('Error setting up storage:', error);
