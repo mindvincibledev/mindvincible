@@ -105,7 +105,7 @@ export function useJournalSave() {
         const fileName = `audio_${timestamp}.webm`;
         
         // Upload audio file
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('journal_files')
           .upload(`${user.id}/${fileName}`, audioBlob, {
             contentType: 'audio/webm',
@@ -131,7 +131,7 @@ export function useJournalSave() {
         const fileName = `drawing_${timestamp}.png`;
         
         // Upload drawing file
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('journal_files')
           .upload(`${user.id}/${fileName}`, drawingBlob, {
             contentType: 'image/png',
