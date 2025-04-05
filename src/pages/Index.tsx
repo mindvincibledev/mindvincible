@@ -4,7 +4,7 @@ import { TaskProvider } from '@/context/TaskContext';
 import TaskList from '@/components/TaskList';
 import Header from '@/components/Header';
 import BackgroundWithEmojis from "@/components/BackgroundWithEmojis";
-const Index = () => {
+export default function Home() {
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen bg-background p-4 md:p-8">
@@ -18,4 +18,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+
