@@ -1,10 +1,11 @@
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Brush, Trash, Save } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useCanvasInteraction } from '@/hooks/useCanvasInteraction';
 
 interface DrawingJournalProps {
   onDrawingChange: (imageBlob: Blob) => void;
@@ -29,12 +30,12 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
   title 
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
   const [selectedColor, setSelectedColor] = useState('#FC68B3');
   const [brushSize, setBrushSize] = useState(5);
   const lastPosition = useRef({ x: 0, y: 0 });
   
-  useEffect(() => {
+  // Initialize canvas with white background
+  React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -53,7 +54,6 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
     const context = canvas.getContext('2d');
     if (!context) return;
     
-    setIsDrawing(true);
     lastPosition.current = { x, y };
     
     // Draw initial dot
@@ -64,8 +64,6 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
   };
 
   const draw = (x: number, y: number) => {
-    if (!isDrawing) return;
-    
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -87,12 +85,17 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
   };
 
   const endDrawing = () => {
-    if (!isDrawing) return;
-    setIsDrawing(false);
-    
     // Save drawing
     saveDrawing();
   };
+
+  // Use the canvas interaction hook
+  useCanvasInteraction({
+    canvasRef,
+    onStartDrawing: startDrawing,
+    onMoveDrawing: draw,
+    onEndDrawing: endDrawing
+  });
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
@@ -123,56 +126,6 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
         onDrawingChange(blob);
       }
     }, 'image/png');
-  };
-
-  // Mouse event handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    startDrawing(x, y);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas || !isDrawing) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    draw(x, y);
-  };
-
-  // Touch event handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    
-    startDrawing(x, y);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    if (!canvas || !isDrawing) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    
-    draw(x, y);
   };
 
   return (
@@ -231,13 +184,6 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
             width={600}
             height={400}
             className="w-full touch-none cursor-crosshair"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={endDrawing}
-            onMouseLeave={endDrawing}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={endDrawing}
           />
         </div>
         
