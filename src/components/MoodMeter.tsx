@@ -45,27 +45,18 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
       exit={{ opacity: 0 }}
       className="w-full h-full text-center flex flex-col items-center justify-center px-4 py-8"
     >
-      {/* Dynamic background that changes with mood */}
-      <motion.div 
-        className="absolute inset-0 -z-10"
-        animate={{ 
-          background: `radial-gradient(circle at center, ${moodColor}40 0%, ${moodColor}20 40%, rgba(0,0,0,0.8) 100%)`
-        }}
-        transition={{ duration: 0.5 }}
-      />
-      
       <div className="relative w-full max-w-md z-10">
         {/* Card container similar to the mood details screen */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-black/40 backdrop-blur-lg rounded-2xl shadow-xl border overflow-hidden p-6"
+          className="bg-black/40 backdrop-blur-lg rounded-2xl shadow-xl border border-white/10 overflow-hidden p-6"
           style={{
             boxShadow: `0 8px 32px ${moodColor}80`,
-            background: `radial-gradient(circle at center, ${moodColor}40 0%, rgba(0,0,0,0.7) 100%)`,
-            transition: 'box-shadow 0.5s ease, background 0.5s ease, border-color 0.5s ease',
-            borderColor: `${moodColor}70`, // More vivid border color
+            background: `radial-gradient(circle at center, ${moodColor}25 0%, rgba(0,0,0,0.6) 90%)`,
+            transition: 'box-shadow 0.5s ease, background 0.5s ease',
+            borderColor: `${moodColor}50`,
           }}
         >
           {/* App name */}
