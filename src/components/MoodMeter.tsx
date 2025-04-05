@@ -53,9 +53,10 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
           transition={{ duration: 0.5 }}
           className="bg-black/40 backdrop-blur-lg rounded-2xl shadow-xl border border-white/10 overflow-hidden p-6"
           style={{
-            boxShadow: `0 8px 32px ${moodColor}33`,
-            background: `radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.6) 100%)`,
+            boxShadow: `0 8px 32px ${moodColor}80`,
+            background: `radial-gradient(circle at center, ${moodColor}25 0%, rgba(0,0,0,0.6) 90%)`,
             transition: 'box-shadow 0.5s ease, background 0.5s ease',
+            borderColor: `${moodColor}50`,
           }}
         >
           {/* App name */}
