@@ -29,7 +29,7 @@ const MoodJar = () => {
     '#3DFDFF', // Cyan (Sad)
     '#D5D5F1', // Lavender (Fearful)
     '#2AC20E', // Green (Surprised)
-    '#F5DF4D', // Yellow (Disgusted - using yellow again)
+    '#D6F6D5', // Light Green (Disgusted)
     '#FC68B3', // Pink (Love)
   ];
 
@@ -214,9 +214,7 @@ const MoodJar = () => {
             <div className="w-full max-w-2xl bg-black/60 backdrop-blur-lg p-6 rounded-xl border border-[#3DFDFF]/30 shadow-xl">
               <div className="flex flex-col gap-6">
                 <p className="text-white text-center text-lg">
-                  Check-in with yourself to understand your feelings. Fill
-                  the jar with feelings colours to see how much of each
-                  feeling you have right now.
+                  Check-in with yourself to understand your feelings.
                 </p>
                 
                 <ColorPalette 
