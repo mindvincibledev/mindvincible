@@ -21,7 +21,7 @@ const MoodJar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Colors directly from the colorEmotions array
+  // Define colors with matching emotional associations
   const colors = [
     '#F5DF4D', // Yellow (Happy)
     '#FF8A48', // Orange (Angry)
@@ -71,7 +71,6 @@ const MoodJar = () => {
       if (context) {
         // Clear canvas
         context.clearRect(0, 0, canvas.width, canvas.height);
-        
         
         // Redraw the empty jar outline
         drawJarOutline(context, canvas.width, canvas.height);
@@ -219,15 +218,13 @@ const MoodJar = () => {
                 
                 <ColorPalette 
                   colors={colors} 
-                  onSelectColor={(color, emotion) => handleColorSelect(color, emotion)} 
+                  onSelectColor={handleColorSelect} 
                   selectedColor={selectedColor} 
-                  
                 />
                 
                 <div className="flex justify-center">
                   <JarCanvas 
                     ref={canvasRef}
-                    
                     drawJarOutline={drawJarOutline}
                     selectedEmotion={selectedEmotion}
                     selectedColor={selectedColor}

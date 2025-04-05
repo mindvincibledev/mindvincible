@@ -31,23 +31,17 @@ const ColorPalette: React.FC<ColorPaletteProps> = ({
       </h3>
       <div className="flex flex-wrap gap-3 justify-center mb-4">
         {colorEmotions.map((item) => {
-          const isSelected = item.color === selectedColor;
           const buttonColor = item.color;
           const textColor = buttonColor === '#F5DF4D' || buttonColor === '#2AC20E' || buttonColor === '#D6F6D5' ? 'text-black' : 'text-white';
           
           return (
             <button
               key={item.name}
-              className={`
-                flex items-center gap-2 px-4 py-2 rounded-full border border-white/30
-                transition-all duration-300 backdrop-blur-sm
-                ${isSelected 
-                  ? 'ring-2 ring-white/80 scale-105 shadow-lg' 
-                  : 'hover:scale-105 hover:shadow-md'}
-              `}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/30
+                transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-md"
               style={{ 
-                backgroundColor: isSelected ? `${buttonColor}` : `${buttonColor}70`,
-                boxShadow: isSelected ? `0 0 15px ${buttonColor}90` : ''
+                backgroundColor: `${buttonColor}70`,
+                boxShadow: '0 0 5px rgba(255, 255, 255, 0.2)'
               }}
               onClick={() => onSelectColor(item.color, item.name)}
               aria-label={`Select ${item.name} color`}

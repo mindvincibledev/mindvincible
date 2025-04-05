@@ -14,6 +14,14 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
     const [isCanvasInitialized, setIsCanvasInitialized] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasSize = { width: 300, height: 400 };
+    
+    // Track current drawing color to avoid unexpected color changes
+    const currentColorRef = useRef(selectedColor);
+
+    // Update the color ref when selectedColor changes
+    useEffect(() => {
+      currentColorRef.current = selectedColor;
+    }, [selectedColor]);
 
     // Forward the ref to parent component
     useImperativeHandle(ref, () => canvasRef.current as HTMLCanvasElement);
@@ -103,13 +111,12 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       setIsDrawing(false);
     };
 
-    // Fix mouse drawing to be continuous
+    // Improved mouse drawing for continuous strokes
     const handleMouseDown = (e: MouseEvent) => {
-      setIsDrawing(true);
-      
       const canvas = canvasRef.current;
       if (!canvas) return;
       
+      setIsDrawing(true);
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -118,8 +125,8 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       drawDot(x, y);
     };
 
-    // Updated mouse move handler to draw even without clicking
     const handleMouseMove = (e: MouseEvent) => {
+      // Only proceed if we're in drawing mode
       if (!isDrawing) return;
       
       const canvas = canvasRef.current;
@@ -144,7 +151,8 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       const context = canvas.getContext('2d');
       if (!context) return;
       
-      context.fillStyle = selectedColor;
+      // Use the current color reference to ensure consistency
+      context.fillStyle = currentColorRef.current;
       context.beginPath();
       context.arc(x, y, 10, 0, Math.PI * 2);
       context.fill();
@@ -157,7 +165,8 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
       const context = canvas.getContext('2d');
       if (!context) return;
       
-      context.strokeStyle = selectedColor;
+      // Use the current color reference to ensure consistency
+      context.strokeStyle = currentColorRef.current;
       context.lineWidth = 20;
       context.lineCap = 'round';
       context.beginPath();
