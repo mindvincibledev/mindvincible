@@ -189,7 +189,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
         ))}
       </div>
       
-      <style jsx="false">{`
+      <style>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
         }
