@@ -95,16 +95,13 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
               e.stopPropagation();
               onChangeMood('left');
             }}
-            style={{ transform: "translateY(-50%)" }} // Fixed position styling
+            style={{ transform: "translateY(-50%)", WebkitTransform: "translateY(-50%)" }} // Fixed position styling
           >
             <ChevronLeft className="text-white w-6 h-6" />
           </motion.button>
           
           {/* The scroll wheel */}
           <div className="relative overflow-hidden mx-10 py-4">
-            {/* Indicator line showing the center point */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/30 -translate-x-1/2 z-10" />
-            
             {/* Mood options container */}
             <div 
               ref={scrollContainerRef}
@@ -169,7 +166,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
               e.stopPropagation();
               onChangeMood('right');
             }}
-            style={{ transform: "translateY(-50%)" }} // Fixed position styling
+            style={{ transform: "translateY(-50%)", WebkitTransform: "translateY(-50%)" }} // Fixed position styling
           >
             <ChevronRight className="text-white w-6 h-6" />
           </motion.button>
@@ -192,8 +189,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
         ))}
       </div>
       
-      {/* Custom CSS to hide scrollbars */}
-      <style jsx>{`
+      <style jsx="false">{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
         }

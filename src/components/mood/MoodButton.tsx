@@ -27,9 +27,10 @@ const MoodButton: React.FC<MoodButtonProps> = ({ selectedMood, onSelectMood }) =
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={handleClick} 
-      className="px-8 py-4 rounded-full bg-white/20 backdrop-blur-sm text-white text-lg font-medium shadow-lg my-6 w-64 border border-white/30 relative overflow-hidden group z-10"
+      className="px-8 py-4 rounded-full bg-white/20 backdrop-blur-sm text-white text-lg font-medium shadow-lg my-6 w-64 border border-white/30 relative overflow-hidden group z-10 transform-gpu"
       style={{ 
-        boxShadow: `0 4px 20px ${moodColor}40`
+        boxShadow: `0 4px 20px ${moodColor}40`,
+        transformStyle: 'preserve-3d'
       }}
     >
       {/* Button light effect */}
