@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -103,7 +104,7 @@ export function useJournalSave() {
         const timestamp = Date.now();
         const fileName = `audio_${timestamp}.webm`;
         
-        // Upload audio file using the updated approach
+        // Upload audio file
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('journal_files')
           .upload(`${user.id}/${fileName}`, audioBlob, {
@@ -116,15 +117,20 @@ export function useJournalSave() {
           throw new Error(`Failed to upload audio: ${uploadError.message}`);
         }
         
-        audioPath = `${user.id}/${fileName}`;
-        console.log('Audio uploaded successfully:', uploadData);
+        // Get the public URL for the uploaded file
+        const { data: audioUrl } = supabase.storage
+          .from('journal_files')
+          .getPublicUrl(`${user.id}/${fileName}`);
+          
+        audioPath = audioUrl.publicUrl;
+        console.log('Audio uploaded successfully, URL:', audioPath);
       }
       
       if (journalType === 'drawing' && drawingBlob) {
         const timestamp = Date.now();
         const fileName = `drawing_${timestamp}.png`;
         
-        // Upload drawing file using the updated approach
+        // Upload drawing file
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('journal_files')
           .upload(`${user.id}/${fileName}`, drawingBlob, {
@@ -137,8 +143,13 @@ export function useJournalSave() {
           throw new Error(`Failed to upload drawing: ${uploadError.message}`);
         }
         
-        drawingPath = `${user.id}/${fileName}`;
-        console.log('Drawing uploaded successfully:', uploadData);
+        // Get the public URL for the uploaded file
+        const { data: drawingUrl } = supabase.storage
+          .from('journal_files')
+          .getPublicUrl(`${user.id}/${fileName}`);
+        
+        drawingPath = drawingUrl.publicUrl;
+        console.log('Drawing uploaded successfully, URL:', drawingPath);
       }
       
       // Insert journal entry
