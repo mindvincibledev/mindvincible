@@ -12,6 +12,8 @@ import ColorPalette from '@/components/jar/ColorPalette';
 import { getBase64FromCanvas, generateJarFilename } from '@/utils/jarUtils';
 
 const MoodJar = () => {
+  const [selectedColor, setSelectedColor] = useState<string>('#F5DF4D');
+  const [selectedEmotion, setSelectedEmotion] = useState<string>('Happy');
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -69,6 +71,7 @@ const MoodJar = () => {
       if (context) {
         // Clear canvas
         context.clearRect(0, 0, canvas.width, canvas.height);
+        
         
         // Redraw the empty jar outline
         drawJarOutline(context, canvas.width, canvas.height);
@@ -216,16 +219,18 @@ const MoodJar = () => {
                 
                 <ColorPalette 
                   colors={colors} 
-                  selectedColor={selectedColor} 
                   onSelectColor={(color, emotion) => handleColorSelect(color, emotion)} 
+                  selectedColor={selectedColor} 
+                  
                 />
                 
                 <div className="flex justify-center">
                   <JarCanvas 
                     ref={canvasRef}
-                    selectedColor={selectedColor}
+                    
                     drawJarOutline={drawJarOutline}
                     selectedEmotion={selectedEmotion}
+                    selectedColor={selectedColor}
                   />
                 </div>
                 
