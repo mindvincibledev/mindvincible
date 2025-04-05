@@ -19,14 +19,17 @@ export async function setupJournalStorage() {
     } else {
       console.log('journal_files bucket exists');
       
-      // Let's check the RLS policies as well
-      const { data: policies, error: policiesError } = await supabase.rpc('get_policies', {
-        table_name: 'objects',
-        schema_name: 'storage'
-      }).catch(() => ({ data: null, error: null }));
-      
-      if (!policiesError) {
-        console.log('Storage policies are set up');
+      // Let's check if we can access storage info without using RPC
+      try {
+        // Just check if we can access the bucket
+        const { data, error } = await supabase.storage.from('journal_files').list();
+        if (!error) {
+          console.log('Storage policies are set up correctly');
+        } else {
+          console.warn('Potential issue with storage policies:', error.message);
+        }
+      } catch (err) {
+        console.error('Error checking storage policies:', err);
       }
     }
     
