@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -102,15 +101,14 @@ export function useJournalSave() {
       
       if (journalType === 'audio' && audioBlob) {
         const timestamp = Date.now();
-        const fileName = `audio_${user.id}_${timestamp}.webm`;
+        const fileName = `audio_${timestamp}.webm`;
         
-        // Upload audio file with explicit owner setting
+        // Upload audio file using the updated approach
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('journal_files')
-          .upload(fileName, audioBlob, {
+          .upload(`${user.id}/${fileName}`, audioBlob, {
             contentType: 'audio/webm',
-            upsert: false,
-            duplex: 'half'
+            upsert: true
           });
           
         if (uploadError) {
@@ -118,21 +116,20 @@ export function useJournalSave() {
           throw new Error(`Failed to upload audio: ${uploadError.message}`);
         }
         
-        audioPath = fileName;
+        audioPath = `${user.id}/${fileName}`;
         console.log('Audio uploaded successfully:', uploadData);
       }
       
       if (journalType === 'drawing' && drawingBlob) {
         const timestamp = Date.now();
-        const fileName = `drawing_${user.id}_${timestamp}.png`;
+        const fileName = `drawing_${timestamp}.png`;
         
-        // Upload drawing file with explicit owner setting
+        // Upload drawing file using the updated approach
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('journal_files')
-          .upload(fileName, drawingBlob, {
+          .upload(`${user.id}/${fileName}`, drawingBlob, {
             contentType: 'image/png',
-            upsert: false,
-            duplex: 'half'
+            upsert: true
           });
           
         if (uploadError) {
@@ -140,7 +137,7 @@ export function useJournalSave() {
           throw new Error(`Failed to upload drawing: ${uploadError.message}`);
         }
         
-        drawingPath = fileName;
+        drawingPath = `${user.id}/${fileName}`;
         console.log('Drawing uploaded successfully:', uploadData);
       }
       
