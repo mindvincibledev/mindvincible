@@ -51,10 +51,10 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white shadow-md">
+    <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-[#222222] shadow-md">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold text-primary">
+          <Link to="/" className="text-2xl font-bold text-white">
             M(in)dvincible
           </Link>
 
@@ -62,7 +62,7 @@ const Navbar = () => {
           <div className="block md:hidden">
             <button
               onClick={toggleMenu}
-              className="text-foreground focus:outline-none"
+              className="text-white focus:outline-none"
             >
               {isMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -104,7 +104,7 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-white bg-opacity-95 backdrop-blur-md mt-3 py-4 px-2 rounded-lg shadow-lg animate-fade-in">
+          <div className="md:hidden bg-[#333333] bg-opacity-95 backdrop-blur-md mt-3 py-4 px-2 rounded-lg shadow-lg animate-fade-in">
             <div className="flex flex-col space-y-4">
               {user ? (
                 <>
