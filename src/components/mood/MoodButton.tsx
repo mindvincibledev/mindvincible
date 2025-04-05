@@ -27,9 +27,11 @@ const MoodButton: React.FC<MoodButtonProps> = ({ selectedMood, onSelectMood }) =
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={handleClick} 
-      className="px-8 py-3 rounded-full bg-white/20 backdrop-blur-sm text-white text-lg font-medium shadow-lg my-4 w-full max-w-56 border border-white/30 relative overflow-hidden group z-10 transform-gpu"
+      className="px-8 py-3 rounded-full text-white text-lg font-medium shadow-lg my-4 w-full max-w-56 relative overflow-hidden group z-10 transform-gpu"
       style={{ 
-        boxShadow: `0 4px 20px ${moodColor}40`,
+        background: `linear-gradient(135deg, ${moodColor}CC, ${moodColor}99)`,
+        boxShadow: `0 4px 20px ${moodColor}70`,
+        border: `1px solid ${moodColor}50`,
         transformStyle: 'preserve-3d'
       }}
     >
@@ -37,7 +39,7 @@ const MoodButton: React.FC<MoodButtonProps> = ({ selectedMood, onSelectMood }) =
       <motion.div 
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         style={{ 
-          background: `radial-gradient(circle at center, ${moodColor}40 0%, transparent 70%)`
+          background: `radial-gradient(circle at center, ${moodColor}60 0%, transparent 70%)`
         }}
         animate={{
           scale: [1, 1.1, 1],
@@ -50,7 +52,7 @@ const MoodButton: React.FC<MoodButtonProps> = ({ selectedMood, onSelectMood }) =
       />
       
       {/* Button highlight effect */}
-      <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+      <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
       
       <span className="relative z-10">Tap to pick your mood</span>
     </motion.button>
