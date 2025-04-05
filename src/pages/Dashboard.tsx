@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { WavyBackground } from '@/components/ui/wavy-background';
-import { PlusCircle, LogOut } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import DailyMoodChart from '@/components/charts/DailyMoodChart';
@@ -278,8 +278,8 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Background gradient for better visibility */}
-      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-white/20 to-transparent z-[1] pointer-events-none"></div>
+      {/* Background gradient always visible */}
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/20 to-transparent z-[1] pointer-events-none"></div>
       
       <div className="absolute inset-0 z-0 overflow-hidden">
         <WavyBackground 

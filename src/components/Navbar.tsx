@@ -83,8 +83,7 @@ const Navbar = () => {
                   Mood Entry
                 </Link>
                 <Button 
-                  variant="outline" 
-                  className="ml-4 flex items-center gap-2 border-red-400 text-red-400 hover:bg-red-400/10" 
+                  className="ml-4 flex items-center gap-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-white" 
                   onClick={handleLogout}
                 >
                   <LogOut className="h-4 w-4" />
@@ -124,7 +123,7 @@ const Navbar = () => {
                     Mood Entry
                   </Link>
                   <button 
-                    className="px-4 py-2 text-left text-red-500 hover:bg-red-50 rounded-md transition-colors flex items-center"
+                    className="px-4 py-2 text-left text-white bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 rounded-md transition-colors flex items-center"
                     onClick={() => {
                       handleLogout();
                       setIsMenuOpen(false);
@@ -142,7 +141,7 @@ const Navbar = () => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Login
-                  </Link>
+                  </Button>
                 )
               )}
             </div>
