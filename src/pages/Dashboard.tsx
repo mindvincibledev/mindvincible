@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
@@ -12,6 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
+import StreakCounter from '@/components/StreakCounter';
 import {
   startOfDay,
   endOfDay,
@@ -289,14 +291,24 @@ const Dashboard = () => {
                 <p className="text-white mt-2">Welcome, {user.name}</p>
               </div>
               
-              <div>
-                <Link to="/mood-entry">
-                  <Button className="flex items-center gap-2 bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:opacity-90 text-white">
+              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                {/* Add StreakCounter here */}
+                <div className="md:hidden w-full sm:w-auto">
+                  <StreakCounter userId={user.id} />
+                </div>
+                
+                <Link to="/mood-entry" className="w-full sm:w-auto">
+                  <Button className="flex items-center gap-2 bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:opacity-90 text-white w-full">
                     <PlusCircle size={18} />
                     <span>New Mood Entry</span>
                   </Button>
                 </Link>
               </div>
+            </div>
+            
+            {/* Streak counter for medium and larger screens */}
+            <div className="hidden md:block max-w-xs">
+              <StreakCounter userId={user.id} />
             </div>
             
             {/* Date filter - affects only MoodDistributionChart and MoodTagsTable */}
