@@ -29,9 +29,6 @@ const JournalEntry = () => {
       content,
       audioBlob,
       drawingBlob
-    }, () => {
-      // Redirect to home page after successful save
-      navigate('/home');
     });
   };
 
