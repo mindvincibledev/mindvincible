@@ -15,6 +15,7 @@ import MoodJar from "./pages/MoodJar";
 import Journal from "./pages/Journal";
 import JournalEntry from "./pages/JournalEntry";
 import JournalDetail from "./pages/JournalDetail";
+import EmotionalAirbnb from "./pages/EmotionalAirbnb";
 import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { initSupabase } from "./integrations/supabase/initSupabase";
@@ -80,6 +81,12 @@ const AppRoutes = () => {
       <Route path="/journal/:id" element={
         <ProtectedRoute>
           <JournalDetail />
+        </ProtectedRoute>
+      } />
+      {/* Add the Emotional Airbnb route */}
+      <Route path="/emotional-airbnb" element={
+        <ProtectedRoute>
+          <EmotionalAirbnb />
         </ProtectedRoute>
       } />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

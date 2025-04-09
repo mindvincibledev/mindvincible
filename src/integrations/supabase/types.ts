@@ -9,6 +9,62 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      emotional_airbnb: {
+        Row: {
+          appearance_description_text: string | null
+          appearance_drawing_path: string | null
+          created_at: string
+          emotion_drawing_path: string | null
+          emotion_text: string | null
+          id: string
+          intensity_description_text: string | null
+          intensity_drawing_path: string | null
+          location_in_body_drawing_path: string | null
+          location_in_body_text: string | null
+          message_description_text: string | null
+          message_drawing_path: string | null
+          user_id: string
+        }
+        Insert: {
+          appearance_description_text?: string | null
+          appearance_drawing_path?: string | null
+          created_at?: string
+          emotion_drawing_path?: string | null
+          emotion_text?: string | null
+          id?: string
+          intensity_description_text?: string | null
+          intensity_drawing_path?: string | null
+          location_in_body_drawing_path?: string | null
+          location_in_body_text?: string | null
+          message_description_text?: string | null
+          message_drawing_path?: string | null
+          user_id: string
+        }
+        Update: {
+          appearance_description_text?: string | null
+          appearance_drawing_path?: string | null
+          created_at?: string
+          emotion_drawing_path?: string | null
+          emotion_text?: string | null
+          id?: string
+          intensity_description_text?: string | null
+          intensity_drawing_path?: string | null
+          location_in_body_drawing_path?: string | null
+          location_in_body_text?: string | null
+          message_description_text?: string | null
+          message_drawing_path?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emotional_airbnb_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           audio_path: string | null

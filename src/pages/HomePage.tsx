@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Book, Archive, AreaChart, Brain, Sparkles, Calendar } from 'lucide-react';
+import { Heart, Book, Archive, AreaChart, Brain, Sparkles, Home } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,6 +52,13 @@ const HomePage = () => {
       icon: <Archive className="h-8 w-8 text-[#F5DF4D]" />,
       link: "/mood-jar",
       color: "from-[#F5DF4D] to-[#FF8A48]"
+    },
+    {
+      title: "Emotional Airbnb",
+      description: "Explore your emotions in depth with guided reflection exercises.",
+      icon: <Home className="h-8 w-8 text-[#FC68B3]" />,
+      link: "/emotional-airbnb",
+      color: "from-[#FC68B3] to-[#3DFDFF]"
     },
     {
       title: "Dashboard",

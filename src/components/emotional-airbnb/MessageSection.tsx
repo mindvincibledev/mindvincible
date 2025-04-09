@@ -1,0 +1,40 @@
+
+import React from 'react';
+import SectionBase from './SectionBase';
+import { MessageCircle } from 'lucide-react';
+
+interface MessageSectionProps {
+  textValue: string;
+  drawingBlob: Blob | null;
+  onSaveText: (text: string) => void;
+  onSaveDrawing: (blob: Blob | null) => void;
+}
+
+const MessageSection: React.FC<MessageSectionProps> = ({
+  textValue,
+  drawingBlob,
+  onSaveText,
+  onSaveDrawing
+}) => {
+  return (
+    <div>
+      <div className="flex justify-center mb-6">
+        <div className="p-3 bg-[#2AC20E]/10 rounded-full">
+          <MessageCircle className="h-10 w-10 text-[#2AC20E]" />
+        </div>
+      </div>
+      
+      <SectionBase
+        title="What message does this emotion have for you?"
+        description="If this emotion could speak, what might it be trying to tell you?"
+        textPlaceholder="This emotion is telling me..."
+        textValue={textValue}
+        drawingBlob={drawingBlob}
+        onSaveText={onSaveText}
+        onSaveDrawing={onSaveDrawing}
+      />
+    </div>
+  );
+};
+
+export default MessageSection;
