@@ -58,20 +58,20 @@ const RecentMoodJars = ({ userId }: { userId: string }) => {
 
   if (loading) {
     return (
-      <div className="bg-black/60 backdrop-blur-lg rounded-lg border border-[#3DFDFF]/30 shadow-lg p-6">
-        <p className="text-center text-[#D5D5F1]">Loading mood jars...</p>
+      <div className="bg-white/90 backdrop-blur-lg rounded-lg border border-gray-200 shadow-lg p-6">
+        <p className="text-center text-gray-500">Loading mood jars...</p>
       </div>
     );
   }
 
   if (moodJars.length === 0) {
     return (
-      <Card className="bg-black/60 backdrop-blur-lg border border-[#3DFDFF]/30 shadow-lg">
+      <Card className="bg-white/90 backdrop-blur-lg border border-gray-200 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-[#F5DF4D]">Your Mood Jars</CardTitle>
+          <CardTitle className="text-gray-800">Your Mood Jars</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center p-6">
-          <p className="text-[#D5D5F1] mb-4">You haven't created any mood jars yet.</p>
+          <p className="text-gray-600 mb-4">You haven't created any mood jars yet.</p>
           <Link to="/mood-jar">
             <Button className="flex items-center gap-2 bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] hover:opacity-90 text-black">
               <PlusCircle size={18} />
@@ -84,9 +84,9 @@ const RecentMoodJars = ({ userId }: { userId: string }) => {
   }
 
   return (
-    <Card className="bg-black/60 backdrop-blur-lg border border-[#3DFDFF]/30 shadow-lg">
+    <Card className="bg-white/90 backdrop-blur-lg border border-gray-200 shadow-lg">
       <CardHeader>
-        <CardTitle className="text-[#F5DF4D]">Your Recent Mood Jars</CardTitle>
+        <CardTitle className="text-gray-800">Your Recent Mood Jars</CardTitle>
       </CardHeader>
       <CardContent>
         <Carousel className="w-full">
@@ -94,7 +94,7 @@ const RecentMoodJars = ({ userId }: { userId: string }) => {
             {moodJars.map((jar) => (
               <CarouselItem key={jar.id} className="md:basis-1/2 lg:basis-1/3">
                 <div className="p-1">
-                  <div className="bg-white/90 rounded-lg overflow-hidden flex flex-col items-center p-2 shadow-md">
+                  <div className="bg-white rounded-lg overflow-hidden flex flex-col items-center p-2 shadow-md border border-gray-100">
                     <img 
                       src={jar.image_path} 
                       alt="Mood Jar" 

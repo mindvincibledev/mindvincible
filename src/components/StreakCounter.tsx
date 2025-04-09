@@ -121,7 +121,7 @@ const StreakCounter = ({ userId }: { userId: string }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="bg-black/60 backdrop-blur-lg border border-[#D5D5F1]/30 shadow-xl overflow-hidden">
+      <Card className="bg-white/90 backdrop-blur-lg border border-gray-200 shadow-xl overflow-hidden">
         <CardContent className="p-4 flex items-center">
           <div className="flex flex-col items-center justify-center mr-4">
             <motion.div
@@ -138,11 +138,11 @@ const StreakCounter = ({ userId }: { userId: string }) => {
             </motion.div>
           </div>
           <div>
-            <h3 className="text-[#D5D5F1] font-medium text-lg">Streak</h3>
+            <h3 className="text-gray-700 font-medium text-lg">Streak</h3>
             {loading ? (
-              <div className="h-6 w-12 bg-[#D5D5F1]/20 rounded animate-pulse"></div>
+              <div className="h-6 w-12 bg-gray-200 rounded animate-pulse"></div>
             ) : (
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-gray-800">
                 {streak} {streak === 1 ? 'day' : 'days'}
               </p>
             )}

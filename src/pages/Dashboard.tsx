@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircle, Archive } from 'lucide-react';
@@ -287,8 +288,8 @@ const Dashboard = () => {
           <div className="flex flex-col gap-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-white">Your Mood Dashboard</h1>
-                <p className="text-white mt-2">Welcome, {user.name}</p>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Your Mood Dashboard</h1>
+                <p className="text-gray-600 mt-2">Welcome, {user.name}</p>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -340,8 +341,8 @@ const Dashboard = () => {
                 <div className="text-[#F5DF4D] text-lg">Loading your mood data...</div>
               </div>
             ) : allMoodEntries.length === 0 ? (
-              <div className="flex flex-col items-center justify-center bg-black/60 backdrop-blur-md rounded-xl border border-[#3DFDFF]/30 p-8 my-8">
-                <div className="text-[#F5DF4D] text-lg mb-6 text-center">
+              <div className="flex flex-col items-center justify-center bg-white/90 backdrop-blur-md rounded-xl border border-gray-200 p-8 my-8 shadow-md">
+                <div className="text-gray-700 text-lg mb-6 text-center">
                   You haven't recorded any moods yet. Start tracking your emotional well-being today!
                 </div>
                 <Link to="/mood-entry">
@@ -359,8 +360,8 @@ const Dashboard = () => {
                 {filteredMoodDistribution.length > 0 ? (
                   <MoodDistributionChart moodDistribution={filteredMoodDistribution} />
                 ) : (
-                  <div className="bg-black/60 backdrop-blur-lg border border-[#FC68B3]/30 shadow-xl rounded-lg p-6 flex items-center justify-center">
-                    <p className="text-[#D5D5F1]">No mood data for this period</p>
+                  <div className="bg-white/90 backdrop-blur-lg border border-gray-200 shadow-xl rounded-lg p-6 flex items-center justify-center">
+                    <p className="text-gray-600">No mood data for this period</p>
                   </div>
                 )}
                 
@@ -368,8 +369,8 @@ const Dashboard = () => {
                 {filteredMoodTags.length > 0 ? (
                   <MoodTagsTable moodTags={filteredMoodTags} />
                 ) : (
-                  <div className="col-span-1 md:col-span-3 bg-black/60 backdrop-blur-lg border border-[#FC68B3]/30 shadow-xl rounded-lg p-6 flex items-center justify-center">
-                    <p className="text-[#D5D5F1]">No tag data for this period</p>
+                  <div className="col-span-1 md:col-span-3 bg-white/90 backdrop-blur-lg border border-gray-200 shadow-xl rounded-lg p-6 flex items-center justify-center">
+                    <p className="text-gray-600">No tag data for this period</p>
                   </div>
                 )}
               </div>

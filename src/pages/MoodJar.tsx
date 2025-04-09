@@ -185,13 +185,13 @@ const MoodJar = () => {
         <Navbar />
         <div className="container mx-auto px-4 py-20">
           <div className="flex flex-col gap-6 items-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-white text-center">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 text-center">
               Feelings Jar Activity
             </h1>
             
-            <div className="w-full max-w-2xl bg-black/60 backdrop-blur-lg p-6 rounded-xl border border-[#3DFDFF]/30 shadow-xl">
+            <div className="w-full max-w-2xl bg-white/90 backdrop-blur-lg p-6 rounded-xl border border-gray-200 shadow-xl">
               <div className="flex flex-col gap-6">
-                <p className="text-white text-center text-lg">
+                <p className="text-gray-700 text-center text-lg">
                   Check-in with yourself to understand your feelings.
                 </p>
                 
@@ -212,7 +212,7 @@ const MoodJar = () => {
                 
                 <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
                   <Button
-                    className="bg-black/40 hover:bg-black/60 text-white border border-white/20 backdrop-blur-sm
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 backdrop-blur-sm
                              transition-all duration-300 hover:scale-105 group"
                     onClick={handleReset}
                   >

@@ -140,13 +140,13 @@ const MoodEntry = () => {
             >
               <div className="relative z-10 container mx-auto px-4 py-20">
                 <div className="flex justify-center items-center min-h-[80vh]">
-                  <Card className="w-full max-w-md bg-black/40 backdrop-blur-lg rounded-2xl shadow-xl border border-white/10 overflow-visible">
+                  <Card className="w-full max-w-md bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-100 overflow-visible">
                     <CardContent className="p-6">
                       <div className="flex items-center mb-8">
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="text-white hover:bg-white/10" 
+                          className="text-gray-700 hover:bg-gray-100" 
                           onClick={handleGoBack}
                         >
                           <ChevronLeft className="h-6 w-6" />
@@ -168,7 +168,7 @@ const MoodEntry = () => {
                               boxShadow: `0 0 30px ${getMoodColor(currentMood || 'neutral')}66`
                             }}
                           >
-                            <div className="h-16 w-16 rounded-full bg-white/10 backdrop-blur-sm"></div>
+                            <div className="h-16 w-16 rounded-full bg-white/70 backdrop-blur-sm"></div>
                           </motion.div>
                         </div>
                         
@@ -179,7 +179,7 @@ const MoodEntry = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-2xl text-white mb-6 font-medium text-center"
+                        className="text-2xl text-gray-800 mb-6 font-medium text-center"
                       >
                         I'm feeling <span 
                           className="font-bold"
@@ -193,7 +193,7 @@ const MoodEntry = () => {
                         transition={{ delay: 0.3 }}
                         className="mt-6 mb-6 space-y-4"
                       >
-                        <h3 className="text-white/90 text-sm font-medium mb-3 text-center">What's contributing to these feelings?</h3>
+                        <h3 className="text-gray-700 text-sm font-medium mb-3 text-center">What's contributing to these feelings?</h3>
                         <div className="flex flex-wrap gap-2 justify-center">
                           <MoodTag 
                             label="Physical health" 
@@ -266,7 +266,7 @@ const MoodEntry = () => {
                       >
                         <Textarea 
                           placeholder="How are you feeling? (optional)" 
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[100px] focus:border-opacity-100 transition-colors"
+                          className="bg-gray-50 border-gray-200 text-gray-800 placeholder:text-gray-400 min-h-[100px] focus:border-opacity-100 transition-colors"
                           style={{ borderColor: `${getMoodColor(currentMood || 'neutral')}44` }}
                           value={moodFeeling} 
                           onChange={e => setMoodFeeling(e.target.value)} 
@@ -294,7 +294,7 @@ const MoodEntry = () => {
                         </Button>
                         
                         <div className="mt-4 flex justify-center">
-                          <Link to="/dashboard" className="text-white/70 text-sm hover:text-white transition-colors">
+                          <Link to="/dashboard" className="text-gray-500 text-sm hover:text-gray-700 transition-colors">
                             Back to dashboard
                           </Link>
                         </div>
@@ -329,7 +329,7 @@ const MoodTag = ({ label, isSelected = false, onClick, mood }: MoodTagProps) => 
       style={{
         borderColor: isSelected ? moodColor : `${moodColor}30`,
         backgroundColor: isSelected ? `${moodColor}20` : 'transparent',
-        color: isSelected ? 'white' : `${moodColor}aa`
+        color: isSelected ? 'gray-800' : `${moodColor}aa`
       }}
       onClick={onClick}
     >
