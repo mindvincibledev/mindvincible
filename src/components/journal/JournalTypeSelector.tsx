@@ -21,7 +21,7 @@ const JournalTypeSelector: React.FC<JournalTypeSelectorProps> = ({
         className={`flex items-center gap-2 px-4 py-2 ${
           selectedType === 'text'
             ? 'bg-[#FC68B3] hover:bg-[#FC68B3]/90'
-            : 'bg-black/30 backdrop-blur-sm hover:bg-black/40 border border-[#FC68B3]/30'
+            : 'bg-white/70 backdrop-blur-sm hover:bg-white/80 border border-[#FC68B3]/30'
         } rounded-lg transition-all`}
         aria-label="Text journal"
       >
@@ -34,7 +34,7 @@ const JournalTypeSelector: React.FC<JournalTypeSelectorProps> = ({
         className={`flex items-center gap-2 px-4 py-2 ${
           selectedType === 'audio'
             ? 'bg-[#FF8A48] hover:bg-[#FF8A48]/90'
-            : 'bg-black/30 backdrop-blur-sm hover:bg-black/40 border border-[#FF8A48]/30'
+            : 'bg-white/70 backdrop-blur-sm hover:bg-white/80 border border-[#FF8A48]/30'
         } rounded-lg transition-all`}
         aria-label="Audio journal"
       >
@@ -47,7 +47,7 @@ const JournalTypeSelector: React.FC<JournalTypeSelectorProps> = ({
         className={`flex items-center gap-2 px-4 py-2 ${
           selectedType === 'drawing'
             ? 'bg-[#3DFDFF] hover:bg-[#3DFDFF]/90 text-black'
-            : 'bg-black/30 backdrop-blur-sm hover:bg-black/40 border border-[#3DFDFF]/30'
+            : 'bg-white/70 backdrop-blur-sm hover:bg-white/80 border border-[#3DFDFF]/30'
         } rounded-lg transition-all`}
         aria-label="Drawing journal"
       >

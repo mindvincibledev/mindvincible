@@ -184,19 +184,19 @@
 }
 
 .animate-wave1 {
-  animation: wave1 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+  animation: wave1 14s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
 }
 
 .animate-wave2 {
-  animation: wave2 5s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+  animation: wave2 10s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
 }
 
 .animate-wave3 {
-  animation: wave3 3s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+  animation: wave3 6s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
 }
 
 .animate-wave4 {
-  animation: wave4 2s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+  animation: wave4 4s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
 }
 
 .waves-container {

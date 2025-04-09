@@ -20,28 +20,28 @@ const Header: React.FC = () => {
   return (
     <div className="w-full bg-accent/50 p-6 rounded-lg mb-8 animate-fade-in">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-card rounded-md p-4 shadow-sm">
+        <div className="bg-white rounded-md p-4 shadow-sm">
           <h3 className="font-medium text-muted-foreground">Total Tasks</h3>
           <p className="text-3xl font-bold">{totalTasks}</p>
         </div>
         
-        <div className="bg-card rounded-md p-4 shadow-sm">
+        <div className="bg-white rounded-md p-4 shadow-sm">
           <h3 className="font-medium text-muted-foreground">Pending</h3>
           <p className="text-3xl font-bold text-yellow-500">{pendingTasks}</p>
         </div>
         
-        <div className="bg-card rounded-md p-4 shadow-sm">
+        <div className="bg-white rounded-md p-4 shadow-sm">
           <h3 className="font-medium text-muted-foreground">In Progress</h3>
           <p className="text-3xl font-bold text-blue-500">{inProgressTasks}</p>
         </div>
         
-        <div className="bg-card rounded-md p-4 shadow-sm">
+        <div className="bg-white rounded-md p-4 shadow-sm">
           <h3 className="font-medium text-muted-foreground">Completed</h3>
           <p className="text-3xl font-bold text-green-500">{completedTasks}</p>
         </div>
       </div>
       
-      <div className="mt-6 bg-card rounded-md p-4 shadow-sm">
+      <div className="mt-6 bg-white rounded-md p-4 shadow-sm">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-medium">Completion Progress</h3>
           <span className="text-sm font-medium">{completionPercentage}%</span>

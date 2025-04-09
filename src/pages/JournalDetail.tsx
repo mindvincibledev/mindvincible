@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -169,7 +168,7 @@ const JournalDetail = () => {
           
           <div className="relative z-10 container mx-auto px-4 py-24">
             <div className="flex justify-center items-center h-64">
-              <div className="text-white text-lg">Loading journal entry...</div>
+              <div className="text-gray-800 text-lg">Loading journal entry...</div>
             </div>
           </div>
         </div>
@@ -188,7 +187,7 @@ const JournalDetail = () => {
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <Link to="/journal">
-                <Button variant="ghost" className="text-white hover:bg-white/10">
+                <Button variant="ghost" className="text-gray-800 hover:bg-gray-100">
                   <ArrowLeft className="h-5 w-5 mr-2" />
                   Back to Journal
                 </Button>
@@ -219,7 +218,7 @@ const JournalDetail = () => {
               </AlertDialog>
             </div>
             
-            <div className="bg-black/60 backdrop-blur-md rounded-xl border border-white/10 p-6 shadow-lg">
+            <div className="bg-white/80 backdrop-blur-md rounded-xl border border-gray-100 p-6 shadow-lg">
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-4">
                   {entry.entry_type === 'text' && (
@@ -231,32 +230,32 @@ const JournalDetail = () => {
                   {entry.entry_type === 'drawing' && (
                     <Brush className="h-6 w-6 text-[#3DFDFF]" />
                   )}
-                  <h1 className="text-3xl font-bold text-white">{entry.title}</h1>
+                  <h1 className="text-3xl font-bold text-gray-800">{entry.title}</h1>
                 </div>
                 
-                <p className="text-gray-400 text-sm">
+                <p className="text-gray-600 text-sm">
                   Created: {formatDate(entry.created_at)}
                 </p>
               </div>
               
               {entry.entry_type === 'text' && entry.content && (
-                <div className="bg-black/30 backdrop-blur-sm border border-[#FC68B3]/20 rounded-lg p-6 mb-6">
-                  <p className="text-white whitespace-pre-wrap">{entry.content}</p>
+                <div className="bg-white/60 backdrop-blur-sm border border-[#FC68B3]/20 rounded-lg p-6 mb-6">
+                  <p className="text-gray-800 whitespace-pre-wrap">{entry.content}</p>
                 </div>
               )}
               
               {entry.entry_type === 'audio' && audioUrl && (
-                <div className="bg-black/30 backdrop-blur-sm border border-[#FF8A48]/20 rounded-lg p-6 mb-6">
+                <div className="bg-white/60 backdrop-blur-sm border border-[#FF8A48]/20 rounded-lg p-6 mb-6">
                   <audio src={audioUrl} controls className="w-full" />
                 </div>
               )}
               
               {entry.entry_type === 'drawing' && drawingUrl && (
-                <div className="bg-black/30 backdrop-blur-sm border border-[#3DFDFF]/20 rounded-lg p-6 mb-6 flex justify-center">
+                <div className="bg-white/60 backdrop-blur-sm border border-[#3DFDFF]/20 rounded-lg p-6 mb-6 flex justify-center">
                   <img 
                     src={drawingUrl} 
                     alt={entry.title} 
-                    className="max-w-full rounded-lg shadow-lg border border-white/10" 
+                    className="max-w-full rounded-lg shadow-lg border border-gray-100" 
                   />
                 </div>
               )}

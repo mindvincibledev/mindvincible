@@ -55,15 +55,15 @@ const DateFilter: React.FC<DateFilterProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-3 p-2 rounded-lg bg-black/30 backdrop-blur-md border border-white/10 mb-2">
+    <div className="flex flex-col sm:flex-row items-center gap-3 p-2 rounded-lg bg-white/50 backdrop-blur-md border border-gray-100 mb-2">
       <Select
         value={filterOption}
         onValueChange={(value) => onFilterChange(value as DateFilterOption)}
       >
-        <SelectTrigger className="w-[140px] bg-black/40 border-white/20 text-white">
+        <SelectTrigger className="w-[140px] bg-white/70 border-gray-200 text-gray-800">
           <SelectValue placeholder="Select period" />
         </SelectTrigger>
-        <SelectContent className="bg-black/90 backdrop-blur-lg border-white/20 text-white">
+        <SelectContent className="bg-white backdrop-blur-lg border-gray-100 text-gray-800">
           <SelectItem value="day">Day</SelectItem>
           <SelectItem value="week">Week</SelectItem>
           <SelectItem value="month">Month</SelectItem>
@@ -78,7 +78,7 @@ const DateFilter: React.FC<DateFilterProps> = ({
             <Button
               variant="outline"
               className={cn(
-                "justify-start text-left font-normal bg-black/40 border-white/20 text-white hover:bg-white/10 hover:text-white",
+                "justify-start text-left font-normal bg-white/70 border-gray-200 text-gray-800 hover:bg-gray-100 hover:text-gray-900",
                 !selectedDate && "text-muted-foreground"
               )}
             >
@@ -86,7 +86,7 @@ const DateFilter: React.FC<DateFilterProps> = ({
               {getFormattedDate()}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-black/90 backdrop-blur-lg border-white/20 text-white">
+          <PopoverContent className="w-auto p-0 bg-white backdrop-blur-lg border-gray-100 text-gray-800">
             <Calendar
               mode="single"
               selected={selectedDate}

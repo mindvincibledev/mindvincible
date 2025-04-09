@@ -53,7 +53,7 @@ const Login = () => {
           transition={{ duration: 0.8, ease: "easeInOut" }} 
           className="w-full max-w-md"
         >
-          <div className="bg-black/50 backdrop-blur-md border border-white/10 rounded-xl p-8 shadow-xl relative">
+          <div className="bg-white/70 backdrop-blur-md border border-gray-100 rounded-xl p-8 shadow-xl relative">
             <div className="absolute top-4 left-4">
               <Link to="/" className="inline-flex items-center text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors group">
                 <Home className="mr-1.5 h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
@@ -66,21 +66,21 @@ const Login = () => {
             </h2>
             
             {error && (
-              <div className="bg-red-500/20 border border-red-500/50 text-white rounded-md p-3 mb-4">
+              <div className="bg-red-500/20 border border-red-500/50 text-red-700 rounded-md p-3 mb-4">
                 {error}
               </div>
             )}
             
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <Label htmlFor="email" className="text-white mb-1.5 block">Email</Label>
+                <Label htmlFor="email" className="text-gray-700 mb-1.5 block">Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input 
                     id="email" 
                     type="email" 
                     placeholder="Enter your email" 
-                    className="pl-10 bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF] focus:ring-[#3DFDFF]/30" 
+                    className="pl-10 bg-white/50 border-gray-200 text-gray-800 placeholder:text-gray-400 focus:border-[#3DFDFF] focus:ring-[#3DFDFF]/30" 
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
                     required 
@@ -90,7 +90,7 @@ const Login = () => {
               
               <div>
                 <div className="flex justify-between items-center mb-1.5">
-                  <Label htmlFor="password" className="text-white">Password</Label>
+                  <Label htmlFor="password" className="text-gray-700">Password</Label>
                   <Link to="/forgot-password" className="text-sm text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors hover:underline">
                     Forgot Password?
                   </Link>
@@ -101,7 +101,7 @@ const Login = () => {
                     id="password" 
                     type="password" 
                     placeholder="Enter your password" 
-                    className="pl-10 bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF] focus:ring-[#3DFDFF]/30" 
+                    className="pl-10 bg-white/50 border-gray-200 text-gray-800 placeholder:text-gray-400 focus:border-[#3DFDFF] focus:ring-[#3DFDFF]/30" 
                     value={password} 
                     onChange={e => setPassword(e.target.value)} 
                     required 
@@ -118,7 +118,7 @@ const Login = () => {
               </Button>
               
               <div className="mt-4 text-center">
-                <p className="text-white/70">
+                <p className="text-gray-600">
                   Don't have an account?{' '}
                   <Link to="/register" className="text-[#3DFDFF] hover:underline">
                     Register now

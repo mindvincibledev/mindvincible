@@ -51,7 +51,7 @@ const Home = () => {
               }}
               className="mt-6 max-w-2xl mx-auto text-center px-4"
             >
-              <div className="text-xl md:text-2xl text-white backdrop-blur-sm bg-black/30 p-4 rounded-lg mb-10">
+              <div className="text-xl md:text-2xl text-gray-800 backdrop-blur-sm bg-white/70 p-4 rounded-lg mb-10">
                 <span className="text-[#F5DF4D]">You're </span>
                 <Typewriter 
                   text={[

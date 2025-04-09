@@ -32,13 +32,13 @@ const JournalCard: React.FC<JournalCardProps> = ({ id, title, createdAt, type, e
   const getBackgroundStyle = () => {
     switch (type) {
       case 'text':
-        return 'border-[#FC68B3]/30 bg-gradient-to-br from-[#FC68B3]/10 to-transparent';
+        return 'border-[#FC68B3]/30 bg-gradient-to-br from-[#FC68B3]/10 to-white/80';
       case 'audio':
-        return 'border-[#FF8A48]/30 bg-gradient-to-br from-[#FF8A48]/10 to-transparent';
+        return 'border-[#FF8A48]/30 bg-gradient-to-br from-[#FF8A48]/10 to-white/80';
       case 'drawing':
-        return 'border-[#3DFDFF]/30 bg-gradient-to-br from-[#3DFDFF]/10 to-transparent';
+        return 'border-[#3DFDFF]/30 bg-gradient-to-br from-[#3DFDFF]/10 to-white/80';
       default:
-        return 'border-gray-700 bg-black/30';
+        return 'border-gray-200 bg-white';
     }
   };
 
@@ -47,30 +47,30 @@ const JournalCard: React.FC<JournalCardProps> = ({ id, title, createdAt, type, e
       <Card className={`hover:scale-105 transition-all backdrop-blur-sm border ${getBackgroundStyle()}`}>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-bold text-white">{title}</CardTitle>
-            <div className="bg-black/20 p-2 rounded-full">{getIcon()}</div>
+            <CardTitle className="text-lg font-bold text-gray-800">{title}</CardTitle>
+            <div className="bg-white/50 p-2 rounded-full">{getIcon()}</div>
           </div>
         </CardHeader>
         
         <CardContent>
           {excerpt && type === 'text' && (
-            <p className="text-sm text-gray-300 line-clamp-3">{excerpt}</p>
+            <p className="text-sm text-gray-600 line-clamp-3">{excerpt}</p>
           )}
           
           {type === 'audio' && (
             <div className="h-12 flex items-center justify-center">
-              <p className="text-sm text-gray-300">Audio Journal Entry</p>
+              <p className="text-sm text-gray-600">Audio Journal Entry</p>
             </div>
           )}
           
           {type === 'drawing' && (
             <div className="h-12 flex items-center justify-center">
-              <p className="text-sm text-gray-300">Drawing Journal Entry</p>
+              <p className="text-sm text-gray-600">Drawing Journal Entry</p>
             </div>
           )}
         </CardContent>
         
-        <CardFooter className="pt-0 text-xs text-gray-400">
+        <CardFooter className="pt-0 text-xs text-gray-500">
           Created {formattedDate}
         </CardFooter>
       </Card>

@@ -67,7 +67,7 @@ const Journal = () => {
         
         <div className="relative z-10 container mx-auto px-4 py-24">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-4 md:mb-0">Your Journal</h1>
+            <h1 className="text-4xl font-bold text-gray-800 mb-4 md:mb-0">Your Journal</h1>
             
             <Link to="/journal/new">
               <Button className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-white flex items-center gap-2">
@@ -79,12 +79,12 @@ const Journal = () => {
           
           {loading ? (
             <div className="flex justify-center items-center h-64">
-              <div className="text-white text-lg">Loading your journal entries...</div>
+              <div className="text-gray-800 text-lg">Loading your journal entries...</div>
             </div>
           ) : entries.length === 0 ? (
-            <div className="bg-black/60 backdrop-blur-md rounded-xl border border-white/10 p-8 text-center">
-              <h2 className="text-2xl text-white mb-4">No Journal Entries Yet</h2>
-              <p className="text-gray-300 mb-6">
+            <div className="bg-white/70 backdrop-blur-md rounded-xl border border-gray-100 p-8 text-center">
+              <h2 className="text-2xl text-gray-800 mb-4">No Journal Entries Yet</h2>
+              <p className="text-gray-600 mb-6">
                 Start expressing yourself by creating your first journal entry.
               </p>
               <Link to="/journal/new">

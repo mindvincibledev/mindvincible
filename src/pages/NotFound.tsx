@@ -13,10 +13,10 @@ const NotFound = () => {
         <Navbar />
         
         <div className="flex-grow flex items-center justify-center px-4 py-12">
-          <div className="text-center bg-black/50 backdrop-blur-md border border-white/10 rounded-xl p-8 shadow-xl">
+          <div className="text-center bg-white/80 backdrop-blur-md border border-gray-100 rounded-xl p-8 shadow-xl">
             <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent mb-4">404</h1>
-            <h2 className="text-2xl md:text-3xl font-semibold mb-6 text-white">Page Not Found</h2>
-            <p className="text-lg mb-8 max-w-md mx-auto text-white/70">
+            <h2 className="text-2xl md:text-3xl font-semibold mb-6 text-gray-800">Page Not Found</h2>
+            <p className="text-lg mb-8 max-w-md mx-auto text-gray-600">
               The page you are looking for doesn't exist or has been moved.
             </p>
             <Link to="/">
