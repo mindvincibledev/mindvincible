@@ -92,8 +92,8 @@ const MoodEntry = () => {
         description: "Your mood has been recorded successfully.",
       });
       
-      // Navigate to dashboard after successful save
-      navigate('/dashboard');
+      // Updated to navigate to home page instead of dashboard
+      navigate('/home');
       
     } catch (err) {
       console.error('Error saving mood:', err);

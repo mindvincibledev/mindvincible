@@ -54,7 +54,8 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-[#fcfcfc] shadow-md">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+          {/* Change from "/" to "/home" for authenticated users */}
+          <Link to={user ? "/home" : "/"} className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
             M(in)dvincible
           </Link>
 

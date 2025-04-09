@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Paintbrush, Save, RotateCcw } from 'lucide-react';
@@ -165,8 +166,8 @@ const MoodJar = () => {
         description: "Your mood jar has been saved successfully!",
       });
       
-      // Navigate to dashboard after successful save
-      navigate("/dashboard");
+      // Navigate to home page after successful save instead of dashboard
+      navigate("/home");
     } catch (error) {
       console.error("Error saving mood jar:", error);
       toast({

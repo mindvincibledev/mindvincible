@@ -186,7 +186,8 @@ export function useJournalSave() {
         description: "Your journal entry has been saved successfully",
       });
       
-      navigate('/journal');
+      // Navigate to home page instead of journal
+      navigate('/home');
     } catch (error: any) {
       console.error('Error saving journal:', error);
       toast({
