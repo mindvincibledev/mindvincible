@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -16,7 +15,7 @@ import IntensitySection from '@/components/emotional-airbnb/IntensitySection';
 import MessageSection from '@/components/emotional-airbnb/MessageSection';
 import { motion } from 'framer-motion';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
-import { WavyBackground } from '@/components/ui/wavy-background'; // Fixed import syntax
+import { WavyBackground } from '@/components/ui/wavy-background';
 
 const EmotionalAirbnb = () => {
   const { user } = useAuth();
@@ -372,7 +371,7 @@ const EmotionalAirbnb = () => {
                   Step {currentStep}/6
                 </span>
               </div>
-              <div className="w-full bg-white-200 rounded-full h-2.5">
+              <div className="w-full bg-gray-100 rounded-full h-2.5">
                 <div 
                   className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] h-2.5 rounded-full transition-all duration-300"
                   style={{ width: `${(currentStep / 6) * 100}%` }}
@@ -388,12 +387,13 @@ const EmotionalAirbnb = () => {
               transition={{ duration: 0.3 }}
               className="relative mb-6 overflow-hidden"
             >
-              <Card className="p-6 relative overflow-hidden bg-white/80 backdrop-blur-sm border border-[#D5D5F1]/50 shadow-lg">
+              <Card className="p-6 relative overflow-hidden bg-white/95 backdrop-blur-sm border border-[#D5D5F1]/50 shadow-lg">
                 <div className="absolute inset-0 z-0 overflow-hidden">
                   <WavyBackground 
                     colors={['#FF8A4820', '#D5D5F120', '#3DFDFF20', '#F5DF4D20', '#FC68B320']}
                     blur={5}
                     speed="fast"
+                    backgroundFill="#FFFFFF"
                     className="w-full h-full"
                   />
                 </div>

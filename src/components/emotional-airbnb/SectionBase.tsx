@@ -183,7 +183,7 @@ const SectionBase: React.FC<SectionBaseProps> = ({
         onValueChange={setActiveTab}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2 mb-4">
+        <TabsList className="grid w-full grid-cols-2 mb-4 bg-gray-100">
           <TabsTrigger value="text" className="flex items-center gap-2">
             <Type className="h-4 w-4" />
             Text
@@ -199,7 +199,7 @@ const SectionBase: React.FC<SectionBaseProps> = ({
             placeholder={textPlaceholder}
             value={text}
             onChange={handleTextChange}
-            className="min-h-[200px] resize-none p-4 text-gray-700"
+            className="min-h-[200px] resize-none p-4 text-gray-700 bg-white border-gray-200"
           />
         </TabsContent>
         
@@ -322,7 +322,7 @@ const SectionBase: React.FC<SectionBaseProps> = ({
           <div className="border border-gray-200 rounded-md overflow-hidden bg-white">
             <canvas
               ref={canvasRef}
-              className="w-full touch-none"
+              className="w-full touch-none bg-white"
               style={{ height: '300px' }}
             />
           </div>

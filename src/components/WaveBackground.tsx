@@ -10,7 +10,7 @@ const WaveBackground = () => {
         blur={20}
         speed="slow"
         waveWidth={100}
-        backgroundFill="white"
+        backgroundFill="#FFFFFF"
         className="h-full w-full"
       />
     </div>
