@@ -75,13 +75,22 @@ const activities = {
   },
 };
 
+// Define a TypeScript interface for the activities
+interface Activity {
+  title: string;
+  description: string;
+  detailedDescription?: string; // Make this property optional
+  color: string;
+  image: string;
+}
+
 type ActivityParams = {
   activityId: string;
 };
 
 const EmotionalHackingActivity = () => {
   const { activityId } = useParams<ActivityParams>();
-  const activity = activityId ? activities[activityId as keyof typeof activities] : null;
+  const activity = activityId ? activities[activityId as keyof typeof activities] as Activity : null;
   
   // Digital Detox specific states
   const [isDetoxActive, setIsDetoxActive] = useState(false);
