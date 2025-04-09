@@ -11,7 +11,7 @@ interface BackgroundWithEmojisProps {
 const BackgroundWithEmojis: FC<BackgroundWithEmojisProps> = ({
   children,
 }) => (
-  <div className="min-h-screen font-poppins relative overflow-hidden bg-black">
+  <div className="min-h-screen font-poppins relative overflow-hidden bg-white">
     {/* Waves background with lowered z-index */}
     <Wave />
     
