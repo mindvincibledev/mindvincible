@@ -12,24 +12,43 @@ export async function setupJournalStorage() {
       return;
     }
     
-    // Check for journal_files bucket
-    const journalBucketExists = buckets?.some(bucket => bucket.id === 'journal_files');
-    if (!journalBucketExists) {
-      console.error('Error: journal_files bucket not found. Please create it in Supabase.');
+    // Check for audio_files bucket
+    const audioBucketExists = buckets?.some(bucket => bucket.id === 'audio_files');
+    if (!audioBucketExists) {
+      console.error('Error: audio_files bucket not found. Please create it in Supabase.');
     } else {
-      console.log('journal_files bucket exists');
+      console.log('audio_files bucket exists');
       
-      // Let's check if we can access storage info without using RPC
+      // Let's check if we can access storage info
       try {
-        // Just check if we can access the bucket
-        const { data, error } = await supabase.storage.from('journal_files').list();
+        const { data, error } = await supabase.storage.from('audio_files').list();
         if (!error) {
-          console.log('Storage policies are set up correctly');
+          console.log('Audio files storage policies are set up correctly');
         } else {
-          console.warn('Potential issue with storage policies:', error.message);
+          console.warn('Potential issue with audio files storage policies:', error.message);
         }
       } catch (err) {
-        console.error('Error checking storage policies:', err);
+        console.error('Error checking audio files storage policies:', err);
+      }
+    }
+    
+    // Check for drawing_files bucket
+    const drawingBucketExists = buckets?.some(bucket => bucket.id === 'drawing_files');
+    if (!drawingBucketExists) {
+      console.error('Error: drawing_files bucket not found. Please create it in Supabase.');
+    } else {
+      console.log('drawing_files bucket exists');
+      
+      // Let's check if we can access storage info
+      try {
+        const { data, error } = await supabase.storage.from('drawing_files').list();
+        if (!error) {
+          console.log('Drawing files storage policies are set up correctly');
+        } else {
+          console.warn('Potential issue with drawing files storage policies:', error.message);
+        }
+      } catch (err) {
+        console.error('Error checking drawing files storage policies:', err);
       }
     }
     

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -104,9 +105,9 @@ export function useJournalSave() {
         const timestamp = Date.now();
         const fileName = `audio_${timestamp}.webm`;
         
-        // Upload audio file
+        // Upload audio file to the audio_files bucket
         const { error: uploadError } = await supabase.storage
-          .from('journal_files')
+          .from('audio_files')
           .upload(`${user.id}/${fileName}`, audioBlob, {
             contentType: 'audio/webm',
             upsert: true
@@ -119,7 +120,7 @@ export function useJournalSave() {
         
         // Get the public URL for the uploaded file
         const { data: audioUrl } = supabase.storage
-          .from('journal_files')
+          .from('audio_files')
           .getPublicUrl(`${user.id}/${fileName}`);
           
         audioPath = audioUrl.publicUrl;
@@ -130,9 +131,9 @@ export function useJournalSave() {
         const timestamp = Date.now();
         const fileName = `drawing_${timestamp}.png`;
         
-        // Upload drawing file
+        // Upload drawing file to the drawing_files bucket
         const { error: uploadError } = await supabase.storage
-          .from('journal_files')
+          .from('drawing_files')
           .upload(`${user.id}/${fileName}`, drawingBlob, {
             contentType: 'image/png',
             upsert: true
@@ -145,15 +146,15 @@ export function useJournalSave() {
         
         // Get the public URL for the uploaded file
         const { data: drawingUrl } = supabase.storage
-          .from('journal_files')
+          .from('drawing_files')
           .getPublicUrl(`${user.id}/${fileName}`);
         
         drawingPath = drawingUrl.publicUrl;
         console.log('Drawing uploaded successfully, URL:', drawingPath);
       }
       
-      // Insert journal entry using type assertion to bypass TypeScript restriction
-      const { error } = await supabase
+      // Insert journal entry
+      const { data, error } = await supabase
         .from('journal_entries')
         .insert({
           user_id: user.id,
@@ -162,7 +163,8 @@ export function useJournalSave() {
           audio_path: audioPath,
           drawing_path: drawingPath,
           entry_type: journalType,
-        } as unknown as any);
+        } as JournalEntry)
+        .select();
         
       if (error) throw error;
       

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -67,7 +68,7 @@ const JournalDetail = () => {
       const journalEntry = data as JournalEntry;
       setEntry(journalEntry);
       
-      // Fetch audio or drawing file if needed
+      // Set audio or drawing URL if available
       if (journalEntry.audio_path) {
         setAudioUrl(journalEntry.audio_path);
       }
@@ -96,19 +97,23 @@ const JournalDetail = () => {
       if (entry.audio_path) {
         const pathParts = entry.audio_path.split('/');
         const fileName = pathParts[pathParts.length - 1];
+        const userId = pathParts[pathParts.length - 2];
         
+        // Delete from audio_files bucket
         await supabase.storage
-          .from('journal_files')
-          .remove([`${user?.id}/${fileName}`]);
+          .from('audio_files')
+          .remove([`${userId}/${fileName}`]);
       }
       
       if (entry.drawing_path) {
         const pathParts = entry.drawing_path.split('/');
         const fileName = pathParts[pathParts.length - 1];
+        const userId = pathParts[pathParts.length - 2];
         
+        // Delete from drawing_files bucket
         await supabase.storage
-          .from('journal_files')
-          .remove([`${user?.id}/${fileName}`]);
+          .from('drawing_files')
+          .remove([`${userId}/${fileName}`]);
       }
       
       // Delete the entry
@@ -245,6 +250,11 @@ const JournalDetail = () => {
       </div>
     </BackgroundWithEmojis>
   );
+  
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
+  }
 };
 
 export default JournalDetail;
