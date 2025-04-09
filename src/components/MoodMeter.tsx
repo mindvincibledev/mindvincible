@@ -45,7 +45,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
       exit={{ opacity: 0 }}
       className="w-full h-full text-center flex flex-col items-center justify-center px-4 py-8"
     >
-      <div className="relative w-full max-w-md z-10">
+      <div className="relative w-full max-w-[101%] z-10"> {/* Increased width by 1% */}
         {/* Card container with more vibrant colors */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -53,7 +53,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
           transition={{ duration: 0.5 }}
           className="backdrop-blur-lg rounded-2xl shadow-md border border-white/30 overflow-hidden p-6"
           style={{
-            backgroundColor: `${moodColor}`, // More saturated, solid color
+            backgroundColor: `${moodColor}F2`, // Made 1% duller by setting opacity to F2 (95%)
             transition: 'background-color 0.5s ease',
             boxShadow: `0 8px 32px ${moodColor}50`
           }}

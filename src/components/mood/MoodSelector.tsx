@@ -107,19 +107,19 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           >
             <defs>
               <linearGradient id="trackGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor={`${moodColor}60`} />
-                <stop offset="45%" stopColor={`${moodColor}90`} />
-                <stop offset="55%" stopColor={`${moodColor}90`} />
-                <stop offset="100%" stopColor={`${moodColor}60`} />
+                <stop offset="0%" stopColor={`${moodColor}70`} />
+                <stop offset="45%" stopColor={`${moodColor}A0`} />
+                <stop offset="55%" stopColor={`${moodColor}A0`} />
+                <stop offset="100%" stopColor={`${moodColor}70`} />
               </linearGradient>
             </defs>
             <path 
               d="M 0,60 C 130,30 270,30 400,60" 
               stroke="url(#trackGradient)" 
-              strokeWidth="6"
+              strokeWidth="7" /* Increased from 6 */
               fill="none"
               strokeLinecap="round"
-              opacity="0.8"
+              opacity="0.9" /* Increased from 0.8 */
             />
           </svg>
           
