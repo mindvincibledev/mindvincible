@@ -95,13 +95,13 @@ const JarCanvas = forwardRef<HTMLCanvasElement, JarCanvasProps>(
         />
         <div className="flex items-center justify-center mt-4 gap-2">
           <div 
-            className="h-5 w-5 rounded-full transition-all duration-300"
+            className="h-5 w-5 rounded-full transition-all duration-300 shadow-md"
             style={{ 
               backgroundColor: selectedColor,
-              boxShadow: `0 0 10px ${selectedColor}90` 
+              boxShadow: `0 0 10px ${selectedColor}` 
             }}
           />
-          <p className="text-white text-center text-sm">
+          <p className="text-black text-center text-sm">
             Currently coloring with: <span className="font-bold">{selectedEmotion}</span>
           </p>
         </div>

@@ -46,22 +46,23 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
       className="w-full h-full text-center flex flex-col items-center justify-center px-4 py-8"
     >
       <div className="relative w-full max-w-md z-10">
-        {/* Card container similar to the mood details screen */}
+        {/* Card container with more vibrant colors */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="backdrop-blur-lg rounded-2xl shadow-md border border-white/20 overflow-hidden p-6"
+          className="backdrop-blur-lg rounded-2xl shadow-md border border-white/30 overflow-hidden p-6"
           style={{
-            backgroundColor: `${moodColor}90`, // More visible but still translucent
+            backgroundColor: `${moodColor}`, // More saturated, solid color
             transition: 'background-color 0.5s ease',
+            boxShadow: `0 8px 32px ${moodColor}50`
           }}
         >
           {/* App name */}
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 0.9, y: 0 }}
-            className="text-xl font-bold text-white mb-8"
+            animate={{ opacity: 1, y: 0 }}
+            className="text-xl font-bold text-black mb-8"
           >
             M(in)dvincible
           </motion.h1>

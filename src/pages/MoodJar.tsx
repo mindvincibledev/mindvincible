@@ -66,7 +66,7 @@ const MoodJar = () => {
   };
 
   // Draw jar outline wrapper function that uses our utility
-  const handleDrawJarOutline = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+  const handleJarOutline = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
     drawJarOutline(ctx, width, height);
   };
 
@@ -185,13 +185,13 @@ const MoodJar = () => {
         <Navbar />
         <div className="container mx-auto px-4 py-20">
           <div className="flex flex-col gap-6 items-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 text-center">
+            <h1 className="text-3xl md:text-4xl font-bold text-black text-center">
               Feelings Jar Activity
             </h1>
             
-            <div className="w-full max-w-2xl bg-white/90 backdrop-blur-lg p-6 rounded-xl border border-gray-200 shadow-xl">
+            <div className="w-full max-w-2xl bg-white/95 backdrop-blur-lg p-6 rounded-xl border border-gray-200 shadow-xl">
               <div className="flex flex-col gap-6">
-                <p className="text-gray-700 text-center text-lg">
+                <p className="text-gray-800 text-center text-lg font-medium">
                   Check-in with yourself to understand your feelings.
                 </p>
                 
@@ -204,7 +204,7 @@ const MoodJar = () => {
                 <div className="flex justify-center">
                   <JarCanvas 
                     ref={canvasRef}
-                    drawJarOutline={handleDrawJarOutline}
+                    drawJarOutline={handleJarOutline}
                     selectedEmotion={selectedEmotion}
                     selectedColor={selectedColor}
                   />
@@ -212,11 +212,11 @@ const MoodJar = () => {
                 
                 <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
                   <Button
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 backdrop-blur-sm
-                             transition-all duration-300 hover:scale-105 group"
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-300 backdrop-blur-sm
+                             transition-all duration-300 hover:scale-105 group font-medium"
                     onClick={handleReset}
                   >
-                    <RotateCcw size={18} className="group-hover:rotate-180 transition-transform duration-500"/>
+                    <RotateCcw size={18} className="group-hover:rotate-180 transition-transform duration-500 mr-2"/>
                     Reset
                   </Button>
                   
@@ -230,7 +230,7 @@ const MoodJar = () => {
                   >
                     <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent 
                                   -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                    <Save size={18} className="group-hover:scale-110 transition-transform duration-300"/>
+                    <Save size={18} className="group-hover:scale-110 transition-transform duration-300 mr-2"/>
                     {isSaving ? 'Saving...' : 'Complete Activity'}
                   </Button>
                 </div>

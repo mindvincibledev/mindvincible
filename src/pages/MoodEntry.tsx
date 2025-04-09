@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
@@ -140,7 +141,7 @@ const MoodEntry = () => {
             >
               <div className="relative z-10 container mx-auto px-4 py-20">
                 <div className="flex justify-center items-center min-h-[80vh]">
-                  <Card className="w-full max-w-md bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-100 overflow-visible">
+                  <Card className="w-full max-w-md bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-100 overflow-visible">
                     <CardContent className="p-6">
                       <div className="flex items-center mb-8">
                         <Button 
@@ -165,7 +166,7 @@ const MoodEntry = () => {
                             className="h-20 w-20 rounded-full mx-auto mb-4 flex items-center justify-center" 
                             style={{
                               background: `radial-gradient(circle at center, ${getMoodColor(currentMood || 'neutral')}, ${getMoodColor(currentMood || 'neutral')}99)`,
-                              boxShadow: `0 0 30px ${getMoodColor(currentMood || 'neutral')}66`
+                              boxShadow: `0 0 30px ${getMoodColor(currentMood || 'neutral')}aa`
                             }}
                           >
                             <div className="h-16 w-16 rounded-full bg-white/70 backdrop-blur-sm"></div>
@@ -179,7 +180,7 @@ const MoodEntry = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-2xl text-gray-800 mb-6 font-medium text-center"
+                        className="text-2xl text-black mb-6 font-medium text-center"
                       >
                         I'm feeling <span 
                           className="font-bold"
@@ -193,7 +194,7 @@ const MoodEntry = () => {
                         transition={{ delay: 0.3 }}
                         className="mt-6 mb-6 space-y-4"
                       >
-                        <h3 className="text-gray-700 text-sm font-medium mb-3 text-center">What's contributing to these feelings?</h3>
+                        <h3 className="text-gray-800 text-sm font-medium mb-3 text-center">What's contributing to these feelings?</h3>
                         <div className="flex flex-wrap gap-2 justify-center">
                           <MoodTag 
                             label="Physical health" 
@@ -267,7 +268,7 @@ const MoodEntry = () => {
                         <Textarea 
                           placeholder="How are you feeling? (optional)" 
                           className="bg-gray-50 border-gray-200 text-gray-800 placeholder:text-gray-400 min-h-[100px] focus:border-opacity-100 transition-colors"
-                          style={{ borderColor: `${getMoodColor(currentMood || 'neutral')}44` }}
+                          style={{ borderColor: `${getMoodColor(currentMood || 'neutral')}80` }}
                           value={moodFeeling} 
                           onChange={e => setMoodFeeling(e.target.value)} 
                         />
@@ -282,19 +283,20 @@ const MoodEntry = () => {
                         <Button 
                           className="w-full py-6 transition-all duration-300 relative overflow-hidden group"
                           style={{
-                            background: `linear-gradient(135deg, ${getMoodColor(currentMood || 'neutral')}99, ${getMoodColor(currentMood || 'neutral')}66)`,
+                            background: `linear-gradient(135deg, ${getMoodColor(currentMood || 'neutral')}, ${getMoodColor(currentMood || 'neutral')}cc)`,
+                            color: currentMood === 'Happy' || currentMood === 'Surprised' ? '#000000' : '#FFFFFF'
                           }}
                           onClick={handleSaveMood}
                           disabled={isSaving}
                         >
-                          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                          <span className="relative z-10 text-white font-medium">
+                          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                          <span className="relative z-10 font-medium text-lg">
                             {isSaving ? 'Saving...' : 'Save mood'}
                           </span>
                         </Button>
                         
                         <div className="mt-4 flex justify-center">
-                          <Link to="/dashboard" className="text-gray-500 text-sm hover:text-gray-700 transition-colors">
+                          <Link to="/dashboard" className="text-gray-600 text-sm font-medium hover:text-gray-800 transition-colors">
                             Back to dashboard
                           </Link>
                         </div>
@@ -325,11 +327,12 @@ const MoodTag = ({ label, isSelected = false, onClick, mood }: MoodTagProps) => 
     <motion.button 
       whileHover={{ scale: isSelected ? 1 : 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className={`px-4 py-2 rounded-full border text-sm transition-all duration-300`}
+      className={`px-4 py-2 rounded-full border-2 text-sm transition-all duration-300 font-medium`}
       style={{
-        borderColor: isSelected ? moodColor : `${moodColor}30`,
-        backgroundColor: isSelected ? `${moodColor}20` : 'transparent',
-        color: isSelected ? 'gray-800' : `${moodColor}aa`
+        borderColor: isSelected ? moodColor : `${moodColor}60`,
+        backgroundColor: isSelected ? `${moodColor}40` : 'transparent',
+        color: isSelected ? 'black' : '#444444',
+        boxShadow: isSelected ? `0 0 8px ${moodColor}50` : 'none'
       }}
       onClick={onClick}
     >

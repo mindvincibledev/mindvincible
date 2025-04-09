@@ -74,14 +74,14 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
       }}
     >
       {/* Wheel background with gradient */}
-      <div className="absolute bottom-0 left-0 w-full h-52 bg-gradient-to-t from-white/20 via-white/10 to-transparent rounded-t-2xl">
+      <div className="absolute bottom-0 left-0 w-full h-52 bg-gradient-to-t from-white/30 via-white/20 to-transparent rounded-t-2xl">
         {/* Decorative circle elements */}
         <motion.div 
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full opacity-20 blur-md"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full opacity-40 blur-md"
           style={{ background: `radial-gradient(circle, ${moodColor} 0%, transparent 70%)` }}
           animate={{
             scale: [1, 1.1, 1],
-            opacity: [0.2, 0.3, 0.2]
+            opacity: [0.4, 0.6, 0.4]
           }}
           transition={{ 
             duration: 4, 
@@ -107,10 +107,10 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           >
             <defs>
               <linearGradient id="trackGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor={`${moodColor}33`} />
-                <stop offset="45%" stopColor={`${moodColor}66`} />
-                <stop offset="55%" stopColor={`${moodColor}66`} />
-                <stop offset="100%" stopColor={`${moodColor}33`} />
+                <stop offset="0%" stopColor={`${moodColor}60`} />
+                <stop offset="45%" stopColor={`${moodColor}90`} />
+                <stop offset="55%" stopColor={`${moodColor}90`} />
+                <stop offset="100%" stopColor={`${moodColor}60`} />
               </linearGradient>
             </defs>
             <path 
@@ -127,7 +127,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           <div 
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full z-0 pointer-events-none"
             style={{
-              background: `radial-gradient(circle, ${moodColor}66 0%, ${moodColor}22 50%, transparent 70%)`,
+              background: `radial-gradient(circle, ${moodColor}80 0%, ${moodColor}40 50%, transparent 70%)`,
               filter: "blur(4px)"
             }}
           />
@@ -140,14 +140,14 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           {/* Left navigation button - Fixed in absolute position */}
           <div className="absolute -left-2 top-1/2 -translate-y-1/2 z-10">
             <motion.button
-              className="w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20 transform-gpu"
+              className="w-10 h-10 flex items-center justify-center bg-white/30 backdrop-blur-sm rounded-full border border-white/40 transform-gpu"
               whileTap={{ scale: 0.9, opacity: 0.8 }}
               onClick={(e) => {
                 e.stopPropagation();
                 onChangeMood('left');
               }}
             >
-              <ChevronLeft className="text-white w-6 h-6" />
+              <ChevronLeft className="text-black w-6 h-6" />
             </motion.button>
           </div>
           
@@ -175,7 +175,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
                     data-index={index}
                     className="flex flex-col items-center justify-center cursor-pointer transition-all shrink-0"
                     animate={{ 
-                      opacity: isSelected ? 1 : 0.6,
+                      opacity: isSelected ? 1 : 0.7,
                       scale: isSelected ? 1.2 : 1,
                       y: isSelected ? -6 : 0,
                       transition: { duration: 0.3 }
@@ -190,8 +190,8 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
                     <motion.span 
                       className="text-xl font-bold whitespace-nowrap px-4 py-2"
                       style={{
-                        color: isSelected ? 'white' : 'rgba(255, 255, 255, 0.7)',
-                        textShadow: isSelected ? '0 2px 8px rgba(0,0,0,0.3)' : 'none'
+                        color: 'black',
+                        textShadow: isSelected ? '0 2px 8px rgba(255,255,255,0.6)' : 'none'
                       }}
                       animate={{
                         y: isSelected ? [0, -2, 0] : 0
@@ -208,7 +208,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
                     {/* Selection indicator dot */}
                     {isSelected && (
                       <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-white mt-1"
+                        className="w-1.5 h-1.5 rounded-full bg-black mt-1"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.1 }}
@@ -226,14 +226,14 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           {/* Right navigation button - Fixed in absolute position */}
           <div className="absolute -right-2 top-1/2 -translate-y-1/2 z-10">
             <motion.button
-              className="w-10 h-10 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full border border-white/20 transform-gpu"
+              className="w-10 h-10 flex items-center justify-center bg-white/30 backdrop-blur-sm rounded-full border border-white/40 transform-gpu"
               whileTap={{ scale: 0.9, opacity: 0.8 }}
               onClick={(e) => {
                 e.stopPropagation();
                 onChangeMood('right');
               }}
             >
-              <ChevronRight className="text-white w-6 h-6" />
+              <ChevronRight className="text-black w-6 h-6" />
             </motion.button>
           </div>
         </div>
@@ -247,7 +247,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
             className="w-2 h-2 rounded-full cursor-pointer"
             animate={{
               scale: i === selectedMoodIndex ? 1.2 : 1,
-              backgroundColor: i === selectedMoodIndex ? 'rgb(255, 255, 255)' : 'rgba(255, 255, 255, 0.4)'
+              backgroundColor: i === selectedMoodIndex ? 'rgb(0, 0, 0)' : 'rgba(0, 0, 0, 0.4)'
             }}
             whileHover={{ scale: 1.3 }}
             onClick={() => onMoodSelect(i)}

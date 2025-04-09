@@ -26,24 +26,25 @@ const ColorPalette: React.FC<ColorPaletteProps> = ({
 }) => {
   return (
     <div className="w-full">
-      <h3 className="text-white text-lg mb-3 text-center">
+      <h3 className="text-black text-lg mb-3 text-center font-semibold">
         Select an emotion color to fill your jar
       </h3>
       <div className="flex flex-wrap gap-3 justify-center mb-4">
         {colorEmotions.map((item) => {
           const buttonColor = item.color;
           const isSelected = selectedColor === item.color;
-          const opacity = isSelected ? '1' : '0.7';
-          const textColor = buttonColor === '#F5DF4D' || buttonColor === '#2AC20E' || buttonColor === '#D6F6D5' ? 'text-black' : 'text-white';
+          const opacity = isSelected ? '1' : '0.85';
+          const textColor = buttonColor === '#F5DF4D' || buttonColor === '#2AC20E' || buttonColor === '#D6F6D5' || buttonColor === '#3DFDFF' ? 'text-black' : 'text-white';
           
           return (
             <button
               key={item.name}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/30
-                transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-md"
+              className="flex items-center gap-2 px-4 py-2 rounded-full border-2 shadow-md
+                transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg"
               style={{ 
-                backgroundColor: `${buttonColor}${isSelected ? '' : '70'}`,
-                boxShadow: isSelected ? `0 0 10px ${buttonColor}` : '0 0 5px rgba(255, 255, 255, 0.2)',
+                backgroundColor: `${buttonColor}`,
+                borderColor: isSelected ? '#000000' : 'rgba(255, 255, 255, 0.5)',
+                boxShadow: isSelected ? `0 0 15px ${buttonColor}` : '0 0 5px rgba(0, 0, 0, 0.1)',
                 opacity: opacity
               }}
               onClick={() => onSelectColor(item.color, item.name)}
@@ -57,7 +58,7 @@ const ColorPalette: React.FC<ColorPaletteProps> = ({
           );
         })}
       </div>
-      <p className="text-white text-center text-sm mb-4">
+      <p className="text-black text-center text-sm mb-4">
         Fill the jar with feelings colours to see how much of each feeling you have right now
       </p>
     </div>
