@@ -44,10 +44,13 @@ const JournalEntry = () => {
                 onSave={handleSaveJournal}
               />
               
-              <JournalTypeSelector 
-                selectedType={journalType} 
-                onTypeChange={setJournalType} 
-              />
+              {/* Added mt-12 to create more space between the save button and type selector */}
+              <div className="mt-12">
+                <JournalTypeSelector 
+                  selectedType={journalType} 
+                  onTypeChange={setJournalType} 
+                />
+              </div>
               
               <div className="mb-8">
                 {journalType === 'text' && (

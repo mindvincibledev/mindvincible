@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -158,7 +159,7 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <Label htmlFor="drawing-journal-title" className="text-white mb-2 block">
+        <Label htmlFor="drawing-journal-title" className="text-black mb-2 block font-medium">
           Drawing Journal Title
         </Label>
         <Input
@@ -166,11 +167,11 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder="Enter a title for your drawing"
-          className="bg-black/20 backdrop-blur-sm border-[#3DFDFF]/30 text-white placeholder-gray-400"
+          className="bg-white border-[#3DFDFF]/30 text-black placeholder-gray-500"
         />
       </div>
       
-      <div className="p-4 rounded-lg border border-[#3DFDFF]/30 bg-black/20 backdrop-blur-sm">
+      <div className="p-4 rounded-lg border border-[#3DFDFF]/30 bg-white">
         <div className="flex flex-wrap gap-2 mb-4 justify-center">
           {colors.map(({color, name}) => (
             <button
@@ -178,7 +179,7 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
               onClick={() => setSelectedColor(color)}
               className={`w-8 h-8 rounded-full border-2 transition-all ${
                 selectedColor === color 
-                  ? 'border-white scale-110 shadow-glow' 
+                  ? 'border-black scale-110 shadow-glow' 
                   : 'border-transparent opacity-80'
               }`}
               style={{ 
@@ -191,7 +192,7 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
         </div>
         
         <div className="mb-4">
-          <Label htmlFor="brush-size" className="text-white mb-2 block">
+          <Label htmlFor="brush-size" className="text-black mb-2 block">
             Brush Size: {brushSize}px
           </Label>
           <input
@@ -205,7 +206,7 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
           />
         </div>
         
-        <div className="relative border border-white/30 rounded-lg overflow-hidden mb-4 bg-white">
+        <div className="relative border border-gray-200 rounded-lg overflow-hidden mb-4 bg-white">
           <canvas 
             ref={canvasRef}
             width={600}
@@ -218,7 +219,7 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
           <Button 
             onClick={clearCanvas}
             variant="destructive"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-black"
           >
             <Trash className="h-5 w-5" />
             Clear
