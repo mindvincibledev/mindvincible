@@ -140,6 +140,7 @@ const JournalDetail = () => {
     }
   };
   
+  // Define the formatDate function only once
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
@@ -250,11 +251,6 @@ const JournalDetail = () => {
       </div>
     </BackgroundWithEmojis>
   );
-  
-  function formatDate(dateString: string) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
-  }
 };
 
 export default JournalDetail;
