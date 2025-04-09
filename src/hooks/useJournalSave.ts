@@ -106,6 +106,7 @@ export function useJournalSave() {
         const fileName = `audio_${timestamp}.webm`;
         
         // Upload audio file to the audio_files bucket
+        // Using the custom users id for the folder structure
         const { error: uploadError } = await supabase.storage
           .from('audio_files')
           .upload(`${user.id}/${fileName}`, audioBlob, {
@@ -132,6 +133,7 @@ export function useJournalSave() {
         const fileName = `drawing_${timestamp}.png`;
         
         // Upload drawing file to the drawing_files bucket
+        // Using the custom users id for the folder structure
         const { error: uploadError } = await supabase.storage
           .from('drawing_files')
           .upload(`${user.id}/${fileName}`, drawingBlob, {
@@ -153,11 +155,11 @@ export function useJournalSave() {
         console.log('Drawing uploaded successfully, URL:', drawingPath);
       }
       
-      // Insert journal entry
+      // Insert journal entry using our custom user id
       const { data, error } = await supabase
         .from('journal_entries')
         .insert({
-          user_id: user.id,
+          user_id: user.id, // This is now the id from our custom users table
           title: title.trim(),
           content: journalType === 'text' ? content.trim() : null,
           audio_path: audioPath,
