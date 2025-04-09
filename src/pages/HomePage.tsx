@@ -54,10 +54,10 @@ const HomePage = () => {
       color: "from-[#F5DF4D] to-[#FF8A48]"
     },
     {
-      title: "Emotional Airbnb",
-      description: "Explore your emotions in depth with guided reflection exercises.",
-      icon: <Home className="h-8 w-8 text-[#FC68B3]" />,
-      link: "/emotional-airbnb",
+      title: "Emotional Hacking",
+      description: "Explore activities and techniques to manage intense emotions and ground yourself.",
+      icon: <Brain className="h-8 w-8 text-[#FC68B3]" />,
+      link: "/emotional-hacking",
       color: "from-[#FC68B3] to-[#3DFDFF]"
     },
     {

@@ -15,6 +15,8 @@ import MoodJar from "./pages/MoodJar";
 import Journal from "./pages/Journal";
 import JournalEntry from "./pages/JournalEntry";
 import JournalDetail from "./pages/JournalDetail";
+import EmotionalHacking from "./pages/EmotionalHacking";
+import EmotionalHackingActivity from "./pages/EmotionalHackingActivity";
 import EmotionalAirbnb from "./pages/EmotionalAirbnb";
 import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -83,7 +85,18 @@ const AppRoutes = () => {
           <JournalDetail />
         </ProtectedRoute>
       } />
-      {/* Add the Emotional Airbnb route */}
+      {/* Add Emotional Hacking routes */}
+      <Route path="/emotional-hacking" element={
+        <ProtectedRoute>
+          <EmotionalHacking />
+        </ProtectedRoute>
+      } />
+      <Route path="/emotional-hacking/:activityId" element={
+        <ProtectedRoute>
+          <EmotionalHackingActivity />
+        </ProtectedRoute>
+      } />
+      {/* Emotional Airbnb route */}
       <Route path="/emotional-airbnb" element={
         <ProtectedRoute>
           <EmotionalAirbnb />
