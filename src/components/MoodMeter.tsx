@@ -34,9 +34,29 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
   // Calculate selected mood based on index
   const selectedMood = moods[selectedMoodIndex];
   // Use hovered mood color if available, otherwise use selected mood color
+  // Dim the color by 20%
   const moodColor = hoveredMoodIndex !== null 
     ? getMoodColor(moods[hoveredMoodIndex]) 
     : getMoodColor(selectedMood);
+  
+  // Function to dim a color by 20%
+  const dimColor = (color: string) => {
+    // Convert hex to RGB
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    
+    // Dim by 20%
+    const dimFactor = 0.8;
+    const newR = Math.round(r * dimFactor);
+    const newG = Math.round(g * dimFactor);
+    const newB = Math.round(b * dimFactor);
+    
+    // Convert back to hex
+    return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+  };
+  
+  const dimmedMoodColor = dimColor(moodColor);
 
   return (
     <motion.div 
@@ -45,7 +65,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
       exit={{ opacity: 0 }}
       className="w-full h-full text-center flex flex-col items-center justify-center px-4 py-8"
     >
-      <div className="relative w-full max-w-[101%] z-10"> {/* Increased width by 1% */}
+      <div className="relative w-full max-w-md z-10" style={{ maxWidth: "calc(100% * 1.1)" }}> {/* Increased width by 10% */}
         {/* Card container with more vibrant colors */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -53,9 +73,9 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
           transition={{ duration: 0.5 }}
           className="backdrop-blur-lg rounded-2xl shadow-md border border-white/30 overflow-hidden p-6"
           style={{
-            backgroundColor: `${moodColor}F2`, // Made 1% duller by setting opacity to F2 (95%)
+            backgroundColor: `${dimmedMoodColor}`, // More saturated, solid color but dimmed
             transition: 'background-color 0.5s ease',
-            boxShadow: `0 8px 32px ${moodColor}50`
+            boxShadow: `0 8px 32px ${dimmedMoodColor}50`
           }}
         >
           {/* App name */}
@@ -68,10 +88,10 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
           </motion.h1>
           
           {/* Mood Display Component */}
-          <MoodDisplay selectedMood={selectedMood} />
+          <MoodDisplay selectedMood={selectedMood} dimColor={dimColor} />
           
           {/* Mood Selection Button */}
-          <MoodButton selectedMood={selectedMood} onSelectMood={onMoodSelect} />
+          <MoodButton selectedMood={selectedMood} onSelectMood={onMoodSelect} dimColor={dimColor} />
           
           {/* Horizontally scrollable Mood Selector Component */}
           <MoodSelector 
@@ -84,6 +104,7 @@ const MoodMeter: React.FC<MoodMeterProps> = ({ onMoodSelect }) => {
             handleTouchMove={handleTouchMove}
             handleTouchEnd={handleTouchEnd}
             onMoodHover={setHoveredMoodIndex}
+            dimColor={dimColor}
           />
         </motion.div>
       </div>

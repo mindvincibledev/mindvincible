@@ -5,10 +5,12 @@ import { getMoodColor } from '@/utils/moodUtils';
 
 interface MoodDisplayProps {
   selectedMood: string;
+  dimColor?: (color: string) => string;
 }
 
-const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
+const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood, dimColor }) => {
   const moodColor = getMoodColor(selectedMood);
+  const actualColor = dimColor ? dimColor(moodColor) : moodColor;
   
   return (
     <div className="flex-1 flex flex-col justify-center items-center w-full px-4 pt-4 pb-6 z-10">
@@ -53,7 +55,7 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
           <motion.div 
             className="absolute -top-8 -left-8 w-32 h-32 rounded-full -z-10"
             style={{
-              background: `${moodColor}50`
+              background: `${actualColor}50`
             }}
             animate={{
               scale: [1, 1.05, 1],
@@ -69,7 +71,7 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
           <motion.div 
             className="absolute -bottom-8 -right-8 w-24 h-24 rounded-full -z-10"
             style={{
-              background: `${moodColor}40`
+              background: `${actualColor}40`
             }}
             animate={{
               scale: [1, 1.1, 1],

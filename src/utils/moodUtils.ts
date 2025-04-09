@@ -2,17 +2,17 @@
 // Helper function to get color based on mood
 export const getMoodColor = (mood: string): string => {
   const moodColors: Record<string, string> = {
-    'Happy': '#F5DF4D',     // Bright yellow (unchanged)
-    'Excited': '#0EA5E9',   // Changed to Ocean Blue from FF8A48
-    'Calm': '#3DFDFF',      // Bright cyan (unchanged)
-    'Sad': '#7B84DB',       // Blue-purple (unchanged)
-    'Angry': '#F97316',     // Bright orange-red (unchanged)
-    'Anxious': '#D946EF',   // Vibrant magenta (unchanged)
-    'Overwhelmed': '#8B5CF6', // Changed to Vivid Purple from F5DF4D
-    'Fearful': '#8B5CF6',    // Vibrant purple (unchanged)
-    'Disgusted': '#0EA5E9',  // Ocean blue (unchanged)
-    'Love': '#FC68B3',       // Bright pink (unchanged)
-    'neutral': '#D5D5F1'    // Default lavender (unchanged)
+    'Happy': '#F5DF4D',     // Bright yellow (more saturated)
+    'Excited': '#FF8A48',   // Vibrant orange (more saturated)
+    'Calm': '#3DFDFF',      // Bright cyan (more saturated)
+    'Sad': '#7B84DB',       // Blue-purple (more saturated)
+    'Angry': '#F97316',     // Bright orange-red (more saturated)
+    'Anxious': '#D946EF',   // Vibrant magenta (more saturated)
+    'Overwhelmed': '#F5DF4D', // Rich yellow (more saturated)
+    'Fearful': '#8B5CF6',    // Vibrant purple (more saturated)
+    'Disgusted': '#0EA5E9',  // Ocean blue (more saturated)
+    'Love': '#FC68B3',       // Bright pink (more saturated)
+    'neutral': '#D5D5F1'    // Default lavender
   };
   return moodColors[mood] || moodColors.neutral;
 };
