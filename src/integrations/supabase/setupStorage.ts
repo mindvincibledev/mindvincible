@@ -24,6 +24,7 @@ export async function setupJournalStorage() {
         const { data, error } = await supabase.storage.from('audio_files').list();
         if (!error) {
           console.log('Audio files storage policies are set up correctly using custom users table');
+          console.log('Available files:', data);
         } else {
           console.warn('Potential issue with audio files storage policies:', error.message);
         }
@@ -44,7 +45,7 @@ export async function setupJournalStorage() {
         const { data, error } = await supabase.storage.from('drawing_files').list();
         if (!error) {
           console.log('Drawing files storage policies are set up correctly using custom users table');
-          console.log('Available drawing files:', data);
+          console.log('Available files:', data);
         } else {
           console.warn('Potential issue with drawing files storage policies:', error.message);
         }

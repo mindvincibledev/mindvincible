@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -26,20 +27,27 @@ const Journal = () => {
   }, [user, navigate]);
   
   const fetchJournalEntries = async () => {
+    if (!user) {
+      console.error('Cannot fetch entries: No user logged in');
+      return;
+    }
+    
     try {
       setLoading(true);
+      console.log('Fetching journal entries for user ID:', user.id);
       
       // Query now explicitly checks for entries where user_id matches our custom user id
       const { data, error } = await supabase
         .from('journal_entries')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
         
       if (error) throw error;
       
       // Use type assertion to tell TypeScript that data is JournalEntry[]
       setEntries((data || []) as JournalEntry[]);
+      console.log('Fetched entries:', data?.length || 0);
     } catch (error: any) {
       console.error('Error fetching journal entries:', error);
       toast({

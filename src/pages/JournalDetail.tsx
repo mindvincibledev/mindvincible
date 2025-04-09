@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -90,30 +91,42 @@ const JournalDetail = () => {
   };
   
   const handleDeleteEntry = async () => {
-    if (!entry) return;
+    if (!entry || !user) return;
     
     try {
       // Delete associated files if present
       if (entry.audio_path) {
+        // Extract the folder path and file name from the URL
         const pathParts = entry.audio_path.split('/');
-        const fileName = pathParts[pathParts.length - 1];
-        const userId = pathParts[pathParts.length - 2];
+        const folderWithFileName = pathParts.slice(pathParts.length - 2).join('/');
+        
+        console.log('Attempting to delete audio file:', folderWithFileName);
         
         // Delete from audio_files bucket
-        await supabase.storage
+        const { error: deleteAudioError } = await supabase.storage
           .from('audio_files')
-          .remove([`${userId}/${fileName}`]);
+          .remove([folderWithFileName]);
+          
+        if (deleteAudioError) {
+          console.error('Error deleting audio file:', deleteAudioError);
+        }
       }
       
       if (entry.drawing_path) {
+        // Extract the folder path and file name from the URL
         const pathParts = entry.drawing_path.split('/');
-        const fileName = pathParts[pathParts.length - 1];
-        const userId = pathParts[pathParts.length - 2];
+        const folderWithFileName = pathParts.slice(pathParts.length - 2).join('/');
+        
+        console.log('Attempting to delete drawing file:', folderWithFileName);
         
         // Delete from drawing_files bucket
-        await supabase.storage
+        const { error: deleteDrawingError } = await supabase.storage
           .from('drawing_files')
-          .remove([`${userId}/${fileName}`]);
+          .remove([folderWithFileName]);
+          
+        if (deleteDrawingError) {
+          console.error('Error deleting drawing file:', deleteDrawingError);
+        }
       }
       
       // Delete the entry
