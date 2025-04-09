@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,6 +96,8 @@ export function useJournalSave() {
         throw new Error("User not authenticated");
       }
 
+      console.log("Starting journal save process with user ID:", user.id);
+      
       // Handle file upload if needed
       let audioPath = null;
       let drawingPath = null;
@@ -105,11 +106,14 @@ export function useJournalSave() {
         const timestamp = Date.now();
         const fileName = `audio_${timestamp}.webm`;
         
+        console.log(`Uploading audio file for user ${user.id} as ${fileName}`);
+        
         // Upload audio file to the audio_files bucket
-        // Using the custom users id for the folder structure
-        const { error: uploadError } = await supabase.storage
+        // Using custom string folder structure instead of UUID directly in path
+        // This helps prevent RLS policy validation errors
+        const { error: uploadError, data: uploadData } = await supabase.storage
           .from('audio_files')
-          .upload(`${user.id}/${fileName}`, audioBlob, {
+          .upload(`user_${user.id}/${fileName}`, audioBlob, {
             contentType: 'audio/webm',
             upsert: true
           });
@@ -122,7 +126,7 @@ export function useJournalSave() {
         // Get the public URL for the uploaded file
         const { data: audioUrl } = supabase.storage
           .from('audio_files')
-          .getPublicUrl(`${user.id}/${fileName}`);
+          .getPublicUrl(`user_${user.id}/${fileName}`);
           
         audioPath = audioUrl.publicUrl;
         console.log('Audio uploaded successfully, URL:', audioPath);
@@ -132,11 +136,14 @@ export function useJournalSave() {
         const timestamp = Date.now();
         const fileName = `drawing_${timestamp}.png`;
         
+        console.log(`Uploading drawing file for user ${user.id} as ${fileName}`);
+        
         // Upload drawing file to the drawing_files bucket
-        // Using the custom users id for the folder structure
-        const { error: uploadError } = await supabase.storage
+        // Using custom string folder structure instead of UUID directly in path
+        // This helps prevent RLS policy validation errors
+        const { error: uploadError, data: uploadData } = await supabase.storage
           .from('drawing_files')
-          .upload(`${user.id}/${fileName}`, drawingBlob, {
+          .upload(`user_${user.id}/${fileName}`, drawingBlob, {
             contentType: 'image/png',
             upsert: true
           });
@@ -149,11 +156,13 @@ export function useJournalSave() {
         // Get the public URL for the uploaded file
         const { data: drawingUrl } = supabase.storage
           .from('drawing_files')
-          .getPublicUrl(`${user.id}/${fileName}`);
+          .getPublicUrl(`user_${user.id}/${fileName}`);
         
         drawingPath = drawingUrl.publicUrl;
         console.log('Drawing uploaded successfully, URL:', drawingPath);
       }
+      
+      console.log("About to insert journal entry with user_id:", user.id);
       
       // Insert journal entry using our custom user id
       const { data, error } = await supabase
@@ -168,7 +177,10 @@ export function useJournalSave() {
         } as JournalEntry)
         .select();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting journal entry:', error);
+        throw error;
+      }
       
       toast({
         title: "Journal saved!",

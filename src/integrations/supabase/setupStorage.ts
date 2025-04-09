@@ -39,11 +39,12 @@ export async function setupJournalStorage() {
     } else {
       console.log('drawing_files bucket exists');
       
-      // Let's check if we can access storage info
+      // Let's check if we can access storage info and log bucket policy details
       try {
         const { data, error } = await supabase.storage.from('drawing_files').list();
         if (!error) {
           console.log('Drawing files storage policies are set up correctly using custom users table');
+          console.log('Available drawing files:', data);
         } else {
           console.warn('Potential issue with drawing files storage policies:', error.message);
         }

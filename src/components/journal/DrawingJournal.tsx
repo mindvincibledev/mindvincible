@@ -1,11 +1,11 @@
-
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Brush, Trash, Save } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useCanvasInteraction } from '@/hooks/useCanvasInteraction';
+import { useAuth } from '@/context/AuthContext';
 
 interface DrawingJournalProps {
   onDrawingChange: (imageBlob: Blob) => void;
@@ -33,9 +33,19 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
   const [selectedColor, setSelectedColor] = useState('#FC68B3');
   const [brushSize, setBrushSize] = useState(5);
   const lastPosition = useRef({ x: 0, y: 0 });
+  const { user } = useAuth();
+  
+  // Log user info when component mounts
+  useEffect(() => {
+    if (user) {
+      console.log("DrawingJournal component mounted with user ID:", user.id);
+    } else {
+      console.log("DrawingJournal component mounted but no user is logged in");
+    }
+  }, [user]);
   
   // Initialize canvas with white background
-  React.useEffect(() => {
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -45,6 +55,9 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
     // Set initial canvas background to white
     context.fillStyle = '#ffffff';
     context.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Initial save of the blank canvas
+    saveDrawing();
   }, []);
 
   const startDrawing = (x: number, y: number) => {
@@ -118,12 +131,25 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
   };
 
   const saveDrawing = () => {
+    if (!user) {
+      console.log("Cannot save drawing: No user is logged in");
+      return;
+    }
+
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      console.log("Cannot save drawing: Canvas reference is null");
+      return;
+    }
+    
+    console.log(`Attempting to save drawing for user ${user.id}`);
     
     canvas.toBlob((blob) => {
       if (blob) {
+        console.log(`Drawing blob created successfully, size: ${blob.size} bytes`);
         onDrawingChange(blob);
+      } else {
+        console.error("Failed to create blob from canvas");
       }
     }, 'image/png');
   };
