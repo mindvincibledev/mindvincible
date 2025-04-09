@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Clock, Play, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Button } from '@/components/ui/button';
@@ -86,6 +86,128 @@ interface Activity {
 
 type ActivityParams = {
   activityId: string;
+};
+
+// Animation component to replace the static image
+const DetoxAnimation = () => {
+  return (
+    <div className="relative h-64 w-full max-w-md mx-auto flex items-center justify-center bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 rounded-lg overflow-hidden">
+      {/* Animated circles in the background */}
+      <motion.div 
+        className="absolute w-20 h-20 rounded-full bg-[#3DFDFF]/30"
+        animate={{ 
+          scale: [1, 1.2, 1],
+          x: [0, -30, 0],
+          y: [0, 20, 0]
+        }}
+        transition={{ 
+          repeat: Infinity,
+          duration: 5,
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div 
+        className="absolute w-16 h-16 rounded-full bg-[#F5DF4D]/30"
+        animate={{ 
+          scale: [1.2, 1, 1.2],
+          x: [20, -10, 20],
+          y: [-20, 10, -20] 
+        }}
+        transition={{ 
+          repeat: Infinity,
+          duration: 7,
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div 
+        className="absolute w-12 h-12 rounded-full bg-[#FC68B3]/30"
+        animate={{ 
+          scale: [1, 1.3, 1],
+          x: [-10, 30, -10],
+          y: [10, -20, 10] 
+        }}
+        transition={{ 
+          repeat: Infinity,
+          duration: 6,
+          ease: "easeInOut"
+        }}
+      />
+      
+      {/* Animated device icons */}
+      <div className="relative z-10 flex flex-col items-center">
+        <motion.div
+          className="mb-5"
+          animate={{ 
+            y: [0, -10, 0],
+            opacity: [1, 0.7, 1]
+          }}
+          transition={{ 
+            repeat: Infinity,
+            duration: 3,
+            ease: "easeInOut"
+          }}
+        >
+          <Smartphone size={48} className="text-[#FC68B3]" />
+        </motion.div>
+        
+        <motion.div
+          className="flex items-center gap-10"
+          animate={{ 
+            y: [0, 5, 0],
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 4,
+            ease: "easeInOut"
+          }}
+        >
+          <motion.div
+            animate={{ 
+              rotate: [0, 10, 0, -10, 0],
+              scale: [1, 1.1, 1, 1.1, 1]
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 5,
+              ease: "easeInOut"
+            }}
+          >
+            <Coffee size={32} className="text-[#2AC20E]" />
+          </motion.div>
+          
+          <motion.div
+            animate={{ 
+              rotate: [0, -10, 0, 10, 0],
+              scale: [1, 1.1, 1, 1.1, 1]
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 5,
+              ease: "easeInOut",
+              delay: 0.5
+            }}
+          >
+            <Sun size={32} className="text-[#F5DF4D]" />
+          </motion.div>
+          
+          <motion.div
+            animate={{ 
+              rotate: [0, 10, 0, -10, 0],
+              scale: [1, 1.1, 1, 1.1, 1]
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 5,
+              ease: "easeInOut",
+              delay: 1
+            }}
+          >
+            <Moon size={32} className="text-[#3DFDFF]" />
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
+  );
 };
 
 const EmotionalHackingActivity = () => {
@@ -189,12 +311,8 @@ const EmotionalHackingActivity = () => {
                   </p>
                 </div>
                 
-                <div className="mb-6 max-w-md mx-auto">
-                  <img 
-                    src={activity.image} 
-                    alt={activity.title} 
-                    className="w-full rounded-lg shadow-md"
-                  />
+                <div className="mb-6">
+                  <DetoxAnimation />
                 </div>
                 
                 {isDetoxActive ? (
