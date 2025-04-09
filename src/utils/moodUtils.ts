@@ -3,12 +3,12 @@
 export const getMoodColor = (mood: string): string => {
   const moodColors: Record<string, string> = {
     'Happy': '#F5DF4D',     // Bright yellow (more saturated)
-    'Excited': '#FF8A48',   // Vibrant orange (more saturated)
+    'Excited': '#FC68B3',   // Changed from '#FF8A48' (orange) to vibrant pink
     'Calm': '#3DFDFF',      // Bright cyan (more saturated)
     'Sad': '#7B84DB',       // Blue-purple (more saturated)
     'Angry': '#F97316',     // Bright orange-red (more saturated)
     'Anxious': '#D946EF',   // Vibrant magenta (more saturated)
-    'Overwhelmed': '#F5DF4D', // Rich yellow (more saturated)
+    'Overwhelmed': '#2AC20E', // Changed from '#F5DF4D' (yellow) to green
     'Fearful': '#8B5CF6',    // Vibrant purple (more saturated)
     'Disgusted': '#0EA5E9',  // Ocean blue (more saturated)
     'Love': '#FC68B3',       // Bright pink (more saturated)
