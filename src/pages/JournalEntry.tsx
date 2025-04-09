@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import JournalTypeSelector from '@/components/journal/JournalTypeSelector';
@@ -17,6 +18,7 @@ const JournalEntry = () => {
   const [content, setContent] = useState('');
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [drawingBlob, setDrawingBlob] = useState<Blob | null>(null);
+  const navigate = useNavigate();
   
   const { saveJournal, isSaving } = useJournalSave();
 
@@ -27,6 +29,9 @@ const JournalEntry = () => {
       content,
       audioBlob,
       drawingBlob
+    }, () => {
+      // Redirect to home page after successful save
+      navigate('/home');
     });
   };
 
@@ -44,8 +49,8 @@ const JournalEntry = () => {
                 onSave={handleSaveJournal}
               />
               
-              {/* Added mt-12 to create more space between the save button and type selector */}
-              <div className="mt-12">
+              {/* Added mt-16 to create more space between the save button and type selector */}
+              <div className="mt-16">
                 <JournalTypeSelector 
                   selectedType={journalType} 
                   onTypeChange={setJournalType} 
