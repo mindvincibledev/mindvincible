@@ -14,6 +14,7 @@ interface MoodSelectorProps {
   handleTouchMove: (e: React.TouchEvent | React.MouseEvent) => void;
   handleTouchEnd: () => void;
   onMoodHover: (index: number | null) => void;
+  dimColor?: (color: string) => string;
 }
 
 const MoodSelector: React.FC<MoodSelectorProps> = ({
@@ -25,7 +26,8 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
   handleTouchStart,
   handleTouchMove,
   handleTouchEnd,
-  onMoodHover
+  onMoodHover,
+  dimColor
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -57,6 +59,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
   }, [selectedMoodIndex, offsetIndex]);
 
   const moodColor = getMoodColor(moods[selectedMoodIndex]);
+  const actualColor = dimColor ? dimColor(moodColor) : moodColor;
 
   return (
     <div 
@@ -78,7 +81,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
         {/* Decorative circle elements */}
         <motion.div 
           className="absolute bottom-8 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full opacity-40 blur-md"
-          style={{ background: `radial-gradient(circle, ${moodColor} 0%, transparent 70%)` }}
+          style={{ background: `radial-gradient(circle, ${actualColor} 0%, transparent 70%)` }}
           animate={{
             scale: [1, 1.1, 1],
             opacity: [0.4, 0.6, 0.4]
@@ -107,10 +110,10 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           >
             <defs>
               <linearGradient id="trackGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor={`${moodColor}60`} />
-                <stop offset="45%" stopColor={`${moodColor}90`} />
-                <stop offset="55%" stopColor={`${moodColor}90`} />
-                <stop offset="100%" stopColor={`${moodColor}60`} />
+                <stop offset="0%" stopColor={`${actualColor}60`} />
+                <stop offset="45%" stopColor={`${actualColor}90`} />
+                <stop offset="55%" stopColor={`${actualColor}90`} />
+                <stop offset="100%" stopColor={`${actualColor}60`} />
               </linearGradient>
             </defs>
             <path 
@@ -127,7 +130,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
           <div 
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full z-0 pointer-events-none"
             style={{
-              background: `radial-gradient(circle, ${moodColor}80 0%, ${moodColor}40 50%, transparent 70%)`,
+              background: `radial-gradient(circle, ${actualColor}80 0%, ${actualColor}40 50%, transparent 70%)`,
               filter: "blur(4px)"
             }}
           />
