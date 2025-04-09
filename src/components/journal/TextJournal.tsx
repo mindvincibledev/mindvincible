@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +20,7 @@ const TextJournal: React.FC<TextJournalProps> = ({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <Label htmlFor="journal-title" className="text-white mb-2 block">
+        <Label htmlFor="journal-title" className="text-black mb-2 block font-medium">
           Journal Title
         </Label>
         <Input
@@ -28,12 +28,12 @@ const TextJournal: React.FC<TextJournalProps> = ({
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder="Enter a title for your journal entry"
-          className="bg-black/20 backdrop-blur-sm border-[#FC68B3]/30 text-white placeholder-gray-400"
+          className="bg-white/90 backdrop-blur-sm border-[#FC68B3]/30 text-black placeholder-gray-500 focus-visible:ring-[#FC68B3]/50 transition-all"
         />
       </div>
       
       <div>
-        <Label htmlFor="journal-content" className="text-white mb-2 block">
+        <Label htmlFor="journal-content" className="text-black mb-2 block font-medium">
           Journal Content
         </Label>
         <Textarea
@@ -41,7 +41,7 @@ const TextJournal: React.FC<TextJournalProps> = ({
           value={content}
           onChange={(e) => onContentChange(e.target.value)}
           placeholder="Write your thoughts and feelings here..."
-          className="min-h-[200px] bg-black/20 backdrop-blur-sm border-[#FC68B3]/30 text-white placeholder-gray-400"
+          className="min-h-[200px] bg-white/90 backdrop-blur-sm border-[#FC68B3]/30 text-black placeholder-gray-500 focus-visible:ring-[#FC68B3]/50 transition-all"
         />
       </div>
     </div>

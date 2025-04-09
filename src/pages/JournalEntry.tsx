@@ -35,9 +35,9 @@ const JournalEntry = () => {
       <div className="min-h-screen relative">
         <Navbar />
         
-        <div className="relative z-10 container mx-auto px-4 py-24">
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-white/80 backdrop-blur-md rounded-xl border border-gray-100 p-6 shadow-lg">
+        <div className="relative z-10 container mx-auto px-4 py-24 w-[101%]">
+          <div className="max-w-[calc(3xl+10%)] mx-auto">
+            <div className="bg-white/90 backdrop-blur-md rounded-xl border border-gray-100 p-8 shadow-lg">
               <JournalHeader 
                 title="Create New Journal Entry"
                 isSaving={isSaving}
