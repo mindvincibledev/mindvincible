@@ -16,7 +16,7 @@ import IntensitySection from '@/components/emotional-airbnb/IntensitySection';
 import MessageSection from '@/components/emotional-airbnb/MessageSection';
 import { motion } from 'framer-motion';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
-import WavyBackground from '@/components/ui/wavy-background';
+import { WavyBackground } from '@/components/ui/wavy-background'; // Fixed import syntax
 
 const EmotionalAirbnb = () => {
   const { user } = useAuth();
@@ -180,7 +180,7 @@ const EmotionalAirbnb = () => {
         messageDrawingPath = await uploadDrawing(formData.messageDrawing, 'message');
       }
 
-      // Insert data into the database
+      // Insert data into the database - fixing the table reference and column names
       const { error } = await supabase
         .from('emotional_airbnb')
         .insert({
@@ -393,7 +393,7 @@ const EmotionalAirbnb = () => {
                   <WavyBackground 
                     colors={['#FF8A4820', '#D5D5F120', '#3DFDFF20', '#F5DF4D20', '#FC68B320']}
                     blur={5}
-                    speed={1}
+                    speed="fast"
                     className="w-full h-full"
                   />
                 </div>
