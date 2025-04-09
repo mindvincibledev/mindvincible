@@ -45,7 +45,7 @@ const JournalDetail = () => {
     try {
       setLoading(true);
       
-      // Query now explicitly checks for entries where user_id matches our custom user id
+      // RLS is disabled, but we still filter by user to get their entries
       const { data, error } = await supabase
         .from('journal_entries')
         .select('*')
@@ -96,16 +96,17 @@ const JournalDetail = () => {
     try {
       // Delete associated files if present
       if (entry.audio_path) {
-        // Extract the folder path and file name from the URL
-        const pathParts = entry.audio_path.split('/');
-        const folderWithFileName = pathParts.slice(pathParts.length - 2).join('/');
+        // Get filename from URL
+        const url = new URL(entry.audio_path);
+        const pathParts = url.pathname.split('/');
+        const fileName = pathParts[pathParts.length - 1];
         
-        console.log('Attempting to delete audio file:', folderWithFileName);
+        console.log('Attempting to delete audio file:', fileName);
         
         // Delete from audio_files bucket
         const { error: deleteAudioError } = await supabase.storage
           .from('audio_files')
-          .remove([folderWithFileName]);
+          .remove([fileName]);
           
         if (deleteAudioError) {
           console.error('Error deleting audio file:', deleteAudioError);
@@ -113,16 +114,17 @@ const JournalDetail = () => {
       }
       
       if (entry.drawing_path) {
-        // Extract the folder path and file name from the URL
-        const pathParts = entry.drawing_path.split('/');
-        const folderWithFileName = pathParts.slice(pathParts.length - 2).join('/');
+        // Get filename from URL
+        const url = new URL(entry.drawing_path);
+        const pathParts = url.pathname.split('/');
+        const fileName = pathParts[pathParts.length - 1];
         
-        console.log('Attempting to delete drawing file:', folderWithFileName);
+        console.log('Attempting to delete drawing file:', fileName);
         
         // Delete from drawing_files bucket
         const { error: deleteDrawingError } = await supabase.storage
           .from('drawing_files')
-          .remove([folderWithFileName]);
+          .remove([fileName]);
           
         if (deleteDrawingError) {
           console.error('Error deleting drawing file:', deleteDrawingError);

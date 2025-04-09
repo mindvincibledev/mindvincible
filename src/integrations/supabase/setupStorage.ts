@@ -23,13 +23,13 @@ export async function setupJournalStorage() {
       try {
         const { data, error } = await supabase.storage.from('audio_files').list();
         if (!error) {
-          console.log('Audio files storage policies are set up correctly using custom users table');
+          console.log('Audio files storage is set up correctly with public access');
           console.log('Available files:', data);
         } else {
-          console.warn('Potential issue with audio files storage policies:', error.message);
+          console.warn('Potential issue with audio files storage:', error.message);
         }
       } catch (err) {
-        console.error('Error checking audio files storage policies:', err);
+        console.error('Error checking audio files storage:', err);
       }
     }
     
@@ -40,17 +40,17 @@ export async function setupJournalStorage() {
     } else {
       console.log('drawing_files bucket exists');
       
-      // Let's check if we can access storage info and log bucket policy details
+      // Let's check if we can access storage info
       try {
         const { data, error } = await supabase.storage.from('drawing_files').list();
         if (!error) {
-          console.log('Drawing files storage policies are set up correctly using custom users table');
+          console.log('Drawing files storage is set up correctly with public access');
           console.log('Available files:', data);
         } else {
-          console.warn('Potential issue with drawing files storage policies:', error.message);
+          console.warn('Potential issue with drawing files storage:', error.message);
         }
       } catch (err) {
-        console.error('Error checking drawing files storage policies:', err);
+        console.error('Error checking drawing files storage:', err);
       }
     }
     

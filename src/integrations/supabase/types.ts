@@ -32,7 +32,7 @@ export type Database = {
           journal_area?: string | null
           title: string
           updated_at?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           audio_path?: string | null

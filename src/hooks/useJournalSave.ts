@@ -107,15 +107,13 @@ export function useJournalSave() {
         const timestamp = Date.now();
         const fileName = `audio_${timestamp}.webm`;
         
-        console.log(`Uploading audio file for user ${user.id} as ${fileName}`);
-        
-        // Store folder with string prefix to match RLS policy
-        const folderPath = `user_${user.id}`;
+        // No need for user-specific folder since RLS is disabled
+        console.log(`Uploading audio file: ${fileName}`);
         
         // Upload audio file to the audio_files bucket
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError, data } = await supabase.storage
           .from('audio_files')
-          .upload(`${folderPath}/${fileName}`, audioBlob, {
+          .upload(fileName, audioBlob, {
             contentType: 'audio/webm',
             upsert: true
           });
@@ -128,7 +126,7 @@ export function useJournalSave() {
         // Get the public URL for the uploaded file
         const { data: audioUrl } = supabase.storage
           .from('audio_files')
-          .getPublicUrl(`${folderPath}/${fileName}`);
+          .getPublicUrl(fileName);
           
         audioPath = audioUrl.publicUrl;
         console.log('Audio uploaded successfully, URL:', audioPath);
@@ -138,15 +136,13 @@ export function useJournalSave() {
         const timestamp = Date.now();
         const fileName = `drawing_${timestamp}.png`;
         
-        console.log(`Uploading drawing file for user ${user.id} as ${fileName}`);
-        
-        // Store folder with string prefix to match RLS policy
-        const folderPath = `user_${user.id}`;
+        // No need for user-specific folder since RLS is disabled
+        console.log(`Uploading drawing file: ${fileName}`);
         
         // Upload drawing file to the drawing_files bucket
         const { error: uploadError } = await supabase.storage
           .from('drawing_files')
-          .upload(`${folderPath}/${fileName}`, drawingBlob, {
+          .upload(fileName, drawingBlob, {
             contentType: 'image/png',
             upsert: true
           });
@@ -159,7 +155,7 @@ export function useJournalSave() {
         // Get the public URL for the uploaded file
         const { data: drawingUrl } = supabase.storage
           .from('drawing_files')
-          .getPublicUrl(`${folderPath}/${fileName}`);
+          .getPublicUrl(fileName);
         
         drawingPath = drawingUrl.publicUrl;
         console.log('Drawing uploaded successfully, URL:', drawingPath);
@@ -167,7 +163,7 @@ export function useJournalSave() {
       
       console.log("About to insert journal entry with user_id:", user.id);
       
-      // Insert journal entry using our custom user id
+      // Insert journal entry - RLS is disabled so no need for special permissions
       const { data, error } = await supabase
         .from('journal_entries')
         .insert({

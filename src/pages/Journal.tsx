@@ -36,7 +36,7 @@ const Journal = () => {
       setLoading(true);
       console.log('Fetching journal entries for user ID:', user.id);
       
-      // Query now explicitly checks for entries where user_id matches our custom user id
+      // RLS is disabled but we still filter by user_id to get user-specific entries
       const { data, error } = await supabase
         .from('journal_entries')
         .select('*')
