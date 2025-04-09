@@ -68,10 +68,10 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
   }, [moodData, groupedData, isMobile]);
   
   return (
-    <Card className="col-span-1 md:col-span-2 bg-black/40 backdrop-blur-lg border-purple-500/20 shadow-xl">
+    <Card className="col-span-1 md:col-span-2 bg-white/95 backdrop-blur-lg border-gray-200 shadow-xl">
       <CardHeader>
-        <CardTitle className="text-white">Daily Mood</CardTitle>
-        <CardDescription className="text-white/60">Your moods stacked by time of day</CardDescription>
+        <CardTitle className="text-gray-800">Daily Mood</CardTitle>
+        <CardDescription className="text-gray-600">Your moods stacked by time of day</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-80">
@@ -79,7 +79,7 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
             <div className="flex-1 grid grid-cols-7 gap-2 h-full">
               {sortedDates.map(date => (
                 <div key={date} className="flex flex-col h-full relative">
-                  <div className="text-white text-xs mb-2 text-center">{date}</div>
+                  <div className="text-gray-800 text-xs mb-2 text-center">{date}</div>
                   <div className="flex-1 flex flex-col-reverse">
                     {groupedData[date]?.map((item, index) => (
                       <div 
@@ -102,7 +102,7 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
                     ))}
                     {groupedData[date]?.length === 0 && (
                       <div className="flex-1 flex items-center justify-center">
-                        <span className="text-white/30 text-xs">No data</span>
+                        <span className="text-gray-400 text-xs">No data</span>
                       </div>
                     )}
                   </div>

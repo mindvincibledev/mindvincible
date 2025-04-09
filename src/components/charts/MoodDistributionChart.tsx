@@ -53,10 +53,10 @@ const MoodDistributionChart = ({ moodDistribution }: MoodDistributionChartProps)
   };
 
   return (
-    <Card className="bg-black/40 backdrop-blur-lg border-purple-500/20 shadow-xl">
+    <Card className="bg-white/95 backdrop-blur-lg border-gray-200 shadow-xl">
       <CardHeader>
-        <CardTitle className="text-white">Mood Distribution</CardTitle>
-        <CardDescription className="text-white/60">How you've been feeling</CardDescription>
+        <CardTitle className="text-gray-800">Mood Distribution</CardTitle>
+        <CardDescription className="text-gray-600">How you've been feeling</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-64">
@@ -80,8 +80,8 @@ const MoodDistributionChart = ({ moodDistribution }: MoodDistributionChartProps)
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
                     return (
-                      <div className="bg-black/80 backdrop-blur-md p-3 rounded-lg border border-purple-500/30">
-                        <p className="text-white font-semibold">{payload[0].name}</p>
+                      <div className="bg-white/95 backdrop-blur-md p-3 rounded-lg border border-gray-200">
+                        <p className="text-gray-800 font-semibold">{payload[0].name}</p>
                         <p className="text-[#FF8A48]">
                           {payload[0].value}%
                         </p>
@@ -101,7 +101,7 @@ const MoodDistributionChart = ({ moodDistribution }: MoodDistributionChartProps)
                 className="w-3 h-3 rounded-full" 
                 style={{ backgroundColor: getMoodColor(entry.name) }}
               ></div>
-              <span className="text-xs text-white/70">{entry.name}</span>
+              <span className="text-xs text-gray-600">{entry.name}</span>
             </div>
           ))}
         </div>
