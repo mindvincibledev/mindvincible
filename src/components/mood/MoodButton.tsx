@@ -6,12 +6,10 @@ import { getMoodColor } from '@/utils/moodUtils';
 interface MoodButtonProps {
   selectedMood: string;
   onSelectMood: (mood: string) => void;
-  dimColor?: (color: string) => string;
 }
 
-const MoodButton: React.FC<MoodButtonProps> = ({ selectedMood, onSelectMood, dimColor }) => {
+const MoodButton: React.FC<MoodButtonProps> = ({ selectedMood, onSelectMood }) => {
   const moodColor = getMoodColor(selectedMood);
-  const actualColor = dimColor ? dimColor(moodColor) : moodColor;
   
   const playClickSound = () => {
     const audio = new Audio('/click.mp3');
@@ -31,7 +29,7 @@ const MoodButton: React.FC<MoodButtonProps> = ({ selectedMood, onSelectMood, dim
       onClick={handleClick} 
       className="px-8 py-3 rounded-full bg-white/60 backdrop-blur-sm text-black text-lg font-medium shadow-lg my-4 w-full max-w-56 border border-white/30 relative overflow-hidden group z-10 transform-gpu"
       style={{ 
-        boxShadow: `0 4px 20px ${actualColor}60`,
+        boxShadow: `0 4px 20px ${moodColor}60`,
         transformStyle: 'preserve-3d'
       }}
     >
@@ -39,7 +37,7 @@ const MoodButton: React.FC<MoodButtonProps> = ({ selectedMood, onSelectMood, dim
       <motion.div 
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         style={{ 
-          background: `radial-gradient(circle at center, ${actualColor}70 0%, transparent 70%)`
+          background: `radial-gradient(circle at center, ${moodColor}70 0%, transparent 70%)`
         }}
         animate={{
           scale: [1, 1.1, 1],
