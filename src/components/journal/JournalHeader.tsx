@@ -18,7 +18,7 @@ const JournalHeader: React.FC<JournalHeaderProps> = ({ title, isSaving, onSave }
         <Button 
           onClick={onSave}
           disabled={isSaving}
-          className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-white px-8 py-6 text-lg flex items-center gap-3 transition-transform hover:scale-105"
+          className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-black px-8 py-6 text-lg flex items-center gap-3 transition-transform hover:scale-105"
         >
           <Save className="h-5 w-5" />
           {isSaving ? 'Saving...' : 'Save Journal Entry'}

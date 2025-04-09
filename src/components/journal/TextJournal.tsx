@@ -28,7 +28,7 @@ const TextJournal: React.FC<TextJournalProps> = ({
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder="Enter a title for your journal entry"
-          className="bg-white/90 backdrop-blur-sm border-[#FC68B3]/30 text-black placeholder-gray-500 focus-visible:ring-[#FC68B3]/50 transition-all"
+          className="bg-white border-[#FC68B3]/30 text-black placeholder-gray-500 focus-visible:ring-[#FC68B3]/50 transition-all"
         />
       </div>
       
@@ -41,7 +41,7 @@ const TextJournal: React.FC<TextJournalProps> = ({
           value={content}
           onChange={(e) => onContentChange(e.target.value)}
           placeholder="Write your thoughts and feelings here..."
-          className="min-h-[200px] bg-white/90 backdrop-blur-sm border-[#FC68B3]/30 text-black placeholder-gray-500 focus-visible:ring-[#FC68B3]/50 transition-all"
+          className="min-h-[200px] bg-white border-[#FC68B3]/30 text-black placeholder-gray-500 focus-visible:ring-[#FC68B3]/50 transition-all"
         />
       </div>
     </div>

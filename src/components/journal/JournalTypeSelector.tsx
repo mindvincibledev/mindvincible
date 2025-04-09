@@ -15,13 +15,13 @@ const JournalTypeSelector: React.FC<JournalTypeSelectorProps> = ({
   onTypeChange
 }) => {
   return (
-    <div className="flex flex-wrap gap-6 justify-center mb-8">
+    <div className="flex flex-wrap gap-8 justify-center mb-8">
       <Button
         onClick={() => onTypeChange('text')}
         className={`flex items-center gap-2 px-6 py-3 ${
           selectedType === 'text'
-            ? 'bg-[#FC68B3] hover:bg-[#FC68B3]/90 shadow-lg scale-105'
-            : 'bg-[#FC68B3]/40 hover:bg-[#FC68B3]/60 border border-[#FC68B3]/30'
+            ? 'bg-[#FC68B3] hover:bg-[#FC68B3]/90 shadow-lg scale-105 text-black'
+            : 'bg-[#FC68B3]/40 hover:bg-[#FC68B3]/60 border border-[#FC68B3]/30 text-black'
         } rounded-lg transition-all duration-300 hover:scale-105`}
         aria-label="Text journal"
       >
@@ -33,8 +33,8 @@ const JournalTypeSelector: React.FC<JournalTypeSelectorProps> = ({
         onClick={() => onTypeChange('audio')}
         className={`flex items-center gap-2 px-6 py-3 ${
           selectedType === 'audio'
-            ? 'bg-[#FF8A48] hover:bg-[#FF8A48]/90 shadow-lg scale-105'
-            : 'bg-[#FF8A48]/40 hover:bg-[#FF8A48]/60 border border-[#FF8A48]/30'
+            ? 'bg-[#FF8A48] hover:bg-[#FF8A48]/90 shadow-lg scale-105 text-black'
+            : 'bg-[#FF8A48]/40 hover:bg-[#FF8A48]/60 border border-[#FF8A48]/30 text-black'
         } rounded-lg transition-all duration-300 hover:scale-105`}
         aria-label="Audio journal"
       >
