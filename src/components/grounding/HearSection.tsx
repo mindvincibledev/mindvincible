@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { EarIcon, Pencil, Mic, ListFilter } from 'lucide-react';
+import { EarIcon, Pencil, Mic, ListFilter, Type } from 'lucide-react';
 import AudioJournal from '../journal/AudioJournal';
 import DrawingJournal from '../journal/DrawingJournal';
 import ObjectDragDrop from './ObjectDragDrop';
