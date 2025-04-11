@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -391,7 +390,7 @@ const WelcomeScreen = ({
           </TabsContent>
         </Tabs>
         
-        <div className="text-center">
+        <div className="text-center mt-14">
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

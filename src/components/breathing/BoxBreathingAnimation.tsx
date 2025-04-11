@@ -326,9 +326,9 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
         )}
       </motion.div>
       
-      {/* Progress bar for total exercise */}
+      {/* Progress bar for total exercise - Fix: Only show when active and with consistent styling */}
       {isActive && (
-        <div className="w-full max-w-md mb-8">
+        <div className="w-full max-w-md mb-12">
           <Progress 
             value={totalProgress} 
             className="h-2 bg-white/30 backdrop-blur-sm" 
