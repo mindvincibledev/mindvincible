@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Headphones, BookOpen, Eye, Navigation, Coffee, Music, Palette, Clock, Brain } from 'lucide-react';
+import { BookOpen, Eye, Navigation, Coffee, Music, Palette, Clock, Brain, MessageSquare } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,14 +30,6 @@ const activities = [
     bgColor: "bg-[#F2FCE2]"
   },
   {
-    title: "Expressive Writing",
-    description: "Take a moment to write down whatever you're feeling without censoring yourself.",
-    icon: <BookOpen className="h-8 w-8 text-[#3DFDFF]" />,
-    link: "/emotional-hacking/expressive-writing",
-    color: "from-[#3DFDFF] to-[#FC68B3]",
-    bgColor: "bg-[#E5DEFF]"
-  },
-  {
     title: "5-4-3-2-1: The Grounding Quest",
     description: "Use your senses to ground yourself in the present moment.",
     icon: <Eye className="h-8 w-8 text-[#F5DF4D]" />,
@@ -46,53 +38,13 @@ const activities = [
     bgColor: "bg-[#FEF7CD]"
   },
   {
-    title: "Music Mindfulness",
-    description: "Focus on the lyrics, beats, or instruments of your favorite song.",
-    icon: <Music className="h-8 w-8 text-[#FC68B3]" />,
-    link: "/emotional-hacking/music-mindfulness",
-    color: "from-[#FC68B3] to-[#F5DF4D]",
-    bgColor: "bg-[#FDE1D3]"
-  },
-  {
-    title: "Sensory Focus",
-    description: "Pop a piece of gum or a mint and focus on the flavor and texture.",
-    icon: <Coffee className="h-8 w-8 text-[#F5DF4D]" />,
-    link: "/emotional-hacking/sensory-focus",
-    color: "from-[#F5DF4D] to-[#FC68B3]",
-    bgColor: "bg-[#FFDEE2]"
-  },
-  {
-    title: "Walk It Out",
-    description: "Notice the feeling of your feet hitting the ground as you walk, even if it's just around the room.",
-    icon: <Navigation className="h-8 w-8 text-[#2AC20E]" />,
-    link: "/emotional-hacking/walk-it-out",
-    color: "from-[#2AC20E] to-[#3DFDFF]",
-    bgColor: "bg-[#F2FCE2]"
-  },
-  {
-    title: "Color Hunt",
-    description: "Pick a color and find 5 things around you that match it to bring your mind back to the present.",
-    icon: <Palette className="h-8 w-8 text-[#3DFDFF]" />,
-    link: "/emotional-hacking/color-hunt",
-    color: "from-[#3DFDFF] to-[#F5DF4D]",
-    bgColor: "bg-[#D3E4FD]"
-  },
-  {
-    title: "Rewinding-Rewiring",
-    description: "Think of a happy or funny memory and walk yourself through all the details.",
-    icon: <Brain className="h-8 w-8 text-[#FC68B3]" />,
-    link: "/emotional-hacking/rewinding-rewiring",
+    title: "Mirror Mirror On the Wall",
+    description: "Because how you speak to yourself matters.",
+    icon: <MessageSquare className="h-8 w-8 text-[#FC68B3]" />,
+    link: "/emotional-hacking/mirror-mirror",
     color: "from-[#FC68B3] to-[#2AC20E]",
     bgColor: "bg-[#E5DEFF]"
-  },
-  {
-    title: "Grounding Techniques",
-    description: "When emotions feel too intense, use grounding techniques to bring yourself back to the present moment.",
-    icon: <Clock className="h-8 w-8 text-[#F5DF4D]" />,
-    link: "/emotional-hacking/grounding",
-    color: "from-[#F5DF4D] to-[#3DFDFF]",
-    bgColor: "bg-[#FEF7CD]"
-  },
+  }
 ];
 
 const EmotionalHacking = () => {
@@ -128,10 +80,10 @@ const EmotionalHacking = () => {
             className="text-center mb-8 md:mb-12"
           >
             <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent mb-4">
-              Hack the Feels, Don’t Let Them Hack You
+              Hack the Feels, Don't Let Them Hack You
             </h1>
             <p className="text-black text-lg max-w-3xl mx-auto bg-white/80 backdrop-blur-sm p-4 rounded-lg">
-            Learn tricks to stay chill when emotions get extra.
+              Learn tricks to stay chill when emotions get extra.
             </p>
           </motion.div>
           
@@ -139,7 +91,7 @@ const EmotionalHacking = () => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
             {activities.map((activity, index) => (
               <motion.div key={index} variants={itemVariants}>
