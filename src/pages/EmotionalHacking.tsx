@@ -186,7 +186,7 @@ const EmotionalHacking = () => {
                       View Stats
                     </Button>
                   </SheetTrigger>
-                  <SheetContent size="lg">
+                  <SheetContent className="w-[90%] sm:max-w-md">
                     <SheetHeader>
                       <SheetTitle className="text-2xl bg-gradient-to-r from-[#FC68B3] to-[#3DFDFF] bg-clip-text text-transparent">
                         Activity Completion Stats
