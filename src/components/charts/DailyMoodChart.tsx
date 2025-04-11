@@ -192,9 +192,9 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
           
           {/* Most frequent mood of today */}
           {mostFrequentMood && (
-            <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center justify-center gap-4 font-bold text-sm text-gray-600">
             <span>Today's most frequent mood:</span>
-            <div className="flex items-center gap-2 font-medium">
+            <div className="flex items-center gap-2">
               <div 
                 className="w-4 h-4 rounded-full" 
                 style={{ backgroundColor: getMoodColor(mostFrequentMood) }}
@@ -202,6 +202,7 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
               <span>{mostFrequentMood}</span>
             </div>
           </div>
+          
           
           )}
         </div>
