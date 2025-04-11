@@ -79,7 +79,7 @@ const MoodWidgetBar = () => {
       </div>
       
       <div className="relative z-10">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 bg-gradient-to-r from-[#FC68B3] to-[#3DFDFF] bg-clip-text text-transparent">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 bg-gradient-to-r from-[#000000] to-[#000000] bg-clip-text text-transparent">
           How are we feeling today?
         </h2>
         
