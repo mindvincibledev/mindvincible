@@ -163,10 +163,33 @@ function getEmojiForItem(item: string): string {
     fan: "💨",
     stream: "🏞️",
     ocean: "🌊",
-    breathing: "🫁"
+    breathing: "🫁",
+    
+    // Smell items
+    food: "🍲",
+    candle: "🕯️",
+    shampoo: "🧴",
+    air: "🌬️",
+    coffee: "☕",
+    perfume: "🧪",
+    flowers: "🌸",
+    "fresh bread": "🍞",
+    "fresh bread": "🍞", 
+    soap: "🧼",
+    spices: "🌶️",
+    rain: "🌧️",
+    laundry: "👕",
+    "cleaning products": "🧹",
+    fruit: "🍎",
+    books: "📚",
+    grass: "🌿",
+    dessert: "🍰",
+    fire: "🔥",
+    ocean: "🌊",
+    "essential oil": "💧"
   };
 
-  return emojiMap[item.toLowerCase()] || "👆";
+  return emojiMap[item.toLowerCase()] || "👃";
 }
 
 export default ObjectDragDrop;

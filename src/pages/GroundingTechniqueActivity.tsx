@@ -15,6 +15,7 @@ import AnimatedWelcome from '@/components/grounding/AnimatedWelcome';
 import SeeSection from '@/components/grounding/SeeSection';
 import TouchSection from '@/components/grounding/TouchSection';
 import HearSection from '@/components/grounding/HearSection';
+import SmellSection from '@/components/grounding/SmellSection';
 
 enum GroundingStep {
   Welcome,
@@ -37,8 +38,8 @@ const GroundingTechniqueActivity = () => {
   const handleContinue = () => {
     setCurrentStep(prevStep => {
       const nextStep = prevStep + 1;
-      // If hear section is complete, move to completion screen or next section
-      return nextStep > GroundingStep.Hear ? GroundingStep.Complete : nextStep;
+      // If smell section is complete, move to completion screen or next section
+      return nextStep > GroundingStep.Smell ? GroundingStep.Complete : nextStep;
     });
   };
   
@@ -85,6 +86,8 @@ const GroundingTechniqueActivity = () => {
         return <TouchSection onComplete={handleContinue} onBack={handleBack} />;
       case GroundingStep.Hear:
         return <HearSection onComplete={handleContinue} onBack={handleBack} />;
+      case GroundingStep.Smell:
+        return <SmellSection onComplete={handleContinue} onBack={handleBack} />;
       case GroundingStep.Complete:
         return (
           <motion.div 
@@ -109,8 +112,8 @@ const GroundingTechniqueActivity = () => {
             </h2>
             
             <p className="mb-8 text-gray-700">
-              Great job completing the first three sections of the grounding exercise! 
-              The other sections will be coming soon.
+              Amazing job completing four sections of the grounding exercise! 
+              The last section (Taste) will be coming soon.
             </p>
             
             <div className="space-x-4">
