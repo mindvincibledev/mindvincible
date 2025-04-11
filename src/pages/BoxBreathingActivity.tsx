@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -302,8 +303,8 @@ const WelcomeScreen = ({
               </RadioGroup>
             </div>
             
-            <div className="mt-8">
-              <div className="w-full max-w-lg mx-auto h-40 rounded-lg overflow-hidden">
+            <div className="mt-8 flex justify-center">
+              <div className="h-40 w-40">
                 <BoxBreathingAnimation 
                   isActive={false} 
                   theme={settings.theme as any} 
@@ -525,7 +526,7 @@ const BoxBreathingActivity = () => {
                   </p>
                 </div>
                 
-                <div className="relative rounded-xl overflow-hidden bg-gradient-to-r from-[#0f1729]/80 to-[#111827]/80 backdrop-blur mb-8 p-6">
+                <div className="mb-8">
                   <BoxBreathingAnimation 
                     isActive={isBreathingActive}
                     onComplete={handleBreathingComplete}

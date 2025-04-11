@@ -1,11 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Progress } from "@/components/ui/progress";
 
 type BreathingPhase = 'prepare' | 'inhale' | 'hold1' | 'exhale' | 'hold2';
 type BreathingState = {
   phase: BreathingPhase;
   progress: number;
   message: string;
+  countDown: number;
 };
 
 interface BoxBreathingAnimationProps {
@@ -26,25 +29,25 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
   const [breathingState, setBreathingState] = useState<BreathingState>({
     phase: 'prepare',
     progress: 0,
-    message: 'Get ready...'
+    message: 'Get ready...',
+    countDown: 3
   });
   
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
   const [cycleCount, setCycleCount] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [totalProgress, setTotalProgress] = useState(0);
   
   const totalCycles = 3; // Number of complete cycles before completion
   const prepDuration = 3; // 3 seconds preparation time
   
   const getPhaseMessage = (phase: BreathingPhase): string => {
-    const timeRemaining = Math.ceil((100 - breathingState.progress) / (100 / (phase === 'prepare' ? prepDuration : phaseDuration)));
-    
     switch (phase) {
-      case 'prepare': return `Get ready... ${timeRemaining}`;
-      case 'inhale': return `Breathe in... ${timeRemaining}`;
-      case 'hold1': return `Hold it... ${timeRemaining}`;
-      case 'exhale': return `Breathe out... ${timeRemaining}`;
-      case 'hold2': return `Hold again... ${timeRemaining}`;
+      case 'prepare': return 'Get ready...';
+      case 'inhale': return 'Breathe in';
+      case 'hold1': return 'Hold it';
+      case 'exhale': return 'Breathe out';
+      case 'hold2': return 'Hold again';
       default: return '';
     }
   };
@@ -104,6 +107,11 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
 
   const themeColors = getThemeColors();
   
+  // Calculate total exercise duration for progress bar
+  const calculateTotalDuration = () => {
+    return prepDuration + (phaseDuration * 4 * totalCycles);
+  };
+  
   // Start and manage the breathing cycle
   useEffect(() => {
     if (isActive && !isPaused) {
@@ -117,6 +125,19 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
           const phaseDurationToUse = state.phase === 'prepare' ? prepDuration : phaseDuration;
           const newProgress = state.progress + (100 / (phaseDurationToUse * 10)); // 10 updates per second
           
+          // Calculate countdown number
+          const newCountDown = Math.ceil((100 - newProgress) / (100 / phaseDurationToUse));
+          
+          // Update total progress for progress bar
+          const totalDuration = calculateTotalDuration();
+          const elapsedTime = state.phase === 'prepare' 
+            ? (prepDuration - newCountDown) 
+            : prepDuration + (cycleCount * 4 * phaseDuration) + 
+              (['inhale', 'hold1', 'exhale', 'hold2'].indexOf(state.phase) * phaseDuration) +
+              (phaseDuration - newCountDown);
+          
+          setTotalProgress((elapsedTime / totalDuration) * 100);
+          
           // If we've completed this phase
           if (newProgress >= 100) {
             // Get the next phase
@@ -124,7 +145,8 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
             return {
               phase: nextPhase,
               progress: 0,
-              message: getPhaseMessage(nextPhase)
+              message: getPhaseMessage(nextPhase),
+              countDown: nextPhase === 'prepare' ? 3 : phaseDuration
             };
           }
           
@@ -132,7 +154,7 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
           return {
             ...state,
             progress: newProgress,
-            message: getPhaseMessage(state.phase)
+            countDown: newCountDown
           };
         });
       }, 100); // Update 10 times per second
@@ -227,10 +249,10 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full h-64 md:h-96">
+    <div className="relative flex flex-col items-center justify-center w-full">
       {/* Floating box container */}
       <motion.div 
-        className="relative"
+        className="relative mb-10"
         animate={floatingAnimation}
       >
         {/* Main breathing box - no expansion/contraction */}
@@ -252,16 +274,28 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
             }}
           />
           
-          {/* Message inside the box */}
+          {/* Message and countdown inside the box */}
           {isActive && (
-            <motion.p 
-              className="text-white text-lg font-medium text-center px-4 drop-shadow-md"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              {breathingState.message}
-            </motion.p>
+            <div className="flex flex-col items-center justify-center">
+              <motion.p 
+                className="text-white text-xl font-medium text-center drop-shadow-md"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {breathingState.message}
+              </motion.p>
+              
+              <motion.p
+                className="text-white text-4xl font-bold mt-2"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                key={breathingState.countDown} // This ensures animation triggers on number change
+              >
+                {breathingState.countDown}
+              </motion.p>
+            </div>
           )}
         </motion.div>
         
@@ -291,6 +325,19 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
           />
         )}
       </motion.div>
+      
+      {/* Progress bar for total exercise */}
+      {isActive && (
+        <div className="w-full max-w-md mb-8">
+          <Progress 
+            value={totalProgress} 
+            className="h-2 bg-white/30 backdrop-blur-sm" 
+          />
+          <p className="text-center text-sm text-gray-600 mt-2">
+            {Math.floor(totalProgress)}% complete
+          </p>
+        </div>
+      )}
       
       {/* Wavy background effect */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
