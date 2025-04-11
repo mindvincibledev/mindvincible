@@ -352,17 +352,76 @@ const EmotionalAirbnb = () => {
       case 7:
         return (
           <div className="text-center p-6">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent mb-4">
+            <motion.h2 
+              className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent mb-4"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            >
               All Done!
-            </h2>
-            <p className="mb-6 text-gray-700">
-              You're all done! We are so proud of you for expressing your emotions! Understanding your feelings are really the first step, and you did it! Wohoo!
-            </p>
-            <div className="flex justify-center gap-4">
+            </motion.h2>
+            
+            <motion.div 
+              className="bubble-container mb-6 relative"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+            >
+              <div className="bubble p-6 rounded-3xl bg-gradient-to-br from-[#FF8A48]/20 to-[#FC68B3]/20 border-2 border-[#FC68B3]/30 shadow-lg relative overflow-hidden">
+                <div className="bubble-dots absolute top-2 right-2">
+                  <motion.span 
+                    className="inline-block h-2 w-2 rounded-full bg-[#FC68B3] mr-1"
+                    animate={{ scale: [1, 1.5, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.5, delay: 0 }}
+                  ></motion.span>
+                  <motion.span 
+                    className="inline-block h-2 w-2 rounded-full bg-[#FF8A48] mr-1"
+                    animate={{ scale: [1, 1.5, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.5, delay: 0.5 }}
+                  ></motion.span>
+                  <motion.span 
+                    className="inline-block h-2 w-2 rounded-full bg-[#3DFDFF]"
+                    animate={{ scale: [1, 1.5, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.5, delay: 1 }}
+                  ></motion.span>
+                </div>
+                <motion.p 
+                  className="text-lg font-medium text-gray-700 relative z-10"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  You're all done! We are so proud of you for expressing your emotions! 
+                  <motion.span 
+                    className="block mt-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                  >
+                    Understanding your feelings are really the first step, and you did it!
+                  </motion.span>
+                  <motion.span 
+                    className="block mt-2 font-bold"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.5 }}
+                  >
+                    Wohoo! <span className="animate-bounce inline-block">🎉</span> <span className="animate-pulse inline-block">✨</span> <span className="animate-float inline-block">🌟</span>
+                  </motion.span>
+                </motion.p>
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              className="flex justify-center gap-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.7, duration: 0.5 }}
+            >
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] text-white"
+                className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] text-white hover:shadow-lg transition-all"
               >
                 <Save className="mr-2 h-4 w-4" />
                 {isSubmitting ? 'Saving...' : 'Save Responses'}
@@ -370,11 +429,12 @@ const EmotionalAirbnb = () => {
               <Button
                 onClick={handleExit}
                 variant="outline"
+                className="hover:shadow-md transition-all"
               >
                 <Home className="mr-2 h-4 w-4" />
                 Return Home
               </Button>
-            </div>
+            </motion.div>
           </div>
         );
       default:

@@ -291,3 +291,42 @@
 .card {
   @apply bg-white bg-opacity-80 backdrop-blur-md rounded-lg shadow-lg p-6;
 }
+
+/* Bubble animations for emotional airbnb final message */
+.bubble-container {
+  position: relative;
+}
+
+.bubble {
+  position: relative;
+  transform-origin: center bottom;
+  animation: bubble-float 5s ease-in-out infinite;
+}
+
+@keyframes bubble-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.02); }
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(to bottom right, rgba(252, 104, 179, 0.3), rgba(255, 138, 72, 0.3));
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+/* Animations for the emoji in the bubble */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
