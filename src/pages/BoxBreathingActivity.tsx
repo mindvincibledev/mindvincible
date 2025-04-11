@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -452,17 +451,17 @@ const BoxBreathingActivity = () => {
             >
               <Card className="p-6 md:p-8 bg-white/90 backdrop-blur-lg shadow-xl">
                 <div className="text-center mb-8">
-                  <h1 className={`text-3xl md:text-4xl font-bold bg-gradient-to-r ${activityColor} bg-clip-text text-transparent mb-4`}>
+                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] bg-clip-text text-transparent mb-4">
                     Box Breathing
                   </h1>
                   
                   <p className="text-lg text-gray-700 mb-6">
-                    Follow the animation - a glowing line will trace each side of the box.
+                    Follow the animation - a glowing point will trace each side of the box.
                     Each side takes {settings.phaseDuration} seconds to complete.
                   </p>
                 </div>
                 
-                <div className="relative rounded-xl overflow-hidden bg-gradient-to-r from-[#0f1729]/80 to-[#111827]/80 backdrop-blur mb-8">
+                <div className="relative rounded-xl overflow-hidden bg-gradient-to-r from-[#0f1729]/80 to-[#111827]/80 backdrop-blur mb-8 p-6">
                   <BoxBreathingAnimation 
                     isActive={isBreathingActive}
                     onComplete={handleBreathingComplete}
