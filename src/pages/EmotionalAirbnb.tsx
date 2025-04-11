@@ -194,7 +194,7 @@ const EmotionalAirbnb = () => {
         messageDrawingPath = await uploadDrawing(formData.messageDrawing, 'message');
       }
 
-      // Insert data into the database - fixing the table reference and column names
+      // Insert data into the database - using the correct column names
       const { error } = await supabase
         .from('emotional_airbnb')
         .insert({
@@ -203,13 +203,13 @@ const EmotionalAirbnb = () => {
           location_in_body_text: formData.locationText || null,
           appearance_description_text: formData.appearanceText || null,
           intensity_description_text: formData.intensityText || null,
-          sound_description_text: formData.soundText || null,
+          sound_text: formData.soundText || null, // Changed from sound_description_text to sound_text
           message_description_text: formData.messageText || null,
           emotion_drawing_path: emotionDrawingPath,
           location_in_body_drawing_path: locationDrawingPath,
           appearance_drawing_path: appearanceDrawingPath,
           intensity_drawing_path: intensityDrawingPath,
-          sound_drawing_path: soundDrawingPath,
+          sound_drawing_path: soundDrawingPath, // Changed from sound_description_drawing_path to sound_drawing_path
           message_drawing_path: messageDrawingPath
         });
 
