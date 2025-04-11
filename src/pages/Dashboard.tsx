@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircle, Archive } from 'lucide-react';
@@ -59,6 +58,9 @@ const Dashboard = () => {
   const { user, session, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Current date formatted nicely
+  const currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
   
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -290,6 +292,7 @@ const Dashboard = () => {
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Your Mood Dashboard</h1>
                 <p className="text-gray-600 mt-2">Welcome, {user.name}</p>
+                <p className="text-gray-500 text-sm mt-1">{currentDate}</p>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
