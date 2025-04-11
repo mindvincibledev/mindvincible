@@ -27,3 +27,26 @@ export const getMoodColor = (mood: string | null): string => {
   // Return the color for the normalized mood, or a default color if not found
   return moodColors[normalizedMood] || '#D5D5F1';
 };
+
+/**
+ * Maps widget mood to valid enum values in the mood_data table
+ * The mood_data table only accepts specific enum values: "Happy", "Excited", "Sad", "Angry", "Anxious", "Calm", "Overwhelmed"
+ */
+export const mapWidgetMoodToEnum = (widgetMood: string): "Happy" | "Excited" | "Sad" | "Angry" | "Anxious" | "Calm" | "Overwhelmed" => {
+  // Map widget moods to mood_data enum values
+  const moodMap: Record<string, "Happy" | "Excited" | "Sad" | "Angry" | "Anxious" | "Calm" | "Overwhelmed"> = {
+    'Happy': 'Happy',
+    'Loved': 'Happy',  // Map to closest enum value
+    'Excited': 'Excited',
+    'Good': 'Happy',   // Map to closest enum value
+    'Okay': 'Calm',    // Map to closest enum value
+    'Sad': 'Sad',
+    'Awful': 'Angry',  // Map to closest enum value
+    'Angry': 'Angry',
+    'Anxious': 'Anxious',
+    'Calm': 'Calm',
+    'Overwhelmed': 'Overwhelmed'
+  };
+  
+  return moodMap[widgetMood] || 'Happy'; // Default to 'Happy' if no match
+};

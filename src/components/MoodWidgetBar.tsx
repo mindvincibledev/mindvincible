@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Smile, Frown, Meh, ThumbsUp, Heart, CloudRain, Zap, Sparkles } from 'lucide-react';
@@ -7,7 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import MoodButton from './mood/MoodButton';
 import MoodDisplay from './mood/MoodDisplay';
-import { getMoodColor } from '@/utils/moodUtils';
+import { getMoodColor, mapWidgetMoodToEnum } from '@/utils/moodUtils';
 
 const MoodWidgetBar = () => {
   const [selectedMood, setSelectedMood] = useState('');
@@ -59,12 +58,15 @@ const MoodWidgetBar = () => {
         throw widgetError;
       }
       
-      // Then, also save to the mood_data table for consistency with the rest of the app
+      // Then, also save to the mood_data table with proper type conversion
+      // Using the mapWidgetMoodToEnum function to ensure only valid enum values are used
+      const enumMood = mapWidgetMoodToEnum(selectedMood);
+      
       const { error } = await supabase
         .from('mood_data')
         .insert({
           user_id: user.id,
-          mood: mapWidgetMoodToEnum(selectedMood), // Convert to the enum value expected by mood_data table
+          mood: enumMood, // Now using the properly mapped enum value
           notes: `Mood recorded from widget: ${selectedMood}`,
           tags: [selectedMood]
         });
@@ -98,27 +100,9 @@ const MoodWidgetBar = () => {
       setIsSubmitting(false);
     }
   };
-  
-  // Helper function to map widget mood to mood_data enum values
-  const mapWidgetMoodToEnum = (widgetMood: string): string => {
-    // Map widget moods to mood_data enum values
-    const moodMap: Record<string, string> = {
-      'Happy': 'Happy',
-      'Loved': 'Happy', // Map to closest enum value
-      'Excited': 'Excited',
-      'Good': 'Happy', // Map to closest enum value
-      'Okay': 'Calm',  // Map to closest enum value
-      'Sad': 'Sad',
-      'Awful': 'Angry', // Map to closest enum value
-      'Angry': 'Angry',
-      'Anxious': 'Anxious',
-      'Calm': 'Calm',
-      'Overwhelmed': 'Overwhelmed'
-    };
-    
-    return moodMap[widgetMood] || 'Happy'; // Default to 'Happy' if no match
-  };
 
+  // No longer need the old mapWidgetMoodToEnum function since we moved it to utils
+  
   // Get the current mood color for styling
   const currentMoodColor = selectedMood ? getMoodColor(selectedMood) : 'transparent';
 
