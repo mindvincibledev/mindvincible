@@ -106,6 +106,50 @@ export type Database = {
           },
         ]
       }
+      grounding_responses: {
+        Row: {
+          activity_id: string
+          created_at: string
+          id: string
+          response_audio_path: string | null
+          response_drawing_path: string | null
+          response_selected_items: string[] | null
+          response_text: string | null
+          section_name: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          id?: string
+          response_audio_path?: string | null
+          response_drawing_path?: string | null
+          response_selected_items?: string[] | null
+          response_text?: string | null
+          section_name: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          id?: string
+          response_audio_path?: string | null
+          response_drawing_path?: string | null
+          response_selected_items?: string[] | null
+          response_text?: string | null
+          section_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grounding_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           audio_path: string | null
