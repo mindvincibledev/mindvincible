@@ -373,7 +373,7 @@ const WelcomeScreen = ({
                       className="peer sr-only" 
                     />
                     <Label
-                      htmlFor={`sound-${sound}`}
+                      htmlFor={`theme-${sound}`}
                       className="flex flex-col items-center justify-center border-2 border-muted p-4 rounded-md hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary h-full cursor-pointer capitalize"
                     >
                       {sound === 'none' ? (
@@ -531,11 +531,12 @@ const BoxBreathingActivity = () => {
                     onComplete={handleBreathingComplete}
                     theme={settings.theme as any}
                     phaseDuration={settings.phaseDuration}
+                    totalDuration={settings.totalDuration} 
                     soundType={settings.soundType as any}
                   />
                 </div>
                 
-                <div className="flex justify-center">
+                <div className="flex justify-center mt-20">
                   <Button 
                     className="bg-gradient-to-r from-[#F5DF4D] to-[#FF8A48] text-black font-medium px-8 py-3 rounded-full hover:opacity-90 transition-all duration-300"
                     onClick={resetBreathing}

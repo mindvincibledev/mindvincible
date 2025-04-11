@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Progress } from "@/components/ui/progress";
@@ -15,6 +14,7 @@ interface BoxBreathingAnimationProps {
   isActive: boolean;
   onComplete?: () => void;
   phaseDuration?: number; // Duration of each phase in seconds
+  totalDuration?: number; // Total duration in minutes
   theme?: 'glow' | 'clouds' | 'galaxy' | 'neon' | 'bubbles';
   soundType?: 'none' | 'rain' | 'waves' | 'lofi';
 }
@@ -23,6 +23,7 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
   isActive,
   onComplete,
   phaseDuration = 4, // Default to 4 seconds per phase
+  totalDuration = 3, // Default to 3 minutes total duration
   theme = 'glow',
   soundType = 'none'
 }) => {
@@ -38,16 +39,10 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
   const [isPaused, setIsPaused] = useState(false);
   const [totalProgress, setTotalProgress] = useState(0);
   const progressRef = useRef<number>(0);
-  const totalDurationRef = useRef(0);
   const startTimeRef = useRef<number | null>(null);
   
-  const totalCycles = 3; // Number of complete cycles before completion
-  const prepDuration = 3; // 3 seconds preparation time
-  
-  // Calculate total exercise duration and store in ref to avoid recalculation
-  useEffect(() => {
-    totalDurationRef.current = prepDuration + (phaseDuration * 4 * totalCycles);
-  }, [phaseDuration]);
+  // Convert totalDuration from minutes to seconds for calculations
+  const totalDurationSeconds = totalDuration * 60;
   
   const getPhaseMessage = (phase: BreathingPhase): string => {
     switch (phase) {
@@ -130,10 +125,9 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
         
         const currentTime = performance.now();
         const elapsedSeconds = (currentTime - startTimeRef.current) / 1000;
-        const totalDuration = totalDurationRef.current;
         
-        // Calculate total progress percentage
-        const newProgress = Math.min((elapsedSeconds / totalDuration) * 100, 100);
+        // Calculate total progress percentage based on totalDurationSeconds
+        const newProgress = Math.min((elapsedSeconds / totalDurationSeconds) * 100, 100);
         
         // Only update state when there's a meaningful change to avoid excessive renders
         if (Math.abs(newProgress - progressRef.current) > 0.1) {
@@ -141,8 +135,16 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
           progressRef.current = newProgress;
         }
         
+        // Check if we've reached the total duration
+        if (newProgress >= 100 && isActive) {
+          if (onComplete) {
+            onComplete();
+          }
+          return;
+        }
+        
         // If not complete, continue animation
-        if (newProgress < 100 && isActive) {
+        if (isActive) {
           animationFrameId = requestAnimationFrame(updateProgress);
         }
       };
@@ -155,7 +157,7 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [isActive, isPaused]);
+  }, [isActive, isPaused, totalDurationSeconds, onComplete]);
   
   // Start and manage the breathing cycle
   useEffect(() => {
@@ -169,24 +171,27 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
       const intervalId = window.setInterval(() => {
         setBreathingState(state => {
           // Update progress
-          const phaseDurationToUse = state.phase === 'prepare' ? prepDuration : phaseDuration;
+          const phaseDurationToUse = state.phase === 'prepare' ? 3 : phaseDuration;
           const newProgress = state.progress + (100 / (phaseDurationToUse * 10)); // 10 updates per second
           
           // Calculate countdown number
           const newCountDown = Math.ceil((100 - newProgress) / (100 / phaseDurationToUse));
           
+          // If total duration has been reached, complete the exercise
+          if (totalProgress >= 100) {
+            if (timerRef !== null) {
+              clearInterval(timerRef);
+            }
+            if (onComplete) {
+              setTimeout(onComplete, 500);
+            }
+            return state;
+          }
+          
           // If we've completed this phase
           if (newProgress >= 100) {
             // Get the next phase
             const nextPhase = getNextPhase(state.phase);
-            
-            // Check if we've completed all cycles
-            if (cycleCount >= totalCycles && state.phase === 'hold2') {
-              // Exercise is complete
-              if (onComplete) {
-                setTimeout(onComplete, 500); // Small delay before calling onComplete
-              }
-            }
             
             return {
               phase: nextPhase,
@@ -216,23 +221,15 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
         clearInterval(timerRef);
       }
     };
-  }, [isActive, isPaused, phaseDuration, cycleCount, onComplete]);
+  }, [isActive, isPaused, phaseDuration, onComplete, totalProgress]);
   
-  // Track completion of cycles
-  useEffect(() => {
-    if (cycleCount >= totalCycles && onComplete) {
-      onComplete();
-      // Reset cycle count if you want it to restart
-      setCycleCount(0);
-    }
-  }, [cycleCount, onComplete]);
-
   // Reset progress when the exercise is restarted
   useEffect(() => {
     if (!isActive) {
       setTotalProgress(0);
       progressRef.current = 0;
       startTimeRef.current = null;
+      setCycleCount(0);
     }
   }, [isActive]);
 
@@ -309,7 +306,7 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
     <div className="relative flex flex-col items-center justify-center w-full">
       {/* Floating box container */}
       <motion.div 
-        className="relative mb-10"
+        className="relative mb-16"
         animate={floatingAnimation}
       >
         {/* Main breathing box - no expansion/contraction */}
@@ -383,16 +380,13 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
         )}
       </motion.div>
       
-      {/* Completely rebuilt progress bar for total exercise - with fixed display */}
+      {/* Fixed progress bar for total exercise */}
       {isActive && (
-        <div className="w-full max-w-md mb-12 relative z-10">
-          <div className="bg-white/30 backdrop-blur-sm h-2 rounded-full overflow-hidden w-full">
+        <div className="w-full max-w-md mb-12 fixed-progress">
+          <div className="bg-white/30 backdrop-blur-sm rounded-full overflow-hidden w-full h-2">
             <motion.div 
               className="h-full bg-gradient-to-r from-[#3DFDFF] to-[#FC68B3]"
-              style={{ 
-                width: `${totalProgress}%`,
-                transition: "width 0.3s ease"
-              }}
+              style={{ width: `${totalProgress}%` }}
             />
           </div>
           <p className="text-center text-sm text-gray-600 mt-2">
