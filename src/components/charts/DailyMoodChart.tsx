@@ -9,49 +9,102 @@ import {
 } from "@/components/ui/card";
 import { getMoodColor } from '@/utils/moodUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { addDays, format, isSameDay, subDays } from 'date-fns';
 
 type DailyMoodChartProps = {
   moodData: Array<{
     date: string;
     mood: string;
     time: string;
+    created_at?: string; // Added to handle actual dates
   }>;
 };
 
 const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
-  // Group the data by date to organize for our custom layout
-  const groupedData: Record<string, Array<{mood: string, time: string}>> = {};
   const isMobile = useIsMobile();
   const [tabHeight, setTabHeight] = useState<number>(12); // Default height
+  const [mostFrequentMood, setMostFrequentMood] = useState<string | null>(null);
   
-  moodData.forEach(entry => {
-    if (!groupedData[entry.date]) {
-      groupedData[entry.date] = [];
+  // Generate the last 7 days (including today)
+  const getLast7Days = () => {
+    const today = new Date();
+    const days = [];
+    
+    // Start from 6 days ago (7 days including today)
+    for (let i = 6; i >= 0; i--) {
+      const date = subDays(today, i);
+      days.push({
+        date,
+        dayName: format(date, 'EEE'), // Short day name (Mon, Tue, etc.)
+        fullDate: format(date, 'yyyy-MM-dd'),
+      });
     }
     
-    groupedData[entry.date].push({
-      mood: entry.mood,
-      time: entry.time
+    return days;
+  };
+  
+  const last7Days = getLast7Days();
+  
+  // Process mood data to match our 7-day format
+  const processedData = last7Days.map(day => {
+    // Filter mood entries for this specific day
+    const dayEntries = moodData.filter(entry => {
+      // Check if entry has created_at field (from database)
+      if (entry.created_at) {
+        return isSameDay(new Date(entry.created_at), day.date);
+      }
+      // Fallback to date string if created_at is not available
+      return entry.date === day.dayName;
     });
+    
+    return {
+      day: day.dayName,
+      fullDate: day.fullDate,
+      entries: dayEntries.map(entry => ({
+        mood: entry.mood,
+        time: entry.time
+      }))
+    };
   });
   
-  // Convert to array format for rendering
-  const dates = Object.keys(groupedData);
-  const sortedDates = [...dates].sort((a, b) => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return days.indexOf(a) - days.indexOf(b);
-  });
-
+  // Calculate most frequent mood for today
+  useEffect(() => {
+    const todayEntries = processedData[processedData.length - 1]?.entries || [];
+    
+    if (todayEntries.length > 0) {
+      // Count occurrences of each mood
+      const moodCounts: Record<string, number> = {};
+      todayEntries.forEach(entry => {
+        moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
+      });
+      
+      // Find the mood with the highest count
+      let maxCount = 0;
+      let maxMood = null;
+      
+      Object.entries(moodCounts).forEach(([mood, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          maxMood = mood;
+        }
+      });
+      
+      setMostFrequentMood(maxMood);
+    } else {
+      setMostFrequentMood(null);
+    }
+  }, [moodData, processedData]);
+  
   // Calculate dynamic tab height based on number of entries
   useEffect(() => {
     const maxEntriesPerDay = Math.max(
-      ...Object.values(groupedData).map(entries => entries.length),
+      ...processedData.map(day => day.entries.length),
       1 // Ensure we have at least 1 as a default
     );
     
     // Calculate the available height and adjust tab height
     // Base height of container is around 320px (h-80 = 20rem = 320px)
-    const availableHeight = 320 - 40; // Subtract header space
+    const availableHeight = 280 - 40; // Subtract header space and leave room for legend
     
     // Calculate tab height (with a minimum of 8px and a maximum of 48px)
     let calculatedHeight = Math.min(
@@ -65,8 +118,15 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
     }
     
     setTabHeight(calculatedHeight);
-  }, [moodData, groupedData, isMobile]);
+  }, [moodData, processedData, isMobile]);
   
+  // Get all unique moods for the legend
+  const uniqueMoods = Array.from(
+    new Set(
+      moodData.map(entry => entry.mood)
+    )
+  ).filter(mood => mood); // Filter out any undefined/empty moods
+
   return (
     <Card className="col-span-1 md:col-span-2 bg-white/95 backdrop-blur-lg border-gray-200 shadow-xl">
       <CardHeader>
@@ -74,16 +134,18 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
         <CardDescription className="text-gray-600">Your moods stacked by time of day</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
-          <div className="flex h-full">
-            <div className="flex-1 grid grid-cols-7 gap-2 h-full">
-              {sortedDates.map(date => (
-                <div key={date} className="flex flex-col h-full relative">
-                  <div className="text-gray-800 text-xs mb-2 text-center">{date}</div>
-                  <div className="flex-1 flex flex-col-reverse">
-                    {groupedData[date]?.map((item, index) => (
+        <div className="h-80 flex flex-col">
+          <div className="flex-1 grid grid-cols-7 gap-2">
+            {processedData.map((dayData) => (
+              <div key={dayData.day} className="flex flex-col h-full relative">
+                <div className="text-gray-800 text-xs mb-2 text-center font-medium">
+                  {dayData.day}
+                </div>
+                <div className="flex-1 flex flex-col-reverse">
+                  {dayData.entries.length > 0 ? (
+                    dayData.entries.map((item, index) => (
                       <div 
-                        key={`${date}-${index}`}
+                        key={`${dayData.day}-${index}`}
                         className={`w-full rounded-md mb-1 relative group hover:opacity-90 transition-opacity`}
                         style={{ 
                           backgroundColor: getMoodColor(item.mood),
@@ -99,17 +161,47 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
                           <div className="absolute bottom-0 left-0 right-0 h-2 bg-black/20 rounded-b-md"></div>
                         )}
                       </div>
-                    ))}
-                    {groupedData[date]?.length === 0 && (
-                      <div className="flex-1 flex items-center justify-center">
-                        <span className="text-gray-400 text-xs">No data</span>
-                      </div>
-                    )}
-                  </div>
+                    ))
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center">
+                      <span className="text-gray-400 text-xs">No data</span>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
+          
+          {/* Color legend */}
+          <div className="mt-4 flex flex-wrap gap-2 justify-center">
+            {uniqueMoods.length > 0 ? (
+              uniqueMoods.map((mood) => (
+                <div key={mood} className="flex items-center gap-1">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: getMoodColor(mood) }}
+                  ></div>
+                  <span className="text-xs text-gray-600">{mood}</span>
+                </div>
+              ))
+            ) : (
+              <div className="text-xs text-gray-400">No mood data available</div>
+            )}
+          </div>
+          
+          {/* Most frequent mood of today */}
+          {mostFrequentMood && (
+            <div className="mt-3 text-center">
+              <div className="text-sm text-gray-600">Today's most frequent mood:</div>
+              <div className="flex items-center justify-center gap-2 font-medium">
+                <div 
+                  className="w-4 h-4 rounded-full" 
+                  style={{ backgroundColor: getMoodColor(mostFrequentMood) }}
+                ></div>
+                <span>{mostFrequentMood}</span>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

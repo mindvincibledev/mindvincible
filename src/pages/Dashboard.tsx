@@ -24,6 +24,7 @@ import {
   endOfYear,
   format,
   subMonths,
+  subDays,
 } from 'date-fns';
 
 // Type definitions for mood data
@@ -31,6 +32,7 @@ interface MoodData {
   date: string;
   mood: string;
   time: string;
+  created_at?: string;
 }
 
 interface MoodDistribution {
@@ -155,42 +157,26 @@ const Dashboard = () => {
 
   // Process weekly data for the DailyMoodChart (not affected by filters)
   const processWeeklyData = () => {
-    // Always use a week of data for the DailyMoodChart regardless of filter
-    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
+    // We're now getting the last 7 days of data regardless of filter
+    const today = new Date();
+    const weekStart = subDays(today, 6); // Get data from 6 days ago (7 days total including today)
     
-    // Filter entries for the current week
+    // Filter entries for the last 7 days
     const weekEntries = allMoodEntries.filter(entry => {
       const entryDate = new Date(entry.created_at);
-      return entryDate >= weekStart && entryDate <= weekEnd;
+      return entryDate >= weekStart && entryDate <= today;
     });
     
     // Process data for daily chart
-    const groupedByDay: Record<string, MoodData[]> = {};
-    
-    weekEntries.forEach(entry => {
-      const date = new Date(entry.created_at).toLocaleDateString('en-US', { weekday: 'short' });
-      
-      if (!groupedByDay[date]) {
-        groupedByDay[date] = [];
-      }
-      
-      const timeString = new Date(entry.created_at).toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit' 
-      });
-      
-      groupedByDay[date].push({
-        date,
+    const dailyData: MoodData[] = weekEntries.map(entry => {
+      const entryDate = new Date(entry.created_at);
+      return {
+        date: format(entryDate, 'EEE'), // Short day name (Mon, Tue, etc.)
         mood: entry.mood,
-        time: timeString
-      });
+        time: format(entryDate, 'h:mm a'), // Format time as 12-hour with am/pm
+        created_at: entry.created_at // Pass through the original date for exact comparison
+      };
     });
-    
-    // Convert grouped data to array format for chart
-    const dailyData: MoodData[] = Object.values(groupedByDay)
-      .flat()
-      .slice(0, 20); // Limit to 20 most recent mood entries for chart clarity
     
     setWeeklyMoodData(dailyData);
   };
