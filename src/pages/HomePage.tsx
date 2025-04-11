@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
-import MoodWidgetBar from '@/components/MoodWidgetBar';
 
 const HomePage = () => {
   const { user } = useAuth();
@@ -104,9 +103,6 @@ const HomePage = () => {
                 All the mental health stuff you need - tips, activities, and a place to rant, everything kept 100% confidential
               </p>
             </motion.div>
-            
-            {/* Add the MoodWidgetBar component */}
-            <MoodWidgetBar />
             
             <motion.div 
               variants={containerVariants}

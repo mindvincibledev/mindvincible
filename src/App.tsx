@@ -21,6 +21,7 @@ import EmotionalAirbnb from "./pages/EmotionalAirbnb";
 import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { initSupabase } from "./integrations/supabase/initSupabase";
+import MoodReminderNotification from "./components/MoodReminderNotification";
 
 const queryClient = new QueryClient();
 
@@ -46,65 +47,70 @@ const AppRoutes = () => {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/home" element={
-        <ProtectedRoute>
-          <HomePage />
-        </ProtectedRoute>
-      } />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      } />
-      <Route path="/mood-entry" element={
-        <ProtectedRoute>
-          <MoodEntry />
-        </ProtectedRoute>
-      } />
-      <Route path="/mood-jar" element={
-        <ProtectedRoute>
-          <MoodJar />
-        </ProtectedRoute>
-      } />
-      <Route path="/journal" element={
-        <ProtectedRoute>
-          <Journal />
-        </ProtectedRoute>
-      } />
-      <Route path="/journal/new" element={
-        <ProtectedRoute>
-          <JournalEntry />
-        </ProtectedRoute>
-      } />
-      <Route path="/journal/:id" element={
-        <ProtectedRoute>
-          <JournalDetail />
-        </ProtectedRoute>
-      } />
-      {/* Add Emotional Hacking routes */}
-      <Route path="/emotional-hacking" element={
-        <ProtectedRoute>
-          <EmotionalHacking />
-        </ProtectedRoute>
-      } />
-      <Route path="/emotional-hacking/:activityId" element={
-        <ProtectedRoute>
-          <EmotionalHackingActivity />
-        </ProtectedRoute>
-      } />
-      {/* Emotional Airbnb route */}
-      <Route path="/emotional-airbnb" element={
-        <ProtectedRoute>
-          <EmotionalAirbnb />
-        </ProtectedRoute>
-      } />
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/mood-entry" element={
+          <ProtectedRoute>
+            <MoodEntry />
+          </ProtectedRoute>
+        } />
+        <Route path="/mood-jar" element={
+          <ProtectedRoute>
+            <MoodJar />
+          </ProtectedRoute>
+        } />
+        <Route path="/journal" element={
+          <ProtectedRoute>
+            <Journal />
+          </ProtectedRoute>
+        } />
+        <Route path="/journal/new" element={
+          <ProtectedRoute>
+            <JournalEntry />
+          </ProtectedRoute>
+        } />
+        <Route path="/journal/:id" element={
+          <ProtectedRoute>
+            <JournalDetail />
+          </ProtectedRoute>
+        } />
+        {/* Add Emotional Hacking routes */}
+        <Route path="/emotional-hacking" element={
+          <ProtectedRoute>
+            <EmotionalHacking />
+          </ProtectedRoute>
+        } />
+        <Route path="/emotional-hacking/:activityId" element={
+          <ProtectedRoute>
+            <EmotionalHackingActivity />
+          </ProtectedRoute>
+        } />
+        {/* Emotional Airbnb route */}
+        <Route path="/emotional-airbnb" element={
+          <ProtectedRoute>
+            <EmotionalAirbnb />
+          </ProtectedRoute>
+        } />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      
+      {/* Add the mood reminder notification that will appear on all pages */}
+      <MoodReminderNotification />
+    </>
   );
 };
 
