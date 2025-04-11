@@ -25,8 +25,8 @@ const MessageSection: React.FC<MessageSectionProps> = ({
       </div>
       
       <SectionBase
-        title="What message does this emotion have for you?"
-        description="If this emotion could speak, what might it be trying to tell you?"
+        title="What is this feeling trying to tell you?"
+        description="Emotions usually have a reason for showing up. Is it trying to get your attention or make you do something? Maybe it wants you to take a break, talk to someone, or stand up for yourself."
         textPlaceholder="This emotion is telling me..."
         textValue={textValue}
         drawingBlob={drawingBlob}

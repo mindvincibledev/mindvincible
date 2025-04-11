@@ -61,8 +61,8 @@ const HomePage = () => {
       color: "from-[#D5D5F1] to-[#FC68B3]"
     },
     {
-      title: "Emotional Airbnb",
-      description: "Take a guided tour through your emotions and explore them in a creative way.",
+      title: "Self Awareness",
+      description: "BBecause understanding yourself is the ultimate glow-up ✨🧠.",
       icon: <HomeIcon className="h-8 w-8 text-[#FF8A48]" />,
       link: "/emotional-airbnb",
       color: "from-[#FF8A48] to-[#FC68B3]"

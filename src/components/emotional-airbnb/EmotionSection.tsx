@@ -25,8 +25,8 @@ const EmotionSection: React.FC<EmotionSectionProps> = ({
       </div>
       
       <SectionBase
-        title="What emotion are you experiencing?"
-        description="Name or describe the emotion you're feeling right now."
+        title="What are you feeling right now?"
+        description="Take a moment and check in with yourself—what emotion are you feeling? It could be something like happy, sad, annoyed, nervous, or excited. There’s no right or wrong answer!"
         textPlaceholder="I'm feeling..."
         textValue={textValue}
         drawingBlob={drawingBlob}

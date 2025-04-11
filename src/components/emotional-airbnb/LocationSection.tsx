@@ -25,8 +25,8 @@ const LocationSection: React.FC<LocationSectionProps> = ({
       </div>
       
       <SectionBase
-        title="Where do you feel this emotion in your body?"
-        description="Describe or draw where this emotion shows up physically."
+        title="Where do you feel it in your body?"
+        description="Emotions often show up in our bodies. For example, stress might feel like tight shoulders or a racing heart. Where do you notice this feeling? Just one part, or all over?"
         textPlaceholder="I feel it in my..."
         textValue={textValue}
         drawingBlob={drawingBlob}

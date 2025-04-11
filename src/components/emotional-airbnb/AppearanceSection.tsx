@@ -25,8 +25,8 @@ const AppearanceSection: React.FC<AppearanceSectionProps> = ({
       </div>
       
       <SectionBase
-        title="What does this emotion look like?"
-        description="If your emotion had a shape, color, or appearance, what would it be?"
+        title="If your feeling had a look, what would it be?"
+        description="Imagine your emotion as a shape, object, or color. This helps make your feelings more understandable and less overwhelming."
         textPlaceholder="This emotion looks like..."
         textValue={textValue}
         drawingBlob={drawingBlob}

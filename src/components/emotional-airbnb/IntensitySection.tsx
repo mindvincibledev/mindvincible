@@ -25,8 +25,8 @@ const IntensitySection: React.FC<IntensitySectionProps> = ({
       </div>
       
       <SectionBase
-        title="How intense is this emotion?"
-        description="Describe the strength or intensity of what you're feeling."
+        title="How big or strong is the feeling?"
+        description="Think about the size or intensity of the emotion. Is it small and barely there, or huge and taking over? Does it feel heavy or light?"
         textPlaceholder="The intensity feels like..."
         textValue={textValue}
         drawingBlob={drawingBlob}
