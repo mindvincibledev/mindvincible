@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -77,7 +76,6 @@ const EmotionalAirbnb = () => {
 
   // Handle going to the next step
   const handleNext = () => {
-    // Don't allow proceeding if no input on the current step
     if (currentStep >= 1) {
       const hasTextInput = (() => {
         switch (currentStep) {
@@ -236,7 +234,6 @@ const EmotionalAirbnb = () => {
     }
   };
 
-  // Save to local storage when formData changes
   useEffect(() => {
     // Only save text data to local storage
     const dataToStore = {
