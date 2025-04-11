@@ -18,6 +18,7 @@ import JournalEntry from "./pages/JournalEntry";
 import JournalDetail from "./pages/JournalDetail";
 import EmotionalHacking from "./pages/EmotionalHacking";
 import EmotionalHackingActivity from "./pages/EmotionalHackingActivity";
+import BoxBreathingActivity from "./pages/BoxBreathingActivity"; 
 import EmotionalAirbnb from "./pages/EmotionalAirbnb";
 import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -102,6 +103,12 @@ const AppRoutes = () => {
         <Route path="/emotional-hacking/:activityId" element={
           <ProtectedRoute>
             <EmotionalHackingActivity />
+          </ProtectedRoute>
+        } />
+        {/* Add dedicated Box Breathing route */}
+        <Route path="/emotional-hacking/box-breathing" element={
+          <ProtectedRoute>
+            <BoxBreathingActivity />
           </ProtectedRoute>
         } />
         {/* Emotional Airbnb route */}

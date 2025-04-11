@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, Star, ThumbsUp, ThumbsDown, BarChart2 } from 'lucide-react';
+import { useParams, Link, Navigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import Affirmation from '@/components/Affirmation';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/context/AuthContext';
+import BoxBreathingActivity from './BoxBreathingActivity';
 
 // Added activity content details for each activity
 const activities = {
@@ -24,7 +25,7 @@ const activities = {
   },
   "box-breathing": {
     title: "Box Breathing",
-    description: "Inhale for 4 seconds, hold for 4 seconds, exhale for 4 seconds, and hold again for 4 seconds. This rhythmic breathing pattern can calm your nervous system. (Imagine tracing a box in the air as you do this!)",
+    description: "Inhale for 4 seconds, hold for 4 seconds, exhale for 4 seconds, and hold again for 4 seconds. This rhythmic breathing pattern can calm your nervous system.",
     color: "from-[#3DFDFF] to-[#2AC20E]",
     image: "/lovable-uploads/3a6d7986-3c95-4ccd-a09c-1adf38891888.png"
   },
@@ -55,7 +56,7 @@ type ActivityParams = {
   activityId: string;
 };
 
-// Updated feedback dialog component with no skip option and better alignment
+// Updated feedback dialog component
 const FeedbackDialog = ({ isOpen, onClose, onSubmit }: { isOpen: boolean, onClose: () => void, onSubmit: (feedback: string) => void }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -336,6 +337,11 @@ const EmotionalHackingActivity = () => {
   const { user } = useAuth();
   const { activityId } = useParams<ActivityParams>();
   const activity = activityId ? activities[activityId as keyof typeof activities] as Activity : null;
+  
+  // If the activityId is box-breathing, redirect to the dedicated component
+  if (activityId === "box-breathing") {
+    return <BoxBreathingActivity />;
+  }
   
   // Digital Detox specific states
   const [isDetoxActive, setIsDetoxActive] = useState(false);
