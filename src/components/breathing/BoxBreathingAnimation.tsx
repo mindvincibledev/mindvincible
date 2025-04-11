@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -12,12 +13,16 @@ interface BoxBreathingAnimationProps {
   isActive: boolean;
   onComplete?: () => void;
   phaseDuration?: number; // Duration of each phase in seconds
+  theme?: 'glow' | 'clouds' | 'galaxy' | 'neon' | 'bubbles';
+  soundType?: 'none' | 'rain' | 'waves' | 'lofi';
 }
 
 const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
   isActive,
   onComplete,
-  phaseDuration = 4 // Default to 4 seconds per phase
+  phaseDuration = 4, // Default to 4 seconds per phase
+  theme = 'glow',
+  soundType = 'none'
 }) => {
   const [breathingState, setBreathingState] = useState<BreathingState>({
     phase: 'inhale',
@@ -33,10 +38,10 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
   
   const getPhaseMessage = (phase: BreathingPhase): string => {
     switch (phase) {
-      case 'inhale': return 'Breathe In...';
-      case 'hold1': return 'Hold...';
-      case 'exhale': return 'Breathe Out...';
-      case 'hold2': return 'Hold...';
+      case 'inhale': return `Breathe in... ${Math.ceil((100 - breathingState.progress) / (100 / phaseDuration))}`;
+      case 'hold1': return `Hold it... ${Math.ceil((100 - breathingState.progress) / (100 / phaseDuration))}`;
+      case 'exhale': return `Breathe out... ${Math.ceil((100 - breathingState.progress) / (100 / phaseDuration))}`;
+      case 'hold2': return `Hold again... ${Math.ceil((100 - breathingState.progress) / (100 / phaseDuration))}`;
       default: return '';
     }
   };
@@ -114,12 +119,55 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
       ],
       transition: {
         repeat: Infinity,
-        repeatType: "loop",
+        repeatType: "loop" as const,
         ease: "easeInOut",
         duration: 8
       }
     }
   };
+
+  // Get theme-based colors
+  const getThemeColors = () => {
+    switch (theme) {
+      case 'clouds':
+        return {
+          primary: 'from-sky-300 to-indigo-200',
+          glow: 'rgba(148, 190, 233, 0.5)',
+          particle: 'bg-white/70',
+          box: 'bg-gradient-to-r from-sky-300/40 to-indigo-200/40'
+        };
+      case 'galaxy':
+        return {
+          primary: 'from-purple-500 to-indigo-600',
+          glow: 'rgba(139, 92, 246, 0.5)',
+          particle: 'bg-violet-200/70',
+          box: 'bg-gradient-to-r from-purple-500/40 to-indigo-600/40'
+        };
+      case 'neon':
+        return {
+          primary: 'from-green-400 to-cyan-400',
+          glow: 'rgba(52, 211, 153, 0.5)',
+          particle: 'bg-green-200/70',
+          box: 'bg-gradient-to-r from-green-400/40 to-cyan-400/40'
+        };
+      case 'bubbles':
+        return {
+          primary: 'from-blue-400 to-teal-300',
+          glow: 'rgba(45, 212, 191, 0.5)',
+          particle: 'bg-blue-100/70',
+          box: 'bg-gradient-to-r from-blue-400/40 to-teal-300/40'
+        };
+      default: // glow
+        return {
+          primary: 'from-[#3DFDFF] to-[#FC68B3]',
+          glow: 'rgba(61, 253, 255, 0.5)',
+          particle: 'bg-white/70',
+          box: 'bg-gradient-to-r from-[#3DFDFF]/40 to-[#FC68B3]/40'
+        };
+    }
+  };
+
+  const themeColors = getThemeColors();
 
   // Start and manage the breathing cycle
   useEffect(() => {
@@ -147,7 +195,8 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
           // Otherwise just update progress
           return {
             ...state,
-            progress: newProgress
+            progress: newProgress,
+            message: getPhaseMessage(state.phase)
           };
         });
       }, 100); // Update 10 times per second
@@ -172,6 +221,38 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
     }
   }, [cycleCount, onComplete]);
 
+  // Play sound effect based on selected sound type
+  useEffect(() => {
+    let audio: HTMLAudioElement | null = null;
+    
+    if (soundType !== 'none' && isActive) {
+      audio = new Audio(`/sounds/${soundType}.mp3`);
+      audio.loop = true;
+      audio.volume = 0.5;
+      audio.play().catch(e => console.error("Audio playback failed:", e));
+    }
+    
+    return () => {
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    };
+  }, [soundType, isActive]);
+
+  // Calculate the current active side of the box
+  const getActiveSide = (): 'top' | 'right' | 'bottom' | 'left' => {
+    switch (breathingState.phase) {
+      case 'inhale': return 'top';
+      case 'hold1': return 'right';
+      case 'exhale': return 'bottom';
+      case 'hold2': return 'left';
+      default: return 'top';
+    }
+  };
+
+  const activeSide = getActiveSide();
+
   return (
     <div className="relative flex flex-col items-center justify-center w-full h-64 md:h-96">
       {/* Background waves */}
@@ -181,12 +262,12 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
           className="absolute bottom-0 w-full opacity-20"
         >
           <motion.path
-            fill="url(#wave-gradient)"
+            fill={`url(#${theme}-gradient)`}
             variants={waveVariants}
             animate="animate"
           />
           <defs>
-            <linearGradient id="wave-gradient" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`${theme}-gradient`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#3DFDFF" />
               <stop offset="50%" stopColor="#F5DF4D" />
               <stop offset="100%" stopColor="#FC68B3" />
@@ -200,7 +281,7 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
         {[...Array(8)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute rounded-full bg-white opacity-70"
+            className={`absolute rounded-full ${themeColors.particle}`}
             style={{ 
               width: 4 + Math.random() * 4, 
               height: 4 + Math.random() * 4 
@@ -221,38 +302,138 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
         ))}
       </div>
       
-      {/* Central breathing box */}
-      <motion.div
-        className="relative bg-gradient-to-r from-[#3DFDFF]/40 to-[#FC68B3]/40 backdrop-blur-lg rounded-2xl"
-        style={{ width: boxSize, height: boxSize }}
-        variants={animationConfig}
-        animate={breathingState.phase}
-        custom={phaseDuration}
-      >
-        <motion.div 
-          className="absolute inset-0 rounded-2xl"
-          variants={glowVariants}
+      {/* Box container */}
+      <div className="relative">
+        {/* Central breathing box */}
+        <motion.div
+          className={`relative ${themeColors.box} backdrop-blur-lg rounded-2xl flex items-center justify-center`}
+          style={{ width: boxSize, height: boxSize }}
+          variants={animationConfig}
           animate={breathingState.phase}
-        />
-      </motion.div>
-
-      {/* Breath instructions */}
-      <motion.div 
-        className="absolute bottom-0 left-0 right-0 text-center py-4"
-        animate={{ 
-          opacity: [0.7, 1, 0.7],
-          y: [0, -5, 0]
-        }}
-        transition={{
-          repeat: Infinity,
-          duration: 2,
-          ease: "easeInOut"
-        }}
-      >
-        <p className="text-xl font-medium text-white bg-black/30 backdrop-blur-sm rounded-full px-6 py-2 mx-auto inline-block">
-          {breathingState.message}
-        </p>
-      </motion.div>
+          custom={phaseDuration}
+        >
+          <motion.div 
+            className="absolute inset-0 rounded-2xl"
+            variants={glowVariants}
+            animate={breathingState.phase}
+          />
+          
+          {/* Box sides that illuminate based on the current phase */}
+          <div className="absolute inset-0">
+            {/* Top side */}
+            <motion.div 
+              className="absolute top-0 left-0 right-0 h-1"
+              style={{ 
+                background: activeSide === 'top' 
+                  ? `linear-gradient(to right, transparent, ${themeColors.glow}, transparent)` 
+                  : 'rgba(255,255,255,0.2)'
+              }}
+              animate={
+                activeSide === 'top' ? {
+                  opacity: [0.5, 1, 0.5],
+                  boxShadow: [
+                    `0 0 5px ${themeColors.glow}`,
+                    `0 0 15px ${themeColors.glow}`,
+                    `0 0 5px ${themeColors.glow}`
+                  ]
+                } : {}
+              }
+              transition={{
+                repeat: Infinity,
+                duration: 2,
+                ease: "easeInOut"
+              }}
+            />
+            
+            {/* Right side */}
+            <motion.div 
+              className="absolute top-0 right-0 bottom-0 w-1"
+              style={{ 
+                background: activeSide === 'right' 
+                  ? `linear-gradient(to bottom, transparent, ${themeColors.glow}, transparent)` 
+                  : 'rgba(255,255,255,0.2)'
+              }}
+              animate={
+                activeSide === 'right' ? {
+                  opacity: [0.5, 1, 0.5],
+                  boxShadow: [
+                    `0 0 5px ${themeColors.glow}`,
+                    `0 0 15px ${themeColors.glow}`,
+                    `0 0 5px ${themeColors.glow}`
+                  ]
+                } : {}
+              }
+              transition={{
+                repeat: Infinity,
+                duration: 2,
+                ease: "easeInOut"
+              }}
+            />
+            
+            {/* Bottom side */}
+            <motion.div 
+              className="absolute bottom-0 left-0 right-0 h-1"
+              style={{ 
+                background: activeSide === 'bottom' 
+                  ? `linear-gradient(to right, transparent, ${themeColors.glow}, transparent)` 
+                  : 'rgba(255,255,255,0.2)'
+              }}
+              animate={
+                activeSide === 'bottom' ? {
+                  opacity: [0.5, 1, 0.5],
+                  boxShadow: [
+                    `0 0 5px ${themeColors.glow}`,
+                    `0 0 15px ${themeColors.glow}`,
+                    `0 0 5px ${themeColors.glow}`
+                  ]
+                } : {}
+              }
+              transition={{
+                repeat: Infinity,
+                duration: 2,
+                ease: "easeInOut"
+              }}
+            />
+            
+            {/* Left side */}
+            <motion.div 
+              className="absolute top-0 left-0 bottom-0 w-1"
+              style={{ 
+                background: activeSide === 'left' 
+                  ? `linear-gradient(to bottom, transparent, ${themeColors.glow}, transparent)` 
+                  : 'rgba(255,255,255,0.2)'
+              }}
+              animate={
+                activeSide === 'left' ? {
+                  opacity: [0.5, 1, 0.5],
+                  boxShadow: [
+                    `0 0 5px ${themeColors.glow}`,
+                    `0 0 15px ${themeColors.glow}`,
+                    `0 0 5px ${themeColors.glow}`
+                  ]
+                } : {}
+              }
+              transition={{
+                repeat: Infinity,
+                duration: 2,
+                ease: "easeInOut"
+              }}
+            />
+          </div>
+          
+          {/* Message inside the box */}
+          {isActive && (
+            <motion.p 
+              className="text-white text-lg font-medium text-center px-4 drop-shadow-md"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {breathingState.message}
+            </motion.p>
+          )}
+        </motion.div>
+      </div>
 
       {/* Progress circle around the box */}
       <svg 

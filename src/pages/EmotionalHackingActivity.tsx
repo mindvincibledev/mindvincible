@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -85,7 +86,7 @@ const FeedbackDialog = ({ isOpen, onClose, onSubmit }: { isOpen: boolean, onClos
             variant="outline" 
             className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
           >
-            <Star size={32} className="text-blue-500 mb-2" />
+            <div className="text-3xl mb-2">😐</div>
             <span>Neutral</span>
           </Button>
           
