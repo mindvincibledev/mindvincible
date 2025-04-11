@@ -63,41 +63,40 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
     }
   };
   
-  // Animation constants
-  const boxSize = 200; // Base size of the breathing box
-  const expansionFactor = 1.25; // How much the box expands during inhalation
+  // Fixed box size
+  const boxSize = 200; 
   
   // Get theme-based colors
   const getThemeColors = () => {
     switch (theme) {
       case 'clouds':
         return {
-          box: 'bg-gradient-to-r from-sky-300/80 to-indigo-200/80 backdrop-blur-md',
-          glow: 'rgba(148, 190, 233, 0.6)',
+          box: 'from-sky-300/90 to-indigo-200/90',
+          glow: 'rgba(148, 190, 233, 0.8)',
           trace: '#ffffff'
         };
       case 'galaxy':
         return {
-          box: 'bg-gradient-to-r from-purple-500/80 to-indigo-600/80 backdrop-blur-md',
-          glow: 'rgba(139, 92, 246, 0.6)',
+          box: 'from-purple-500/90 to-indigo-600/90',
+          glow: 'rgba(139, 92, 246, 0.8)',
           trace: '#f0e7ff'
         };
       case 'neon':
         return {
-          box: 'bg-gradient-to-r from-green-400/80 to-cyan-400/80 backdrop-blur-md',
-          glow: 'rgba(52, 211, 153, 0.6)',
+          box: 'from-green-400/90 to-cyan-400/90',
+          glow: 'rgba(52, 211, 153, 0.8)',
           trace: '#dbfff6'
         };
       case 'bubbles':
         return {
-          box: 'bg-gradient-to-r from-blue-400/80 to-teal-300/80 backdrop-blur-md',
-          glow: 'rgba(45, 212, 191, 0.6)',
+          box: 'from-blue-400/90 to-teal-300/90',
+          glow: 'rgba(45, 212, 191, 0.8)',
           trace: '#d5ffff'
         };
       default: // glow
         return {
-          box: 'bg-gradient-to-r from-[#3DFDFF]/80 to-[#FC68B3]/80 backdrop-blur-md',
-          glow: 'rgba(61, 253, 255, 0.6)',
+          box: 'from-[#3DFDFF]/90 to-[#FC68B3]/90',
+          glow: 'rgba(61, 253, 255, 0.8)',
           trace: '#ffffff'
         };
     }
@@ -187,30 +186,28 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
     }
     
     const halfSize = boxSize / 2;
-    const adjustedSize = phase === 'inhale' || phase === 'hold1' ? boxSize * expansionFactor : boxSize;
-    const halfAdjustedSize = adjustedSize / 2;
     
     // Calculate position based on phase and progress
     switch (phase) {
       case 'inhale': // Top side: left to right
         return {
-          x: -halfAdjustedSize + (progress / 100) * adjustedSize,
-          y: -halfAdjustedSize
+          x: -halfSize + (progress / 100) * boxSize,
+          y: -halfSize
         };
       case 'hold1': // Right side: top to bottom
         return {
-          x: halfAdjustedSize,
-          y: -halfAdjustedSize + (progress / 100) * adjustedSize
+          x: halfSize,
+          y: -halfSize + (progress / 100) * boxSize
         };
       case 'exhale': // Bottom side: right to left
         return {
-          x: halfAdjustedSize - (progress / 100) * adjustedSize,
-          y: halfAdjustedSize
+          x: halfSize - (progress / 100) * boxSize,
+          y: halfSize
         };
       case 'hold2': // Left side: bottom to top
         return {
-          x: -halfAdjustedSize,
-          y: halfAdjustedSize - (progress / 100) * adjustedSize
+          x: -halfSize,
+          y: halfSize - (progress / 100) * boxSize
         };
       default:
         return { x: 0, y: 0 };
@@ -219,55 +216,42 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
   
   const tracePosition = getTracePosition();
   
-  // Calculate box animation based on phase
-  const getBoxAnimation = () => {
-    const { phase } = breathingState;
-    
-    // Don't animate during preparation
-    if (phase === 'prepare') {
-      return {
-        scale: 1,
-        boxShadow: `0 0 20px 5px ${themeColors.glow}`
-      };
-    }
-    
-    switch (phase) {
-      case 'inhale':
-      case 'hold1':
-        return {
-          scale: expansionFactor,
-          boxShadow: `0 0 30px 10px ${themeColors.glow}`
-        };
-      case 'exhale':
-      case 'hold2':
-        return {
-          scale: 1,
-          boxShadow: `0 0 20px 5px ${themeColors.glow}`
-        };
-      default:
-        return { scale: 1 };
+  // Floating animation for the box
+  const floatingAnimation = {
+    y: [0, -10, 0],
+    transition: {
+      repeat: Infinity,
+      duration: 6,
+      ease: "easeInOut"
     }
   };
 
   return (
     <div className="relative flex flex-col items-center justify-center w-full h-64 md:h-96">
       {/* Floating box container */}
-      <div className="relative">
-        {/* Main breathing box */}
+      <motion.div 
+        className="relative"
+        animate={floatingAnimation}
+      >
+        {/* Main breathing box - no expansion/contraction */}
         <motion.div
-          className={`relative ${themeColors.box} rounded-xl flex items-center justify-center overflow-hidden`}
+          className={`relative bg-gradient-to-r ${themeColors.box} rounded-xl flex items-center justify-center shadow-lg backdrop-blur-md overflow-hidden`}
           style={{ 
             width: boxSize, 
             height: boxSize,
-            originX: 0.5,
-            originY: 0.5
-          }}
-          animate={getBoxAnimation()}
-          transition={{ 
-            duration: breathingState.phase === 'prepare' ? 0 : phaseDuration,
-            ease: "easeInOut" 
+            boxShadow: `0 0 25px 5px ${themeColors.glow}`,
+            backdropFilter: 'blur(8px)',
           }}
         >
+          {/* Glossy overlay effect */}
+          <div 
+            className="absolute inset-0 rounded-xl"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.05) 100%)',
+              pointerEvents: 'none',
+            }}
+          />
+          
           {/* Message inside the box */}
           {isActive && (
             <motion.p 
@@ -281,7 +265,7 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
           )}
         </motion.div>
         
-        {/* Tracing point that moves around the box */}
+        {/* Tracing point that moves around the box with smoother animation */}
         {isActive && tracePosition && (
           <motion.div
             className="absolute"
@@ -290,7 +274,7 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
               height: 10,
               borderRadius: '50%',
               backgroundColor: themeColors.trace,
-              boxShadow: `0 0 8px 2px ${themeColors.trace}`,
+              boxShadow: `0 0 10px 3px ${themeColors.trace}`,
               zIndex: 10,
               left: '50%',
               top: '50%',
@@ -299,9 +283,14 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
               transform: 'translate(-50%, -50%)'
             }}
             initial={false}
+            transition={{
+              type: "spring",
+              stiffness: 30,
+              damping: 20
+            }}
           />
         )}
-      </div>
+      </motion.div>
       
       {/* Wavy background effect */}
       <div className="absolute inset-0 -z-10 overflow-hidden">

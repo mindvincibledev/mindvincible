@@ -169,6 +169,69 @@ const FeedbackDialog = ({ isOpen, onClose, onSubmit }: { isOpen: boolean, onClos
   );
 };
 
+// Theme preview component for the theme selector
+const ThemePreview = ({ theme }: { theme: string }) => {
+  // Get theme colors based on theme name
+  const getThemeColors = () => {
+    switch (theme) {
+      case 'clouds':
+        return {
+          box: 'from-sky-300 to-indigo-200',
+          glow: 'rgba(148, 190, 233, 0.6)',
+        };
+      case 'galaxy':
+        return {
+          box: 'from-purple-500 to-indigo-600',
+          glow: 'rgba(139, 92, 246, 0.6)',
+        };
+      case 'neon':
+        return {
+          box: 'from-green-400 to-cyan-400',
+          glow: 'rgba(52, 211, 153, 0.6)',
+        };
+      case 'bubbles':
+        return {
+          box: 'from-blue-400 to-teal-300',
+          glow: 'rgba(45, 212, 191, 0.6)',
+        };
+      default: // glow
+        return {
+          box: 'from-[#3DFDFF] to-[#FC68B3]',
+          glow: 'rgba(61, 253, 255, 0.6)',
+        };
+    }
+  };
+
+  const themeColors = getThemeColors();
+
+  return (
+    <div className="relative flex items-center justify-center h-16 w-full">
+      <motion.div
+        className={`h-10 w-10 rounded-md bg-gradient-to-r ${themeColors.box}`}
+        style={{
+          boxShadow: `0 0 15px 2px ${themeColors.glow}`,
+        }}
+        animate={{
+          y: [0, -5, 0],
+        }}
+        transition={{
+          repeat: Infinity,
+          duration: 2 + Math.random(),
+          ease: "easeInOut"
+        }}
+      >
+        {/* Glossy overlay */}
+        <div 
+          className="w-full h-full rounded-md"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.05) 100%)',
+          }}
+        />
+      </motion.div>
+    </div>
+  );
+};
+
 // Welcome screen component
 const WelcomeScreen = ({ 
   onStart, 
@@ -229,9 +292,10 @@ const WelcomeScreen = ({
                     />
                     <Label
                       htmlFor={`theme-${theme}`}
-                      className="flex flex-col items-center justify-center border-2 border-muted p-4 rounded-md hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary h-full cursor-pointer capitalize"
+                      className="flex flex-col items-center justify-center border-2 border-muted p-4 rounded-md hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary h-full cursor-pointer"
                     >
-                      {theme}
+                      <ThemePreview theme={theme} />
+                      <span className="mt-2 capitalize">{theme}</span>
                     </Label>
                   </div>
                 ))}
@@ -239,7 +303,7 @@ const WelcomeScreen = ({
             </div>
             
             <div className="mt-8">
-              <div className="w-full max-w-lg mx-auto h-40 rounded-lg overflow-hidden border border-gray-200">
+              <div className="w-full max-w-lg mx-auto h-40 rounded-lg overflow-hidden">
                 <BoxBreathingAnimation 
                   isActive={false} 
                   theme={settings.theme as any} 
