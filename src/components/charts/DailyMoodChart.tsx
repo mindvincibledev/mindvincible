@@ -131,7 +131,8 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
     <Card className="col-span-1 md:col-span-2 bg-white/95 backdrop-blur-lg border-gray-200 shadow-xl">
       <CardHeader>
         <CardTitle className="text-gray-800">Daily Mood</CardTitle>
-        <CardDescription className="text-gray-600">Your moods stacked by time of day</CardDescription>
+        <CardDescription className="text-gray-600">Your Vibe Check for the Week
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-80 flex flex-col">
@@ -191,16 +192,17 @@ const DailyMoodChart = ({ moodData }: DailyMoodChartProps) => {
           
           {/* Most frequent mood of today */}
           {mostFrequentMood && (
-            <div className="mt-3 text-center">
-              <div className="text-sm text-gray-600">Today's most frequent mood:</div>
-              <div className="flex items-center justify-center gap-2 font-medium">
-                <div 
-                  className="w-4 h-4 rounded-full" 
-                  style={{ backgroundColor: getMoodColor(mostFrequentMood) }}
-                ></div>
-                <span>{mostFrequentMood}</span>
-              </div>
+            <div className="flex items-center gap-4 text-sm text-gray-600">
+            <span>Today's most frequent mood:</span>
+            <div className="flex items-center gap-2 font-medium">
+              <div 
+                className="w-4 h-4 rounded-full" 
+                style={{ backgroundColor: getMoodColor(mostFrequentMood) }}
+              ></div>
+              <span>{mostFrequentMood}</span>
             </div>
+          </div>
+          
           )}
         </div>
       </CardContent>
