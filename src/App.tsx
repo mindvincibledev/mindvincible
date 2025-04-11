@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +24,9 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { initSupabase } from "./integrations/supabase/initSupabase";
 import MoodReminderNotification from "./components/MoodReminderNotification";
+
+// Update document title to correct app name
+document.title = "M(in)dvincible";
 
 const queryClient = new QueryClient();
 
