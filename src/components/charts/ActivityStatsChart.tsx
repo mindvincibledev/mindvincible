@@ -26,14 +26,6 @@ const ActivityStatsChart = ({ activityStats }: ActivityStatsProps) => {
 
   return (
     <Card className="col-span-1 md:col-span-3 bg-white/95 backdrop-blur-lg border-gray-200 shadow-lg text-black">
-      <CardHeader>
-        <CardTitle className="text-lg font-bold bg-gradient-to-r from-[#FC68B3] to-[#3DFDFF] bg-clip-text text-transparent">
-          Activity Completion Stats
-        </CardTitle>
-        <CardDescription className="text-gray-800">
-          Track how many times you've completed each emotional hacking activity
-        </CardDescription>
-      </CardHeader>
       <CardContent className="text-black">
         <div className="h-64 md:h-72">
           <ResponsiveContainer width="100%" height="100%">
