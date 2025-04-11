@@ -55,7 +55,7 @@ const ActivityStatsChart = ({ activityStats }: ActivityStatsProps) => {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: '#000000', fontSize: 12 }}
-                tickFormatter={(value) => Math.floor(value)}
+                tickFormatter={(value) => `${Math.floor(value)}`} 
                 allowDecimals={false}
                 label={{ 
                   value: 'Times Completed', 
