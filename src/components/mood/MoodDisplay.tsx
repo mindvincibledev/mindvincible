@@ -2,7 +2,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMoodColor } from '@/utils/moodUtils';
-import { Sparkles } from 'lucide-react';
 
 interface MoodDisplayProps {
   selectedMood: string;
@@ -43,32 +42,14 @@ const MoodDisplay: React.FC<MoodDisplayProps> = ({ selectedMood }) => {
             duration: 0.4,
             ease: "easeOut"
           }} 
-          className="relative text-5xl md:text-6xl lg:text-7xl font-bold my-4 md:my-6 tracking-tight" 
+          className="relative text-5xl md:text-6xl lg:text-7xl font-bold text-black my-4 md:my-6 tracking-tight" 
           style={{
-            textShadow: '0 2px 10px rgba(255,255,255,0.5)',
-            color: moodColor,
-            WebkitTextStroke: '1px rgba(0,0,0,0.1)'
+            textShadow: '0 2px 10px rgba(255,255,255,0.5)'
           }}
         >
           {selectedMood}
           
-          {/* Sparkle accents around the mood text */}
-          <motion.div 
-            className="absolute -top-6 -right-6 text-lg"
-            animate={{
-              rotate: [0, 20, 0],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              repeatType: "reverse"
-            }}
-          >
-            <Sparkles color={moodColor} />
-          </motion.div>
-          
-          {/* Decorative elements with enhanced colors */}
+          {/* Simple decorative elements with enhanced colors */}
           <motion.div 
             className="absolute -top-8 -left-8 w-32 h-32 rounded-full -z-10"
             style={{

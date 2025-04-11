@@ -1,18 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Smile, Frown, Meh, ThumbsUp, Heart, CloudRain, Zap, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Smile, Frown, Meh, ThumbsUp, Heart, CloudRain, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import MoodButton from './mood/MoodButton';
 import MoodDisplay from './mood/MoodDisplay';
-import { getMoodColor } from '@/utils/moodUtils';
 
 const MoodWidgetBar = () => {
   const [selectedMood, setSelectedMood] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showAnimation, setShowAnimation] = useState(false);
   const { user } = useAuth();
   
   const moodOptions = [
@@ -27,8 +25,6 @@ const MoodWidgetBar = () => {
 
   const handleSelectMood = (mood: string) => {
     setSelectedMood(mood);
-    setShowAnimation(true);
-    setTimeout(() => setShowAnimation(false), 1500);
   };
 
   const handleSubmit = async () => {
@@ -50,19 +46,13 @@ const MoodWidgetBar = () => {
         
       if (error) throw error;
       
-      // Show success animation
-      setShowAnimation(true);
-      setTimeout(() => {
-        setShowAnimation(false);
-        // Reset selection after successful submission
-        setSelectedMood('');
-      }, 1500);
-      
       toast({
         title: "Mood recorded!",
         description: `You're feeling ${selectedMood} today.`,
       });
       
+      // Reset selection after successful submission
+      setSelectedMood('');
     } catch (error) {
       console.error('Error recording mood:', error);
       toast({
@@ -75,161 +65,70 @@ const MoodWidgetBar = () => {
     }
   };
 
-  // Get the current mood color for styling
-  const currentMoodColor = selectedMood ? getMoodColor(selectedMood) : 'transparent';
-
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-4xl mx-auto rounded-xl p-6 mb-12 shadow-lg relative overflow-hidden"
-        style={{
-          background: selectedMood 
-            ? `linear-gradient(135deg, ${currentMoodColor}20, ${currentMoodColor}40, white)`
-            : 'linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.9))', 
-          backdropFilter: 'blur(8px)',
-          border: `1px solid ${selectedMood ? `${currentMoodColor}50` : 'rgba(255,255,255,0.3)'}`
-        }}
-      >
-        {/* Animated sparkles when interaction happens */}
-        <AnimatePresence>
-          {showAnimation && (
-            <motion.div 
-              className="absolute inset-0 pointer-events-none z-50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              {[...Array(12)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute"
-                  initial={{ 
-                    x: '50%', 
-                    y: '50%', 
-                    scale: 0,
-                    opacity: 1,
-                    rotate: Math.random() * 360
-                  }}
-                  animate={{ 
-                    x: `${Math.random() * 100}%`, 
-                    y: `${Math.random() * 100}%`, 
-                    scale: Math.random() * 0.5 + 0.5,
-                    opacity: 0,
-                    rotate: Math.random() * 360 + 180
-                  }}
-                  transition={{
-                    duration: Math.random() * 1 + 0.5,
-                    ease: 'easeOut'
-                  }}
-                >
-                  <Sparkles 
-                    className="h-6 w-6" 
-                    style={{ color: currentMoodColor || '#FC68B3' }} 
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Decorative wave background with mood color */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <motion.div 
-            className="absolute inset-x-0 bottom-0 h-32"
-            style={{
-              background: `linear-gradient(to top, ${currentMoodColor || '#3DFDFF'}10, transparent)`,
-              opacity: selectedMood ? 1 : 0.3,
-            }}
-            animate={{
-              y: [5, -5, 5],
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 6,
-              ease: "easeInOut",
-            }}
-          />
-          <motion.div 
-            className="absolute inset-x-0 top-0 h-32"
-            style={{
-              background: `linear-gradient(to bottom, ${currentMoodColor || '#FC68B3'}10, transparent)`,
-              opacity: selectedMood ? 1 : 0.3,
-            }}
-            animate={{
-              y: [-5, 5, -5],
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 7,
-              ease: "easeInOut",
-            }}
-          />
-        </div>
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full max-w-4xl mx-auto bg-white/60 backdrop-blur-md rounded-xl p-6 mb-12 shadow-lg border border-white/30 relative overflow-hidden"
+    >
+      {/* Decorative wave background */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#3DFDFF]/10 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#FC68B3]/10 to-transparent" />
+      </div>
+      
+      <div className="relative z-10">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 bg-gradient-to-r from-[#FC68B3] to-[#3DFDFF] bg-clip-text text-transparent">
+          How are we feeling today?
+        </h2>
         
-        <div className="relative z-10">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 bg-gradient-to-r from-[#000000] to-[#000000] bg-clip-text text-transparent">
-            How are we feeling today?
-          </h2>
-          
-          {!selectedMood ? (
-            <div className="flex flex-wrap justify-center gap-4">
-              {moodOptions.map((mood) => (
-                <motion.button
-                  key={mood.name}
-                  onClick={() => handleSelectMood(mood.name)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex flex-col items-center justify-center p-4 rounded-lg bg-white/80 shadow-md border border-white/50 w-24 transition-all duration-200"
-                  style={{ boxShadow: `0 4px 12px ${mood.color}30` }}
-                >
-                  <div className="p-2 rounded-full bg-white shadow-sm mb-2">
-                    {mood.icon}
-                  </div>
-                  <span className="text-sm font-medium">{mood.name}</span>
-                </motion.button>
-              ))}
-            </div>
-          ) : (
-            <motion.div 
-              className="flex flex-col items-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <MoodDisplay selectedMood={selectedMood} />
+        {!selectedMood ? (
+          <div className="flex flex-wrap justify-center gap-4">
+            {moodOptions.map((mood) => (
+              <motion.button
+                key={mood.name}
+                onClick={() => handleSelectMood(mood.name)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex flex-col items-center justify-center p-4 rounded-lg bg-white/80 shadow-md border border-white/50 w-24 transition-all duration-200"
+                style={{ boxShadow: `0 4px 12px ${mood.color}30` }}
+              >
+                <div className="p-2 rounded-full bg-white shadow-sm mb-2">
+                  {mood.icon}
+                </div>
+                <span className="text-sm font-medium">{mood.name}</span>
+              </motion.button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center">
+            <MoodDisplay selectedMood={selectedMood} />
+            
+            <div className="flex space-x-4 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedMood('')}
+                className="px-6 py-2 rounded-full bg-white/80 border border-gray-200 shadow-sm text-gray-700 font-medium"
+              >
+                Change
+              </motion.button>
               
-              <div className="flex space-x-4 mt-6">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedMood('')}
-                  className="px-6 py-2 rounded-full bg-white/80 border border-gray-200 shadow-sm text-gray-700 font-medium"
-                >
-                  Change
-                </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className="px-6 py-2 rounded-full text-white font-medium shadow-md disabled:opacity-70"
-                  style={{
-                    background: `linear-gradient(to right, ${currentMoodColor || '#FC68B3'}, ${currentMoodColor || '#3DFDFF'})`
-                  }}
-                >
-                  {isSubmitting ? 'Saving...' : 'Save Mood'}
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </motion.div>
-    </AnimatePresence>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="px-6 py-2 rounded-full bg-gradient-to-r from-[#FC68B3] to-[#3DFDFF] text-white font-medium shadow-md disabled:opacity-70"
+              >
+                {isSubmitting ? 'Saving...' : 'Save Mood'}
+              </motion.button>
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 };
 
