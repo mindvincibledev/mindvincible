@@ -95,36 +95,50 @@ const ObjectDragDrop: React.FC<ObjectDragDropProps> = ({ objects, selectedItems,
 // Helper function to get an emoji for each item
 function getEmojiForItem(item: string): string {
   const emojiMap: Record<string, string> = {
-    lights: "💡", 
-    books: "📚",
-    plants: "🌿",
-    window: "🪟",
+    // Furniture and fixtures
     desk: "🪑",
-    cup: "☕",
-    clock: "🕰️",
-    phone: "📱",
-    person: "👤",
+    chair: "💺",
     door: "🚪",
-    pen: "🖊️",
-    shoes: "👟",
-    chair: "🪑",
-    shadow: "👥",
     wall: "🧱",
-    ceiling: "🏠",
-    floor: "🟫",
-    art: "🖼️",
-    smile: "😊",
-    hands: "👐",
-    screen: "💻",
+    
+    // Electronics
     keyboard: "⌨️",
+    phone: "📱",
     mouse: "🖱️",
-    dog: "🐕",
-    cat: "🐈",
-    trees: "🌳",
-    clouds: "☁️"
+    headphones: "🎧",
+    remote: "🔖",
+    
+    // Personal items
+    glasses: "👓",
+    watch: "⌚",
+    ring: "💍",
+    bracelet: "💎",
+    
+    // Stationery and books
+    book: "📚",
+    pen: "🖊️",
+    paper: "📄",
+    
+    // Kitchen items
+    cup: "☕",
+    bottle: "🍼",
+    
+    // Textiles and fabrics
+    clothing: "👕",
+    hair: "💇",
+    skin: "🫱",
+    fabric: "🧵",
+    carpet: "🧶",
+    blanket: "🛏️",
+    pillow: "🛌",
+    
+    // Materials
+    wood: "🪵",
+    metal: "🔩",
+    plastic: "💿"
   };
 
-  return emojiMap[item.toLowerCase()] || "👁️";
+  return emojiMap[item.toLowerCase()] || "👆";
 }
 
 export default ObjectDragDrop;
