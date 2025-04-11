@@ -135,7 +135,35 @@ function getEmojiForItem(item: string): string {
     // Materials
     wood: "🪵",
     metal: "🔩",
-    plastic: "💿"
+    plastic: "💿",
+    
+    // Sound items
+    music: "🎵",
+    voice: "🗣️",
+    conversation: "💬",
+    vehicle: "🚗",
+    bell: "🔔",
+    alarm: "⏰",
+    traffic: "🚦",
+    bird: "🐦",
+    rain: "🌧️",
+    thunder: "⚡",
+    wind: "🌬️",
+    appliance: "🔌",
+    tv: "📺",
+    radio: "📻",
+    typing: "⌨️",
+    footsteps: "👣",
+    dog: "🐕",
+    cat: "🐈",
+    airplane: "✈️",
+    siren: "🚨",
+    knock: "👊",
+    clock: "🕰️",
+    fan: "💨",
+    stream: "🏞️",
+    ocean: "🌊",
+    breathing: "🫁"
   };
 
   return emojiMap[item.toLowerCase()] || "👆";

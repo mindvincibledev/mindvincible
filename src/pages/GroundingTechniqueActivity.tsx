@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import AnimatedWelcome from '@/components/grounding/AnimatedWelcome';
 import SeeSection from '@/components/grounding/SeeSection';
 import TouchSection from '@/components/grounding/TouchSection';
+import HearSection from '@/components/grounding/HearSection';
 
 enum GroundingStep {
   Welcome,
@@ -37,9 +38,9 @@ const GroundingTechniqueActivity = () => {
   const handleContinue = () => {
     setCurrentStep(prevStep => {
       const nextStep = prevStep + 1;
-      // Update to include touch section
-      // If touch section is complete, move to completion screen or next section
-      return nextStep > GroundingStep.Touch ? GroundingStep.Complete : nextStep;
+      // Update to include hear section
+      // If hear section is complete, move to completion screen or next section
+      return nextStep > GroundingStep.Hear ? GroundingStep.Complete : nextStep;
     });
   };
   
@@ -84,6 +85,8 @@ const GroundingTechniqueActivity = () => {
         return <SeeSection onComplete={handleContinue} onBack={handleBack} />;
       case GroundingStep.Touch:
         return <TouchSection onComplete={handleContinue} onBack={handleBack} />;
+      case GroundingStep.Hear:
+        return <HearSection onComplete={handleContinue} onBack={handleBack} />;
       case GroundingStep.Complete:
         return (
           <motion.div 
@@ -108,7 +111,7 @@ const GroundingTechniqueActivity = () => {
             </h2>
             
             <p className="mb-8 text-gray-700">
-              Great job completing the first two sections of the grounding exercise! 
+              Great job completing the first three sections of the grounding exercise! 
               The other sections will be coming soon.
             </p>
             
