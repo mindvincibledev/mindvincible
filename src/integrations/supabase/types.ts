@@ -179,35 +179,6 @@ export type Database = {
           },
         ]
       }
-      mood_widget_selections: {
-        Row: {
-          created_at: string
-          id: string
-          mood: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          mood: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          mood?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "mood_widget_selections_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       users: {
         Row: {
           address: string | null

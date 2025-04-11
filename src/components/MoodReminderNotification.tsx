@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Heart, X, Bell } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,11 +10,15 @@ import { format } from 'date-fns';
 const MoodReminderNotification = () => {
   const [showReminder, setShowReminder] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const { user, session } = useAuth();
+  const { user } = useAuth();
+  const location = useLocation();
+  
+  // Don't show on mood entry page
+  const isMoodEntryPage = location.pathname === '/mood-entry';
   
   // Check if the user has already logged a mood for today
   useEffect(() => {
-    if (!user) return;
+    if (!user || isMoodEntryPage) return;
     
     const checkMoodEntry = async () => {
       try {
@@ -22,7 +26,7 @@ const MoodReminderNotification = () => {
         const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
         const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
         
-        // Check both mood tables
+        // Check only mood_data table
         const { data: moodData, error: moodError } = await supabase
           .from('mood_data')
           .select('id')
@@ -30,22 +34,14 @@ const MoodReminderNotification = () => {
           .gte('created_at', startOfDay)
           .lt('created_at', endOfDay)
           .limit(1);
-          
-        const { data: widgetData, error: widgetError } = await supabase
-          .from('mood_widget_selections')
-          .select('id')
-          .eq('user_id', user.id)
-          .gte('created_at', startOfDay)
-          .lt('created_at', endOfDay)
-          .limit(1);
         
-        if (moodError || widgetError) {
-          console.error('Error checking mood entries:', moodError || widgetError);
+        if (moodError) {
+          console.error('Error checking mood entries:', moodError);
           return;
         }
         
-        // Show reminder if no entries found in either table
-        const hasMoodEntry = (moodData && moodData.length > 0) || (widgetData && widgetData.length > 0);
+        // Show reminder if no entries found
+        const hasMoodEntry = (moodData && moodData.length > 0);
         setShowReminder(!hasMoodEntry);
         
       } catch (error) {
@@ -55,14 +51,14 @@ const MoodReminderNotification = () => {
     
     checkMoodEntry();
     
-    // Recheck every 30 minutes
-    const intervalId = setInterval(checkMoodEntry, 30 * 60 * 1000);
+    // Recheck every 10 minutes (600,000 ms)
+    const intervalId = setInterval(checkMoodEntry, 10 * 60 * 1000);
     
     return () => clearInterval(intervalId);
-  }, [user]);
+  }, [user, isMoodEntryPage, location.pathname]);
   
-  // Don't render anything if no reminder needed or user not logged in
-  if (!showReminder || !user) return null;
+  // Don't render anything if no reminder needed, user not logged in, or on the mood entry page
+  if (!showReminder || !user || isMoodEntryPage) return null;
   
   return (
     <AnimatePresence>
