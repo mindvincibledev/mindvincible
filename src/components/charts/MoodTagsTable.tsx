@@ -56,8 +56,8 @@ const MoodTagsTable = ({ moodTags }: MoodTagsTableProps) => {
   return (
     <Card className="col-span-1 md:col-span-3 bg-white/95 backdrop-blur-lg border-gray-200 shadow-xl">
       <CardHeader>
-        <CardTitle className="text-gray-800">Most Used Tags by Mood</CardTitle>
-        <CardDescription className="text-gray-600">See which factors influence your moods</CardDescription>
+        <CardTitle className="text-gray-800">Top Mood Triggers</CardTitle>
+        <CardDescription className="text-gray-600">What’s been boosting or busting your mood?</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[400px] rounded-lg">

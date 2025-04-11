@@ -55,8 +55,8 @@ const MoodDistributionChart = ({ moodDistribution }: MoodDistributionChartProps)
   return (
     <Card className="bg-white/95 backdrop-blur-lg border-gray-200 shadow-xl">
       <CardHeader>
-        <CardTitle className="text-gray-800">Mood Distribution</CardTitle>
-        <CardDescription className="text-gray-600">How you've been feeling</CardDescription>
+        <CardTitle className="text-gray-800">Mood Mix</CardTitle>
+        <CardDescription className="text-gray-600">A look at your emotional playlist lately</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-64">

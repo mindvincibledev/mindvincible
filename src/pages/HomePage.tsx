@@ -55,7 +55,7 @@ const HomePage = () => {
     },
     {
       title: "Mood Jar Gallery",
-      description: "View all your created mood jars in a beautiful gallery.",
+      description: "View all your latest feels, bottled up in a beautiful gallery.",
       icon: <Images className="h-8 w-8 text-[#D5D5F1]" />,
       link: "/recent-mood-jars",
       color: "from-[#D5D5F1] to-[#FC68B3]"
