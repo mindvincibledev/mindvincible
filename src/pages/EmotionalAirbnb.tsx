@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -12,6 +13,7 @@ import EmotionSection from '@/components/emotional-airbnb/EmotionSection';
 import LocationSection from '@/components/emotional-airbnb/LocationSection';
 import AppearanceSection from '@/components/emotional-airbnb/AppearanceSection';
 import IntensitySection from '@/components/emotional-airbnb/IntensitySection';
+import SoundSection from '@/components/emotional-airbnb/SoundSection';
 import MessageSection from '@/components/emotional-airbnb/MessageSection';
 import { motion } from 'framer-motion';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
@@ -29,11 +31,13 @@ const EmotionalAirbnb = () => {
     locationText: '',
     appearanceText: '',
     intensityText: '',
+    soundText: '',
     messageText: '',
     emotionDrawing: null as Blob | null,
     locationDrawing: null as Blob | null,
     appearanceDrawing: null as Blob | null,
     intensityDrawing: null as Blob | null,
+    soundDrawing: null as Blob | null,
     messageDrawing: null as Blob | null
   });
 
@@ -57,7 +61,11 @@ const EmotionalAirbnb = () => {
           return type === 'text'
             ? { ...prev, intensityText: value as string }
             : { ...prev, intensityDrawing: value as Blob };
-        case 5: // Message step
+        case 5: // Sound step
+          return type === 'text'
+            ? { ...prev, soundText: value as string }
+            : { ...prev, soundDrawing: value as Blob };
+        case 6: // Message step
           return type === 'text'
             ? { ...prev, messageText: value as string }
             : { ...prev, messageDrawing: value as Blob };
@@ -77,7 +85,8 @@ const EmotionalAirbnb = () => {
           case 2: return !!formData.locationText;
           case 3: return !!formData.appearanceText;
           case 4: return !!formData.intensityText;
-          case 5: return !!formData.messageText;
+          case 5: return !!formData.soundText;
+          case 6: return !!formData.messageText;
           default: return true;
         }
       })();
@@ -88,7 +97,8 @@ const EmotionalAirbnb = () => {
           case 2: return !!formData.locationDrawing;
           case 3: return !!formData.appearanceDrawing;
           case 4: return !!formData.intensityDrawing;
-          case 5: return !!formData.messageDrawing;
+          case 5: return !!formData.soundDrawing;
+          case 6: return !!formData.messageDrawing;
           default: return true;
         }
       })();
@@ -103,7 +113,7 @@ const EmotionalAirbnb = () => {
       }
     }
 
-    setCurrentStep(prev => prev < 6 ? prev + 1 : prev);
+    setCurrentStep(prev => prev < 7 ? prev + 1 : prev);
   };
 
   // Handle going to the previous step
@@ -130,6 +140,7 @@ const EmotionalAirbnb = () => {
       let locationDrawingPath = null;
       let appearanceDrawingPath = null;
       let intensityDrawingPath = null;
+      let soundDrawingPath = null;
       let messageDrawingPath = null;
 
       // Helper function for uploading drawings
@@ -175,6 +186,10 @@ const EmotionalAirbnb = () => {
         intensityDrawingPath = await uploadDrawing(formData.intensityDrawing, 'intensity');
       }
       
+      if (formData.soundDrawing) {
+        soundDrawingPath = await uploadDrawing(formData.soundDrawing, 'sound');
+      }
+      
       if (formData.messageDrawing) {
         messageDrawingPath = await uploadDrawing(formData.messageDrawing, 'message');
       }
@@ -188,11 +203,13 @@ const EmotionalAirbnb = () => {
           location_in_body_text: formData.locationText || null,
           appearance_description_text: formData.appearanceText || null,
           intensity_description_text: formData.intensityText || null,
+          sound_description_text: formData.soundText || null,
           message_description_text: formData.messageText || null,
           emotion_drawing_path: emotionDrawingPath,
           location_in_body_drawing_path: locationDrawingPath,
           appearance_drawing_path: appearanceDrawingPath,
           intensity_drawing_path: intensityDrawingPath,
+          sound_drawing_path: soundDrawingPath,
           message_drawing_path: messageDrawingPath
         });
 
@@ -227,6 +244,7 @@ const EmotionalAirbnb = () => {
       locationText: formData.locationText,
       appearanceText: formData.appearanceText,
       intensityText: formData.intensityText,
+      soundText: formData.soundText,
       messageText: formData.messageText,
       currentStep
     };
@@ -247,6 +265,7 @@ const EmotionalAirbnb = () => {
           locationText: parsed.locationText || '',
           appearanceText: parsed.appearanceText || '',
           intensityText: parsed.intensityText || '',
+          soundText: parsed.soundText || '',
           messageText: parsed.messageText || ''
         }));
         
@@ -314,6 +333,15 @@ const EmotionalAirbnb = () => {
         );
       case 5:
         return (
+          <SoundSection 
+            textValue={formData.soundText}
+            drawingBlob={formData.soundDrawing}
+            onSaveText={(text) => handleSaveStep('text', text)}
+            onSaveDrawing={(blob) => handleSaveStep('drawing', blob)}
+          />
+        );
+      case 6:
+        return (
           <MessageSection 
             textValue={formData.messageText}
             drawingBlob={formData.messageDrawing}
@@ -321,14 +349,14 @@ const EmotionalAirbnb = () => {
             onSaveDrawing={(blob) => handleSaveStep('drawing', blob)}
           />
         );
-      case 6:
+      case 7:
         return (
           <div className="text-center p-6">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent mb-4">
               All Done!
             </h2>
             <p className="mb-6 text-gray-700">
-              You've completed your emotional airbnb journey. Would you like to submit your responses?
+              You're all done! We are so proud of you for expressing your emotions! Understanding your feelings are really the first step, and you did it! Wohoo!
             </p>
             <div className="flex justify-center gap-4">
               <Button
@@ -365,16 +393,16 @@ const EmotionalAirbnb = () => {
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                 <h1 className="text-xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-                  Emotional Airbnb
+                  M(in)dvincible
                 </h1>
                 <span className="text-sm text-gray-500">
-                  Step {currentStep}/6
+                  Step {currentStep}/7
                 </span>
               </div>
               <div className="w-full bg-gray-100 rounded-full h-2.5">
                 <div 
                   className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${(currentStep / 6) * 100}%` }}
+                  style={{ width: `${(currentStep / 7) * 100}%` }}
                 ></div>
               </div>
             </div>
@@ -415,7 +443,7 @@ const EmotionalAirbnb = () => {
                 Previous
               </Button>
               
-              {currentStep < 6 ? (
+              {currentStep < 7 ? (
                 <Button
                   onClick={handleNext}
                   className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] gap-2"
