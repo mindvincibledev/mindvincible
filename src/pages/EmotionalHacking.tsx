@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, Eye, Navigation, Coffee, Music, Palette, Clock, Brain, MessageSquare, Target, BarChart2 } from 'lucide-react';
+import { BookOpen, Eye, Navigation, Coffee, Music, Palette, Clock, Brain, MessageSquare, Target, BarChart2, ArrowRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +25,8 @@ const activities = [
     link: "/emotional-hacking/digital-detox",
     color: "from-[#FC68B3] to-[#FF8A48]",
     bgColor: "bg-[#FFDEE2]",
-    chartColor: "#FF8A48"
+    chartColor: "#FF8A48",
+    shortName: "Detox"
   },
   {
     id: "box-breathing",
@@ -37,7 +38,8 @@ const activities = [
     link: "/emotional-hacking/box-breathing",
     color: "from-[#3DFDFF] to-[#2AC20E]",
     bgColor: "bg-[#F2FCE2]",
-    chartColor: "#2AC20E"
+    chartColor: "#2AC20E",
+    shortName: "Breathe"
   },
   {
     id: "grounding-technique",
@@ -47,7 +49,8 @@ const activities = [
     link: "/emotional-hacking/grounding-technique",
     color: "from-[#F5DF4D] to-[#3DFDFF]",
     bgColor: "bg-[#FEF7CD]",
-    chartColor: "#F5DF4D"
+    chartColor: "#F5DF4D",
+    shortName: "Ground"
   },
   {
     id: "mirror-mirror",
@@ -57,14 +60,15 @@ const activities = [
     link: "/emotional-hacking/mirror-mirror",
     color: "from-[#FC68B3] to-[#2AC20E]",
     bgColor: "bg-[#E5DEFF]",
-    chartColor: "#D5D5F1"
+    chartColor: "#D5D5F1",
+    shortName: "Mirror"
   }
 ];
 
 const EmotionalHacking = () => {
   const { user } = useAuth();
   const [completions, setCompletions] = useState<any[]>([]);
-  const [activityStats, setActivityStats] = useState<{[key: string]: {id: string, title: string, count: number, color: string}}>({});
+  const [activityStats, setActivityStats] = useState<{[key: string]: {id: string, title: string, shortName: string, count: number, color: string}}>({});
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   
@@ -93,11 +97,12 @@ const EmotionalHacking = () => {
       setCompletions(data || []);
       
       // Calculate statistics for each activity
-      const stats: {[key: string]: {id: string, title: string, count: number, color: string}} = {};
+      const stats: {[key: string]: {id: string, title: string, shortName: string, count: number, color: string}} = {};
       activities.forEach(activity => {
         stats[activity.id] = {
           id: activity.id,
           title: activity.title,
+          shortName: activity.shortName,
           count: 0,
           color: activity.chartColor
         };
@@ -186,13 +191,19 @@ const EmotionalHacking = () => {
                       View Stats
                     </Button>
                   </SheetTrigger>
-                  <SheetContent className="w-[90%] sm:max-w-md">
+                  <SheetContent className="w-[90%] sm:max-w-md bg-white">
+                    <SheetHeader className="text-black">
+                      <SheetTitle className="text-2xl font-bold text-black">Activity Completion Stats</SheetTitle>
+                      <SheetDescription className="text-gray-700">
+                        Track how many times you've completed each emotional hacking activity
+                      </SheetDescription>
+                    </SheetHeader>
                     <div className="py-6">
                       <ActivityStatsChart activityStats={activityStats} />
                     </div>
                     
                     <div className="mt-4">
-                      <p className="text-sm text-gray-500 mb-2">
+                      <p className="text-sm text-gray-700 mb-2">
                         Complete each activity at least once to reach 100% progress
                       </p>
                     </div>
@@ -218,27 +229,33 @@ const EmotionalHacking = () => {
           >
             {activities.map((activity, index) => (
               <motion.div key={index} variants={itemVariants}>
-                <Link to={activity.link} className="block h-full">
-                  <Card className={`h-full border border-gray-100 ${activity.bgColor} hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="p-3 rounded-full bg-white shadow-md">
-                          {activity.icon}
-                        </div>
-                        {user && activityStats[activity.id]?.count > 0 && (
-                          <div className="text-xs font-medium px-3 py-1 rounded-full bg-[#2AC20E]/20 text-[#2AC20E] flex items-center">
-                            <span className="mr-1">✓</span>
-                            Completed {activityStats[activity.id]?.count} {activityStats[activity.id]?.count === 1 ? 'time' : 'times'}
-                          </div>
-                        )}
+                <Card className={`h-full border border-gray-100 ${activity.bgColor} hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="p-3 rounded-full bg-white shadow-md">
+                        {activity.icon}
                       </div>
-                      <CardTitle className="text-xl font-bold text-black mt-3">{activity.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription className="text-black">{activity.description}</CardDescription>
-                    </CardContent>
-                  </Card>
-                </Link>
+                      {user && activityStats[activity.id]?.count > 0 && (
+                        <div className="text-xs font-medium px-3 py-1 rounded-full bg-[#2AC20E]/20 text-[#2AC20E] flex items-center">
+                          <span className="mr-1">✓</span>
+                          Completed {activityStats[activity.id]?.count} {activityStats[activity.id]?.count === 1 ? 'time' : 'times'}
+                        </div>
+                      )}
+                    </div>
+                    <CardTitle className="text-xl font-bold text-black mt-3">{activity.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-black mb-6">{activity.description}</CardDescription>
+                    <Link to={activity.link}>
+                      <Button 
+                        className={`w-full bg-gradient-to-r ${activity.color} hover:opacity-90 flex items-center justify-center gap-2`}
+                      >
+                        <span>Open Activity</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </motion.div>
