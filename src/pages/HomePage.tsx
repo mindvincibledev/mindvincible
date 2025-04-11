@@ -100,7 +100,7 @@ const HomePage = () => {
                 Welcome to M(in)dvincible
               </h1>
               <p className="text-black text-lg max-w-2xl mx-auto">
-              All the mental health stuff you need - tips, activities, and a private chat that keeps everything 100% confidential.
+              All the mental health stuff you need - tips, activities, and a place to rant, everything kept 100% confidential
               </p>
             </motion.div>
             
