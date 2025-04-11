@@ -331,7 +331,7 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
           <Button 
             onClick={handleSave}
             disabled={!isValid() || saving}
-            className="bg-gradient-to-r from-[#3DFDFF] to-[#F5DF4D] hover:opacity-90 text-white font-medium"
+            className="bg-gradient-to-r from-[#3DFDFF] to-[#F5DF4D] hover:opacity-90 text-black font-medium"
           >
             {saving ? 'Saving...' : (
               <>

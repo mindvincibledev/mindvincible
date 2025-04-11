@@ -36,15 +36,6 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
   const lastPosition = useRef({ x: 0, y: 0 });
   const { user } = useAuth();
   
-  // Log user info when component mounts
-  useEffect(() => {
-    if (user) {
-      console.log("DrawingJournal component mounted with user ID:", user.id);
-    } else {
-      console.log("DrawingJournal component mounted but no user is logged in");
-    }
-  }, [user]);
-  
   // Initialize canvas with white background
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -132,29 +123,17 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
   };
 
   const saveDrawing = () => {
-    if (!user) {
-      console.log("Cannot save drawing: No user is logged in");
-      return;
-    }
-
     const canvas = canvasRef.current;
-    if (!canvas) {
-      console.log("Cannot save drawing: Canvas reference is null");
-      return;
-    }
-    
-    console.log(`Attempting to save drawing for user ${user.id}`);
+    if (!canvas) return;
     
     canvas.toBlob((blob) => {
       if (blob) {
-        console.log(`Drawing blob created successfully, size: ${blob.size} bytes`);
         onDrawingChange(blob);
       } else {
         console.error("Failed to create blob from canvas");
       }
     }, 'image/png');
   };
-
   
   return (
     <div className="flex flex-col gap-4">

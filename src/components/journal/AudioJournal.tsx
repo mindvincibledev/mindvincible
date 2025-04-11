@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mic, MicOff, Play, Save } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface AudioJournalProps {
   onAudioChange: (audioBlob: Blob) => void;
@@ -68,17 +68,10 @@ const AudioJournal: React.FC<AudioJournalProps> = ({ onAudioChange, onTitleChang
         setRecordingTime(prev => prev + 1);
       }, 1000);
       
-      toast({
-        title: "Recording started",
-        description: "Speak clearly into your microphone",
-      });
+      toast.success("Recording started. Speak clearly into your microphone.");
     } catch (error) {
       console.error('Error accessing microphone:', error);
-      toast({
-        variant: "destructive",
-        title: "Microphone access denied",
-        description: "Please allow microphone access to record audio journals",
-      });
+      toast.error("Microphone access denied. Please allow microphone access to record audio journals.");
     }
   };
 
@@ -92,10 +85,7 @@ const AudioJournal: React.FC<AudioJournalProps> = ({ onAudioChange, onTitleChang
         timerRef.current = null;
       }
       
-      toast({
-        title: "Recording finished",
-        description: "Your audio journal has been saved",
-      });
+      toast.success("Recording finished. Your audio has been saved.");
     }
   };
 
