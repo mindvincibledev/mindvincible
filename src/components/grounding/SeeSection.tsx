@@ -29,6 +29,8 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [drawingTitle, setDrawingTitle] = useState('Things I Can See');
+  const [audioTitle, setAudioTitle] = useState('Things I Can See');
   
   const commonObjects = [
     'lights', 'books', 'plants', 'window', 'desk', 'cup', 'clock', 'phone', 
@@ -223,8 +225,9 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
               transition={{ duration: 0.3 }}
             >
               <DrawingJournal 
-                onSave={(blob) => setDrawingBlob(blob)}
-                existingImageUrl={null}
+                onDrawingChange={setDrawingBlob}
+                onTitleChange={setDrawingTitle}
+                title={drawingTitle}
               />
             </motion.div>
           )}
@@ -238,8 +241,9 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
               transition={{ duration: 0.3 }}
             >
               <AudioJournal
-                onSave={(blob) => setAudioBlob(blob)}
-                existingAudioUrl={null}
+                onAudioChange={setAudioBlob}
+                onTitleChange={setAudioTitle}
+                title={audioTitle}
               />
             </motion.div>
           )}
