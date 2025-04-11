@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, Star, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, Star, ThumbsUp, ThumbsDown, BarChart2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Button } from '@/components/ui/button';
@@ -55,7 +55,7 @@ type ActivityParams = {
   activityId: string;
 };
 
-// Add a feedback dialog component
+// Updated feedback dialog component with no skip option and better alignment
 const FeedbackDialog = ({ isOpen, onClose, onSubmit }: { isOpen: boolean, onClose: () => void, onSubmit: (feedback: string) => void }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -69,11 +69,11 @@ const FeedbackDialog = ({ isOpen, onClose, onSubmit }: { isOpen: boolean, onClos
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex justify-center gap-8 py-10">
+        <div className="grid grid-cols-3 gap-4 py-10 px-4">
           <Button 
             onClick={() => onSubmit('positive')} 
             variant="outline" 
-            className="flex flex-col items-center p-6 hover:bg-green-50 hover:border-green-200 transition-colors"
+            className="flex flex-col items-center p-4 hover:bg-green-50 hover:border-green-200 transition-colors h-auto"
           >
             <ThumbsUp size={32} className="text-green-500 mb-2" />
             <span>Helpful</span>
@@ -82,7 +82,7 @@ const FeedbackDialog = ({ isOpen, onClose, onSubmit }: { isOpen: boolean, onClos
           <Button 
             onClick={() => onSubmit('neutral')} 
             variant="outline" 
-            className="flex flex-col items-center p-6 hover:bg-blue-50 hover:border-blue-200 transition-colors"
+            className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
           >
             <Star size={32} className="text-blue-500 mb-2" />
             <span>Neutral</span>
@@ -91,22 +91,12 @@ const FeedbackDialog = ({ isOpen, onClose, onSubmit }: { isOpen: boolean, onClos
           <Button 
             onClick={() => onSubmit('negative')} 
             variant="outline" 
-            className="flex flex-col items-center p-6 hover:bg-red-50 hover:border-red-200 transition-colors"
+            className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
           >
             <ThumbsDown size={32} className="text-red-500 mb-2" />
             <span>Not helpful</span>
           </Button>
         </div>
-        
-        <DialogFooter className="flex justify-center">
-          <Button 
-            onClick={() => onClose()} 
-            variant="ghost" 
-            className="text-gray-500"
-          >
-            Skip feedback
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

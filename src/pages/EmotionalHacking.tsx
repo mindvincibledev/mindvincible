@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/context/AuthContext';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import ActivityStatsChart from '@/components/charts/ActivityStatsChart';
 
 const activities = [
   {
@@ -23,7 +24,8 @@ const activities = [
     </svg>,
     link: "/emotional-hacking/digital-detox",
     color: "from-[#FC68B3] to-[#FF8A48]",
-    bgColor: "bg-[#FFDEE2]"
+    bgColor: "bg-[#FFDEE2]",
+    chartColor: "#FF8A48"
   },
   {
     id: "box-breathing",
@@ -34,7 +36,8 @@ const activities = [
     </svg>,
     link: "/emotional-hacking/box-breathing",
     color: "from-[#3DFDFF] to-[#2AC20E]",
-    bgColor: "bg-[#F2FCE2]"
+    bgColor: "bg-[#F2FCE2]",
+    chartColor: "#2AC20E"
   },
   {
     id: "grounding-technique",
@@ -43,7 +46,8 @@ const activities = [
     icon: <Eye className="h-8 w-8 text-[#F5DF4D]" />,
     link: "/emotional-hacking/grounding-technique",
     color: "from-[#F5DF4D] to-[#3DFDFF]",
-    bgColor: "bg-[#FEF7CD]"
+    bgColor: "bg-[#FEF7CD]",
+    chartColor: "#F5DF4D"
   },
   {
     id: "mirror-mirror",
@@ -52,14 +56,15 @@ const activities = [
     icon: <MessageSquare className="h-8 w-8 text-[#FC68B3]" />,
     link: "/emotional-hacking/mirror-mirror",
     color: "from-[#FC68B3] to-[#2AC20E]",
-    bgColor: "bg-[#E5DEFF]"
+    bgColor: "bg-[#E5DEFF]",
+    chartColor: "#D5D5F1"
   }
 ];
 
 const EmotionalHacking = () => {
   const { user } = useAuth();
   const [completions, setCompletions] = useState<any[]>([]);
-  const [activityStats, setActivityStats] = useState<{[key: string]: number}>({});
+  const [activityStats, setActivityStats] = useState<{[key: string]: {id: string, title: string, count: number, color: string}}>({});
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   
@@ -88,15 +93,21 @@ const EmotionalHacking = () => {
       setCompletions(data || []);
       
       // Calculate statistics for each activity
-      const stats: {[key: string]: number} = {};
+      const stats: {[key: string]: {id: string, title: string, count: number, color: string}} = {};
       activities.forEach(activity => {
-        stats[activity.id] = 0;
+        stats[activity.id] = {
+          id: activity.id,
+          title: activity.title,
+          count: 0,
+          color: activity.chartColor
+        };
       });
       
       (data || []).forEach((completion: any) => {
-        const activityId = completion.activity_name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        const activityId = completion.activity_id.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        
         if (stats[activityId] !== undefined) {
-          stats[activityId]++;
+          stats[activityId].count++;
         }
       });
       
@@ -104,7 +115,7 @@ const EmotionalHacking = () => {
       
       // Calculate progress percentage
       // Define completion as having done each activity at least once
-      const completedActivities = Object.values(stats).filter(count => count > 0).length;
+      const completedActivities = Object.values(stats).filter(stat => stat.count > 0).length;
       const progressPercentage = (completedActivities / activities.length) * 100;
       setProgress(progressPercentage);
       
@@ -175,7 +186,7 @@ const EmotionalHacking = () => {
                       View Stats
                     </Button>
                   </SheetTrigger>
-                  <SheetContent>
+                  <SheetContent size="lg">
                     <SheetHeader>
                       <SheetTitle className="text-2xl bg-gradient-to-r from-[#FC68B3] to-[#3DFDFF] bg-clip-text text-transparent">
                         Activity Completion Stats
@@ -186,22 +197,7 @@ const EmotionalHacking = () => {
                     </SheetHeader>
                     
                     <div className="py-6">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Activity</TableHead>
-                            <TableHead className="text-right">Times Completed</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {activities.map((activity) => (
-                            <TableRow key={activity.id}>
-                              <TableCell className="font-medium">{activity.title}</TableCell>
-                              <TableCell className="text-right">{activityStats[activity.id] || 0}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                      <ActivityStatsChart activityStats={activityStats} />
                     </div>
                     
                     <div className="mt-4">
@@ -216,7 +212,7 @@ const EmotionalHacking = () => {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>{Math.round(progress)}% Complete</span>
-                  <span>{Object.values(activityStats).filter(c => c > 0).length} of {activities.length} Activities</span>
+                  <span>{Object.values(activityStats).filter(c => c.count > 0).length} of {activities.length} Activities</span>
                 </div>
                 <Progress value={progress} className="h-3 bg-gray-200" />
               </div>
@@ -238,10 +234,10 @@ const EmotionalHacking = () => {
                         <div className="p-3 rounded-full bg-white shadow-md">
                           {activity.icon}
                         </div>
-                        {user && activityStats[activity.id] > 0 && (
+                        {user && activityStats[activity.id]?.count > 0 && (
                           <div className="text-xs font-medium px-3 py-1 rounded-full bg-[#2AC20E]/20 text-[#2AC20E] flex items-center">
                             <span className="mr-1">✓</span>
-                            Completed {activityStats[activity.id]} {activityStats[activity.id] === 1 ? 'time' : 'times'}
+                            Completed {activityStats[activity.id]?.count} {activityStats[activity.id]?.count === 1 ? 'time' : 'times'}
                           </div>
                         )}
                       </div>
@@ -250,13 +246,6 @@ const EmotionalHacking = () => {
                     <CardContent>
                       <CardDescription className="text-black">{activity.description}</CardDescription>
                     </CardContent>
-                    <CardFooter>
-                      <Button 
-                        className={`w-full bg-gradient-to-r ${activity.color} hover:opacity-90 text-white transition-all duration-300`}
-                      >
-                        Open Activity
-                      </Button>
-                    </CardFooter>
                   </Card>
                 </Link>
               </motion.div>
