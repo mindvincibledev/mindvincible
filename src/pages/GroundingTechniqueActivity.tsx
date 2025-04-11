@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { WavyBackground } from '@/components/ui/wavy-background';
 import { useAuth } from '@/context/AuthContext';
@@ -38,7 +37,6 @@ const GroundingTechniqueActivity = () => {
   const handleContinue = () => {
     setCurrentStep(prevStep => {
       const nextStep = prevStep + 1;
-      // Update to include hear section
       // If hear section is complete, move to completion screen or next section
       return nextStep > GroundingStep.Hear ? GroundingStep.Complete : nextStep;
     });
