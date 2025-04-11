@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Nose, Pencil, Mic, ListFilter, Type } from 'lucide-react';
+import { Wind, Pencil, Mic, ListFilter, Type } from 'lucide-react';
 import AudioJournal from '../journal/AudioJournal';
 import DrawingJournal from '../journal/DrawingJournal';
 import ObjectDragDrop from './ObjectDragDrop';
@@ -241,7 +241,7 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
       {/* Section Header */}
       <div className="flex items-center justify-center mb-6">
         <div className="p-3 bg-[#F5DF4D]/20 rounded-full">
-          <Nose className="h-8 w-8 text-[#F5DF4D]" />
+          <Wind className="h-8 w-8 text-[#F5DF4D]" />
         </div>
       </div>
       

@@ -174,10 +174,8 @@ function getEmojiForItem(item: string): string {
     perfume: "🧪",
     flowers: "🌸",
     "fresh bread": "🍞",
-    "fresh bread": "🍞", 
     soap: "🧼",
     spices: "🌶️",
-    rain: "🌧️",
     laundry: "👕",
     "cleaning products": "🧹",
     fruit: "🍎",
@@ -185,7 +183,6 @@ function getEmojiForItem(item: string): string {
     grass: "🌿",
     dessert: "🍰",
     fire: "🔥",
-    ocean: "🌊",
     "essential oil": "💧"
   };
 
