@@ -32,23 +32,47 @@ const MoodWidgetBar = () => {
   };
 
   const handleSubmit = async () => {
-    if (!selectedMood || !user) return;
+    if (!selectedMood || !user) {
+      toast({
+        variant: "destructive",
+        title: "Cannot record mood",
+        description: user ? "Please select a mood first." : "You must be logged in to record your mood.",
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     
     try {
-      // Store the mood in an existing table (mood_data) instead of mood_widget_selections
-      // to avoid TypeScript errors until types are updated
+      console.log("Saving mood to database:", selectedMood, "for user:", user.id);
+      
+      // First, save to the mood_widget_selections table
+      const { error: widgetError } = await supabase
+        .from('mood_widget_selections')
+        .insert({
+          user_id: user.id,
+          mood: selectedMood
+        });
+        
+      if (widgetError) {
+        console.error('Error saving to mood_widget_selections:', widgetError);
+        throw widgetError;
+      }
+      
+      // Then, also save to the mood_data table for consistency with the rest of the app
       const { error } = await supabase
         .from('mood_data')
         .insert({
           user_id: user.id,
-          mood: 'Happy', // Using a default value from the enum since we can't directly map our custom moods
-          notes: `Widget mood selection: ${selectedMood}`,
+          mood: mapWidgetMoodToEnum(selectedMood), // Convert to the enum value expected by mood_data table
+          notes: `Mood recorded from widget: ${selectedMood}`,
           tags: [selectedMood]
         });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error recording mood in mood_data:', error);
+        throw error;
+      }
       
       // Show success animation
       setShowAnimation(true);
@@ -63,16 +87,36 @@ const MoodWidgetBar = () => {
         description: `You're feeling ${selectedMood} today.`,
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error recording mood:', error);
       toast({
         variant: "destructive",
         title: "Failed to record mood",
-        description: "Please try again later.",
+        description: error.message || "Please try again later.",
       });
     } finally {
       setIsSubmitting(false);
     }
+  };
+  
+  // Helper function to map widget mood to mood_data enum values
+  const mapWidgetMoodToEnum = (widgetMood: string): string => {
+    // Map widget moods to mood_data enum values
+    const moodMap: Record<string, string> = {
+      'Happy': 'Happy',
+      'Loved': 'Happy', // Map to closest enum value
+      'Excited': 'Excited',
+      'Good': 'Happy', // Map to closest enum value
+      'Okay': 'Calm',  // Map to closest enum value
+      'Sad': 'Sad',
+      'Awful': 'Angry', // Map to closest enum value
+      'Angry': 'Angry',
+      'Anxious': 'Anxious',
+      'Calm': 'Calm',
+      'Overwhelmed': 'Overwhelmed'
+    };
+    
+    return moodMap[widgetMood] || 'Happy'; // Default to 'Happy' if no match
   };
 
   // Get the current mood color for styling

@@ -29,28 +29,47 @@ const Login = () => {
   // Check if user has already logged a mood today
   const checkMoodForToday = async (userId: string) => {
     try {
+      console.log("Checking if user has logged a mood today...");
       const today = new Date();
       const startOfToday = startOfDay(today);
       const endOfToday = endOfDay(today);
 
-      // Query mood_data to see if there's an entry for today
-      const { data: todayMoods, error } = await supabase
-        .from('mood_data')
-        .select('id')
-        .eq('user_id', userId)
-        .gte('created_at', startOfToday.toISOString())
-        .lte('created_at', endOfToday.toISOString())
-        .limit(1);
+      // Query both mood_data and mood_widget_selections to see if there's an entry for today
+      const [moodDataResult, widgetSelectionsResult] = await Promise.all([
+        supabase
+          .from('mood_data')
+          .select('id')
+          .eq('user_id', userId)
+          .gte('created_at', startOfToday.toISOString())
+          .lte('created_at', endOfToday.toISOString())
+          .limit(1),
+          
+        supabase
+          .from('mood_widget_selections')
+          .select('id')
+          .eq('user_id', userId)
+          .gte('created_at', startOfToday.toISOString())
+          .lte('created_at', endOfToday.toISOString())
+          .limit(1)
+      ]);
 
-      if (error) {
-        console.error('Error checking mood data:', error);
-        // Default to mood entry page if there's an error
-        navigate('/mood-entry');
-        return;
+      const { data: todayMoods, error: moodDataError } = moodDataResult;
+      const { data: todayWidgetSelections, error: widgetError } = widgetSelectionsResult;
+
+      if (moodDataError) {
+        console.error('Error checking mood_data:', moodDataError);
+      }
+      
+      if (widgetError) {
+        console.error('Error checking mood_widget_selections:', widgetError);
       }
 
-      // Redirect based on whether user has logged a mood today
-      if (todayMoods && todayMoods.length > 0) {
+      // Redirect based on whether user has logged a mood today in either table
+      const hasLoggedMood = (todayMoods && todayMoods.length > 0) || 
+                           (todayWidgetSelections && todayWidgetSelections.length > 0);
+      
+      console.log("Has user logged mood today?", hasLoggedMood);
+      if (hasLoggedMood) {
         // User has already logged a mood today, redirect to home
         navigate('/home');
       } else {

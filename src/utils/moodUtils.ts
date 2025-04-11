@@ -5,7 +5,7 @@
 export const getMoodColor = (mood: string | null): string => {
   if (!mood) return '#D5D5F1'; // Default color if no mood is provided
   
-  // Normalize mood string to handle case variations
+  // Normalize mood string to handle case variations - convert to Title Case
   const normalizedMood = mood.charAt(0).toUpperCase() + mood.slice(1).toLowerCase();
   
   // Define mood colors
