@@ -187,15 +187,6 @@ const EmotionalHacking = () => {
                     </Button>
                   </SheetTrigger>
                   <SheetContent className="w-[90%] sm:max-w-md">
-                    <SheetHeader>
-                      <SheetTitle className="text-2xl bg-gradient-to-r from-[#FC68B3] to-[#3DFDFF] bg-clip-text text-transparent">
-                        Activity Completion Stats
-                      </SheetTitle>
-                      <SheetDescription>
-                        Track how many times you've completed each emotional hacking activity
-                      </SheetDescription>
-                    </SheetHeader>
-                    
                     <div className="py-6">
                       <ActivityStatsChart activityStats={activityStats} />
                     </div>
