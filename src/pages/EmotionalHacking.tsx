@@ -20,8 +20,8 @@ const activities = [
     bgColor: "bg-[#FFDEE2]"
   },
   {
-    title: "Box Breathing",
-    description: "Practice a rhythmic breathing pattern to calm your nervous system.",
+    title: "Breathe in a Box",
+    description: "Chill your brain with a rhythmic breathing pattern to calm your nerves.",
     icon: <svg className="h-8 w-8 text-[#2AC20E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <rect x="3" y="3" width="18" height="18" rx="2" />
     </svg>,
@@ -38,7 +38,7 @@ const activities = [
     bgColor: "bg-[#E5DEFF]"
   },
   {
-    title: "5-4-3-2-1 Technique",
+    title: "5-4-3-2-1: The Grounding Quest",
     description: "Use your senses to ground yourself in the present moment.",
     icon: <Eye className="h-8 w-8 text-[#F5DF4D]" />,
     link: "/emotional-hacking/grounding-technique",
@@ -128,11 +128,10 @@ const EmotionalHacking = () => {
             className="text-center mb-8 md:mb-12"
           >
             <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent mb-4">
-              Emotional Hacking
+              Hack the Feels, Don’t Let Them Hack You
             </h1>
             <p className="text-black text-lg max-w-3xl mx-auto bg-white/80 backdrop-blur-sm p-4 rounded-lg">
-              When emotions start to feel too intense, grounding techniques can help bring you back to the present moment. 
-              Grounding is like hitting a mental reset button, shifting your focus away from overwhelming thoughts.
+            Learn tricks to stay chill when emotions get extra.
             </p>
           </motion.div>
           

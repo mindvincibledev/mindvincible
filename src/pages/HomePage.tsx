@@ -62,7 +62,7 @@ const HomePage = () => {
     },
     {
       title: "Self Awareness",
-      description: "BBecause understanding yourself is the ultimate glow-up ✨🧠.",
+      description: "Because understanding yourself is the ultimate glow-up ✨🧠.",
       icon: <HomeIcon className="h-8 w-8 text-[#FF8A48]" />,
       link: "/emotional-airbnb",
       color: "from-[#FF8A48] to-[#FC68B3]"
