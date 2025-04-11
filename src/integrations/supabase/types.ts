@@ -9,6 +9,41 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activity_completions: {
+        Row: {
+          activity_id: string
+          activity_name: string
+          completed_at: string
+          feedback: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          activity_name: string
+          completed_at?: string
+          feedback?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          activity_name?: string
+          completed_at?: string
+          feedback?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       emotional_airbnb: {
         Row: {
           appearance_description_text: string | null

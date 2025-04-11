@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, Star } from 'lucide-react';
+import { ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, Star, ThumbsUp, ThumbsDown } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import Affirmation from '@/components/Affirmation';
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from '@/context/AuthContext';
 
 // Added activity content details for each activity
 const activities = {
@@ -26,54 +28,18 @@ const activities = {
     color: "from-[#3DFDFF] to-[#2AC20E]",
     image: "/lovable-uploads/3a6d7986-3c95-4ccd-a09c-1adf38891888.png"
   },
-  "expressive-writing": {
-    title: "Expressive Writing",
-    description: "Take a moment to write down whatever you're feeling. Don't censor yourself, just let the words flow. This can help you process your emotions and clear your mind.",
-    color: "from-[#3DFDFF] to-[#FC68B3]",
-    image: "/lovable-uploads/3a6d7986-3c95-4ccd-a09c-1adf38891888.png"
-  },
   "grounding-technique": {
     title: "5-4-3-2-1 Technique",
     description: "Name 5 things you can see, Name 4 things you can touch, Name 3 things you can hear, Name 2 things you can smell, Name 1 thing you can taste.",
     color: "from-[#F5DF4D] to-[#3DFDFF]",
     image: "/lovable-uploads/3a6d7986-3c95-4ccd-a09c-1adf38891888.png"
   },
-  "music-mindfulness": {
-    title: "Music Mindfulness",
-    description: "Put on your favourite song and really focus on the lyrics, beats, or instruments. Try to hum along or tap your fingers to the rhythm.",
-    color: "from-[#FC68B3] to-[#F5DF4D]",
-    image: "/lovable-uploads/3a6d7986-3c95-4ccd-a09c-1adf38891888.png"
-  },
-  "sensory-focus": {
-    title: "Sensory Focus",
-    description: "Pop a piece of gum or a mint in your mouth and focus on the flavour, texture, and how it feels as you chew.",
-    color: "from-[#F5DF4D] to-[#FC68B3]",
-    image: "/lovable-uploads/6434be4f-d09e-4244-a496-5c8b007c9a4b.png"
-  },
-  "walk-it-out": {
-    title: "Walk It Out",
-    description: "Take a walk, even if it's just around your room. Notice the feeling of your feet hitting the ground. Bonus: Walk barefoot on grass!",
-    color: "from-[#2AC20E] to-[#3DFDFF]",
-    image: "/lovable-uploads/6434be4f-d09e-4244-a496-5c8b007c9a4b.png"
-  },
-  "color-hunt": {
-    title: "Color Hunt",
-    description: "Pick a colour and find 5 things around you that match it. This distracts your brain and brings you back to the present.",
-    color: "from-[#3DFDFF] to-[#F5DF4D]",
-    image: "/lovable-uploads/6434be4f-d09e-4244-a496-5c8b007c9a4b.png"
-  },
-  "rewinding-rewiring": {
-    title: "Rewinding-Rewiring",
-    description: "Think of a happy or funny memory and walk yourself through the details—what were you wearing? Who was there? What did it smell like?",
+  "mirror-mirror": {
+    title: "Mirror Mirror On the Wall",
+    description: "Because how you speak to yourself matters.",
     color: "from-[#FC68B3] to-[#2AC20E]",
-    image: "/lovable-uploads/6434be4f-d09e-4244-a496-5c8b007c9a4b.png"
-  },
-  "grounding": {
-    title: "Grounding Techniques",
-    description: "When emotions start to feel too intense, grounding techniques can help bring you back to the present moment. Grounding is like hitting a mental reset button, shifting your focus away from overwhelming thoughts and back to what's happening right now. It helps you pause and then take actions.",
-    color: "from-[#F5DF4D] to-[#3DFDFF]",
-    image: "/lovable-uploads/6434be4f-d09e-4244-a496-5c8b007c9a4b.png"
-  },
+    image: "/lovable-uploads/3a6d7986-3c95-4ccd-a09c-1adf38891888.png"
+  }
 };
 
 // Define a TypeScript interface for the activities
@@ -89,18 +55,83 @@ type ActivityParams = {
   activityId: string;
 };
 
+// Add a feedback dialog component
+const FeedbackDialog = ({ isOpen, onClose, onSubmit }: { isOpen: boolean, onClose: () => void, onSubmit: (feedback: string) => void }) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+        <DialogHeader>
+          <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+            How was your experience?
+          </DialogTitle>
+          <DialogDescription className="text-center">
+            Your feedback helps us improve our activities
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="flex justify-center gap-8 py-10">
+          <Button 
+            onClick={() => onSubmit('positive')} 
+            variant="outline" 
+            className="flex flex-col items-center p-6 hover:bg-green-50 hover:border-green-200 transition-colors"
+          >
+            <ThumbsUp size={32} className="text-green-500 mb-2" />
+            <span>Helpful</span>
+          </Button>
+          
+          <Button 
+            onClick={() => onSubmit('neutral')} 
+            variant="outline" 
+            className="flex flex-col items-center p-6 hover:bg-blue-50 hover:border-blue-200 transition-colors"
+          >
+            <Star size={32} className="text-blue-500 mb-2" />
+            <span>Neutral</span>
+          </Button>
+          
+          <Button 
+            onClick={() => onSubmit('negative')} 
+            variant="outline" 
+            className="flex flex-col items-center p-6 hover:bg-red-50 hover:border-red-200 transition-colors"
+          >
+            <ThumbsDown size={32} className="text-red-500 mb-2" />
+            <span>Not helpful</span>
+          </Button>
+        </div>
+        
+        <DialogFooter className="flex justify-center">
+          <Button 
+            onClick={() => onClose()} 
+            variant="ghost" 
+            className="text-gray-500"
+          >
+            Skip feedback
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // Add a celebration dialog component
-const CelebrationDialog = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+const CelebrationDialog = ({ 
+  isOpen, 
+  onClose, 
+  activityName 
+}: { 
+  isOpen: boolean, 
+  onClose: () => void, 
+  activityName: string 
+}) => {
   const emojis = ["✨", "🎉", "🌟", "💫", "🙌", "🎊", "💯", "🏆", "🥇", "👏"];
   const affirmations = [
-    "Amazing job taking a break from your screens!",
-    "Your mind thanks you for the digital break!",
-    "Well done on prioritizing your mental well-being!",
-    "Congratulations on completing your digital detox!",
-    "You've just given your brain a wonderful gift!",
-    "Taking time away from screens is a sign of self-care mastery!",
-    "That's how you recharge your mental batteries!",
-    "Fantastic work creating space for your mind to breathe!"
+    `Amazing job completing ${activityName}!`,
+    `Your mind thanks you for taking this break!`,
+    `Well done on prioritizing your mental well-being!`,
+    `Congratulations on completing ${activityName}!`,
+    `You've just given your brain a wonderful gift!`,
+    `Taking time for self-care is a sign of strength!`,
+    `That's how you recharge your mental batteries!`,
+    `Fantastic work creating space for your mind to breathe!`
   ];
   
   const randomAffirmation = affirmations[Math.floor(Math.random() * affirmations.length)];
@@ -110,7 +141,7 @@ const CelebrationDialog = ({ isOpen, onClose }: { isOpen: boolean, onClose: () =
       <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-            Digital Detox Complete!
+            {activityName} Complete!
           </DialogTitle>
         </DialogHeader>
         <div className="relative py-10">
@@ -312,6 +343,7 @@ const DetoxAnimation = () => {
 };
 
 const EmotionalHackingActivity = () => {
+  const { user } = useAuth();
   const { activityId } = useParams<ActivityParams>();
   const activity = activityId ? activities[activityId as keyof typeof activities] as Activity : null;
   
@@ -320,8 +352,11 @@ const EmotionalHackingActivity = () => {
   const [timeRemaining, setTimeRemaining] = useState(5 * 60); // 5 minutes in seconds
   const [initialTime, setInitialTime] = useState(5); // 5 minutes
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
-  // New state for the celebration dialog
+  
+  // Activity completion states
+  const [activityCompleted, setActivityCompleted] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   // Start the detox timer
   const startDetox = () => {
@@ -335,7 +370,8 @@ const EmotionalHackingActivity = () => {
         if (prev <= 1) {
           clearInterval(interval);
           setIsDetoxActive(false);
-          setShowCelebration(true); // Show celebration when timer completes
+          setActivityCompleted(true);
+          setShowCelebration(true);
           return 0;
         }
         return prev - 1;
@@ -360,12 +396,62 @@ const EmotionalHackingActivity = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Record activity completion in the database
+  const recordActivityCompletion = async (feedback?: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('activity_completions')
+        .insert({
+          user_id: user.id,
+          activity_name: activity?.title || '',
+          activity_id: activityId || '',
+          feedback: feedback
+        });
+      
+      if (error) {
+        console.error('Error recording activity completion:', error);
+        toast.error('Failed to record your activity completion');
+        return;
+      }
+      
+      toast.success('Activity completion recorded!');
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
+
+  // Handle feedback submission
+  const handleFeedback = (feedback: string) => {
+    recordActivityCompletion(feedback);
+    setShowFeedback(false);
+    toast.success('Thanks for your feedback!');
+  };
+
+  // Handle activity completion - show celebration and then feedback dialog
+  const handleActivityComplete = () => {
+    setActivityCompleted(true);
+    setShowCelebration(true);
+  };
+
+  // Handle closing the celebration dialog
+  const handleCelebrationClose = () => {
+    setShowCelebration(false);
+    setShowFeedback(true); // Show feedback dialog after celebration
+  };
+
   // Cleanup on component unmount
   useEffect(() => {
     return () => {
       if (timer) clearInterval(timer);
     };
   }, [timer]);
+
+  // Complete activity without feedback (for non-digital-detox activities)
+  const completeGenericActivity = () => {
+    handleActivityComplete();
+  };
 
   if (!activity) {
     return (
@@ -473,16 +559,23 @@ const EmotionalHackingActivity = () => {
                     </p>
                   </div>
                 )}
-                
-                {/* Celebration dialog */}
-                <CelebrationDialog 
-                  isOpen={showCelebration} 
-                  onClose={() => setShowCelebration(false)} 
-                />
-                
               </Card>
             </motion.div>
           </div>
+          
+          {/* Celebration dialog */}
+          <CelebrationDialog 
+            isOpen={showCelebration} 
+            onClose={handleCelebrationClose}
+            activityName={activity.title}
+          />
+          
+          {/* Feedback dialog */}
+          <FeedbackDialog 
+            isOpen={showFeedback} 
+            onClose={() => setShowFeedback(false)} 
+            onSubmit={handleFeedback}
+          />
         </div>
       </BackgroundWithEmojis>
     );
@@ -527,12 +620,27 @@ const EmotionalHackingActivity = () => {
               <div className="flex justify-center">
                 <Button 
                   className={`bg-gradient-to-r ${activity.color} text-white px-8 py-3 rounded-full hover:opacity-90 transition-all duration-300`}
+                  onClick={completeGenericActivity}
                 >
-                  Start Activity
+                  Complete Activity
                 </Button>
               </div>
             </Card>
           </motion.div>
+          
+          {/* Celebration dialog */}
+          <CelebrationDialog 
+            isOpen={showCelebration} 
+            onClose={handleCelebrationClose}
+            activityName={activity.title}
+          />
+          
+          {/* Feedback dialog */}
+          <FeedbackDialog 
+            isOpen={showFeedback} 
+            onClose={() => setShowFeedback(false)} 
+            onSubmit={handleFeedback}
+          />
         </div>
       </div>
     </BackgroundWithEmojis>
