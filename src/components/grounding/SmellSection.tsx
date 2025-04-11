@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,9 +19,9 @@ interface SmellSectionProps {
 
 const SMELL_OBJECTS = [
   "Food", "Candle", "Shampoo", "Air", "Coffee", "Perfume", 
-  "Flowers", "Fresh Bread", "Soap", "Spices", "Rain", 
-  "Laundry", "Cleaning Products", "Fruit", "Books", 
-  "Grass", "Dessert", "Fire", "Ocean", "Essential Oil"
+  "Flowers", "Fresh Bread", "Soap", "Spices", "Laundry", 
+  "Cleaning Products", "Fruit", "Books", "Grass", "Dessert", 
+  "Fire", "Essential Oil"
 ];
 
 const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
@@ -90,6 +89,12 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
       return;
     }
     
+    // Check if current input type has valid data
+    if (!isComplete()) {
+      toast.error("Please complete the section before saving");
+      return;
+    }
+    
     try {
       setSaving(true);
       let drawingPath = null;
@@ -99,30 +104,38 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
       if (drawingBlob) {
         try {
           const fileName = `smell_section_${user.id}_${Date.now()}.png`;
-          // Check if the bucket exists first
-          const { data: buckets } = await supabase.storage.listBuckets();
-          const groundingDrawingsBucketExists = buckets?.some(bucket => bucket.name === 'grounding_drawings');
           
-          if (!groundingDrawingsBucketExists) {
-            const { data: newBucket, error: createBucketError } = await supabase.storage.createBucket('grounding_drawings', { 
-              public: true 
-            });
+          // Instead of trying to create a bucket which requires admin permissions,
+          // Let's check if it exists and only try to upload
+          const { data: existingBuckets } = await supabase.storage.listBuckets();
+          
+          // Try to find grounding_drawings bucket
+          const groundingDrawingsBucket = existingBuckets?.find(bucket => 
+            bucket.name === 'grounding_drawings'
+          );
+          
+          if (groundingDrawingsBucket) {
+            const { data: drawingData, error: drawingError } = await supabase
+              .storage
+              .from('grounding_drawings')
+              .upload(fileName, drawingBlob, {
+                contentType: 'image/png',
+                upsert: true
+              });
+              
+            if (drawingError) throw drawingError;
             
-            if (createBucketError) {
-              throw new Error(`Failed to create drawing bucket: ${createBucketError.message}`);
-            }
+            // Get the public URL for the uploaded file
+            const { data: publicUrlData } = supabase
+              .storage
+              .from('grounding_drawings')
+              .getPublicUrl(fileName);
+              
+            drawingPath = publicUrlData.publicUrl;
+            console.log("Drawing saved successfully:", drawingPath);
+          } else {
+            console.warn("grounding_drawings bucket doesn't exist, skipping drawing upload");
           }
-          
-          const { data: drawingData, error: drawingError } = await supabase
-            .storage
-            .from('grounding_drawings')
-            .upload(fileName, drawingBlob, {
-              contentType: 'image/png',
-              upsert: true
-            });
-            
-          if (drawingError) throw drawingError;
-          drawingPath = drawingData.path;
         } catch (error) {
           console.error("Error uploading drawing:", error);
           toast.error("Failed to upload drawing. Continuing with other data...");
@@ -133,59 +146,77 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
       if (audioBlob) {
         try {
           const fileName = `smell_section_${user.id}_${Date.now()}.webm`;
-          // Check if the bucket exists first
-          const { data: buckets } = await supabase.storage.listBuckets();
-          const groundingAudioBucketExists = buckets?.some(bucket => bucket.name === 'grounding_audio');
           
-          if (!groundingAudioBucketExists) {
-            const { data: newBucket, error: createBucketError } = await supabase.storage.createBucket('grounding_audio', { 
-              public: true 
-            });
+          // Instead of trying to create a bucket, check if it exists
+          const { data: existingBuckets } = await supabase.storage.listBuckets();
+          
+          // Try to find grounding_audio bucket
+          const groundingAudioBucket = existingBuckets?.find(bucket => 
+            bucket.name === 'grounding_audio'
+          );
+          
+          if (groundingAudioBucket) {
+            const { data: audioData, error: audioError } = await supabase
+              .storage
+              .from('grounding_audio')
+              .upload(fileName, audioBlob, {
+                contentType: 'audio/webm',
+                upsert: true
+              });
+              
+            if (audioError) throw audioError;
             
-            if (createBucketError) {
-              throw new Error(`Failed to create audio bucket: ${createBucketError.message}`);
-            }
+            // Get the public URL for the uploaded file
+            const { data: publicUrlData } = supabase
+              .storage
+              .from('grounding_audio')
+              .getPublicUrl(fileName);
+              
+            audioPath = publicUrlData.publicUrl;
+            console.log("Audio saved successfully:", audioPath);
+          } else {
+            console.warn("grounding_audio bucket doesn't exist, skipping audio upload");
           }
-          
-          const { data: audioData, error: audioError } = await supabase
-            .storage
-            .from('grounding_audio')
-            .upload(fileName, audioBlob, {
-              contentType: 'audio/webm',
-              upsert: true
-            });
-            
-          if (audioError) throw audioError;
-          audioPath = audioData.path;
         } catch (error) {
           console.error("Error uploading audio:", error);
           toast.error("Failed to upload audio. Continuing with other data...");
         }
       }
       
+      // Prepare the data to save to the database
+      let responseData = {
+        user_id: user.id,
+        activity_id: 'grounding-technique',
+        section_name: 'smell',
+        response_text: inputType === 'text' ? textItems.join(', ') : null,
+        response_drawing_path: drawingPath,
+        response_audio_path: audioPath,
+        response_selected_items: inputType === 'select' ? selectedObjects : null
+      };
+      
+      console.log("Saving to database:", responseData);
+      
       // Save to database
       const { error } = await supabase
         .from('grounding_responses')
-        .insert({
-          user_id: user.id,
-          activity_id: 'grounding-technique',
-          section_name: 'smell',
-          response_text: inputType === 'text' ? textItems.join(', ') : null,
-          response_drawing_path: drawingPath,
-          response_audio_path: audioPath,
-          response_selected_items: inputType === 'select' ? selectedObjects : null
-        });
+        .insert(responseData);
         
       if (error) {
         console.error("Database error:", error);
         throw error;
       }
       
+      console.log("Response saved successfully!");
       toast.success("Response saved successfully!");
+      
+      // Clear the local storage cache since we've saved successfully
+      localStorage.removeItem('groundingSmellData');
+      
+      // Move to next section
       onComplete();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving response:", error);
-      toast.error("Failed to save your response. Please try again.");
+      toast.error(`Failed to save your response: ${error.message || "Unknown error"}`);
     } finally {
       setSaving(false);
     }
