@@ -41,9 +41,10 @@ const IntroSection = () => {
         </div>
       </div>
       
-      <div className="bg-[#F5DF4D]/10 p-4 rounded-lg border border-[#F5DF4D]/20">
-        <h3 className="font-medium text-center mb-2">How It Works</h3>
-        <p className="text-sm text-gray-700">
+      <div className="bg-[#FFF9E6] p-6 rounded-3xl border-2 border-[#F5DF4D]/30 shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-br from-[#F5DF4D]/10 to-transparent rounded-3xl"></div>
+        <h3 className="font-bold text-center text-xl mb-4">How It Works</h3>
+        <p className="text-gray-800 font-medium text-center relative z-10">
           You'll go through 5 simple questions about your emotion. For each question, you can choose
           to respond with text, a drawing, or both. Your answers will be saved at the end, allowing you
           to reflect on them later.
