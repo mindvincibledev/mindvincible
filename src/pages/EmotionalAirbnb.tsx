@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -76,6 +77,7 @@ const EmotionalAirbnb = () => {
 
   // Handle going to the next step
   const handleNext = () => {
+    // Don't allow proceeding if no input on the current step
     if (currentStep >= 1) {
       const hasTextInput = (() => {
         switch (currentStep) {
@@ -192,7 +194,7 @@ const EmotionalAirbnb = () => {
         messageDrawingPath = await uploadDrawing(formData.messageDrawing, 'message');
       }
 
-      // Insert data into the database - fixing the column references to match the table schema
+      // Insert data into the database - fixing the table reference and column names
       const { error } = await supabase
         .from('emotional_airbnb')
         .insert({
@@ -201,13 +203,13 @@ const EmotionalAirbnb = () => {
           location_in_body_text: formData.locationText || null,
           appearance_description_text: formData.appearanceText || null,
           intensity_description_text: formData.intensityText || null,
-          sound_text: formData.soundText || null, // Using correct column name
+          sound_description_text: formData.soundText || null,
           message_description_text: formData.messageText || null,
           emotion_drawing_path: emotionDrawingPath,
           location_in_body_drawing_path: locationDrawingPath,
           appearance_drawing_path: appearanceDrawingPath,
           intensity_drawing_path: intensityDrawingPath,
-          sound_drawing_path: soundDrawingPath, // Using correct column name
+          sound_drawing_path: soundDrawingPath,
           message_drawing_path: messageDrawingPath
         });
 
@@ -234,6 +236,7 @@ const EmotionalAirbnb = () => {
     }
   };
 
+  // Save to local storage when formData changes
   useEffect(() => {
     // Only save text data to local storage
     const dataToStore = {

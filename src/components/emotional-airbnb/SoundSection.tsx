@@ -2,7 +2,6 @@
 import React from 'react';
 import SectionBase from './SectionBase';
 import { Volume2 } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface SoundSectionProps {
   textValue: string;
@@ -19,42 +18,11 @@ const SoundSection: React.FC<SoundSectionProps> = ({
 }) => {
   return (
     <div>
-      <motion.div 
-        className="flex justify-center mb-6"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      >
-        <div className="p-3 bg-[#D5D5F1]/10 rounded-full relative overflow-hidden">
-          <motion.div
-            className="absolute inset-0 bg-[#D5D5F1]/5"
-            animate={{ 
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3]
-            }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 2,
-              ease: "easeInOut" 
-            }}
-          />
-          <Volume2 className="h-10 w-10 text-[#D5D5F1] relative z-10" />
-          
-          {/* Sound wave effect */}
-          <motion.div 
-            className="absolute top-1/2 left-1/2 w-full h-full -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#D5D5F1]/20"
-            animate={{ 
-              scale: [1, 1.5, 1],
-              opacity: [0.5, 0, 0.5] 
-            }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 2.5,
-              ease: "easeInOut" 
-            }}
-          />
+      <div className="flex justify-center mb-6">
+        <div className="p-3 bg-[#D5D5F1]/10 rounded-full">
+          <Volume2 className="h-10 w-10 text-[#D5D5F1]" />
         </div>
-      </motion.div>
+      </div>
       
       <SectionBase
         title="If your emotion made a sound, how loud would it be?"
