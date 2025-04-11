@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -82,6 +83,76 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
       addTextItem();
     }
   };
+
+  // Check if storage bucket exists
+  const checkBucketExists = async (bucketName: string) => {
+    try {
+      const { data: buckets } = await supabase.storage.listBuckets();
+      return buckets?.some(bucket => bucket.name === bucketName);
+    } catch (error) {
+      console.error(`Error checking if bucket ${bucketName} exists:`, error);
+      return false;
+    }
+  };
+
+  // Create storage bucket if it doesn't exist
+  const createBucketIfNotExists = async (bucketName: string, isPublic: boolean = true) => {
+    try {
+      const bucketExists = await checkBucketExists(bucketName);
+      
+      if (!bucketExists) {
+        const { error } = await supabase.storage.createBucket(bucketName, {
+          public: isPublic,
+        });
+        
+        if (error) {
+          console.error(`Error creating bucket ${bucketName}:`, error);
+          return false;
+        }
+        
+        console.log(`Created bucket ${bucketName} successfully`);
+        return true;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error(`Error creating bucket ${bucketName}:`, error);
+      return false;
+    }
+  };
+
+  // Upload file to storage
+  const uploadFile = async (blob: Blob, bucketName: string, fileName: string, contentType: string) => {
+    try {
+      // First ensure the bucket exists
+      const bucketReady = await createBucketIfNotExists(bucketName);
+      
+      if (!bucketReady) {
+        throw new Error(`Bucket ${bucketName} is not ready for upload`);
+      }
+      
+      const { data, error } = await supabase
+        .storage
+        .from(bucketName)
+        .upload(fileName, blob, {
+          contentType,
+          upsert: true
+        });
+        
+      if (error) throw error;
+      
+      // Get the public URL for the uploaded file
+      const { data: publicUrlData } = supabase
+        .storage
+        .from(bucketName)
+        .getPublicUrl(fileName);
+        
+      return publicUrlData.publicUrl;
+    } catch (error: any) {
+      console.error(`Error uploading to ${bucketName}:`, error);
+      throw error;
+    }
+  };
   
   const handleSave = async () => {
     if (!user?.id) {
@@ -97,45 +168,20 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
     
     try {
       setSaving(true);
-      let drawingPath = null;
-      let audioPath = null;
+      let drawingUrl = null;
+      let audioUrl = null;
       
       // Upload drawing if any
       if (drawingBlob) {
         try {
           const fileName = `smell_section_${user.id}_${Date.now()}.png`;
-          
-          // Instead of trying to create a bucket which requires admin permissions,
-          // Let's check if it exists and only try to upload
-          const { data: existingBuckets } = await supabase.storage.listBuckets();
-          
-          // Try to find grounding_drawings bucket
-          const groundingDrawingsBucket = existingBuckets?.find(bucket => 
-            bucket.name === 'grounding_drawings'
+          drawingUrl = await uploadFile(
+            drawingBlob, 
+            'grounding_drawings', 
+            fileName, 
+            'image/png'
           );
-          
-          if (groundingDrawingsBucket) {
-            const { data: drawingData, error: drawingError } = await supabase
-              .storage
-              .from('grounding_drawings')
-              .upload(fileName, drawingBlob, {
-                contentType: 'image/png',
-                upsert: true
-              });
-              
-            if (drawingError) throw drawingError;
-            
-            // Get the public URL for the uploaded file
-            const { data: publicUrlData } = supabase
-              .storage
-              .from('grounding_drawings')
-              .getPublicUrl(fileName);
-              
-            drawingPath = publicUrlData.publicUrl;
-            console.log("Drawing saved successfully:", drawingPath);
-          } else {
-            console.warn("grounding_drawings bucket doesn't exist, skipping drawing upload");
-          }
+          console.log("Drawing saved successfully:", drawingUrl);
         } catch (error) {
           console.error("Error uploading drawing:", error);
           toast.error("Failed to upload drawing. Continuing with other data...");
@@ -146,37 +192,13 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
       if (audioBlob) {
         try {
           const fileName = `smell_section_${user.id}_${Date.now()}.webm`;
-          
-          // Instead of trying to create a bucket, check if it exists
-          const { data: existingBuckets } = await supabase.storage.listBuckets();
-          
-          // Try to find grounding_audio bucket
-          const groundingAudioBucket = existingBuckets?.find(bucket => 
-            bucket.name === 'grounding_audio'
+          audioUrl = await uploadFile(
+            audioBlob, 
+            'grounding_audio', 
+            fileName, 
+            'audio/webm'
           );
-          
-          if (groundingAudioBucket) {
-            const { data: audioData, error: audioError } = await supabase
-              .storage
-              .from('grounding_audio')
-              .upload(fileName, audioBlob, {
-                contentType: 'audio/webm',
-                upsert: true
-              });
-              
-            if (audioError) throw audioError;
-            
-            // Get the public URL for the uploaded file
-            const { data: publicUrlData } = supabase
-              .storage
-              .from('grounding_audio')
-              .getPublicUrl(fileName);
-              
-            audioPath = publicUrlData.publicUrl;
-            console.log("Audio saved successfully:", audioPath);
-          } else {
-            console.warn("grounding_audio bucket doesn't exist, skipping audio upload");
-          }
+          console.log("Audio saved successfully:", audioUrl);
         } catch (error) {
           console.error("Error uploading audio:", error);
           toast.error("Failed to upload audio. Continuing with other data...");
@@ -184,13 +206,13 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
       }
       
       // Prepare the data to save to the database
-      let responseData = {
+      const responseData = {
         user_id: user.id,
         activity_id: 'grounding-technique',
         section_name: 'smell',
         response_text: inputType === 'text' ? textItems.join(', ') : null,
-        response_drawing_path: drawingPath,
-        response_audio_path: audioPath,
+        response_drawing_path: drawingUrl,
+        response_audio_path: audioUrl,
         response_selected_items: inputType === 'select' ? selectedObjects : null
       };
       
