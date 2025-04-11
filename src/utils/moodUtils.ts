@@ -13,6 +13,10 @@ export const getMoodColor = (mood: string): string => {
     'Okay': '#D5D5F1',
     'Sad': '#5081D1',
     'Awful': '#FF8A48',
+    'Overwhelmed': #8E6E95,
+    'Angry': #D64550,
+    'Anxious': #6C7A89,
+    'Calm': #A8E6CF,
     // Add default color for unknown moods
     'default': '#D5D5F1'
   };
