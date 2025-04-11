@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Pencil, Mic, Hand, Type, Save, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Eye, Pencil, Mic, Hand, Type, Save, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,26 +23,37 @@ type InputMethod = 'type' | 'draw' | 'speak' | 'select';
 
 const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
   const { user } = useAuth();
+  
+  // State for input method
   const [inputMethod, setInputMethod] = useState<InputMethod>('type');
+  
+  // State for each input type
   const [textInput, setTextInput] = useState('');
+  
+  // Drawing state
   const [drawingBlob, setDrawingBlob] = useState<Blob | null>(null);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [saving, setSaving] = useState(false);
+  const [drawingPreviewURL, setDrawingPreviewURL] = useState<string | null>(null);
   const [drawingTitle, setDrawingTitle] = useState('Things I Can See');
+  
+  // Audio state
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioPreviewURL, setAudioPreviewURL] = useState<string | null>(null);
   const [audioTitle, setAudioTitle] = useState('Things I Can See');
   
-  // Add state for storing the preview URLs (similar to journal entry page)
-  const [drawingPreviewURL, setDrawingPreviewURL] = useState<string | null>(null);
-  const [audioPreviewURL, setAudioPreviewURL] = useState<string | null>(null);
+  // Selected items state
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   
+  // UI state
+  const [saving, setSaving] = useState(false);
+  
+  // Common objects for selection method
   const commonObjects = [
     'lights', 'books', 'plants', 'window', 'desk', 'cup', 'clock', 'phone', 
     'person', 'door', 'pen', 'shoes', 'chair', 'shadow', 'wall', 'ceiling', 
     'floor', 'art', 'screen', 'keyboard', 'mouse', 'dog', 'cat', 'trees', 'clouds'
   ];
   
-  // Update the handlers for drawing and audio to maintain state
+  // Handlers for input methods
   const handleDrawingChange = (blob: Blob) => {
     // Clean up old URL if exists to prevent memory leaks
     if (drawingPreviewURL) {
@@ -68,7 +79,7 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
   };
   
   // Cleanup URLs when component unmounts
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (drawingPreviewURL) {
         URL.revokeObjectURL(drawingPreviewURL);

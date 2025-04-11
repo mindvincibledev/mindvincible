@@ -1,10 +1,9 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Brush, Trash, Save } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { Brush } from 'lucide-react';
+import { toast } from 'sonner';
 import { useCanvasInteraction } from '@/hooks/useCanvasInteraction';
 import { useAuth } from '@/context/AuthContext';
 
@@ -102,26 +101,6 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
     onEndDrawing: endDrawing
   });
 
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const context = canvas.getContext('2d');
-    if (!context) return;
-    
-    // Reset canvas to white background
-    context.fillStyle = '#ffffff';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Save the cleared state
-    saveDrawing();
-    
-    toast({
-      title: "Canvas cleared",
-      description: "Your drawing has been cleared",
-    });
-  };
-
   const saveDrawing = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -192,25 +171,6 @@ const DrawingJournal: React.FC<DrawingJournalProps> = ({
             height={400}
             className="w-full touch-none cursor-crosshair"
           />
-        </div>
-        
-        <div className="flex justify-center gap-4">
-          <Button 
-            onClick={clearCanvas}
-            variant="destructive"
-            className="flex items-center gap-2 text-black"
-          >
-            <Trash className="h-5 w-5" />
-            Clear
-          </Button>
-          
-          <Button 
-            onClick={saveDrawing}
-            className="bg-[#3DFDFF] hover:bg-[#3DFDFF]/80 text-black flex items-center gap-2"
-          >
-            <Save className="h-5 w-5" />
-            Save Drawing
-          </Button>
         </div>
       </div>
     </div>

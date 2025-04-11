@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mic, MicOff, Play, Save } from 'lucide-react';
+import { Mic, MicOff, Play } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AudioJournalProps {
