@@ -23,6 +23,8 @@ export type Database = {
           location_in_body_text: string | null
           message_description_text: string | null
           message_drawing_path: string | null
+          sound_drawing_path: string | null
+          sound_text: string | null
           user_id: string
         }
         Insert: {
@@ -38,6 +40,8 @@ export type Database = {
           location_in_body_text?: string | null
           message_description_text?: string | null
           message_drawing_path?: string | null
+          sound_drawing_path?: string | null
+          sound_text?: string | null
           user_id: string
         }
         Update: {
@@ -53,6 +57,8 @@ export type Database = {
           location_in_body_text?: string | null
           message_description_text?: string | null
           message_drawing_path?: string | null
+          sound_drawing_path?: string | null
+          sound_text?: string | null
           user_id?: string
         }
         Relationships: [
