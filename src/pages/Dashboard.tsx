@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { PlusCircle, Archive } from 'lucide-react';
+import { PlusCircle, Archive, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import DailyMoodChart from '@/components/charts/DailyMoodChart';
@@ -56,6 +55,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState<DateFilterOption>('month');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date());
   const { user, session, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -279,6 +279,9 @@ const Dashboard = () => {
     return null; // Will redirect in useEffect
   }
 
+  // Format the current date
+  const formattedDate = format(currentDate, 'EEEE, MMMM d, yyyy');
+
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen relative">
@@ -289,7 +292,13 @@ const Dashboard = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Your Mood Dashboard</h1>
-                <p className="text-gray-600 mt-2">Welcome, {user.name}</p>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-2">
+                  <p className="text-gray-600">Welcome, <span className="font-medium text-[#FC68B3]">{user?.name}</span></p>
+                  <div className="flex items-center text-gray-500">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    <span className="text-sm">{formattedDate}</span>
+                  </div>
+                </div>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">

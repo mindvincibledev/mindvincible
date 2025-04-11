@@ -7,7 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Mail, Lock, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import BackgroundWithEmojis from "@/components/BackgroundWithEmojis";
+import { startOfDay, endOfDay } from 'date-fns';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -18,11 +20,49 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If user is already logged in, redirect to mood entry instead of dashboard
+    // If user is already logged in, check if they have logged a mood today
     if (user) {
-      navigate('/mood-entry');
+      checkMoodForToday(user.id);
     }
   }, [user, navigate]);
+
+  // Check if user has already logged a mood today
+  const checkMoodForToday = async (userId: string) => {
+    try {
+      const today = new Date();
+      const startOfToday = startOfDay(today);
+      const endOfToday = endOfDay(today);
+
+      // Query mood_data to see if there's an entry for today
+      const { data: todayMoods, error } = await supabase
+        .from('mood_data')
+        .select('id')
+        .eq('user_id', userId)
+        .gte('created_at', startOfToday.toISOString())
+        .lte('created_at', endOfToday.toISOString())
+        .limit(1);
+
+      if (error) {
+        console.error('Error checking mood data:', error);
+        // Default to mood entry page if there's an error
+        navigate('/mood-entry');
+        return;
+      }
+
+      // Redirect based on whether user has logged a mood today
+      if (todayMoods && todayMoods.length > 0) {
+        // User has already logged a mood today, redirect to home
+        navigate('/home');
+      } else {
+        // User hasn't logged a mood today, redirect to mood entry
+        navigate('/mood-entry');
+      }
+    } catch (err) {
+      console.error('Error checking mood for today:', err);
+      // Default to mood entry page if there's an error
+      navigate('/mood-entry');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,8 +71,7 @@ const Login = () => {
     
     try {
       await signIn(email, password);
-      // Redirect to mood entry page instead of dashboard
-      navigate('/mood-entry');
+      // Redirect will be handled by the useEffect above
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
