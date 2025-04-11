@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Book, Archive, AreaChart, Brain, Sparkles, Home } from 'lucide-react';
+import { Heart, Book, Archive, AreaChart, Brain, Sparkles } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
+import MoodWidgetBar from '@/components/MoodWidgetBar';
 
 const HomePage = () => {
   const { user } = useAuth();
@@ -100,9 +101,12 @@ const HomePage = () => {
                 Welcome to M(in)dvincible
               </h1>
               <p className="text-black text-lg max-w-2xl mx-auto">
-              All the mental health stuff you need - tips, activities, and a place to rant, everything kept 100% confidential
+                All the mental health stuff you need - tips, activities, and a place to rant, everything kept 100% confidential
               </p>
             </motion.div>
+            
+            {/* Add the MoodWidgetBar component */}
+            <MoodWidgetBar />
             
             <motion.div 
               variants={containerVariants}
