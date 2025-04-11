@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Wind, Pencil, Mic, ListFilter, Type } from 'lucide-react';
+import { Wind, Pencil, Mic, ListFilter, Type, Flower } from 'lucide-react';
 import AudioJournal from '../journal/AudioJournal';
 import DrawingJournal from '../journal/DrawingJournal';
 import ObjectDragDrop from './ObjectDragDrop';
@@ -84,167 +84,7 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
     }
   };
 
-  // Check if storage bucket exists
-  const checkBucketExists = async (bucketName: string) => {
-    try {
-      const { data: buckets } = await supabase.storage.listBuckets();
-      return buckets?.some(bucket => bucket.name === bucketName);
-    } catch (error) {
-      console.error(`Error checking if bucket ${bucketName} exists:`, error);
-      return false;
-    }
-  };
-
-  // Create storage bucket if it doesn't exist
-  const createBucketIfNotExists = async (bucketName: string, isPublic: boolean = true) => {
-    try {
-      const bucketExists = await checkBucketExists(bucketName);
-      
-      if (!bucketExists) {
-        const { error } = await supabase.storage.createBucket(bucketName, {
-          public: isPublic,
-        });
-        
-        if (error) {
-          console.error(`Error creating bucket ${bucketName}:`, error);
-          return false;
-        }
-        
-        console.log(`Created bucket ${bucketName} successfully`);
-        return true;
-      }
-      
-      return true;
-    } catch (error) {
-      console.error(`Error creating bucket ${bucketName}:`, error);
-      return false;
-    }
-  };
-
-  // Upload file to storage
-  const uploadFile = async (blob: Blob, bucketName: string, fileName: string, contentType: string) => {
-    try {
-      // First ensure the bucket exists
-      const bucketReady = await createBucketIfNotExists(bucketName);
-      
-      if (!bucketReady) {
-        throw new Error(`Bucket ${bucketName} is not ready for upload`);
-      }
-      
-      const { data, error } = await supabase
-        .storage
-        .from(bucketName)
-        .upload(fileName, blob, {
-          contentType,
-          upsert: true
-        });
-        
-      if (error) throw error;
-      
-      // Get the public URL for the uploaded file
-      const { data: publicUrlData } = supabase
-        .storage
-        .from(bucketName)
-        .getPublicUrl(fileName);
-        
-      return publicUrlData.publicUrl;
-    } catch (error: any) {
-      console.error(`Error uploading to ${bucketName}:`, error);
-      throw error;
-    }
-  };
-  
-  const handleSave = async () => {
-    if (!user?.id) {
-      toast.error("You need to be logged in to save your response");
-      return;
-    }
-    
-    // Check if current input type has valid data
-    if (!isComplete()) {
-      toast.error("Please complete the section before saving");
-      return;
-    }
-    
-    try {
-      setSaving(true);
-      let drawingUrl = null;
-      let audioUrl = null;
-      
-      // Upload drawing if any
-      if (drawingBlob) {
-        try {
-          const fileName = `smell_section_${user.id}_${Date.now()}.png`;
-          drawingUrl = await uploadFile(
-            drawingBlob, 
-            'grounding_drawings', 
-            fileName, 
-            'image/png'
-          );
-          console.log("Drawing saved successfully:", drawingUrl);
-        } catch (error) {
-          console.error("Error uploading drawing:", error);
-          toast.error("Failed to upload drawing. Continuing with other data...");
-        }
-      }
-      
-      // Upload audio if any
-      if (audioBlob) {
-        try {
-          const fileName = `smell_section_${user.id}_${Date.now()}.webm`;
-          audioUrl = await uploadFile(
-            audioBlob, 
-            'grounding_audio', 
-            fileName, 
-            'audio/webm'
-          );
-          console.log("Audio saved successfully:", audioUrl);
-        } catch (error) {
-          console.error("Error uploading audio:", error);
-          toast.error("Failed to upload audio. Continuing with other data...");
-        }
-      }
-      
-      // Prepare the data to save to the database
-      const responseData = {
-        user_id: user.id,
-        activity_id: 'grounding-technique',
-        section_name: 'smell',
-        response_text: inputType === 'text' ? textItems.join(', ') : null,
-        response_drawing_path: drawingUrl,
-        response_audio_path: audioUrl,
-        response_selected_items: inputType === 'select' ? selectedObjects : null
-      };
-      
-      console.log("Saving to database:", responseData);
-      
-      // Save to database
-      const { error } = await supabase
-        .from('grounding_responses')
-        .insert(responseData);
-        
-      if (error) {
-        console.error("Database error:", error);
-        throw error;
-      }
-      
-      console.log("Response saved successfully!");
-      toast.success("Response saved successfully!");
-      
-      // Clear the local storage cache since we've saved successfully
-      localStorage.removeItem('groundingSmellData');
-      
-      // Move to next section
-      onComplete();
-    } catch (error: any) {
-      console.error("Error saving response:", error);
-      toast.error(`Failed to save your response: ${error.message || "Unknown error"}`);
-    } finally {
-      setSaving(false);
-    }
-  };
-  
-  // Determine if the current section is "complete" based on the active input method
+  // Check if response is complete based on the active input method
   const isComplete = () => {
     switch (inputType) {
       case "text":
@@ -269,9 +109,146 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
     setDrawingBlob(null);
     setDrawingTitle("Smells I Can Sense");
     
-    // Clear cached data
     localStorage.removeItem('groundingSmellData');
     toast.info("Reset complete");
+  };
+
+  // File upload helper function
+  const uploadFile = async (blob: Blob, fileName: string, contentType: string, bucketName: string) => {
+    try {
+      // Create the bucket if it doesn't exist
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
+      
+      if (!bucketExists) {
+        const { error: bucketError } = await supabase.storage.createBucket(bucketName, { 
+          public: true 
+        });
+        
+        if (bucketError) {
+          console.error(`Error creating bucket ${bucketName}:`, bucketError);
+          throw bucketError;
+        }
+      }
+
+      // Upload the file
+      const { data, error } = await supabase
+        .storage
+        .from(bucketName)
+        .upload(fileName, blob, {
+          contentType,
+          upsert: true
+        });
+        
+      if (error) throw error;
+      
+      // Get public URL
+      const { data: publicUrlData } = supabase
+        .storage
+        .from(bucketName)
+        .getPublicUrl(fileName);
+        
+      return publicUrlData.publicUrl;
+    } catch (error) {
+      console.error(`Error in uploadFile (${bucketName}):`, error);
+      throw error;
+    }
+  };
+  
+  const handleSave = async () => {
+    if (!user?.id) {
+      toast.error("You need to be logged in to save your response");
+      return;
+    }
+    
+    if (!isComplete()) {
+      toast.error("Please complete the section before saving");
+      return;
+    }
+    
+    try {
+      setSaving(true);
+      
+      // Prepare data based on input type
+      let responseText = null;
+      let drawingUrl = null;
+      let audioUrl = null;
+      let selectedItems = null;
+      
+      switch (inputType) {
+        case "text":
+          responseText = textItems.join(', ');
+          break;
+        
+        case "select":
+          selectedItems = selectedObjects;
+          break;
+        
+        case "draw":
+          if (drawingBlob) {
+            try {
+              const fileName = `smell_drawing_${user.id}_${Date.now()}.png`;
+              drawingUrl = await uploadFile(drawingBlob, fileName, 'image/png', 'grounding_drawings');
+              console.log("Drawing uploaded:", drawingUrl);
+            } catch (error) {
+              console.error("Error uploading drawing:", error);
+              toast.error("Failed to upload drawing");
+              setSaving(false);
+              return;
+            }
+          }
+          break;
+          
+        case "audio":
+          if (audioBlob) {
+            try {
+              const fileName = `smell_audio_${user.id}_${Date.now()}.webm`;
+              audioUrl = await uploadFile(audioBlob, fileName, 'audio/webm', 'grounding_audio');
+              console.log("Audio uploaded:", audioUrl);
+            } catch (error) {
+              console.error("Error uploading audio:", error);
+              toast.error("Failed to upload audio");
+              setSaving(false);
+              return;
+            }
+          }
+          break;
+      }
+      
+      // Save response to database
+      const responseData = {
+        user_id: user.id,
+        activity_id: 'grounding-technique',
+        section_name: 'smell',
+        response_text: responseText,
+        response_drawing_path: drawingUrl,
+        response_audio_path: audioUrl,
+        response_selected_items: selectedItems
+      };
+      
+      console.log("Saving to database:", responseData);
+      
+      const { error } = await supabase
+        .from('grounding_responses')
+        .insert(responseData);
+        
+      if (error) {
+        console.error("Database error:", error);
+        toast.error("Failed to save your response: " + error.message);
+        return;
+      }
+      
+      // Clear local storage cache
+      localStorage.removeItem('groundingSmellData');
+      
+      toast.success("Your response was saved successfully!");
+      onComplete();
+    } catch (error: any) {
+      console.error("Error saving response:", error);
+      toast.error(`Failed to save: ${error.message || "Unknown error"}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -294,7 +271,7 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
       {/* Section Header */}
       <div className="flex items-center justify-center mb-6">
         <div className="p-3 bg-[#F5DF4D]/20 rounded-full">
-          <Wind className="h-8 w-8 text-[#F5DF4D]" />
+          <Flower className="h-8 w-8 text-[#F5DF4D]" />
         </div>
       </div>
       

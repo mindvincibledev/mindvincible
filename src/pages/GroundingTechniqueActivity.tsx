@@ -38,7 +38,7 @@ const GroundingTechniqueActivity = () => {
   const handleContinue = () => {
     setCurrentStep(prevStep => {
       const nextStep = prevStep + 1;
-      // If smell section is complete, move to completion screen or next section
+      // If smell section is complete, move to completion screen or next section when available
       return nextStep > GroundingStep.Smell ? GroundingStep.Complete : nextStep;
     });
   };
@@ -108,7 +108,7 @@ const GroundingTechniqueActivity = () => {
             </motion.div>
             
             <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-[#3DFDFF] to-[#FC68B3] bg-clip-text text-transparent">
-              Grounding Complete!
+              M(in)dvincible Grounding Complete!
             </h2>
             
             <p className="mb-8 text-gray-700">
