@@ -21,5 +21,10 @@ export const getMoodColor = (mood: string): string => {
     'default': '#D5D5F1'
   };
   
-  return moodColors[mood] || moodColors['default'];
+  // Convert to title case to ensure consistent matching regardless of input casing
+  const normalizedMood = typeof mood === 'string' 
+    ? mood.charAt(0).toUpperCase() + mood.slice(1).toLowerCase() 
+    : 'default';
+  
+  return moodColors[normalizedMood] || moodColors['default'];
 };
