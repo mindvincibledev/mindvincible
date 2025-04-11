@@ -32,11 +32,52 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
   const [drawingTitle, setDrawingTitle] = useState('Things I Can See');
   const [audioTitle, setAudioTitle] = useState('Things I Can See');
   
+  // Add state for storing the preview URLs (similar to journal entry page)
+  const [drawingPreviewURL, setDrawingPreviewURL] = useState<string | null>(null);
+  const [audioPreviewURL, setAudioPreviewURL] = useState<string | null>(null);
+  
   const commonObjects = [
     'lights', 'books', 'plants', 'window', 'desk', 'cup', 'clock', 'phone', 
     'person', 'door', 'pen', 'shoes', 'chair', 'shadow', 'wall', 'ceiling', 
     'floor', 'art', 'screen', 'keyboard', 'mouse', 'dog', 'cat', 'trees', 'clouds'
   ];
+  
+  // Update the handlers for drawing and audio to maintain state
+  const handleDrawingChange = (blob: Blob) => {
+    // Clean up old URL if exists to prevent memory leaks
+    if (drawingPreviewURL) {
+      URL.revokeObjectURL(drawingPreviewURL);
+    }
+    
+    // Create new URL and save blob
+    const newPreviewURL = URL.createObjectURL(blob);
+    setDrawingPreviewURL(newPreviewURL);
+    setDrawingBlob(blob);
+  };
+  
+  const handleAudioChange = (blob: Blob) => {
+    // Clean up old URL if exists
+    if (audioPreviewURL) {
+      URL.revokeObjectURL(audioPreviewURL);
+    }
+    
+    // Create new URL and save blob
+    const newPreviewURL = URL.createObjectURL(blob);
+    setAudioPreviewURL(newPreviewURL);
+    setAudioBlob(blob);
+  };
+  
+  // Cleanup URLs when component unmounts
+  React.useEffect(() => {
+    return () => {
+      if (drawingPreviewURL) {
+        URL.revokeObjectURL(drawingPreviewURL);
+      }
+      if (audioPreviewURL) {
+        URL.revokeObjectURL(audioPreviewURL);
+      }
+    };
+  }, []);
   
   const handleSave = async () => {
     if (!user?.id) {
@@ -225,7 +266,7 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
               transition={{ duration: 0.3 }}
             >
               <DrawingJournal 
-                onDrawingChange={setDrawingBlob}
+                onDrawingChange={handleDrawingChange}
                 onTitleChange={setDrawingTitle}
                 title={drawingTitle}
               />
@@ -241,7 +282,7 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
               transition={{ duration: 0.3 }}
             >
               <AudioJournal
-                onAudioChange={setAudioBlob}
+                onAudioChange={handleAudioChange}
                 onTitleChange={setAudioTitle}
                 title={audioTitle}
               />
