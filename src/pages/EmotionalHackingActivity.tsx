@@ -1,14 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, Star } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import Affirmation from '@/components/Affirmation';
 
 // Added activity content details for each activity
 const activities = {
@@ -86,6 +87,106 @@ interface Activity {
 
 type ActivityParams = {
   activityId: string;
+};
+
+// Add a celebration dialog component
+const CelebrationDialog = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+  const emojis = ["✨", "🎉", "🌟", "💫", "🙌", "🎊", "💯", "🏆", "🥇", "👏"];
+  const affirmations = [
+    "Amazing job taking a break from your screens!",
+    "Your mind thanks you for the digital break!",
+    "Well done on prioritizing your mental well-being!",
+    "Congratulations on completing your digital detox!",
+    "You've just given your brain a wonderful gift!",
+    "Taking time away from screens is a sign of self-care mastery!",
+    "That's how you recharge your mental batteries!",
+    "Fantastic work creating space for your mind to breathe!"
+  ];
+  
+  const randomAffirmation = affirmations[Math.floor(Math.random() * affirmations.length)];
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+        <DialogHeader>
+          <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+            Digital Detox Complete!
+          </DialogTitle>
+        </DialogHeader>
+        <div className="relative py-10">
+          {/* Background emoji animations */}
+          <div className="absolute inset-0 overflow-hidden">
+            {emojis.map((emoji, index) => (
+              <motion.div
+                key={index}
+                className="absolute text-2xl md:text-3xl"
+                initial={{ 
+                  y: 150, 
+                  x: Math.random() * 300 - 150,
+                  opacity: 0 
+                }}
+                animate={{ 
+                  y: -100, 
+                  opacity: [0, 1, 0],
+                  rotate: Math.random() * 360
+                }}
+                transition={{ 
+                  duration: 3 + Math.random() * 2,
+                  delay: Math.random() * 0.5,
+                  repeat: Infinity,
+                  repeatDelay: Math.random() * 3
+                }}
+                style={{
+                  left: `${10 + (index * 8)}%`
+                }}
+              >
+                {emoji}
+              </motion.div>
+            ))}
+          </div>
+          
+          {/* Center content */}
+          <div className="relative z-10 flex flex-col items-center justify-center">
+            <motion.div
+              className="mb-6 p-4 rounded-full bg-gradient-to-r from-[#3DFDFF] to-[#FC68B3] shadow-lg"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            >
+              <Check className="h-12 w-12 text-white" />
+            </motion.div>
+            
+            <motion.p 
+              className="text-center text-lg font-medium mb-6 px-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              {randomAffirmation}
+            </motion.p>
+
+            <div className="w-full max-w-sm mb-6">
+              <Affirmation />
+            </div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Button 
+                className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
+                onClick={onClose}
+              >
+                <Heart className="mr-2 h-4 w-4" />
+                Continue My Journey
+              </Button>
+            </motion.div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 // Animation component to replace the static image
@@ -219,6 +320,8 @@ const EmotionalHackingActivity = () => {
   const [timeRemaining, setTimeRemaining] = useState(5 * 60); // 5 minutes in seconds
   const [initialTime, setInitialTime] = useState(5); // 5 minutes
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  // New state for the celebration dialog
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // Start the detox timer
   const startDetox = () => {
@@ -232,7 +335,7 @@ const EmotionalHackingActivity = () => {
         if (prev <= 1) {
           clearInterval(interval);
           setIsDetoxActive(false);
-          toast.success("Digital detox complete! How do you feel?");
+          setShowCelebration(true); // Show celebration when timer completes
           return 0;
         }
         return prev - 1;
@@ -370,6 +473,13 @@ const EmotionalHackingActivity = () => {
                     </p>
                   </div>
                 )}
+                
+                {/* Celebration dialog */}
+                <CelebrationDialog 
+                  isOpen={showCelebration} 
+                  onClose={() => setShowCelebration(false)} 
+                />
+                
               </Card>
             </motion.div>
           </div>
