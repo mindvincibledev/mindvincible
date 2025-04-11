@@ -13,7 +13,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import StreakCounter from '@/components/StreakCounter';
-import RecentMoodJars from '@/components/jar/RecentMoodJars';
 import {
   startOfDay,
   endOfDay,
@@ -322,11 +321,6 @@ const Dashboard = () => {
             {/* Streak counter for medium and larger screens */}
             <div className="hidden md:block max-w-xs">
               <StreakCounter userId={user.id} />
-            </div>
-            
-            {/* Display recent mood jars */}
-            <div className="mb-6">
-              <RecentMoodJars userId={user.id} />
             </div>
             
             {/* Date filter - affects only MoodDistributionChart and MoodTagsTable */}

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Book, Archive, AreaChart, Brain, Sparkles } from 'lucide-react';
+import { Heart, Book, Archive, AreaChart, Brain, Sparkles, Images } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,6 +52,13 @@ const HomePage = () => {
       icon: <Archive className="h-8 w-8 text-[#F5DF4D]" />,
       link: "/mood-jar",
       color: "from-[#F5DF4D] to-[#FF8A48]"
+    },
+    {
+      title: "Mood Jar Gallery",
+      description: "View all your created mood jars in a beautiful gallery.",
+      icon: <Images className="h-8 w-8 text-[#D5D5F1]" />,
+      link: "/recent-mood-jars",
+      color: "from-[#D5D5F1] to-[#FC68B3]"
     },
     {
       title: "Emotional Hacking",

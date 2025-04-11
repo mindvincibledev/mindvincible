@@ -1,7 +1,6 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Paintbrush, Save, RotateCcw } from 'lucide-react';
+import { Paintbrush, Save, RotateCcw, Images, Link } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
@@ -180,6 +179,11 @@ const MoodJar = () => {
     }
   };
 
+  // Navigate to the Recent Mood Jars page
+  const handleViewJars = () => {
+    navigate('/recent-mood-jars');
+  };
+
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen">
@@ -195,6 +199,18 @@ const MoodJar = () => {
                 <p className="text-gray-800 text-center text-lg font-medium">
                   Check-in with yourself to understand your feelings.
                 </p>
+                
+                {/* Added button to view recent jars */}
+                <div className="flex justify-center mb-2">
+                  <Button
+                    className="bg-gradient-to-r from-[#FC68B3] to-[#3DFDFF] hover:opacity-90 
+                             text-black font-medium flex items-center gap-2"
+                    onClick={handleViewJars}
+                  >
+                    <Images size={18} />
+                    View Your Mood Jar Gallery
+                  </Button>
+                </div>
                 
                 <ColorPalette 
                   colors={colors} 

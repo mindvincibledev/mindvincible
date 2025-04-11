@@ -12,6 +12,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import MoodEntry from "./pages/MoodEntry";
 import MoodJar from "./pages/MoodJar";
+import RecentMoodJars from "./pages/RecentMoodJars";
 import Journal from "./pages/Journal";
 import JournalEntry from "./pages/JournalEntry";
 import JournalDetail from "./pages/JournalDetail";
@@ -70,6 +71,11 @@ const AppRoutes = () => {
         <Route path="/mood-jar" element={
           <ProtectedRoute>
             <MoodJar />
+          </ProtectedRoute>
+        } />
+        <Route path="/recent-mood-jars" element={
+          <ProtectedRoute>
+            <RecentMoodJars />
           </ProtectedRoute>
         } />
         <Route path="/journal" element={
