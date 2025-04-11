@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
-import { startOfDay, endOfDay } from 'date-fns';
 
 type MoodType = Database['public']['Enums']['mood_type'];
 
@@ -29,51 +29,12 @@ const MoodEntry = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if user has already logged a mood today and redirect if needed
-  useEffect(() => {
+  // Redirect to login if not authenticated
+  React.useEffect(() => {
     if (!session) {
       navigate('/login', { replace: true });
-      return;
     }
-    
-    // Check if the user has already logged a mood today
-    if (user) {
-      checkMoodForToday(user.id);
-    }
-  }, [session, navigate, user]);
-
-  const checkMoodForToday = async (userId: string) => {
-    try {
-      const today = new Date();
-      const startOfToday = startOfDay(today);
-      const endOfToday = endOfDay(today);
-
-      // Query mood_data to see if there's an entry for today
-      const { data: todayMoods, error } = await supabase
-        .from('mood_data')
-        .select('id')
-        .eq('user_id', userId)
-        .gte('created_at', startOfToday.toISOString())
-        .lte('created_at', endOfToday.toISOString())
-        .limit(1);
-
-      if (error) {
-        console.error('Error checking mood data:', error);
-        return; // Stay on this page if there's an error
-      }
-
-      // If user has already logged a mood today, redirect to home
-      if (todayMoods && todayMoods.length > 0) {
-        toast({
-          title: "Mood already recorded today",
-          description: "You've already recorded your mood for today.",
-        });
-        navigate('/home');
-      }
-    } catch (err) {
-      console.error('Error checking mood for today:', err);
-    }
-  };
+  }, [session, navigate]);
 
   const handleMoodSelect = (mood: string) => {
     setCurrentMood(mood);
