@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, Eye, Navigation, Coffee, Music, Palette, Clock, Brain, MessageSquare, Target, BarChart2, ArrowRight } from 'lucide-react';
+import { BookOpen, Eye, Navigation, Coffee, Music, Palette, Clock, Brain, MessageSquare, Target, BarChart2, ArrowRight, UserPlus } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,6 +61,17 @@ const activities = [
     bgColor: "bg-[#E5DEFF]",
     chartColor: "#D5D5F1",
     shortName: "Mirror"
+  },
+  {
+    id: "power-of-hi",
+    title: "Power of a Simple Hi",
+    description: "Small moments. Big confidence.",
+    icon: <UserPlus className="h-8 w-8 text-[#2AC20E]" />,
+    link: "/emotional-hacking/power-of-hi",
+    color: "from-[#3DFDFF] to-[#2AC20E]",
+    bgColor: "bg-[#E5FFF2]",
+    chartColor: "#2AC20E",
+    shortName: "Hi"
   }
 ];
 

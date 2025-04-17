@@ -264,6 +264,125 @@ export type Database = {
           },
         ]
       }
+      simple_hi_challenges: {
+        Row: {
+          challenge_level: string
+          created_at: string
+          feeling: string | null
+          feeling_path: string | null
+          goal: string
+          how_it_went: string | null
+          how_it_went_path: string | null
+          id: string
+          other_people_responses: string | null
+          try_next_time: string | null
+          updated_at: string
+          user_id: string
+          what_felt_easy: string | null
+          what_felt_hard: string | null
+          who: string | null
+          who_path: string | null
+        }
+        Insert: {
+          challenge_level: string
+          created_at?: string
+          feeling?: string | null
+          feeling_path?: string | null
+          goal: string
+          how_it_went?: string | null
+          how_it_went_path?: string | null
+          id?: string
+          other_people_responses?: string | null
+          try_next_time?: string | null
+          updated_at?: string
+          user_id: string
+          what_felt_easy?: string | null
+          what_felt_hard?: string | null
+          who?: string | null
+          who_path?: string | null
+        }
+        Update: {
+          challenge_level?: string
+          created_at?: string
+          feeling?: string | null
+          feeling_path?: string | null
+          goal?: string
+          how_it_went?: string | null
+          how_it_went_path?: string | null
+          id?: string
+          other_people_responses?: string | null
+          try_next_time?: string | null
+          updated_at?: string
+          user_id?: string
+          what_felt_easy?: string | null
+          what_felt_hard?: string | null
+          who?: string | null
+          who_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simple_hi_challenges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simple_hi_interactions: {
+        Row: {
+          challenge_id: string
+          completed_at: string
+          feeling: string | null
+          feeling_path: string | null
+          how_it_went: string | null
+          how_it_went_path: string | null
+          id: string
+          user_id: string
+          who: string | null
+          who_path: string | null
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string
+          feeling?: string | null
+          feeling_path?: string | null
+          how_it_went?: string | null
+          how_it_went_path?: string | null
+          id?: string
+          user_id: string
+          who?: string | null
+          who_path?: string | null
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string
+          feeling?: string | null
+          feeling_path?: string | null
+          how_it_went?: string | null
+          how_it_went_path?: string | null
+          id?: string
+          user_id?: string
+          who?: string | null
+          who_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simple_hi_interactions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "simple_hi_challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simple_hi_interactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           address: string | null

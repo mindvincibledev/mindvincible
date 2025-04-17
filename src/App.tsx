@@ -25,6 +25,9 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { initSupabase } from "./integrations/supabase/initSupabase";
 import MoodReminderNotification from "./components/MoodReminderNotification";
 
+// Add the import for PowerOfHiActivity
+import PowerOfHiActivity from "./pages/PowerOfHiActivity";
+
 // Update document title to correct app name
 document.title = "M(in)dvincible";
 
@@ -125,6 +128,14 @@ const AppRoutes = () => {
             <EmotionalAirbnb />
           </ProtectedRoute>
         } />
+        
+        {/* Add Power of Hi route */}
+        <Route path="/emotional-hacking/power-of-hi" element={
+          <ProtectedRoute>
+            <PowerOfHiActivity />
+          </ProtectedRoute>
+        } />
+        
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
