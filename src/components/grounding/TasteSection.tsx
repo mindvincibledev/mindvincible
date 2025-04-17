@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import ObjectDragDrop from './ObjectDragDrop';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -24,19 +24,13 @@ interface TasteSectionProps {
 const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
   // State for different input types
   const [textInput, setTextInput] = useState<string>('');
-  const [selectedObjects, setSelectedObjects] = useState<string[]>([]);
-  const [selectedTastes, setSelectedTastes] = useState<{[key: string]: boolean}>({
-    sweet: false,
-    salty: false,
-    sour: false,
-    bitter: false,
-    umami: false
-  });
+  const [selectedObject, setSelectedObject] = useState<string>('');
+  const [selectedTasteType, setSelectedTasteType] = useState<string>('');
 
   // For determining if the user can proceed
   const canProceed = textInput !== '' || 
-                    selectedObjects.length > 0 || 
-                    Object.values(selectedTastes).some(value => value);
+                    selectedObject !== '' || 
+                    selectedTasteType !== '';
 
   // Set up persisted storage
   useEffect(() => {
@@ -45,14 +39,8 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
     if (savedData) {
       const parsedData = JSON.parse(savedData);
       setTextInput(parsedData.textInput || '');
-      setSelectedObjects(parsedData.selectedObjects || []);
-      setSelectedTastes(parsedData.selectedTastes || {
-        sweet: false,
-        salty: false,
-        sour: false,
-        bitter: false,
-        umami: false
-      });
+      setSelectedObject(parsedData.selectedObject || '');
+      setSelectedTasteType(parsedData.selectedTasteType || '');
     }
   }, []);
 
@@ -60,16 +48,13 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
   useEffect(() => {
     localStorage.setItem('tasteSection', JSON.stringify({
       textInput,
-      selectedObjects,
-      selectedTastes
+      selectedObject,
+      selectedTasteType
     }));
-  }, [textInput, selectedObjects, selectedTastes]);
+  }, [textInput, selectedObject, selectedTasteType]);
 
-  const handleTastesChange = (id: string, checked: boolean) => {
-    setSelectedTastes(prev => ({
-      ...prev,
-      [id]: checked
-    }));
+  const handleObjectSelect = (item: string) => {
+    setSelectedObject(item === selectedObject ? '' : item);
   };
 
   const handleSkip = () => {
@@ -115,76 +100,78 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
         </TabsContent>
 
         <TabsContent value="objects">
-          <ObjectDragDrop 
-            objects={tasteObjects} 
-            selectedItems={selectedObjects}
-            onItemsChange={setSelectedObjects}
-            maxItems={3}
-          />
+          <div className="w-full">
+            <p className="text-sm font-medium text-gray-700 mb-4">Select one taste object:</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {tasteObjects.map((item) => {
+                const emoji = getEmojiForItem(item);
+                return (
+                  <motion.div
+                    key={item}
+                    className={`px-4 py-2 rounded-full cursor-pointer text-center 
+                              ${selectedObject === item ? 'bg-[#3DFDFF]/20 border border-[#3DFDFF]' : 'bg-white/80 border border-gray-200'}`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleObjectSelect(item)}
+                    layout
+                  >
+                    <span className="mr-2">{emoji}</span>
+                    {item}
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="tastes">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <div className="flex items-start space-x-2">
-              <Checkbox 
-                id="sweet" 
-                checked={selectedTastes.sweet}
-                onCheckedChange={(checked) => handleTastesChange('sweet', checked === true)} 
-              />
-              <div className="grid gap-1.5 leading-none">
-                <Label htmlFor="sweet">Sweet</Label>
-                <p className="text-sm text-gray-500">Sugar, fruit, candy</p>
+          <RadioGroup 
+            value={selectedTasteType} 
+            onValueChange={setSelectedTasteType}
+            className="space-y-3"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-start space-x-2 p-3 rounded-lg border border-gray-200 bg-white/80">
+                <RadioGroupItem id="sweet" value="sweet" />
+                <div className="grid gap-1.5 leading-none">
+                  <Label htmlFor="sweet" className="text-base">Sweet</Label>
+                  <p className="text-sm text-gray-500">Sugar, fruit, candy</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-2 p-3 rounded-lg border border-gray-200 bg-white/80">
+                <RadioGroupItem id="salty" value="salty" />
+                <div className="grid gap-1.5 leading-none">
+                  <Label htmlFor="salty" className="text-base">Salty</Label>
+                  <p className="text-sm text-gray-500">Chips, pretzels, olives</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-2 p-3 rounded-lg border border-gray-200 bg-white/80">
+                <RadioGroupItem id="sour" value="sour" />
+                <div className="grid gap-1.5 leading-none">
+                  <Label htmlFor="sour" className="text-base">Sour</Label>
+                  <p className="text-sm text-gray-500">Lemon, vinegar, yogurt</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-2 p-3 rounded-lg border border-gray-200 bg-white/80">
+                <RadioGroupItem id="bitter" value="bitter" />
+                <div className="grid gap-1.5 leading-none">
+                  <Label htmlFor="bitter" className="text-base">Bitter</Label>
+                  <p className="text-sm text-gray-500">Coffee, dark chocolate</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-2 p-3 rounded-lg border border-gray-200 bg-white/80">
+                <RadioGroupItem id="umami" value="umami" />
+                <div className="grid gap-1.5 leading-none">
+                  <Label htmlFor="umami" className="text-base">Umami</Label>
+                  <p className="text-sm text-gray-500">Savory, broth, mushrooms</p>
+                </div>
               </div>
             </div>
-            
-            <div className="flex items-start space-x-2">
-              <Checkbox 
-                id="salty" 
-                checked={selectedTastes.salty}
-                onCheckedChange={(checked) => handleTastesChange('salty', checked === true)} 
-              />
-              <div className="grid gap-1.5 leading-none">
-                <Label htmlFor="salty">Salty</Label>
-                <p className="text-sm text-gray-500">Chips, pretzels, olives</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-2">
-              <Checkbox 
-                id="sour" 
-                checked={selectedTastes.sour}
-                onCheckedChange={(checked) => handleTastesChange('sour', checked === true)} 
-              />
-              <div className="grid gap-1.5 leading-none">
-                <Label htmlFor="sour">Sour</Label>
-                <p className="text-sm text-gray-500">Lemon, vinegar, yogurt</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-2">
-              <Checkbox 
-                id="bitter" 
-                checked={selectedTastes.bitter}
-                onCheckedChange={(checked) => handleTastesChange('bitter', checked === true)} 
-              />
-              <div className="grid gap-1.5 leading-none">
-                <Label htmlFor="bitter">Bitter</Label>
-                <p className="text-sm text-gray-500">Coffee, dark chocolate</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-2">
-              <Checkbox 
-                id="umami" 
-                checked={selectedTastes.umami}
-                onCheckedChange={(checked) => handleTastesChange('umami', checked === true)} 
-              />
-              <div className="grid gap-1.5 leading-none">
-                <Label htmlFor="umami">Umami</Label>
-                <p className="text-sm text-gray-500">Savory, broth, mushrooms</p>
-              </div>
-            </div>
-          </div>
+          </RadioGroup>
         </TabsContent>
       </Tabs>
 
@@ -211,5 +198,37 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
     </motion.div>
   );
 };
+
+// Helper function to get emoji for items
+function getEmojiForItem(item: string): string {
+  const emojiMap: Record<string, string> = {
+    // Taste section objects
+    "Coffee": "☕",
+    "Tea": "🍵",
+    "Chocolate": "🍫",
+    "Mint": "🌿",
+    "Gum": "🍬",
+    "Toothpaste": "🪥",
+    "Water": "💧",
+    "Fruit": "🍎",
+    "Candy": "🍭",
+    "Bread": "🍞",
+    "Nothing": "🚫",
+    "Snack": "🍿",
+    "Salty": "🧂",
+    "Sweet": "🍯",
+    "Sour": "🍋",
+    "Spicy": "🌶️",
+    "Bitter": "☕",
+    "Juice": "🧃",
+    "Soda": "🥤",
+    "Smoothie": "🥤",
+    "Fresh Bread": "🥖",
+    "Cleaning Products": "🧹",
+    "Essential Oil": "🌱💧",
+  };
+
+  return emojiMap[item] || "✨";
+}
 
 export default TasteSection;
