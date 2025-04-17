@@ -90,6 +90,14 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
   const summaryPointsA = getSummaryPoints(decisionData, 'A');
   const summaryPointsB = getSummaryPoints(decisionData, 'B');
   
+  const handleComplete = () => {
+    if (!selection) {
+      return;
+    }
+    console.log("Completing with selection:", selection);
+    onComplete(selection);
+  };
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -258,7 +266,7 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
           
           <div className="mt-8">
             <Button 
-              onClick={() => onComplete(selection)}
+              onClick={handleComplete}
               disabled={!selection}
               className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90 px-8"
             >

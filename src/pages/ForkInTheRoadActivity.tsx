@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, GitFork } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from "sonner";
 import WelcomeScreen from '@/components/fork-in-the-road/WelcomeScreen';
 import DecisionInputScreen from '@/components/fork-in-the-road/DecisionInputScreen';
 import RoadLabelsScreen from '@/components/fork-in-the-road/RoadLabelsScreen';
@@ -40,32 +41,140 @@ const ForkInTheRoadActivity = () => {
     futureB: '',
     selection: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCompletionMessage, setShowCompletionMessage] = useState(false);
 
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const handleNextStep = (data: Partial<typeof decisionData>) => {
     setDecisionData(prev => ({ ...prev, ...data }));
-    setCurrentStep(prev => prev + 1);
+    
+    // If this is the final step (GutCheckScreen), save data to Supabase
+    if (currentStep === 3) {
+      handleSubmitDecision(data.selection || '');
+    } else {
+      setCurrentStep(prev => prev + 1);
+    }
   };
 
-  const handleSubmitDecision = async () => {
-    if (!user) return;
-
+  const handleSubmitDecision = async (selection: string) => {
+    if (!user) {
+      toast.error("You need to be logged in to save your decision");
+      return;
+    }
+    
+    // Prevent double submissions
+    if (isSubmitting) return;
+    
     try {
+      setIsSubmitting(true);
+      console.log("Saving decision data to Supabase:", { ...decisionData, selection, user_id: user.id });
+      
       const { data, error } = await supabase
         .from('fork_in_road_decisions')
         .insert({
           user_id: user.id,
-          ...decisionData
-        });
+          ...decisionData,
+          selection: selection
+        })
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving decision:', error);
+        toast.error(`Failed to save your decision: ${error.message}`);
+        setIsSubmitting(false);
+        return;
+      }
 
-      // Navigate to past decisions or show completion
-    } catch (error) {
-      console.error('Error saving decision:', error);
+      console.log("Decision saved successfully:", data);
+      toast.success("Your decision has been saved!");
+      setShowCompletionMessage(true);
+      setCurrentStep(prev => prev + 1);
+      
+    } catch (error: any) {
+      console.error('Exception saving decision:', error);
+      toast.error(`An error occurred: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  // Create a completion screen component
+  const CompletionScreen = () => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="text-center py-8"
+    >
+      <div className="mb-8">
+        <div className="w-20 h-20 mx-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] rounded-full flex items-center justify-center">
+          <GitFork className="h-10 w-10 text-white" />
+        </div>
+        <h2 className="text-2xl font-bold mt-6 mb-2">Decision Journey Complete!</h2>
+        <p className="text-gray-600 mb-6">
+          Thank you for reflecting on your choices. Your decision has been saved.
+        </p>
+        
+        <div className="bg-[#D5D5F1]/10 p-6 rounded-lg mb-6">
+          <p className="text-lg font-medium mb-2">Your decision: {decisionData.choice}</p>
+          {decisionData.selection && (
+            <p className="text-gray-700">
+              You were leaning toward: <span className="font-medium">{
+                decisionData.selection === 'A' 
+                  ? decisionData.considerationPath 
+                  : decisionData.selection === 'B' 
+                    ? decisionData.otherPath 
+                    : "Still deciding"
+              }</span>
+            </p>
+          )}
+        </div>
+        
+        <div className="flex flex-col md:flex-row gap-4 justify-center mt-8">
+          <Button 
+            onClick={() => navigate("/emotional-hacking")} 
+            variant="outline"
+            className="px-6"
+          >
+            Back to Activities
+          </Button>
+          <Button 
+            onClick={() => {
+              setDecisionData({
+                choice: '',
+                considerationPath: '',
+                otherPath: '',
+                changeA: '',
+                feelA: '',
+                changeB: '',
+                feelB: '',
+                challengesA: '',
+                challengesB: '',
+                strengthsA: [],
+                strengthsB: [],
+                valuesA: '',
+                valuesB: '',
+                tagA: [],
+                tagB: [],
+                gainA: '',
+                gainB: '',
+                futureA: '',
+                futureB: '',
+                selection: ''
+              });
+              setCurrentStep(0);
+              setShowCompletionMessage(false);
+            }}
+            className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
+          >
+            Make Another Decision
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
 
   const screens = [
     <WelcomeScreen onNext={() => setCurrentStep(1)} />,
@@ -87,7 +196,8 @@ const ForkInTheRoadActivity = () => {
     <GutCheckScreen 
       onComplete={(selection) => handleNextStep({ selection })}
       decisionData={decisionData}
-    />
+    />,
+    <CompletionScreen />
   ];
 
   return (
