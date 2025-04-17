@@ -9,52 +9,52 @@ import { Separator } from '@/components/ui/separator';
 interface GutCheckScreenProps {
   onComplete: (selection: string) => void;
   decisionData: {
-    considerationPath: string;
-    otherPath: string;
-    changeA?: string;
-    feelA?: string;
-    changeB?: string;
-    feelB?: string;
-    challengesA?: string;
-    challengesB?: string;
-    strengthsA?: string[];
-    strengthsB?: string[];
-    valuesA?: string;
-    valuesB?: string;
-    tagA?: string[];
-    tagB?: string[];
-    gainA?: string;
-    gainB?: string;
-    futureA?: string;
-    futureB?: string;
+    consideration_path: string;
+    other_path: string;
+    change_a?: string;
+    feel_a?: string;
+    change_b?: string;
+    feel_b?: string;
+    challenges_a?: string;
+    challenges_b?: string;
+    strengths_a?: string[];
+    strengths_b?: string[];
+    values_a?: string;
+    values_b?: string;
+    tag_a?: string[];
+    tag_b?: string[];
+    gain_a?: string;
+    gain_b?: string;
+    future_a?: string;
+    future_b?: string;
   };
 }
 
 // Helper function to get summary points with default fallbacks
 const getSummaryPoints = (data: GutCheckScreenProps['decisionData'], path: 'A' | 'B') => {
   const points = [];
-  const field = path === 'A' ? 'A' : 'B';
+  const field = path === 'A' ? 'a' : 'b';
   
   // Daily impact
-  if (data[`change${field}` as keyof typeof data]) {
+  if (data[`change_${field}` as keyof typeof data]) {
     points.push({
       emoji: '💡',
       title: 'Daily Impact',
-      content: data[`change${field}` as keyof typeof data] as string
+      content: data[`change_${field}` as keyof typeof data] as string
     });
   }
   
   // Challenges
-  if (data[`challenges${field}` as keyof typeof data]) {
+  if (data[`challenges_${field}` as keyof typeof data]) {
     points.push({
       emoji: '🧱',
       title: 'Challenges',
-      content: data[`challenges${field}` as keyof typeof data] as string
+      content: data[`challenges_${field}` as keyof typeof data] as string
     });
   }
   
   // Strengths
-  const strengths = data[`strengths${field}` as keyof typeof data] as string[] | undefined;
+  const strengths = data[`strengths_${field}` as keyof typeof data] as string[] | undefined;
   if (strengths && strengths.length > 0) {
     points.push({
       emoji: '💪',
@@ -64,20 +64,20 @@ const getSummaryPoints = (data: GutCheckScreenProps['decisionData'], path: 'A' |
   }
   
   // Values alignment
-  if (data[`values${field}` as keyof typeof data]) {
+  if (data[`values_${field}` as keyof typeof data]) {
     points.push({
       emoji: '🧭',
       title: 'Values',
-      content: data[`values${field}` as keyof typeof data] as string
+      content: data[`values_${field}` as keyof typeof data] as string
     });
   }
   
   // Future gains
-  if (data[`gain${field}` as keyof typeof data]) {
+  if (data[`gain_${field}` as keyof typeof data]) {
     points.push({
       emoji: '🔮',
       title: 'Future Gains',
-      content: data[`gain${field}` as keyof typeof data] as string
+      content: data[`gain_${field}` as keyof typeof data] as string
     });
   }
   
@@ -94,7 +94,7 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
     if (!selection) {
       return;
     }
-    console.log("Completing with selection:", selection);
+    console.log("GutCheckScreen - Completing with selection:", selection);
     onComplete(selection);
   };
   

@@ -21,24 +21,24 @@ const ForkInTheRoadActivity = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [decisionData, setDecisionData] = useState({
     choice: '',
-    considerationPath: '',
-    otherPath: '',
-    changeA: '',
-    feelA: '',
-    changeB: '',
-    feelB: '',
-    challengesA: '',
-    challengesB: '',
-    strengthsA: [],
-    strengthsB: [],
-    valuesA: '',
-    valuesB: '',
-    tagA: [],
-    tagB: [],
-    gainA: '',
-    gainB: '',
-    futureA: '',
-    futureB: '',
+    consideration_path: '',
+    other_path: '',
+    change_a: '',
+    feel_a: '',
+    change_b: '',
+    feel_b: '',
+    challenges_a: '',
+    challenges_b: '',
+    strengths_a: [],
+    strengths_b: [],
+    values_a: '',
+    values_b: '',
+    tag_a: [],
+    tag_b: [],
+    gain_a: '',
+    gain_b: '',
+    future_a: '',
+    future_b: '',
     selection: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,6 +48,7 @@ const ForkInTheRoadActivity = () => {
   const { user } = useAuth();
 
   const handleNextStep = (data: Partial<typeof decisionData>) => {
+    console.log("handleNextStep - Current step:", currentStep, "Received data:", data);
     setDecisionData(prev => ({ ...prev, ...data }));
     
     // If this is the final step (GutCheckScreen), save data to Supabase
@@ -69,15 +70,37 @@ const ForkInTheRoadActivity = () => {
     
     try {
       setIsSubmitting(true);
-      console.log("Saving decision data to Supabase:", { ...decisionData, selection, user_id: user.id });
+      
+      // Make sure all field names exactly match the column names in Supabase
+      const dataToSave = {
+        user_id: user.id,
+        choice: decisionData.choice,
+        consideration_path: decisionData.consideration_path,
+        other_path: decisionData.other_path,
+        change_a: decisionData.change_a,
+        feel_a: decisionData.feel_a,
+        change_b: decisionData.change_b,
+        feel_b: decisionData.feel_b,
+        challenges_a: decisionData.challenges_a,
+        challenges_b: decisionData.challenges_b,
+        strengths_a: decisionData.strengths_a,
+        strengths_b: decisionData.strengths_b,
+        values_a: decisionData.values_a,
+        values_b: decisionData.values_b,
+        tag_a: decisionData.tag_a,
+        tag_b: decisionData.tag_b,
+        gain_a: decisionData.gain_a,
+        gain_b: decisionData.gain_b,
+        future_a: decisionData.future_a,
+        future_b: decisionData.future_b,
+        selection: selection
+      };
+      
+      console.log("Saving decision data to Supabase:", dataToSave);
       
       const { data, error } = await supabase
         .from('fork_in_road_decisions')
-        .insert({
-          user_id: user.id,
-          ...decisionData,
-          selection: selection
-        })
+        .insert(dataToSave)
         .select();
 
       if (error) {
@@ -185,8 +208,8 @@ const ForkInTheRoadActivity = () => {
     <RoadLabelsScreen 
       onNext={(paths) => handleNextStep(paths)}
       initialValues={{
-        considerationPath: decisionData.considerationPath, 
-        otherPath: decisionData.otherPath
+        consideration_path: decisionData.consideration_path, 
+        other_path: decisionData.other_path
       }}
     />,
     <ReflectionScreen 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -13,29 +12,29 @@ import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 
 interface ReflectionData {
-  changeA: string;
-  feelA: string;
-  changeB: string;
-  feelB: string;
-  challengesA: string;
-  challengesB: string;
-  strengthsA: string[];
-  strengthsB: string[];
-  valuesA: string;
-  valuesB: string;
-  tagA: string[];
-  tagB: string[];
-  gainA: string;
-  gainB: string;
-  futureA: string;
-  futureB: string;
+  change_a: string;
+  feel_a: string;
+  change_b: string;
+  feel_b: string;
+  challenges_a: string;
+  challenges_b: string;
+  strengths_a: string[];
+  strengths_b: string[];
+  values_a: string;
+  values_b: string;
+  tag_a: string[];
+  tag_b: string[];
+  gain_a: string;
+  gain_b: string;
+  future_a: string;
+  future_b: string;
 }
 
 interface ReflectionScreenProps {
   onNext: (data: ReflectionData) => void;
   initialValues: Partial<ReflectionData> & {
-    considerationPath: string;
-    otherPath: string;
+    consideration_path: string;
+    other_path: string;
   };
 }
 
@@ -71,22 +70,22 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
   const [activeRoad, setActiveRoad] = useState<"A" | "B">("A");
   
   const [formData, setFormData] = useState<ReflectionData>({
-    changeA: initialValues.changeA || "",
-    feelA: initialValues.feelA || "5", // Default to middle of the slider
-    changeB: initialValues.changeB || "",
-    feelB: initialValues.feelB || "5", // Default to middle of the slider
-    challengesA: initialValues.challengesA || "",
-    challengesB: initialValues.challengesB || "",
-    strengthsA: initialValues.strengthsA || [],
-    strengthsB: initialValues.strengthsB || [],
-    valuesA: initialValues.valuesA || "",
-    valuesB: initialValues.valuesB || "",
-    tagA: initialValues.tagA || [],
-    tagB: initialValues.tagB || [],
-    gainA: initialValues.gainA || "",
-    gainB: initialValues.gainB || "",
-    futureA: initialValues.futureA || "",
-    futureB: initialValues.futureB || "",
+    change_a: initialValues.change_a || "",
+    feel_a: initialValues.feel_a || "5", // Default to middle of the slider
+    change_b: initialValues.change_b || "",
+    feel_b: initialValues.feel_b || "5", // Default to middle of the slider
+    challenges_a: initialValues.challenges_a || "",
+    challenges_b: initialValues.challenges_b || "",
+    strengths_a: initialValues.strengths_a || [],
+    strengths_b: initialValues.strengths_b || [],
+    values_a: initialValues.values_a || "",
+    values_b: initialValues.values_b || "",
+    tag_a: initialValues.tag_a || [],
+    tag_b: initialValues.tag_b || [],
+    gain_a: initialValues.gain_a || "",
+    gain_b: initialValues.gain_b || "",
+    future_a: initialValues.future_a || "",
+    future_b: initialValues.future_b || "",
   });
   
   // Helper function to update form data
@@ -96,7 +95,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
 
   // Helper function to handle checkbox changes for strengths
   const handleStrengthChange = (road: "A" | "B", id: string, checked: boolean) => {
-    const field = road === "A" ? "strengthsA" : "strengthsB";
+    const field = road === "A" ? "strengths_a" : "strengths_b";
     if (checked) {
       updateFormData(field, [...formData[field], id]);
     } else {
@@ -106,7 +105,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
 
   // Helper function to handle tag selection
   const handleTagToggle = (road: "A" | "B", tag: string) => {
-    const field = road === "A" ? "tagA" : "tagB";
+    const field = road === "A" ? "tag_a" : "tag_b";
     const currentTags = formData[field];
     
     if (currentTags.includes(tag)) {
@@ -129,6 +128,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
         setActiveTab("future");
         break;
       case "future":
+        console.log("Reflection completed with data:", formData);
         onNext(formData);
         break;
     }
@@ -169,7 +169,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
             className={`rounded-full ${activeRoad === "A" ? "bg-gradient-to-r from-[#D5D5F1] to-[#3DFDFF]" : ""}`}
           >
             {activeRoad === "A" && <Check className="mr-1 h-4 w-4" />}
-            Road A: {initialValues.considerationPath}
+            Road A: {initialValues.consideration_path}
           </Button>
           <Button
             variant={activeRoad === "B" ? "default" : "outline"}
@@ -177,7 +177,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
             className={`rounded-full ${activeRoad === "B" ? "bg-gradient-to-r from-[#3DFDFF] to-[#F5DF4D]" : ""}`}
           >
             {activeRoad === "B" && <Check className="mr-1 h-4 w-4" />}
-            Road B: {initialValues.otherPath}
+            Road B: {initialValues.other_path}
           </Button>
         </div>
 
@@ -212,15 +212,15 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                     <Label>
                       What will change in your daily life if you take 
                       {activeRoad === "A" 
-                        ? ` ${initialValues.considerationPath}`
-                        : ` ${initialValues.otherPath}`}?
+                        ? ` ${initialValues.consideration_path}`
+                        : ` ${initialValues.other_path}`}?
                     </Label>
                     <Textarea
                       className="mt-2"
                       placeholder="Think about your routine, time commitments, social circle..."
-                      value={activeRoad === "A" ? formData.changeA : formData.changeB}
+                      value={activeRoad === "A" ? formData.change_a : formData.change_b}
                       onChange={(e) => updateFormData(
-                        activeRoad === "A" ? "changeA" : "changeB", 
+                        activeRoad === "A" ? "change_a" : "change_b", 
                         e.target.value
                       )}
                     />
@@ -230,9 +230,9 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                     <Label>How might you feel about these changes?</Label>
                     <div className="mt-4">
                       <EmojiSlider
-                        value={[parseInt(activeRoad === "A" ? formData.feelA : formData.feelB)]}
+                        value={[parseInt(activeRoad === "A" ? formData.feel_a : formData.feel_b)]}
                         onValueChange={(value) => updateFormData(
-                          activeRoad === "A" ? "feelA" : "feelB", 
+                          activeRoad === "A" ? "feel_a" : "feel_b", 
                           value[0].toString()
                         )}
                         minEmoji="😬"
@@ -261,15 +261,15 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                     <Label>
                       What challenges might pop up on 
                       {activeRoad === "A" 
-                        ? ` ${initialValues.considerationPath}`
-                        : ` ${initialValues.otherPath}`}?
+                        ? ` ${initialValues.consideration_path}`
+                        : ` ${initialValues.other_path}`}?
                     </Label>
                     <Textarea
                       className="mt-2"
                       placeholder="Consider possible difficulties or obstacles..."
-                      value={activeRoad === "A" ? formData.challengesA : formData.challengesB}
+                      value={activeRoad === "A" ? formData.challenges_a : formData.challenges_b}
                       onChange={(e) => updateFormData(
-                        activeRoad === "A" ? "challengesA" : "challengesB", 
+                        activeRoad === "A" ? "challenges_a" : "challenges_b", 
                         e.target.value
                       )}
                     />
@@ -283,8 +283,8 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                           <Checkbox 
                             id={`${activeRoad}-${option.id}`}
                             checked={activeRoad === "A" 
-                              ? formData.strengthsA.includes(option.id)
-                              : formData.strengthsB.includes(option.id)
+                              ? formData.strengths_a.includes(option.id)
+                              : formData.strengths_b.includes(option.id)
                             }
                             onCheckedChange={(checked) => handleStrengthChange(
                               activeRoad, 
@@ -325,8 +325,8 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                     <div className="flex flex-wrap gap-2 mb-4">
                       {tagOptions.map((tag) => {
                         const isSelected = activeRoad === "A" 
-                          ? formData.tagA.includes(tag.id)
-                          : formData.tagB.includes(tag.id);
+                          ? formData.tag_a.includes(tag.id)
+                          : formData.tag_b.includes(tag.id);
                         return (
                           <Badge 
                             key={tag.id}
@@ -347,16 +347,16 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                     <Label>
                       How does 
                       {activeRoad === "A" 
-                        ? ` ${initialValues.considerationPath}`
-                        : ` ${initialValues.otherPath}`}
+                        ? ` ${initialValues.consideration_path}`
+                        : ` ${initialValues.other_path}`}
                       match your values, interests, or long-term goals?
                     </Label>
                     <Textarea
                       className="mt-2"
                       placeholder="Reflect on whether this path aligns with what matters to you..."
-                      value={activeRoad === "A" ? formData.valuesA : formData.valuesB}
+                      value={activeRoad === "A" ? formData.values_a : formData.values_b}
                       onChange={(e) => updateFormData(
-                        activeRoad === "A" ? "valuesA" : "valuesB", 
+                        activeRoad === "A" ? "values_a" : "values_b", 
                         e.target.value
                       )}
                     />
@@ -381,15 +381,15 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                     <Label>
                       Imagine it's a year from now. What have you gained from 
                       {activeRoad === "A" 
-                        ? ` ${initialValues.considerationPath}`
-                        : ` ${initialValues.otherPath}`}?
+                        ? ` ${initialValues.consideration_path}`
+                        : ` ${initialValues.other_path}`}?
                     </Label>
                     <Textarea
                       className="mt-2"
                       placeholder="New skills? A story to tell? A new friend?"
-                      value={activeRoad === "A" ? formData.gainA : formData.gainB}
+                      value={activeRoad === "A" ? formData.gain_a : formData.gain_b}
                       onChange={(e) => updateFormData(
-                        activeRoad === "A" ? "gainA" : "gainB", 
+                        activeRoad === "A" ? "gain_a" : "gain_b", 
                         e.target.value
                       )}
                     />
@@ -399,7 +399,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                     <Label className="block mb-2">Select emojis that represent your future on this path:</Label>
                     <div className="grid grid-cols-3 md:grid-cols-6 gap-2 text-center">
                       {["⭐", "💬", "🌱", "🎓", "💪", "💯", "🚀", "💖", "🔄", "💰", "🤝", "🏆"].map((emoji) => {
-                        const field = activeRoad === "A" ? "futureA" : "futureB";
+                        const field = activeRoad === "A" ? "future_a" : "future_b";
                         const isSelected = formData[field] === emoji;
                         
                         return (
