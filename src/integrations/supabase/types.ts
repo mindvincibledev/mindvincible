@@ -273,20 +273,14 @@ export type Database = {
           goal: string
           how_it_went: string | null
           how_it_went_path: string | null
-          how_it_went_rating: number | null
           id: string
-          other_people_rating: number | null
           other_people_responses: string | null
           try_next_time: string | null
-          try_next_time_confidence: number | null
           updated_at: string
           user_id: string
           what_felt_easy: string | null
-          what_felt_easy_rating: number | null
           what_felt_hard: string | null
-          what_felt_hard_rating: number | null
           who: string | null
-          who_difficulty: number | null
           who_path: string | null
         }
         Insert: {
@@ -297,20 +291,14 @@ export type Database = {
           goal: string
           how_it_went?: string | null
           how_it_went_path?: string | null
-          how_it_went_rating?: number | null
           id?: string
-          other_people_rating?: number | null
           other_people_responses?: string | null
           try_next_time?: string | null
-          try_next_time_confidence?: number | null
           updated_at?: string
           user_id: string
           what_felt_easy?: string | null
-          what_felt_easy_rating?: number | null
           what_felt_hard?: string | null
-          what_felt_hard_rating?: number | null
           who?: string | null
-          who_difficulty?: number | null
           who_path?: string | null
         }
         Update: {
@@ -321,20 +309,14 @@ export type Database = {
           goal?: string
           how_it_went?: string | null
           how_it_went_path?: string | null
-          how_it_went_rating?: number | null
           id?: string
-          other_people_rating?: number | null
           other_people_responses?: string | null
           try_next_time?: string | null
-          try_next_time_confidence?: number | null
           updated_at?: string
           user_id?: string
           what_felt_easy?: string | null
-          what_felt_easy_rating?: number | null
           what_felt_hard?: string | null
-          what_felt_hard_rating?: number | null
           who?: string | null
-          who_difficulty?: number | null
           who_path?: string | null
         }
         Relationships: [
