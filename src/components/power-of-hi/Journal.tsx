@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -14,6 +13,7 @@ import { Star, Trophy, Target, ArrowRight, Mic, MicOff, Upload, Image, Camera, S
 import { useMoodWheel } from '@/hooks/useMoodWheel';
 import { v4 as uuidv4 } from 'uuid';
 import ReflectionSection, { ReflectionData } from './ReflectionSection';
+import EmojiSlider from '@/components/ui/EmojiSlider';
 
 const MOODS = ["Happy", "Excited", "Proud", "Confident", "Nervous", "Awkward", "Uncomfortable", "Scared"];
 
@@ -30,6 +30,8 @@ const Journal = () => {
   const [who, setWho] = useState('');
   const [howItWent, setHowItWent] = useState('');
   const [feeling, setFeeling] = useState('');
+  const [whoDifficulty, setWhoDifficulty] = useState([5]);
+  const [howItWentRating, setHowItWentRating] = useState([5]);
   
   // Upload states
   const [whoFile, setWhoFile] = useState<File | null>(null);
@@ -333,8 +335,10 @@ const Journal = () => {
         .update({
           who,
           who_path: whoPath,
+          who_difficulty: whoDifficulty[0],
           how_it_went: howItWent,
           how_it_went_path: howItWentPath,
+          how_it_went_rating: howItWentRating[0],
           feeling,
           feeling_path: feelingPath,
           updated_at: new Date().toISOString()
@@ -369,36 +373,40 @@ const Journal = () => {
           what_felt_hard: reflectionData.whatFeltHard,
           other_people_responses: reflectionData.otherPeopleResponses,
           try_next_time: reflectionData.tryNextTime,
+          what_felt_easy_rating: reflectionData.whatFeltEasyRating,
+          what_felt_hard_rating: reflectionData.whatFeltHardRating,
+          other_people_rating: reflectionData.otherPeopleRating,
+          try_next_time_confidence: reflectionData.tryNextTimeConfidence,
           updated_at: new Date().toISOString()
         })
         .eq('id', selectedGoal)
         .eq('user_id', user.id);
 
-      if (error) throw error;
+    if (error) throw error;
 
-      toast.success('Goal completed successfully! This goal is now marked as complete and cannot be updated further.');
-      
-      // Refresh goals to remove the completed one
-      fetchJournalEntries();
-      
-      // Reset form and go back to initial section
-      setWho('');
-      setHowItWent('');
-      setFeeling('');
-      setWhoFile(null);
-      setHowItWentFile(null);
-      setWhoPreview(null);
-      setHowItWentPreview(null);
-      setFeelingPreview(null);
-      setSelectedGoal('');
-      setActiveSection('initial');
-    } catch (error: any) {
-      console.error('Error saving reflection:', error);
-      toast.error('Failed to save reflection');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    toast.success('Goal completed successfully! This goal is now marked as complete and cannot be updated further.');
+    
+    // Refresh goals to remove the completed one
+    fetchJournalEntries();
+    
+    // Reset form and go back to initial section
+    setWho('');
+    setHowItWent('');
+    setFeeling('');
+    setWhoFile(null);
+    setHowItWentFile(null);
+    setWhoPreview(null);
+    setHowItWentPreview(null);
+    setFeelingPreview(null);
+    setSelectedGoal('');
+    setActiveSection('initial');
+  } catch (error: any) {
+    console.error('Error saving reflection:', error);
+    toast.error('Failed to save reflection');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   // Add state for managing sections
   const [activeSection, setActiveSection] = React.useState<'initial' | 'reflection'>('initial');
@@ -520,6 +528,14 @@ const Journal = () => {
                           placeholder="Describe the person or situation..."
                           className="min-h-[80px]"
                         />
+                        <EmojiSlider
+                          value={whoDifficulty}
+                          onValueChange={setWhoDifficulty}
+                          label="How difficult was the interaction? 🤔"
+                          minEmoji="😓"
+                          middleEmoji="🙂"
+                          maxEmoji="🌟"
+                        />
                         
                         <div className="mt-2 flex flex-wrap gap-2">
                           <label htmlFor="who-file" className="cursor-pointer">
@@ -565,6 +581,14 @@ const Journal = () => {
                           onChange={(e) => setHowItWent(e.target.value)}
                           placeholder="Share your experience..."
                           className="min-h-[120px]"
+                        />
+                        <EmojiSlider
+                          value={howItWentRating}
+                          onValueChange={setHowItWentRating}
+                          label="How would you rate the interaction? 🤔"
+                          minEmoji="😓"
+                          middleEmoji="🙂"
+                          maxEmoji="🌟"
                         />
                         
                         <div className="mt-2 flex flex-wrap gap-2">
@@ -704,4 +728,3 @@ const Journal = () => {
 };
 
 export default Journal;
-

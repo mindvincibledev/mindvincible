@@ -1,12 +1,12 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import EmojiSlider from '@/components/ui/EmojiSlider';
 
 interface ReflectionSectionProps {
   onSubmit: (data: ReflectionData) => void;
@@ -18,6 +18,10 @@ export interface ReflectionData {
   whatFeltHard: string;
   otherPeopleResponses: string;
   tryNextTime: string;
+  whatFeltEasyRating: number;
+  whatFeltHardRating: number;
+  otherPeopleRating: number;
+  tryNextTimeConfidence: number;
 }
 
 const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) => {
@@ -25,8 +29,10 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
   const [whatFeltHard, setWhatFeltHard] = React.useState("");
   const [otherPeopleResponses, setOtherPeopleResponses] = React.useState("");
   const [tryNextTime, setTryNextTime] = React.useState("");
-  const [easyDifficulty, setEasyDifficulty] = React.useState([5]);
-  const [hardDifficulty, setHardDifficulty] = React.useState([5]);
+  const [whatFeltEasyRating, setWhatFeltEasyRating] = React.useState([5]);
+  const [whatFeltHardRating, setWhatFeltHardRating] = React.useState([5]);
+  const [otherPeopleRating, setOtherPeopleRating] = React.useState([5]);
+  const [tryNextTimeConfidence, setTryNextTimeConfidence] = React.useState([5]);
   const [isConfident, setIsConfident] = React.useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -35,7 +41,11 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
       whatFeltEasy,
       whatFeltHard,
       otherPeopleResponses,
-      tryNextTime
+      tryNextTime,
+      whatFeltEasyRating: whatFeltEasyRating[0],
+      whatFeltHardRating: whatFeltHardRating[0],
+      otherPeopleRating: otherPeopleRating[0],
+      tryNextTimeConfidence: tryNextTimeConfidence[0]
     });
   };
 
@@ -56,19 +66,14 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
               placeholder="Share the moments that flowed naturally..."
               className="min-h-[100px]"
             />
-            <Label>How easy was it? 😊</Label>
-            <Slider
-              value={easyDifficulty}
-              onValueChange={setEasyDifficulty}
-              max={10}
-              step={1}
-              className="my-4"
+            <EmojiSlider
+              value={whatFeltEasyRating}
+              onValueChange={setWhatFeltEasyRating}
+              label="How easy was it? 😊"
+              minEmoji="😓"
+              middleEmoji="🙂"
+              maxEmoji="🌟"
             />
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>Super Easy</span>
-              <span>Just Right</span>
-              <span>Challenging</span>
-            </div>
           </div>
 
           <div className="space-y-4">
@@ -80,19 +85,14 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
               placeholder="What were your challenges?"
               className="min-h-[100px]"
             />
-            <Label>How challenging was it? 🤔</Label>
-            <Slider
-              value={hardDifficulty}
-              onValueChange={setHardDifficulty}
-              max={10}
-              step={1}
-              className="my-4"
+            <EmojiSlider
+              value={whatFeltHardRating}
+              onValueChange={setWhatFeltHardRating}
+              label="How challenging was it? 🤔"
+              minEmoji="😌"
+              middleEmoji="😅"
+              maxEmoji="😰"
             />
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>A Bit Tough</span>
-              <span>Pretty Hard</span>
-              <span>Super Hard</span>
-            </div>
           </div>
 
           <div className="space-y-4">
@@ -104,6 +104,14 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
               placeholder="Tell us what unexpected things you discovered..."
               className="min-h-[100px]"
             />
+            <EmojiSlider
+              value={otherPeopleRating}
+              onValueChange={setOtherPeopleRating}
+              label="How surprising were their responses? 🤔"
+              minEmoji="😐"
+              middleEmoji="😲"
+              maxEmoji="🤯"
+            />
           </div>
 
           <div className="space-y-4">
@@ -114,6 +122,14 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
               onChange={(e) => setTryNextTime(e.target.value)}
               placeholder="Share your next adventure..."
               className="min-h-[100px]"
+            />
+            <EmojiSlider
+              value={tryNextTimeConfidence}
+              onValueChange={setTryNextTimeConfidence}
+              label="How confident are you about trying this? 💪"
+              minEmoji="😟"
+              middleEmoji="🤔"
+              maxEmoji="💪"
             />
           </div>
 
