@@ -18,7 +18,7 @@ const REFLECTION_PROMPTS = [
   "Name one moment today when you showed strength.",
   "Imagine you wake up with a superpower that makes you instantly kinder to yourself—what would it be?",
   "What's one unkind thing you often tell yourself? Now rephrase it as if talking to a friend.",
-  "What's a small "failure" you can now laugh about?",
+  "What's a small \"failure\" you can now laugh about?", // Escaped quotes
   "What's one kind thing you've done for someone else this week?",
   "You're a cartoon character—what's your catchphrase that makes you feel unstoppable?",
   "What's a compliment you've received that you secretly love but don't say out loud?",
