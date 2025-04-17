@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -244,7 +245,7 @@ const Journal = () => {
     // Determine bucket based on file type
     const buckets = {
       'who': 'simple_hi_images',
-      'howItWent': 'simple_hi_audio', // Assuming this could be audio or image
+      'howItWent': 'simple_hi_audio', 
       'feeling': 'simple_hi_stickers'
     };
     
@@ -254,7 +255,10 @@ const Journal = () => {
     
     const { data, error } = await supabase.storage
       .from(bucket)
-      .upload(fileName, file);
+      .upload(fileName, file, {
+        contentType: file.type,
+        upsert: true
+      });
       
     if (error) {
       console.error(`Error uploading ${type} file:`, error);
