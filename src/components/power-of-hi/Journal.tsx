@@ -14,6 +14,7 @@ import { useMoodWheel } from '@/hooks/useMoodWheel';
 import { v4 as uuidv4 } from 'uuid';
 import ReflectionSection, { ReflectionData } from './ReflectionSection';
 import EmojiSlider from '@/components/ui/EmojiSlider';
+import { startOfWeek, endOfWeek } from 'date-fns';
 
 const MOODS = ["Happy", "Excited", "Proud", "Confident", "Nervous", "Awkward", "Uncomfortable", "Scared"];
 
@@ -65,6 +66,8 @@ const Journal = () => {
     initialMoodIndex: 0, 
     wheelRef 
   });
+  const [weeklyGoals, setWeeklyGoals] = useState<any[]>([]);
+  const [weeklyCompletedGoals, setWeeklyCompletedGoals] = useState<any[]>([]);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [totalGoals, setTotalGoals] = useState(0);
 
@@ -124,18 +127,44 @@ const Journal = () => {
     if (!user?.id) return;
 
     try {
-      const { data: goalsData, error } = await supabase
+      // Get the start and end of the current week
+      const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }); // Start from Monday
+      const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
+
+      // Fetch all goals for the current week
+      const { data: weeklyData, error: weeklyError } = await supabase
         .from('simple_hi_challenges')
         .select('*')
         .eq('user_id', user.id)
-        .is('how_it_went', null)  // Only fetch incomplete goals
-        .is('feeling', null)      // Ensure goal is truly incomplete
+        .gte('created_at', weekStart.toISOString())
+        .lte('created_at', weekEnd.toISOString())
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (weeklyError) throw weeklyError;
+
+      // Fetch incomplete goals for the current week
+      const { data: incompleteData, error: incompleteError } = await supabase
+        .from('simple_hi_challenges')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', weekStart.toISOString())
+        .lte('created_at', weekEnd.toISOString())
+        .is('how_it_went', null)
+        .is('feeling', null)
+        .order('created_at', { ascending: false });
+
+      if (incompleteError) throw incompleteError;
       
-      setIncompleteGoals(goalsData || []);
-      setGoals(goalsData || []);
+      setWeeklyGoals(weeklyData || []);
+      setIncompleteGoals(incompleteData || []);
+      setGoals(weeklyData || []);
+      
+      // Calculate completed goals
+      const completedGoals = (weeklyData || []).filter(
+        goal => goal.how_it_went !== null && goal.feeling !== null
+      );
+      setWeeklyCompletedGoals(completedGoals);
+
     } catch (error: any) {
       console.error('Error fetching goals:', error);
       toast.error('Failed to load your goals');
@@ -143,6 +172,15 @@ const Journal = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (weeklyGoals.length > 0) {
+      const total = weeklyGoals.length;
+      const completed = weeklyCompletedGoals.length;
+      setTotalGoals(total);
+      setCompletionPercentage((completed / total) * 100);
+    }
+  }, [weeklyGoals, weeklyCompletedGoals]);
 
   // File Upload handlers
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'who' | 'howItWent' | 'feeling') => {
@@ -481,12 +519,12 @@ const Journal = () => {
           
           <div className="space-y-4 mb-8">
             <div className="flex justify-between items-center text-sm text-gray-600">
-              <span>Goal Completion Progress</span>
+              <span>This Week's Goal Progress</span>
               <span>{Math.round(completionPercentage)}%</span>
             </div>
             <Progress value={completionPercentage} className="h-2" />
             <p className="text-center text-sm text-gray-600">
-              {incompleteGoals.length} goals remaining out of {totalGoals}
+              {weeklyCompletedGoals.length} goals completed, {incompleteGoals.length} remaining this week
             </p>
           </div>
 
