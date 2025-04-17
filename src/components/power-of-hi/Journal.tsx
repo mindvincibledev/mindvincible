@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -238,13 +237,20 @@ const Journal = () => {
     toast.success('Recording stopped');
   };
 
-  // Upload file to Supabase storage
+  // File upload handler with specific bucket selection
   const uploadFile = async (file: File, type: 'who' | 'howItWent' | 'feeling') => {
-    if (!file) return null;
+    if (!file || !user?.id) return null;
     
+    // Determine bucket based on file type
+    const buckets = {
+      'who': 'simple_hi_images',
+      'howItWent': 'simple_hi_audio', // Assuming this could be audio or image
+      'feeling': 'simple_hi_stickers'
+    };
+    
+    const bucket = buckets[type];
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user?.id}/${type}-${uuidv4()}.${fileExt}`;
-    const bucket = 'hi-challenge-media';
+    const fileName = `${user.id}/${type}-${uuidv4()}.${fileExt}`;
     
     const { data, error } = await supabase.storage
       .from(bucket)
