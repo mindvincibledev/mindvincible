@@ -29,12 +29,12 @@ const ForkInTheRoadActivity = () => {
     feel_b: '',
     challenges_a: '',
     challenges_b: '',
-    strengths_a: [],
-    strengths_b: [],
+    strengths_a: [] as string[],
+    strengths_b: [] as string[],
     values_a: '',
     values_b: '',
-    tag_a: [],
-    tag_b: [],
+    tag_a: [] as string[],
+    tag_b: [] as string[],
     gain_a: '',
     gain_b: '',
     future_a: '',
@@ -71,6 +71,8 @@ const ForkInTheRoadActivity = () => {
     try {
       setIsSubmitting(true);
       
+      console.log("Preparing data to save to Supabase with selection:", selection);
+      
       // Make sure all field names exactly match the column names in Supabase
       const dataToSave = {
         user_id: user.id,
@@ -96,7 +98,7 @@ const ForkInTheRoadActivity = () => {
         selection: selection
       };
       
-      console.log("Saving decision data to Supabase:", dataToSave);
+      console.log("Final data to save:", dataToSave);
       
       const { data, error } = await supabase
         .from('fork_in_road_decisions')
