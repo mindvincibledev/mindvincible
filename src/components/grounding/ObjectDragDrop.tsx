@@ -159,6 +159,9 @@ function getEmojiForItem(item: string): string {
     essentialoil: '🌱',
     bottle: '🍾',
     clothing: '👚',
+    "Essential Oil": "🌱💧",
+    "Fresh Bread": "🥖",
+    "Cleaning Products": "🧹",
     
     // Hear section objects from image
     music: '🎵',
