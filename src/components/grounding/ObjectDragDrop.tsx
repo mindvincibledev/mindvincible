@@ -151,14 +151,39 @@ function getEmojiForItem(item: string): string {
     soap: '🧼',
     spices: '🌶️',
     laundry: '👕',
-    cleaningproducts: '🧽',
+    cleaningproducts: '🧹',
     fruit: '🍎',
     grass: '🌿',
     dessert: '🍰',
     fire: '🔥',
-    essentialoil: '🌼',
+    essentialoil: '🌱',
     bottle: '🍾',
-    clothing: '👚'
+    clothing: '👚',
+    
+    // Hear section objects from image
+    music: '🎵',
+    voice: '🗣️',
+    conversation: '💬',
+    vehicle: '🚗',
+    bell: '🔔',
+    alarm: '⏰',
+    traffic: '🚦',
+    bird: '🐦',
+    rain: '🌧️',
+    thunder: '⛈️',
+    wind: '💨',
+    appliance: '🔌',
+    tv: '📺',
+    radio: '📻',
+    typing: '⌨️',
+    footsteps: '👣',
+    airplane: '✈️',
+    siren: '🚨',
+    knock: '🚪',
+    fan: '💨',
+    stream: '🌊',
+    ocean: '🌊',
+    breathing: '🫁'
   };
 
   // Strict emoji mapping without fallback
