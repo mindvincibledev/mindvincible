@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mirror } from 'lucide-react';
+import { Eye } from 'lucide-react'; // Replace Mirror with Eye
 
 interface IntroSectionProps {
   onComplete: () => void;
@@ -38,7 +37,7 @@ const IntroSection: React.FC<IntroSectionProps> = ({ onComplete }) => {
                 }}
               />
               
-              {/* Mirror icon */}
+              {/* Reflection icon */}
               <motion.div 
                 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
                 animate={{ 
@@ -51,7 +50,7 @@ const IntroSection: React.FC<IntroSectionProps> = ({ onComplete }) => {
                   ease: "easeInOut"
                 }}
               >
-                <Mirror size={80} className="text-[#9b87f5]/60" />
+                <Eye size={80} className="text-[#9b87f5]/60" /> {/* Changed from Mirror to Eye */}
               </motion.div>
               
               {/* Floating particles */}
