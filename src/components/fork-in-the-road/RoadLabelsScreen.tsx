@@ -8,29 +8,29 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
 
 interface RoadLabelsScreenProps {
-  onNext: (paths: { consideration_path: string; otherPath: string }) => void;
+  onNext: (paths: { consideration_path: string; other_path: string }) => void;
   initialValues?: {
     consideration_path: string;
-    otherPath: string;
+    other_path: string;
   };
 }
 
 const RoadLabelsScreen: React.FC<RoadLabelsScreenProps> = ({ 
   onNext, 
-  initialValues = { consideration_path: '', otherPath: '' } 
+  initialValues = { consideration_path: '', other_path: '' } 
 }) => {
   const [paths, setPaths] = useState(initialValues);
-  const [errors, setErrors] = useState({ consideration_path: false, otherPath: false });
+  const [errors, setErrors] = useState({ consideration_path: false, other_path: false });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     const newErrors = {
       consideration_path: paths.consideration_path.trim().length === 0,
-      otherPath: paths.otherPath.trim().length === 0
+      other_path: paths.other_path.trim().length === 0
     };
     
-    if (newErrors.consideration_path || newErrors.otherPath) {
+    if (newErrors.consideration_path || newErrors.other_path) {
       setErrors(newErrors);
       return;
     }
@@ -38,7 +38,7 @@ const RoadLabelsScreen: React.FC<RoadLabelsScreenProps> = ({
     onNext(paths);
   };
 
-  const handleChange = (field: 'consideration_path' | 'otherPath', value: string) => {
+  const handleChange = (field: 'consideration_path' | 'other_path', value: string) => {
     setPaths(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: false }));
@@ -100,17 +100,17 @@ const RoadLabelsScreen: React.FC<RoadLabelsScreenProps> = ({
             
             <div className="space-y-4">
               <div>
-                <Label htmlFor="pathB" className={errors.otherPath ? "text-red-500" : ""}>
+                <Label htmlFor="pathB" className={errors.other_path ? "text-red-500" : ""}>
                   What's the other option?
                 </Label>
                 <Input
                   id="pathB"
-                  value={paths.otherPath}
-                  onChange={(e) => handleChange('otherPath', e.target.value)}
+                  value={paths.other_path}
+                  onChange={(e) => handleChange('other_path', e.target.value)}
                   placeholder="Example: Stay with art club"
-                  className={`${errors.otherPath ? "border-red-500" : ""}`}
+                  className={`${errors.other_path ? "border-red-500" : ""}`}
                 />
-                {errors.otherPath && (
+                {errors.other_path && (
                   <p className="text-sm text-red-500 mt-1">
                     Please name this path
                   </p>

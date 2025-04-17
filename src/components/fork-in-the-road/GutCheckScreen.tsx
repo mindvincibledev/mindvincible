@@ -10,7 +10,7 @@ interface GutCheckScreenProps {
   onComplete: (selection: string) => void;
   decisionData: {
     consideration_path: string;
-    otherPath: string;
+    other_path: string;
     change_a?: string;
     feel_a?: string;
     change_b?: string;
@@ -186,7 +186,7 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
             >
               <CardHeader className="pb-2">
                 <CardTitle className="flex justify-between items-center">
-                  <span>Road B: {decisionData.otherPath}</span>
+                  <span>Road B: {decisionData.other_path}</span>
                   {selection === 'B' && (
                     <motion.div
                       initial={{ scale: 0 }}

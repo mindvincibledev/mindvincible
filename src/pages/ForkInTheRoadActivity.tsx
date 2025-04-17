@@ -22,7 +22,7 @@ const ForkInTheRoadActivity = () => {
   const [decisionData, setDecisionData] = useState({
     choice: '',
     consideration_path: '',
-    otherPath: '',
+    other_path: '',
     change_a: '',
     feel_a: '',
     change_b: '',
@@ -125,7 +125,7 @@ const ForkInTheRoadActivity = () => {
                 decisionData.selection === 'A' 
                   ? decisionData.consideration_path 
                   : decisionData.selection === 'B' 
-                    ? decisionData.otherPath 
+                    ? decisionData.other_path 
                     : "Still deciding"
               }</span>
             </p>
@@ -145,7 +145,7 @@ const ForkInTheRoadActivity = () => {
               setDecisionData({
                 choice: '',
                 consideration_path: '',
-                otherPath: '',
+                other_path: '',
                 change_a: '',
                 feel_a: '',
                 change_b: '',
@@ -186,7 +186,7 @@ const ForkInTheRoadActivity = () => {
       onNext={(paths) => handleNextStep(paths)}
       initialValues={{
         consideration_path: decisionData.consideration_path, 
-        otherPath: decisionData.otherPath
+        other_path: decisionData.other_path
       }}
     />,
     <ReflectionScreen 
