@@ -11,22 +11,22 @@ interface GutCheckScreenProps {
   decisionData: {
     considerationPath: string;
     otherPath: string;
-    changeA?: string;
-    feelA?: string;
-    changeB?: string;
-    feelB?: string;
-    challengesA?: string;
-    challengesB?: string;
-    strengthsA?: string[];
-    strengthsB?: string[];
-    valuesA?: string;
-    valuesB?: string;
-    tagA?: string[];
-    tagB?: string[];
-    gainA?: string;
-    gainB?: string;
-    futureA?: string;
-    futureB?: string;
+    change_a?: string;
+    feel_a?: string;
+    change_b?: string;
+    feel_b?: string;
+    challenges_a?: string;
+    challenges_b?: string;
+    strengths_a?: string[];
+    strengths_b?: string[];
+    values_a?: string;
+    values_b?: string;
+    tag_a?: string[];
+    tag_b?: string[];
+    gain_a?: string;
+    gain_b?: string;
+    future_a?: string;
+    future_b?: string;
   };
 }
 
@@ -160,9 +160,9 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
                     <p className="text-gray-400 italic text-sm">No reflection data provided</p>
                   )}
                   
-                  {decisionData.futureA && (
+                  {decisionData.future_a && (
                     <div className="text-center mt-4">
-                      <div className="text-3xl mb-1">{decisionData.futureA}</div>
+                      <div className="text-3xl mb-1">{decisionData.future_a}</div>
                       <p className="text-xs text-gray-500">Future symbol</p>
                     </div>
                   )}
@@ -217,9 +217,9 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
                     <p className="text-gray-400 italic text-sm">No reflection data provided</p>
                   )}
                   
-                  {decisionData.futureB && (
+                  {decisionData.future_b && (
                     <div className="text-center mt-4">
-                      <div className="text-3xl mb-1">{decisionData.futureB}</div>
+                      <div className="text-3xl mb-1">{decisionData.future_b}</div>
                       <p className="text-xs text-gray-500">Future symbol</p>
                     </div>
                   )}
