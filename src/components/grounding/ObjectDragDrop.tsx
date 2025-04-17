@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -93,6 +94,7 @@ const ObjectDragDrop: React.FC<ObjectDragDropProps> = ({ objects, selectedItems,
 
 function getEmojiForItem(item: string): string {
   const emojiMap: Record<string, string> = {
+    // See section objects
     lights: '💡',
     books: '📚', 
     plants: '🌿',
@@ -117,7 +119,46 @@ function getEmojiForItem(item: string): string {
     dog: '🐶',
     cat: '🐱', 
     trees: '🌳',
-    clouds: '☁️'
+    clouds: '☁️',
+
+    // Touch section additional objects
+    keyboard: '⌨️',
+    fabric: '🧵',
+    hair: '💇',
+    skin: '✋',
+    paper: '📄',
+    wood: '🪵',
+    metal: '🔧',
+    plastic: '🥤',
+    carpet: '🔲',
+    blanket: '🛏️',
+    pillow: '🛏️',
+    remote: '🎮',
+    glasses: '👓',
+    watch: '⌚',
+    ring: '💍',
+    bracelet: '📿',
+    headphones: '🎧',
+
+    // Smell section objects
+    food: '🍽️',
+    candle: '🕯️',
+    shampoo: '🧴',
+    air: '💨',
+    coffee: '☕',
+    perfume: '💐',
+    flowers: '🌸',
+    freshbread: '🍞',
+    soap: '🧼',
+    spices: '🌶️',
+    laundry: '👕',
+    cleaningproducts: '🧽',
+    fruit: '🍎',
+    books: '📚',
+    grass: '🌿',
+    dessert: '🍰',
+    fire: '🔥',
+    essentialoil: '🌼'
   };
 
   // Strict emoji mapping without fallback
@@ -125,3 +166,4 @@ function getEmojiForItem(item: string): string {
 }
 
 export default ObjectDragDrop;
+
