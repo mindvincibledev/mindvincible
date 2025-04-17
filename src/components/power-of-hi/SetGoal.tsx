@@ -18,11 +18,10 @@ const challengeLevels = [
     title: 'Easy',
     description: "Smile & make eye contact with someone.",
     xp: 10,
-    colorClass: {
-      border: "border-green-500",
-      bg: "bg-green-100",
-      text: "text-green-600",
-      hover: "hover:bg-green-50"
+    style: {
+      selected: "bg-[#E5FFF2] border-[#2AC20E]",
+      hover: "hover:bg-[#E5FFF2]/50",
+      xp: "text-[#2AC20E]"
     }
   },
   {
@@ -30,11 +29,10 @@ const challengeLevels = [
     title: 'Medium',
     description: "Say hi to a classmate or colleague you don't usually talk to.",
     xp: 20,
-    colorClass: {
-      border: "border-yellow-500",
-      bg: "bg-yellow-100",
-      text: "text-yellow-600",
-      hover: "hover:bg-yellow-50"
+    style: {
+      selected: "bg-[#F5DF4D] border-[#F5DF4D]",
+      hover: "hover:bg-[#F5DF4D]/50",
+      xp: "text-[#B5A327]"
     }
   },
   {
@@ -42,11 +40,10 @@ const challengeLevels = [
     title: 'Advanced',
     description: "Start a short convo or join a group.",
     xp: 30,
-    colorClass: {
-      border: "border-red-500",
-      bg: "bg-red-100",
-      text: "text-red-600",
-      hover: "hover:bg-red-50"
+    style: {
+      selected: "bg-[#FFE6EE] border-[#FC68B3]",
+      hover: "hover:bg-[#FFE6EE]/50",
+      xp: "text-[#FC68B3]"
     }
   },
 ];
@@ -101,57 +98,64 @@ const SetGoal: React.FC<SetGoalProps> = ({ onComplete }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="max-w-3xl mx-auto space-y-8"
+      className="w-full max-w-4xl mx-auto px-4 space-y-8"
     >
-      <Card className="p-8 bg-white/90 backdrop-blur-lg shadow-xl">
-        <h2 className="text-2xl font-bold text-center mb-6">Choose Your Challenge Level</h2>
+      <Card className="p-8 bg-white/95 backdrop-blur-lg shadow-lg rounded-2xl">
+        <h2 className="text-3xl font-bold text-center mb-10">Choose Your Challenge Level</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {challengeLevels.map((challenge) => (
             <motion.div
               key={challenge.level}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full"
             >
-              <Button
-                variant="outline"
-                className={`w-full h-auto p-4 flex flex-col items-center gap-2 border-2 
-                  ${selectedLevel === challenge.level 
-                    ? `${challenge.colorClass.border} ${challenge.colorClass.bg}` 
-                    : `border-gray-200`}`}
+              <button
+                type="button"
                 onClick={() => setSelectedLevel(challenge.level)}
+                className={`w-full h-full min-h-[200px] p-6 rounded-xl border-2 transition-all duration-300
+                  ${selectedLevel === challenge.level 
+                    ? `${challenge.style.selected} shadow-lg` 
+                    : 'border-gray-100 bg-white ' + challenge.style.hover}
+                `}
               >
-                <span className="font-bold">{challenge.title}</span>
-                <span className="text-sm text-gray-600 text-center min-h-[40px]">{challenge.description}</span>
-                <span className={`${challenge.colorClass.text} font-bold mt-2`}>+{challenge.xp} XP</span>
-              </Button>
+                <div className="flex flex-col items-center justify-between h-full">
+                  <div className="text-center space-y-4">
+                    <h3 className="text-xl font-semibold">{challenge.title}</h3>
+                    <p className="text-gray-600">{challenge.description}</p>
+                  </div>
+                  <div className={`${challenge.style.xp} font-bold text-lg mt-4`}>
+                    +{challenge.xp} XP
+                  </div>
+                </div>
+              </button>
             </motion.div>
           ))}
         </div>
 
-        <h2 className="text-2xl font-bold text-center mb-6">Set Your Goal</h2>
+        <h2 className="text-3xl font-bold text-center mb-8">Set Your Goal</h2>
         
-        <div className="space-y-4 mb-6">
+        <div className="space-y-4 mb-8">
           {predefinedGoals.map((goal) => (
-            <Button
+            <button
               key={goal}
-              variant="outline"
-              className={`w-full justify-start ${
-                selectedGoal === goal ? 'border-[#2AC20E] bg-[#E5FFF2]' : ''
-              }`}
               onClick={() => {
                 setSelectedGoal(goal);
                 setCustomGoal('');
               }}
+              className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-300
+                ${selectedGoal === goal 
+                  ? 'border-[#2AC20E] bg-[#E5FFF2] shadow-md' 
+                  : 'border-gray-100 hover:border-[#2AC20E]/30 hover:bg-[#E5FFF2]/30'}
+              `}
             >
               {goal}
-            </Button>
+            </button>
           ))}
         </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Or write your own goal:</label>
+        <div className="space-y-3">
+          <label className="block text-lg font-medium mb-2">Or write your own goal:</label>
           <Textarea
             value={customGoal}
             onChange={(e) => {
@@ -159,19 +163,23 @@ const SetGoal: React.FC<SetGoalProps> = ({ onComplete }) => {
               setSelectedGoal('');
             }}
             placeholder="Type your goal here..."
-            className="min-h-[100px]"
+            className="min-h-[120px] p-4 rounded-lg border-2 border-gray-100 focus:border-[#2AC20E] focus:ring-[#2AC20E]"
           />
         </div>
 
-        <div className="mt-8 flex justify-center">
+        <motion.div 
+          className="mt-10 flex justify-center"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
           <Button
             onClick={handleSaveGoal}
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white px-8 py-6 text-lg rounded-full hover:opacity-90 transition-all duration-300"
+            className="w-full md:w-auto px-12 py-6 text-lg font-semibold rounded-full bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90 transition-all duration-300 disabled:opacity-50"
           >
             {isSubmitting ? 'Saving...' : 'Save My Goal'}
           </Button>
-        </div>
+        </motion.div>
       </Card>
     </motion.div>
   );
