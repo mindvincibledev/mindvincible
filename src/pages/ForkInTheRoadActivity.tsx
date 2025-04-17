@@ -146,9 +146,9 @@ const ForkInTheRoadActivity = () => {
             <p className="text-gray-700">
               You were leaning toward: <span className="font-medium">{
                 decisionData.selection === 'A' 
-                  ? decisionData.considerationPath 
+                  ? decisionData.consideration_path 
                   : decisionData.selection === 'B' 
-                    ? decisionData.otherPath 
+                    ? decisionData.other_path 
                     : "Still deciding"
               }</span>
             </p>
@@ -167,24 +167,24 @@ const ForkInTheRoadActivity = () => {
             onClick={() => {
               setDecisionData({
                 choice: '',
-                considerationPath: '',
-                otherPath: '',
-                changeA: '',
-                feelA: '',
-                changeB: '',
-                feelB: '',
-                challengesA: '',
-                challengesB: '',
-                strengthsA: [],
-                strengthsB: [],
-                valuesA: '',
-                valuesB: '',
-                tagA: [],
-                tagB: [],
-                gainA: '',
-                gainB: '',
-                futureA: '',
-                futureB: '',
+                consideration_path: '',
+                other_path: '',
+                change_a: '',
+                feel_a: '',
+                change_b: '',
+                feel_b: '',
+                challenges_a: '',
+                challenges_b: '',
+                strengths_a: [],
+                strengths_b: [],
+                values_a: '',
+                values_b: '',
+                tag_a: [],
+                tag_b: [],
+                gain_a: '',
+                gain_b: '',
+                future_a: '',
+                future_b: '',
                 selection: ''
               });
               setCurrentStep(0);

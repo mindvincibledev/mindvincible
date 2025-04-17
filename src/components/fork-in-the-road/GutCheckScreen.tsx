@@ -129,7 +129,7 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
             >
               <CardHeader className="pb-2">
                 <CardTitle className="flex justify-between items-center">
-                  <span>Road A: {decisionData.considerationPath}</span>
+                  <span>Road A: {decisionData.consideration_path}</span>
                   {selection === 'A' && (
                     <motion.div
                       initial={{ scale: 0 }}
@@ -160,9 +160,9 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
                     <p className="text-gray-400 italic text-sm">No reflection data provided</p>
                   )}
                   
-                  {decisionData.futureA && (
+                  {decisionData.future_a && (
                     <div className="text-center mt-4">
-                      <div className="text-3xl mb-1">{decisionData.futureA}</div>
+                      <div className="text-3xl mb-1">{decisionData.future_a}</div>
                       <p className="text-xs text-gray-500">Future symbol</p>
                     </div>
                   )}
@@ -186,7 +186,7 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
             >
               <CardHeader className="pb-2">
                 <CardTitle className="flex justify-between items-center">
-                  <span>Road B: {decisionData.otherPath}</span>
+                  <span>Road B: {decisionData.other_path}</span>
                   {selection === 'B' && (
                     <motion.div
                       initial={{ scale: 0 }}
@@ -217,9 +217,9 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
                     <p className="text-gray-400 italic text-sm">No reflection data provided</p>
                   )}
                   
-                  {decisionData.futureB && (
+                  {decisionData.future_b && (
                     <div className="text-center mt-4">
-                      <div className="text-3xl mb-1">{decisionData.futureB}</div>
+                      <div className="text-3xl mb-1">{decisionData.future_b}</div>
                       <p className="text-xs text-gray-500">Future symbol</p>
                     </div>
                   )}
