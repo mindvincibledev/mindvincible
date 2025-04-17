@@ -21,24 +21,24 @@ const ForkInTheRoadActivity = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [decisionData, setDecisionData] = useState({
     choice: '',
-    consideration_path: '',
-    other_path: '',
-    change_a: '',
-    feel_a: '',
-    change_b: '',
-    feel_b: '',
-    challenges_a: '',
-    challenges_b: '',
-    strengths_a: [],
-    strengths_b: [],
-    values_a: '',
-    values_b: '',
-    tag_a: [],
-    tag_b: [],
-    gain_a: '',
-    gain_b: '',
-    future_a: '',
-    future_b: '',
+    considerationPath: '',
+    otherPath: '',
+    changeA: '',
+    feelA: '',
+    changeB: '',
+    feelB: '',
+    challengesA: '',
+    challengesB: '',
+    strengthsA: [],
+    strengthsB: [],
+    valuesA: '',
+    valuesB: '',
+    tagA: [],
+    tagB: [],
+    gainA: '',
+    gainB: '',
+    futureA: '',
+    futureB: '',
     selection: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +48,6 @@ const ForkInTheRoadActivity = () => {
   const { user } = useAuth();
 
   const handleNextStep = (data: Partial<typeof decisionData>) => {
-    console.log("handleNextStep - Current step:", currentStep, "Received data:", data);
     setDecisionData(prev => ({ ...prev, ...data }));
     
     // If this is the final step (GutCheckScreen), save data to Supabase
@@ -68,19 +67,17 @@ const ForkInTheRoadActivity = () => {
     // Prevent double submissions
     if (isSubmitting) return;
     
-    const finalData = {
-      ...decisionData,
-      selection,
-      user_id: user.id
-    };
-    
     try {
       setIsSubmitting(true);
-      console.log("Saving decision data to Supabase:", finalData);
+      console.log("Saving decision data to Supabase:", { ...decisionData, selection, user_id: user.id });
       
       const { data, error } = await supabase
         .from('fork_in_road_decisions')
-        .insert(finalData)
+        .insert({
+          user_id: user.id,
+          ...decisionData,
+          selection: selection
+        })
         .select();
 
       if (error) {
@@ -126,9 +123,9 @@ const ForkInTheRoadActivity = () => {
             <p className="text-gray-700">
               You were leaning toward: <span className="font-medium">{
                 decisionData.selection === 'A' 
-                  ? decisionData.consideration_path 
+                  ? decisionData.considerationPath 
                   : decisionData.selection === 'B' 
-                    ? decisionData.other_path 
+                    ? decisionData.otherPath 
                     : "Still deciding"
               }</span>
             </p>
@@ -147,24 +144,24 @@ const ForkInTheRoadActivity = () => {
             onClick={() => {
               setDecisionData({
                 choice: '',
-                consideration_path: '',
-                other_path: '',
-                change_a: '',
-                feel_a: '',
-                change_b: '',
-                feel_b: '',
-                challenges_a: '',
-                challenges_b: '',
-                strengths_a: [],
-                strengths_b: [],
-                values_a: '',
-                values_b: '',
-                tag_a: [],
-                tag_b: [],
-                gain_a: '',
-                gain_b: '',
-                future_a: '',
-                future_b: '',
+                considerationPath: '',
+                otherPath: '',
+                changeA: '',
+                feelA: '',
+                changeB: '',
+                feelB: '',
+                challengesA: '',
+                challengesB: '',
+                strengthsA: [],
+                strengthsB: [],
+                valuesA: '',
+                valuesB: '',
+                tagA: [],
+                tagB: [],
+                gainA: '',
+                gainB: '',
+                futureA: '',
+                futureB: '',
                 selection: ''
               });
               setCurrentStep(0);
@@ -188,8 +185,8 @@ const ForkInTheRoadActivity = () => {
     <RoadLabelsScreen 
       onNext={(paths) => handleNextStep(paths)}
       initialValues={{
-        consideration_path: decisionData.consideration_path, 
-        other_path: decisionData.other_path
+        considerationPath: decisionData.considerationPath, 
+        otherPath: decisionData.otherPath
       }}
     />,
     <ReflectionScreen 
@@ -248,6 +245,7 @@ const ForkInTheRoadActivity = () => {
                 </TabsContent>
                 
                 <TabsContent value="past-decisions">
+                  {/* TODO: Implement past decisions view */}
                   <p className="text-center text-gray-500">No past decisions yet.</p>
                 </TabsContent>
               </Tabs>

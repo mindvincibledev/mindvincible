@@ -8,29 +8,29 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
 
 interface RoadLabelsScreenProps {
-  onNext: (paths: { consideration_path: string; other_path: string }) => void;
+  onNext: (paths: { considerationPath: string; otherPath: string }) => void;
   initialValues?: {
-    consideration_path: string;
-    other_path: string;
+    considerationPath: string;
+    otherPath: string;
   };
 }
 
 const RoadLabelsScreen: React.FC<RoadLabelsScreenProps> = ({ 
   onNext, 
-  initialValues = { consideration_path: '', other_path: '' } 
+  initialValues = { considerationPath: '', otherPath: '' } 
 }) => {
   const [paths, setPaths] = useState(initialValues);
-  const [errors, setErrors] = useState({ consideration_path: false, other_path: false });
+  const [errors, setErrors] = useState({ considerationPath: false, otherPath: false });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     const newErrors = {
-      consideration_path: paths.consideration_path.trim().length === 0,
-      other_path: paths.other_path.trim().length === 0
+      considerationPath: paths.considerationPath.trim().length === 0,
+      otherPath: paths.otherPath.trim().length === 0
     };
     
-    if (newErrors.consideration_path || newErrors.other_path) {
+    if (newErrors.considerationPath || newErrors.otherPath) {
       setErrors(newErrors);
       return;
     }
@@ -38,7 +38,7 @@ const RoadLabelsScreen: React.FC<RoadLabelsScreenProps> = ({
     onNext(paths);
   };
 
-  const handleChange = (field: 'consideration_path' | 'other_path', value: string) => {
+  const handleChange = (field: 'considerationPath' | 'otherPath', value: string) => {
     setPaths(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: false }));
@@ -70,17 +70,17 @@ const RoadLabelsScreen: React.FC<RoadLabelsScreenProps> = ({
             
             <div className="space-y-4">
               <div>
-                <Label htmlFor="pathA" className={errors.consideration_path ? "text-red-500" : ""}>
+                <Label htmlFor="pathA" className={errors.considerationPath ? "text-red-500" : ""}>
                   What's one path you're considering?
                 </Label>
                 <Input
                   id="pathA"
-                  value={paths.consideration_path}
-                  onChange={(e) => handleChange('consideration_path', e.target.value)}
+                  value={paths.considerationPath}
+                  onChange={(e) => handleChange('considerationPath', e.target.value)}
                   placeholder="Example: Join soccer team"
-                  className={`${errors.consideration_path ? "border-red-500" : ""}`}
+                  className={`${errors.considerationPath ? "border-red-500" : ""}`}
                 />
-                {errors.consideration_path && (
+                {errors.considerationPath && (
                   <p className="text-sm text-red-500 mt-1">
                     Please name this path
                   </p>
@@ -100,17 +100,17 @@ const RoadLabelsScreen: React.FC<RoadLabelsScreenProps> = ({
             
             <div className="space-y-4">
               <div>
-                <Label htmlFor="pathB" className={errors.other_path ? "text-red-500" : ""}>
+                <Label htmlFor="pathB" className={errors.otherPath ? "text-red-500" : ""}>
                   What's the other option?
                 </Label>
                 <Input
                   id="pathB"
-                  value={paths.other_path}
-                  onChange={(e) => handleChange('other_path', e.target.value)}
+                  value={paths.otherPath}
+                  onChange={(e) => handleChange('otherPath', e.target.value)}
                   placeholder="Example: Stay with art club"
-                  className={`${errors.other_path ? "border-red-500" : ""}`}
+                  className={`${errors.otherPath ? "border-red-500" : ""}`}
                 />
-                {errors.other_path && (
+                {errors.otherPath && (
                   <p className="text-sm text-red-500 mt-1">
                     Please name this path
                   </p>
