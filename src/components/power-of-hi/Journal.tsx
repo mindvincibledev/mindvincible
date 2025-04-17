@@ -73,6 +73,42 @@ const Journal = () => {
     fetchGoals();
   }, [user]);
 
+  const fetchJournalEntries = async () => {
+    if (!user?.id) {
+      console.error('Cannot fetch entries: No user logged in');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      console.log('Fetching journal entries for user ID:', user.id);
+      
+      // Only fetch incomplete goals
+      const { data, error } = await supabase
+        .from('simple_hi_challenges')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('how_it_went', null)  // Only fetch incomplete goals
+        .is('feeling', null)      // Ensure goal is truly incomplete
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      setGoals(data || []);
+      setIncompleteGoals(data || []);
+      console.log('Fetched incomplete goals:', data?.length || 0);
+    } catch (error: any) {
+      console.error('Error fetching journal entries:', error);
+      toast({
+        variant: "destructive",
+        title: "Error loading goals",
+        description: error.message || "Could not load your goals",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchGoals = async () => {
     if (!user?.id) return;
 
@@ -293,7 +329,7 @@ const Journal = () => {
         feelingPath = await uploadFile(feelingFile, 'feeling');
       }
       
-      // Update the challenge record with reflection data and mark as complete
+      // Update the challenge record and mark it as complete
       const { error } = await supabase
         .from('simple_hi_challenges')
         .update({
@@ -314,8 +350,8 @@ const Journal = () => {
         description: 'This goal is now marked as complete and cannot be updated further.'
       });
       
-      // Refresh goals to remove the completed goal
-      fetchGoals();
+      // Refresh goals to remove the completed one
+      fetchJournalEntries();
       
       // Reset form
       setWho('');
