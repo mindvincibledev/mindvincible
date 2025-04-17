@@ -57,9 +57,9 @@ const activities = [
     description: "Because how you speak to yourself matters.",
     icon: <MessageSquare className="h-8 w-8 text-[#FC68B3]" />,
     link: "/emotional-hacking/mirror-mirror",
-    color: "from-[#FC68B3] to-[#2AC20E]",
+    color: "from-[#FC68B3] to-[#9b87f5]",
     bgColor: "bg-[#E5DEFF]",
-    chartColor: "#D5D5F1",
+    chartColor: "#9b87f5",
     shortName: "Mirror"
   },
   {

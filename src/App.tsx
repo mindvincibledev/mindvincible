@@ -25,8 +25,9 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { initSupabase } from "./integrations/supabase/initSupabase";
 import MoodReminderNotification from "./components/MoodReminderNotification";
 
-// Add the import for PowerOfHiActivity
+// Import activities
 import PowerOfHiActivity from "./pages/PowerOfHiActivity";
+import MirrorMirrorActivity from "./pages/MirrorMirrorActivity";
 
 // Update document title to correct app name
 document.title = "M(in)dvincible";
@@ -120,6 +121,12 @@ const AppRoutes = () => {
         <Route path="/emotional-hacking/grounding-technique" element={
           <ProtectedRoute>
             <GroundingTechniqueActivity />
+          </ProtectedRoute>
+        } />
+        {/* Add Mirror Mirror activity route */}
+        <Route path="/emotional-hacking/mirror-mirror" element={
+          <ProtectedRoute>
+            <MirrorMirrorActivity />
           </ProtectedRoute>
         } />
         {/* Emotional Airbnb route */}
