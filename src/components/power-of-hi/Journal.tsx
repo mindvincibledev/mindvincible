@@ -18,6 +18,7 @@ const MOODS = ["Happy", "Excited", "Proud", "Confident", "Nervous", "Awkward", "
 const Journal = () => {
   const { user } = useAuth();
   const [goals, setGoals] = useState<any[]>([]);
+  const [incompleteGoals, setIncompleteGoals] = useState<any[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,9 +81,12 @@ const Journal = () => {
         .from('simple_hi_challenges')
         .select('*')
         .eq('user_id', user.id)
+        .is('how_it_went', null)  // Only fetch incomplete goals
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      
+      setIncompleteGoals(goalsData || []);
       setGoals(goalsData || []);
     } catch (error: any) {
       console.error('Error fetching goals:', error);
@@ -241,19 +245,12 @@ const Journal = () => {
   const uploadFile = async (file: File, type: 'who' | 'howItWent' | 'feeling') => {
     if (!file || !user?.id) return null;
     
-    // Determine bucket based on file type
-    const buckets = {
-      'who': 'simple_hi_images',
-      'howItWent': 'simple_hi_audio', 
-      'feeling': 'simple_hi_stickers'
-    };
-    
-    const bucket = buckets[type];
+    const bucketName = 'simple_hi_images';
     const fileExt = file.name.split('.').pop();
     const fileName = `${user.id}/${type}-${uuidv4()}.${fileExt}`;
     
     const { data, error } = await supabase.storage
-      .from(bucket)
+      .from(bucketName)
       .upload(fileName, file, {
         contentType: file.type,
         upsert: true
@@ -267,7 +264,7 @@ const Journal = () => {
     
     // Get public URL
     const { data: publicUrlData } = supabase.storage
-      .from(bucket)
+      .from(bucketName)
       .getPublicUrl(fileName);
       
     return publicUrlData.publicUrl;
@@ -295,7 +292,7 @@ const Journal = () => {
         feelingPath = await uploadFile(feelingFile, 'feeling');
       }
       
-      // Update the challenge record with reflection data
+      // Update the challenge record with reflection data and mark as complete
       const { error } = await supabase
         .from('simple_hi_challenges')
         .update({
@@ -312,7 +309,10 @@ const Journal = () => {
 
       if (error) throw error;
 
-      toast.success('Progress updated successfully!');
+      toast.success('Goal completed successfully!');
+      
+      // Refresh goals to remove the completed goal
+      fetchGoals();
       
       // Reset form
       setWho('');
@@ -324,6 +324,7 @@ const Journal = () => {
       setWhoPreview(null);
       setHowItWentPreview(null);
       setFeelingPreview(null);
+      setSelectedGoal('');
     } catch (error: any) {
       console.error('Error saving progress:', error);
       toast.error('Failed to save progress');
@@ -389,9 +390,9 @@ const Journal = () => {
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-center mb-6">Track Your Progress</h2>
           
-          {goals.length === 0 ? (
+          {incompleteGoals.length === 0 ? (
             <div className="text-center space-y-4">
-              <p className="text-gray-600">You haven't set any goals yet.</p>
+              <p className="text-gray-600">You've completed all your goals!</p>
               <Button
                 onClick={() => window.location.href = '/emotional-hacking/power-of-hi?tab=goal'}
                 className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
@@ -411,7 +412,7 @@ const Journal = () => {
                     <SelectValue placeholder="Choose a goal..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {goals.map((goal) => (
+                    {incompleteGoals.map((goal) => (
                       <SelectItem
                         key={goal.id}
                         value={goal.id}
@@ -607,7 +608,7 @@ const Journal = () => {
                         'Saving...'
                       ) : (
                         <>
-                          Update Progress
+                          Complete Goal
                           <ArrowRight className="h-5 w-5" />
                         </>
                       )}
