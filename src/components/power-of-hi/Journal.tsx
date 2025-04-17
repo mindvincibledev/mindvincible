@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -100,11 +101,7 @@ const Journal = () => {
       console.log('Fetched incomplete goals:', data?.length || 0);
     } catch (error: any) {
       console.error('Error fetching journal entries:', error);
-      toast({
-        variant: "destructive",
-        title: "Error loading goals",
-        description: error.message || "Could not load your goals",
-      });
+      toast.error("Error loading goals: " + (error.message || "Could not load your goals"));
     } finally {
       setLoading(false);
     }
@@ -379,9 +376,7 @@ const Journal = () => {
 
       if (error) throw error;
 
-      toast.success('Goal completed successfully!', {
-        description: 'This goal is now marked as complete and cannot be updated further.'
-      });
+      toast.success('Goal completed successfully! This goal is now marked as complete and cannot be updated further.');
       
       // Refresh goals to remove the completed one
       fetchJournalEntries();
@@ -709,3 +704,4 @@ const Journal = () => {
 };
 
 export default Journal;
+
