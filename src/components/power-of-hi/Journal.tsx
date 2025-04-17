@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import MoodSelector from '@/components/mood/MoodSelector';
 import { Star, Trophy, Target, ArrowRight } from 'lucide-react';
+import { useMoodWheel } from '@/hooks/useMoodWheel';
 
 const MOODS = ["Happy", "Excited", "Proud", "Confident", "Nervous", "Awkward", "Uncomfortable", "Scared"];
 
@@ -20,11 +21,34 @@ const Journal = () => {
   const [selectedGoal, setSelectedGoal] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hoveredMoodIndex, setHoveredMoodIndex] = useState<number | null>(null);
 
   // Form states
   const [who, setWho] = useState('');
   const [howItWent, setHowItWent] = useState('');
   const [feeling, setFeeling] = useState('');
+  
+  // Setup for MoodSelector
+  const wheelRef = useRef<HTMLDivElement>(null);
+  const {
+    selectedMoodIndex,
+    setSelectedMoodIndex,
+    changeMood,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd
+  } = useMoodWheel({ 
+    moodsCount: MOODS.length, 
+    initialMoodIndex: 0, 
+    wheelRef 
+  });
+
+  // Update feeling when mood changes
+  useEffect(() => {
+    if (MOODS[selectedMoodIndex]) {
+      setFeeling(MOODS[selectedMoodIndex]);
+    }
+  }, [selectedMoodIndex]);
 
   useEffect(() => {
     fetchGoals();
@@ -77,6 +101,15 @@ const Journal = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Custom handler for selecting a mood directly with the simplified interface
+  const handleMoodSelect = (mood: string) => {
+    const moodIndex = MOODS.findIndex(m => m === mood);
+    if (moodIndex >= 0) {
+      setSelectedMoodIndex(moodIndex);
+    }
+    setFeeling(mood);
   };
 
   if (loading) {
@@ -173,8 +206,16 @@ const Journal = () => {
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <MoodSelector
                         moods={MOODS}
+                        selectedMoodIndex={selectedMoodIndex}
+                        onMoodSelect={setSelectedMoodIndex}
+                        onChangeMood={changeMood}
+                        wheelRef={wheelRef}
+                        handleTouchStart={handleTouchStart}
+                        handleTouchMove={handleTouchMove}
+                        handleTouchEnd={handleTouchEnd}
+                        onMoodHover={setHoveredMoodIndex}
+                        onSelect={handleMoodSelect}
                         selectedMood={feeling}
-                        onSelect={setFeeling}
                       />
                     </div>
                   </div>
