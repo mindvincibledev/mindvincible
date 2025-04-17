@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,9 @@ import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import MoodSelector from '@/components/mood/MoodSelector';
 import { Star, Trophy, Target } from 'lucide-react';
+import { useMoodWheel } from '@/hooks/useMoodWheel';
+
+const MOODS = ["Happy", "Excited", "Proud", "Confident", "Nervous", "Awkward", "Uncomfortable", "Scared"];
 
 const Journal = () => {
   const { user } = useAuth();
@@ -29,9 +32,34 @@ const Journal = () => {
   const [otherResponses, setOtherResponses] = useState('');
   const [nextTime, setNextTime] = useState('');
 
+  // Set up mood wheel interaction
+  const wheelRef = useRef<HTMLDivElement>(null);
+  const { 
+    selectedMoodIndex, 
+    setSelectedMoodIndex, 
+    changeMood, 
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd
+  } = useMoodWheel({
+    moodsCount: MOODS.length,
+    initialMoodIndex: 0,
+    wheelRef
+  });
+  
+  // State for mood hover effects
+  const [hoveredMoodIndex, setHoveredMoodIndex] = useState<number | null>(null);
+
   useEffect(() => {
     fetchChallengeAndInteractions();
   }, [user]);
+
+  useEffect(() => {
+    // Update feeling whenever selectedMoodIndex changes
+    if (MOODS[selectedMoodIndex]) {
+      setFeeling(MOODS[selectedMoodIndex]);
+    }
+  }, [selectedMoodIndex]);
 
   const fetchChallengeAndInteractions = async () => {
     if (!user?.id) return;
@@ -176,7 +204,17 @@ const Journal = () => {
           <div>
             <h3 className="text-lg font-semibold mb-2">How did it make you feel?</h3>
             <MoodSelector
-              onSelect={(mood) => setFeeling(mood)}
+              moods={MOODS}
+              selectedMoodIndex={selectedMoodIndex}
+              onMoodSelect={setSelectedMoodIndex}
+              onChangeMood={changeMood}
+              wheelRef={wheelRef}
+              handleTouchStart={handleTouchStart}
+              handleTouchMove={handleTouchMove}
+              handleTouchEnd={handleTouchEnd}
+              onMoodHover={setHoveredMoodIndex}
+              // For backward compatibility
+              onSelect={(mood: string) => setFeeling(mood)}
               selectedMood={feeling}
             />
           </div>

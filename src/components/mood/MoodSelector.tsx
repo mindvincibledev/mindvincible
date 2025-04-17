@@ -1,11 +1,10 @@
-
 import React, { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getMoodColor } from '@/utils/moodUtils';
 
 interface MoodSelectorProps {
-  moods: string[];
+  moods?: string[];
   selectedMoodIndex: number;
   onMoodSelect: (index: number) => void;
   onChangeMood: (direction: 'left' | 'right') => void;
@@ -14,10 +13,13 @@ interface MoodSelectorProps {
   handleTouchMove: (e: React.TouchEvent | React.MouseEvent) => void;
   handleTouchEnd: () => void;
   onMoodHover: (index: number | null) => void;
+  // Add the missing onSelect prop that Journal.tsx is trying to use
+  onSelect?: (mood: string) => void;
+  selectedMood?: string;
 }
 
 const MoodSelector: React.FC<MoodSelectorProps> = ({
-  moods,
+  moods = ["Happy", "Sad", "Excited", "Angry", "Calm", "Anxious", "Surprised", "Confused"],
   selectedMoodIndex,
   onMoodSelect,
   onChangeMood,
@@ -25,7 +27,9 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
   handleTouchStart,
   handleTouchMove,
   handleTouchEnd,
-  onMoodHover
+  onMoodHover,
+  onSelect,
+  selectedMood
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -55,6 +59,16 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
       }
     }
   }, [selectedMoodIndex, offsetIndex]);
+
+  // Handle the onSelect prop if provided (for backward compatibility)
+  const handleMoodSelect = (index: number) => {
+    onMoodSelect(index);
+    
+    // If onSelect is provided, call it with the mood string
+    if (onSelect && moods[index]) {
+      onSelect(moods[index]);
+    }
+  };
 
   const moodColor = getMoodColor(moods[selectedMoodIndex]);
 
@@ -184,7 +198,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
                     onMouseLeave={() => onMoodHover(null)}
                     onClick={() => {
                       const adjustedIndex = (actualIndex >= 0) ? actualIndex : moods.length + actualIndex;
-                      onMoodSelect(adjustedIndex);
+                      handleMoodSelect(adjustedIndex);
                     }}
                   >
                     <motion.span 
@@ -250,7 +264,7 @@ const MoodSelector: React.FC<MoodSelectorProps> = ({
               backgroundColor: i === selectedMoodIndex ? 'rgb(0, 0, 0)' : 'rgba(0, 0, 0, 0.4)'
             }}
             whileHover={{ scale: 1.3 }}
-            onClick={() => onMoodSelect(i)}
+            onClick={() => handleMoodSelect(i)}
             onMouseEnter={() => onMoodHover(i)}
             onMouseLeave={() => onMoodHover(null)}
           />
