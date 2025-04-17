@@ -80,20 +80,6 @@ const HomePage = () => {
       icon: <AreaChart className="h-8 w-8 text-[#3DFDFF]" />,
       link: "/dashboard",
       color: "from-[#3DFDFF] to-[#FC68B3]"
-    },
-    {
-      title: "Mindfulness",
-      description: "Practice guided mindfulness exercises for emotional balance.",
-      icon: <Brain className="h-8 w-8 text-[#2AC20E]" />,
-      link: "/dashboard",
-      color: "from-[#2AC20E] to-[#3DFDFF]"
-    },
-    {
-      title: "Self-Care Activities",
-      description: "Discover activities to nurture your mental wellbeing.",
-      icon: <Sparkles className="h-8 w-8 text-[#F5DF4D]" />,
-      link: "/dashboard",
-      color: "from-[#F5DF4D] to-[#FC68B3]"
     }
   ];
 
