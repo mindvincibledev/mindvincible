@@ -8,6 +8,9 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import ObjectDragDrop from './ObjectDragDrop';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 const tasteObjects = [
   'Coffee', 'Tea', 'Chocolate', 'Mint', 'Gum', 
@@ -22,10 +25,12 @@ interface TasteSectionProps {
 }
 
 const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
+  const { user } = useAuth();
   // State for different input types
   const [textInput, setTextInput] = useState<string>('');
   const [selectedObject, setSelectedObject] = useState<string>('');
   const [selectedTasteType, setSelectedTasteType] = useState<string>('');
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // For determining if the user can proceed
   const canProceed = textInput !== '' || 
@@ -55,6 +60,55 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
 
   const handleObjectSelect = (item: string) => {
     setSelectedObject(item === selectedObject ? '' : item);
+  };
+
+  const handleCompleteSection = async () => {
+    if (!user?.id) {
+      toast.error("You need to be logged in to save your progress");
+      onComplete(); // Still allow navigation
+      return;
+    }
+
+    setIsSaving(true);
+    
+    try {
+      // Save the user's response to Supabase
+      // Determine what data to save based on what the user interacted with
+      let responseData = {
+        user_id: user.id,
+        activity_id: 'grounding-technique',
+        section_name: 'taste',
+        response_text: textInput || null,
+        response_drawing_path: null,
+        response_audio_path: null,
+        response_selected_items: null
+      };
+      
+      // If they selected an object, save it as a selected item
+      if (selectedObject) {
+        responseData.response_selected_items = [selectedObject];
+      } 
+      // If they selected a taste type, save it as a selected item
+      else if (selectedTasteType) {
+        responseData.response_selected_items = [selectedTasteType];
+      }
+      
+      const { error } = await supabase
+        .from('grounding_responses')
+        .insert(responseData);
+        
+      if (error) throw error;
+      
+      // Clear local storage for this section after saving to Supabase
+      localStorage.removeItem('tasteSection');
+      
+      onComplete();
+    } catch (error) {
+      console.error("Error saving taste section data:", error);
+      toast.error("Failed to save your data. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSkip = () => {
@@ -186,12 +240,12 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
             Skip
           </Button>
           <Button 
-            onClick={onComplete} 
-            disabled={!canProceed}
+            onClick={handleCompleteSection} 
+            disabled={!canProceed || isSaving}
             className="bg-gradient-to-r from-[#3DFDFF] to-[#FC68B3] hover:opacity-90 flex items-center"
           >
-            Complete
-            {canProceed ? <Check className="ml-2 h-4 w-4" /> : <ArrowRight className="ml-2 h-4 w-4" />}
+            {isSaving ? 'Saving...' : 'Complete'}
+            {canProceed && !isSaving ? <Check className="ml-2 h-4 w-4" /> : <ArrowRight className="ml-2 h-4 w-4" />}
           </Button>
         </div>
       </div>
