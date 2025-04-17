@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import ObjectDragDrop from './ObjectDragDrop';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -65,47 +64,55 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
   const handleCompleteSection = async () => {
     if (!user?.id) {
       toast.error("You need to be logged in to save your progress");
-      onComplete(); // Still allow navigation
+      onComplete(); // Still allow navigation even if not logged in
       return;
     }
 
     setIsSaving(true);
     
     try {
-      // Save the user's response to Supabase
-      // Determine what data to save based on what the user interacted with
-      let responseData = {
+      // Step 1: Prepare the data object based on what the user has entered
+      const responseData = {
         user_id: user.id,
         activity_id: 'grounding-technique',
         section_name: 'taste',
-        response_text: textInput || null,
+        created_at: new Date().toISOString(),
+        response_text: null,
         response_drawing_path: null,
         response_audio_path: null,
         response_selected_items: null
       };
-      
-      // If they selected an object, save it as a selected item
-      if (selectedObject) {
+
+      // Step 2: Add the appropriate data based on which tab was used
+      if (textInput) {
+        responseData.response_text = textInput;
+      } else if (selectedObject) {
         responseData.response_selected_items = [selectedObject];
-      } 
-      // If they selected a taste type, save it as a selected item
-      else if (selectedTasteType) {
+      } else if (selectedTasteType) {
         responseData.response_selected_items = [selectedTasteType];
       }
-      
+
+      // Step 3: Insert the data into Supabase
       const { error } = await supabase
         .from('grounding_responses')
         .insert(responseData);
-        
-      if (error) throw error;
-      
-      // Clear local storage for this section after saving to Supabase
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      // Step 4: Clear localStorage after successful save
       localStorage.removeItem('tasteSection');
       
+      // Step 5: Show success message
+      toast.success("Your taste response was saved successfully!");
+      
+      // Step 6: Call onComplete to move to the next section
       onComplete();
     } catch (error) {
       console.error("Error saving taste section data:", error);
-      toast.error("Failed to save your data. Please try again.");
+      toast.error("Failed to save your response. Please try again.");
     } finally {
       setIsSaving(false);
     }
