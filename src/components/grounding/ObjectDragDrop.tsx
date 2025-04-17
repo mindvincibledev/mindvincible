@@ -120,7 +120,8 @@ function getEmojiForItem(item: string): string {
     clouds: '☁️'
   };
 
-  return emojiMap[item.toLowerCase()] || '👀';
+  // Strict emoji mapping without fallback
+  return emojiMap[item.toLowerCase()] || '';
 }
 
 export default ObjectDragDrop;
