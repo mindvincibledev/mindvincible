@@ -30,12 +30,11 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
   const [selectedObject, setSelectedObject] = useState<string>('');
   const [selectedTasteType, setSelectedTasteType] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>('text');
 
   // For determining if the user can proceed
   const canProceed = textInput !== '' || 
-                     selectedObject !== '' || 
-                     selectedTasteType !== '';
+                    selectedObject !== '' || 
+                    selectedTasteType !== '';
 
   // Set up persisted storage
   useEffect(() => {
@@ -46,7 +45,6 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
       setTextInput(parsedData.textInput || '');
       setSelectedObject(parsedData.selectedObject || '');
       setSelectedTasteType(parsedData.selectedTasteType || '');
-      setActiveTab(parsedData.activeTab || 'text');
     }
   }, []);
 
@@ -55,17 +53,12 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
     localStorage.setItem('tasteSection', JSON.stringify({
       textInput,
       selectedObject,
-      selectedTasteType,
-      activeTab
+      selectedTasteType
     }));
-  }, [textInput, selectedObject, selectedTasteType, activeTab]);
+  }, [textInput, selectedObject, selectedTasteType]);
 
   const handleObjectSelect = (item: string) => {
     setSelectedObject(item === selectedObject ? '' : item);
-  };
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
   };
 
   const handleCompleteSection = async () => {
@@ -76,14 +69,9 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
     }
 
     setIsSaving(true);
-    console.log("Starting save process for taste section");
-    console.log("Current tab:", activeTab);
-    console.log("Text input:", textInput);
-    console.log("Selected object:", selectedObject);
-    console.log("Selected taste type:", selectedTasteType);
     
     try {
-      // Step 1: Prepare the data object
+      // Step 1: Prepare the data object based on what the user has entered
       const responseData = {
         user_id: user.id,
         activity_id: 'grounding-technique',
@@ -96,26 +84,13 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
       };
 
       // Step 2: Add the appropriate data based on which tab was used
-      if (activeTab === 'text' && textInput) {
-        console.log("Saving text input:", textInput);
+      if (textInput) {
         responseData.response_text = textInput;
-      } 
-      else if (activeTab === 'objects' && selectedObject) {
-        console.log("Saving selected object:", selectedObject);
+      } else if (selectedObject) {
         responseData.response_selected_items = [selectedObject];
-      } 
-      else if (activeTab === 'tastes' && selectedTasteType) {
-        console.log("Saving selected taste type:", selectedTasteType);
+      } else if (selectedTasteType) {
         responseData.response_selected_items = [selectedTasteType];
       }
-      else {
-        // If no valid data to save but user pressed complete
-        toast.warning("Please provide a taste response before completing");
-        setIsSaving(false);
-        return;
-      }
-
-      console.log("Saving response data:", JSON.stringify(responseData, null, 2));
 
       // Step 3: Insert the data into Supabase
       const { error } = await supabase
@@ -126,8 +101,6 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
         console.error("Supabase error:", error);
         throw error;
       }
-
-      console.log("Save successful");
 
       // Step 4: Clear localStorage after successful save
       localStorage.removeItem('tasteSection');
@@ -167,12 +140,7 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
         </p>
       </div>
 
-      <Tabs 
-        defaultValue="text" 
-        className="w-full"
-        value={activeTab}
-        onValueChange={handleTabChange}
-      >
+      <Tabs defaultValue="text" className="w-full">
         <TabsList className="grid grid-cols-3 mb-6 bg-gray-100">
           <TabsTrigger value="text" className="text-xs sm:text-sm">Text Answer</TabsTrigger>
           <TabsTrigger value="objects" className="text-xs sm:text-sm">Taste Objects</TabsTrigger>
