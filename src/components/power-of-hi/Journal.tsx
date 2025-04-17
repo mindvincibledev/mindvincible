@@ -68,6 +68,7 @@ const Journal = () => {
     }
 
     try {
+      setIsSubmitting(true);
       const { error } = await supabase
         .from('simple_hi_challenges')
         .update({
@@ -89,6 +90,8 @@ const Journal = () => {
     } catch (error: any) {
       console.error('Error saving reflection:', error);
       toast.error("Could not save reflection: " + (error.message || "Unknown error"));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
