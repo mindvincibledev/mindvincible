@@ -30,6 +30,7 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
   const [selectedObject, setSelectedObject] = useState<string>('');
   const [selectedTasteType, setSelectedTasteType] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [currentTab, setCurrentTab] = useState<string>('text');
 
   // For determining if the user can proceed
   const canProceed = textInput !== '' || 
@@ -45,6 +46,9 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
       setTextInput(parsedData.textInput || '');
       setSelectedObject(parsedData.selectedObject || '');
       setSelectedTasteType(parsedData.selectedTasteType || '');
+      if (parsedData.currentTab) {
+        setCurrentTab(parsedData.currentTab);
+      }
     }
   }, []);
 
@@ -53,9 +57,10 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
     localStorage.setItem('tasteSection', JSON.stringify({
       textInput,
       selectedObject,
-      selectedTasteType
+      selectedTasteType,
+      currentTab
     }));
-  }, [textInput, selectedObject, selectedTasteType]);
+  }, [textInput, selectedObject, selectedTasteType, currentTab]);
 
   const handleObjectSelect = (item: string) => {
     setSelectedObject(item === selectedObject ? '' : item);
@@ -71,7 +76,13 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
     setIsSaving(true);
     
     try {
-      // Step 1: Prepare the data object based on what the user has entered
+      console.log('Starting save process for taste section');
+      console.log('Current tab:', currentTab);
+      console.log('Text input:', textInput);
+      console.log('Selected object:', selectedObject);
+      console.log('Selected taste type:', selectedTasteType);
+
+      // Create base response data
       const responseData = {
         user_id: user.id,
         activity_id: 'grounding-technique',
@@ -83,16 +94,29 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
         response_selected_items: null
       };
 
-      // Step 2: Add the appropriate data based on which tab was used
-      if (textInput) {
+      // Determine what data to save based on the active tab
+      if (currentTab === 'text' && textInput) {
+        console.log('Saving text input:', textInput);
         responseData.response_text = textInput;
-      } else if (selectedObject) {
+      } else if (currentTab === 'objects' && selectedObject) {
+        console.log('Saving selected object:', selectedObject);
         responseData.response_selected_items = [selectedObject];
-      } else if (selectedTasteType) {
+      } else if (currentTab === 'tastes' && selectedTasteType) {
+        console.log('Saving selected taste type:', selectedTasteType);
         responseData.response_selected_items = [selectedTasteType];
+      } else {
+        // Fallback to save whatever data is available if tab doesn't match
+        if (textInput) {
+          responseData.response_text = textInput;
+        } else if (selectedObject) {
+          responseData.response_selected_items = [selectedObject];
+        } else if (selectedTasteType) {
+          responseData.response_selected_items = [selectedTasteType];
+        }
       }
 
-      // Step 3: Insert the data into Supabase
+      console.log('Saving response data:', responseData);
+      
       const { error } = await supabase
         .from('grounding_responses')
         .insert(responseData);
@@ -102,13 +126,12 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
         throw error;
       }
 
-      // Step 4: Clear localStorage after successful save
+      // Clear localStorage after successful save
       localStorage.removeItem('tasteSection');
       
-      // Step 5: Show success message
+      console.log('Save successful');
       toast.success("Your taste response was saved successfully!");
       
-      // Step 6: Call onComplete to move to the next section
       onComplete();
     } catch (error) {
       console.error("Error saving taste section data:", error);
@@ -140,7 +163,11 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
         </p>
       </div>
 
-      <Tabs defaultValue="text" className="w-full">
+      <Tabs 
+        defaultValue={currentTab} 
+        className="w-full"
+        onValueChange={(value) => setCurrentTab(value)}
+      >
         <TabsList className="grid grid-cols-3 mb-6 bg-gray-100">
           <TabsTrigger value="text" className="text-xs sm:text-sm">Text Answer</TabsTrigger>
           <TabsTrigger value="objects" className="text-xs sm:text-sm">Taste Objects</TabsTrigger>
