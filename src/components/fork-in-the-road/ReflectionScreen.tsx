@@ -129,6 +129,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
         setActiveTab("future");
         break;
       case "future":
+        console.log("Reflection completed with data:", formData);
         onNext(formData);
         break;
     }

@@ -48,6 +48,7 @@ const ForkInTheRoadActivity = () => {
   const { user } = useAuth();
 
   const handleNextStep = (data: Partial<typeof decisionData>) => {
+    console.log("handleNextStep - Current step:", currentStep, "Received data:", data);
     setDecisionData(prev => ({ ...prev, ...data }));
     
     // If this is the final step (GutCheckScreen), save data to Supabase
@@ -67,17 +68,19 @@ const ForkInTheRoadActivity = () => {
     // Prevent double submissions
     if (isSubmitting) return;
     
+    const finalData = {
+      ...decisionData,
+      selection,
+      user_id: user.id
+    };
+    
     try {
       setIsSubmitting(true);
-      console.log("Saving decision data to Supabase:", { ...decisionData, selection, user_id: user.id });
+      console.log("Saving decision data to Supabase:", finalData);
       
       const { data, error } = await supabase
         .from('fork_in_road_decisions')
-        .insert({
-          user_id: user.id,
-          ...decisionData,
-          selection: selection
-        })
+        .insert(finalData)
         .select();
 
       if (error) {

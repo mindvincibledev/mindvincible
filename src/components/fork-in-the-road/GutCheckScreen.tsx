@@ -28,6 +28,7 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
   };
 
   const handleComplete = () => {
+    console.log("GutCheckScreen - Completing with selection:", selectedOption);
     onComplete(selectedOption);
   };
 
