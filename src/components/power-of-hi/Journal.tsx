@@ -65,6 +65,8 @@ const Journal = () => {
     initialMoodIndex: 0, 
     wheelRef 
   });
+  const [completionPercentage, setCompletionPercentage] = useState(0);
+  const [totalGoals, setTotalGoals] = useState(0);
 
   // Update feeling when mood changes
   useEffect(() => {
@@ -108,6 +110,15 @@ const Journal = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (goals.length > 0) {
+      const total = goals.length;
+      const completed = goals.length - incompleteGoals.length;
+      setTotalGoals(total);
+      setCompletionPercentage((completed / total) * 100);
+    }
+  }, [goals, incompleteGoals]);
 
   const fetchGoals = async () => {
     if (!user?.id) return;
@@ -468,6 +479,17 @@ const Journal = () => {
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-center mb-6">Track Your Progress</h2>
           
+          <div className="space-y-4 mb-8">
+            <div className="flex justify-between items-center text-sm text-gray-600">
+              <span>Goal Completion Progress</span>
+              <span>{Math.round(completionPercentage)}%</span>
+            </div>
+            <Progress value={completionPercentage} className="h-2" />
+            <p className="text-center text-sm text-gray-600">
+              {incompleteGoals.length} goals remaining out of {totalGoals}
+            </p>
+          </div>
+
           {incompleteGoals.length === 0 ? (
             <div className="text-center space-y-4">
               <p className="text-gray-600">You've completed all your goals!</p>
