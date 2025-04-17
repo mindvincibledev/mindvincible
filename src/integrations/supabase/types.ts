@@ -106,6 +106,95 @@ export type Database = {
           },
         ]
       }
+      fork_in_road_decisions: {
+        Row: {
+          challenges_a: string | null
+          challenges_b: string | null
+          change_a: string | null
+          change_b: string | null
+          choice: string | null
+          consideration_path: string | null
+          created_at: string
+          decision_id: string
+          feel_a: string | null
+          feel_b: string | null
+          future_a: string | null
+          future_b: string | null
+          gain_a: string | null
+          gain_b: string | null
+          other_path: string | null
+          selection: string | null
+          strengths_a: string[] | null
+          strengths_b: string[] | null
+          tag_a: string[] | null
+          tag_b: string[] | null
+          updated_at: string
+          user_id: string
+          values_a: string | null
+          values_b: string | null
+        }
+        Insert: {
+          challenges_a?: string | null
+          challenges_b?: string | null
+          change_a?: string | null
+          change_b?: string | null
+          choice?: string | null
+          consideration_path?: string | null
+          created_at?: string
+          decision_id?: string
+          feel_a?: string | null
+          feel_b?: string | null
+          future_a?: string | null
+          future_b?: string | null
+          gain_a?: string | null
+          gain_b?: string | null
+          other_path?: string | null
+          selection?: string | null
+          strengths_a?: string[] | null
+          strengths_b?: string[] | null
+          tag_a?: string[] | null
+          tag_b?: string[] | null
+          updated_at?: string
+          user_id: string
+          values_a?: string | null
+          values_b?: string | null
+        }
+        Update: {
+          challenges_a?: string | null
+          challenges_b?: string | null
+          change_a?: string | null
+          change_b?: string | null
+          choice?: string | null
+          consideration_path?: string | null
+          created_at?: string
+          decision_id?: string
+          feel_a?: string | null
+          feel_b?: string | null
+          future_a?: string | null
+          future_b?: string | null
+          gain_a?: string | null
+          gain_b?: string | null
+          other_path?: string | null
+          selection?: string | null
+          strengths_a?: string[] | null
+          strengths_b?: string[] | null
+          tag_a?: string[] | null
+          tag_b?: string[] | null
+          updated_at?: string
+          user_id?: string
+          values_a?: string | null
+          values_b?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fork_in_road_decisions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grounding_responses: {
         Row: {
           activity_id: string
@@ -448,7 +537,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_decisions: {
+        Row: {
+          challenges_a: string | null
+          challenges_b: string | null
+          change_a: string | null
+          change_b: string | null
+          choice: string | null
+          consideration_path: string | null
+          created_at: string | null
+          decision_id: string | null
+          feel_a: string | null
+          feel_b: string | null
+          future_a: string | null
+          future_b: string | null
+          gain_a: string | null
+          gain_b: string | null
+          other_path: string | null
+          selection: string | null
+          strengths_a: string[] | null
+          strengths_b: string[] | null
+          tag_a: string[] | null
+          tag_b: string[] | null
+          updated_at: string | null
+          user_email: string | null
+          user_id: string | null
+          user_name: string | null
+          values_a: string | null
+          values_b: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fork_in_road_decisions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never

@@ -28,6 +28,7 @@ import MoodReminderNotification from "./components/MoodReminderNotification";
 // Import activities
 import PowerOfHiActivity from "./pages/PowerOfHiActivity";
 import MirrorMirrorActivity from "./pages/MirrorMirrorActivity";
+import ForkInTheRoadActivity from "./pages/ForkInTheRoadActivity";
 
 // Update document title to correct app name
 document.title = "M(in)dvincible";
@@ -140,6 +141,12 @@ const AppRoutes = () => {
         <Route path="/emotional-hacking/power-of-hi" element={
           <ProtectedRoute>
             <PowerOfHiActivity />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/emotional-hacking/fork-in-the-road" element={
+          <ProtectedRoute>
+            <ForkInTheRoadActivity />
           </ProtectedRoute>
         } />
         

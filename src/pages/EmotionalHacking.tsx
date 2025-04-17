@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/context/AuthContext';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import ActivityStatsChart from '@/components/charts/ActivityStatsChart';
+import { GitFork } from 'lucide-react';  // New icon for Fork in the Road
 
 const activities = [
   {
@@ -72,6 +73,17 @@ const activities = [
     bgColor: "bg-[#E5FFF2]",
     chartColor: "#2AC20E",
     shortName: "Hi"
+  },
+  {
+    id: "fork-in-the-road",
+    title: "Fork in the Road",
+    description: "Explore your options. Choose with clarity.",
+    icon: <GitFork className="h-8 w-8 text-[#3DFDFF]" />,
+    link: "/emotional-hacking/fork-in-the-road",
+    color: "from-[#3DFDFF] to-[#2AC20E]",
+    bgColor: "bg-[#E5FFF2]",
+    chartColor: "#3DFDFF",
+    shortName: "Choices"
   }
 ];
 
