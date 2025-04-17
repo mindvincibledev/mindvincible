@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check, Coffee, Sandwich, IceCream, Cigarette } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,7 +24,6 @@ interface TasteSectionProps {
 const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
   // State for different input types
   const [textInput, setTextInput] = useState<string>('');
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<string[]>([]);
   const [selectedTastes, setSelectedTastes] = useState<{[key: string]: boolean}>({
     sweet: false,
@@ -36,17 +35,8 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
 
   // For determining if the user can proceed
   const canProceed = textInput !== '' || 
-                    selectedOption !== null || 
                     selectedObjects.length > 0 || 
                     Object.values(selectedTastes).some(value => value);
-
-  // Taste type options
-  const tasteOptions = [
-    { id: 'coffee', label: 'Coffee/Bitter', icon: <Coffee className="h-5 w-5" />, color: 'bg-amber-700' },
-    { id: 'sweet', label: 'Sweet', icon: <IceCream className="h-5 w-5" />, color: 'bg-pink-400' },
-    { id: 'savory', label: 'Savory', icon: <Sandwich className="h-5 w-5" />, color: 'bg-yellow-600' },
-    { id: 'mint', label: 'Mint/Fresh', icon: <Cigarette className="h-5 w-5" />, color: 'bg-green-400' }
-  ];
 
   // Set up persisted storage
   useEffect(() => {
@@ -55,7 +45,6 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
     if (savedData) {
       const parsedData = JSON.parse(savedData);
       setTextInput(parsedData.textInput || '');
-      setSelectedOption(parsedData.selectedOption || null);
       setSelectedObjects(parsedData.selectedObjects || []);
       setSelectedTastes(parsedData.selectedTastes || {
         sweet: false,
@@ -71,21 +60,16 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
   useEffect(() => {
     localStorage.setItem('tasteSection', JSON.stringify({
       textInput,
-      selectedOption,
       selectedObjects,
       selectedTastes
     }));
-  }, [textInput, selectedOption, selectedObjects, selectedTastes]);
+  }, [textInput, selectedObjects, selectedTastes]);
 
   const handleTastesChange = (id: string, checked: boolean) => {
     setSelectedTastes(prev => ({
       ...prev,
       [id]: checked
     }));
-  };
-
-  const handleOptionSelect = (option: string) => {
-    setSelectedOption(option === selectedOption ? null : option);
   };
 
   const handleSkip = () => {
@@ -111,9 +95,8 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
       </div>
 
       <Tabs defaultValue="text" className="w-full">
-        <TabsList className="grid grid-cols-4 mb-6 bg-gray-100">
+        <TabsList className="grid grid-cols-3 mb-6 bg-gray-100">
           <TabsTrigger value="text" className="text-xs sm:text-sm">Text Answer</TabsTrigger>
-          <TabsTrigger value="options" className="text-xs sm:text-sm">Quick Select</TabsTrigger>
           <TabsTrigger value="objects" className="text-xs sm:text-sm">Taste Objects</TabsTrigger>
           <TabsTrigger value="tastes" className="text-xs sm:text-sm">Taste Types</TabsTrigger>
         </TabsList>
@@ -128,29 +111,6 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
               className="mt-2"
               placeholder="I taste..."
             />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="options">
-          <div className="grid grid-cols-2 gap-3">
-            {tasteOptions.map((option) => (
-              <div
-                key={option.id}
-                onClick={() => handleOptionSelect(option.id)}
-                className={`flex items-center p-3 rounded-lg cursor-pointer transition-all ${
-                  selectedOption === option.id 
-                    ? 'bg-[#3DFDFF]/20 border-2 border-[#3DFDFF]' 
-                    : 'bg-white border border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                <div className={`rounded-full p-2 mr-3 ${option.color} text-white`}>
-                  {option.icon}
-                </div>
-                <div>
-                  <p className="font-medium">{option.label}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </TabsContent>
 
