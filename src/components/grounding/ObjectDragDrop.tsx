@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -92,101 +91,36 @@ const ObjectDragDrop: React.FC<ObjectDragDropProps> = ({ objects, selectedItems,
   );
 };
 
-// Helper function to get an emoji for each item
 function getEmojiForItem(item: string): string {
   const emojiMap: Record<string, string> = {
-    // Furniture and fixtures
-    desk: "🪑",
-    chair: "💺",
-    door: "🚪",
-    wall: "🧱",
-    
-    // Electronics
-    keyboard: "⌨️",
-    phone: "📱",
-    mouse: "🖱️",
-    headphones: "🎧",
-    remote: "🔖",
-    
-    // Personal items
-    glasses: "👓",
-    watch: "⌚",
-    ring: "💍",
-    bracelet: "💎",
-    
-    // Stationery and books
-    book: "📚",
-    pen: "🖊️",
-    paper: "📄",
-    
-    // Kitchen items
-    cup: "☕",
-    bottle: "🍼",
-    
-    // Textiles and fabrics
-    clothing: "👕",
-    hair: "💇",
-    skin: "🫱",
-    fabric: "🧵",
-    carpet: "🧶",
-    blanket: "🛏️",
-    pillow: "🛌",
-    
-    // Materials
-    wood: "🪵",
-    metal: "🔩",
-    plastic: "💿",
-    
-    // Sound items
-    music: "🎵",
-    voice: "🗣️",
-    conversation: "💬",
-    vehicle: "🚗",
-    bell: "🔔",
-    alarm: "⏰",
-    traffic: "🚦",
-    bird: "🐦",
-    rain: "🌧️",
-    thunder: "⚡",
-    wind: "🌬️",
-    appliance: "🔌",
-    tv: "📺",
-    radio: "📻",
-    typing: "⌨️",
-    footsteps: "👣",
-    dog: "🐕",
-    cat: "🐈",
-    airplane: "✈️",
-    siren: "🚨",
-    knock: "👊",
-    clock: "🕰️",
-    fan: "💨",
-    stream: "🏞️",
-    ocean: "🌊",
-    breathing: "🫁",
-    
-    // Smell items
-    food: "🍲",
-    candle: "🕯️",
-    shampoo: "🧴",
-    air: "🌬️",
-    coffee: "☕",
-    perfume: "🧪",
-    flowers: "🌸",
-    "fresh bread": "🍞",
-    soap: "🧼",
-    spices: "🌶️",
-    laundry: "👕",
-    "cleaning products": "🧹",
-    fruit: "🍎",
-    books: "📚",
-    grass: "🌿",
-    dessert: "🍰",
-    fire: "🔥",
-    "essential oil": "💧"
+    lights: '💡',
+    books: '📚', 
+    plants: '🌿',
+    window: '🪟', 
+    desk: '🪑',
+    cup: '☕',
+    clock: '⏰', 
+    phone: '📱',
+    person: '👤', 
+    door: '🚪',
+    pen: '🖊️', 
+    shoes: '👟',
+    chair: '💺', 
+    shadow: '👥',
+    wall: '🧱', 
+    ceiling: '⬜',
+    floor: '🟤', 
+    art: '🖼️',
+    screen: '🖥️', 
+    keyboard: '⌨️',
+    mouse: '🖱️', 
+    dog: '🐶',
+    cat: '🐱', 
+    trees: '🌳',
+    clouds: '☁️'
   };
 
-  return emojiMap[item.toLowerCase()] || "👃";
+  return emojiMap[item.toLowerCase()] || '👀';
 }
 
 export default ObjectDragDrop;
