@@ -16,6 +16,8 @@ import SeeSection from '@/components/grounding/SeeSection';
 import TouchSection from '@/components/grounding/TouchSection';
 import HearSection from '@/components/grounding/HearSection';
 import SmellSection from '@/components/grounding/SmellSection';
+import TasteSection from '@/components/grounding/TasteSection';
+import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 
 enum GroundingStep {
   Welcome,
@@ -38,8 +40,7 @@ const GroundingTechniqueActivity = () => {
   const handleContinue = () => {
     setCurrentStep(prevStep => {
       const nextStep = prevStep + 1;
-      // If smell section is complete, move to completion screen or next section when available
-      return nextStep > GroundingStep.Smell ? GroundingStep.Complete : nextStep;
+      return nextStep;
     });
   };
   
@@ -88,6 +89,8 @@ const GroundingTechniqueActivity = () => {
         return <HearSection onComplete={handleContinue} onBack={handleBack} />;
       case GroundingStep.Smell:
         return <SmellSection onComplete={handleContinue} onBack={handleBack} />;
+      case GroundingStep.Taste:
+        return <TasteSection onComplete={handleContinue} onBack={handleBack} />;
       case GroundingStep.Complete:
         return (
           <motion.div 
@@ -96,40 +99,33 @@ const GroundingTechniqueActivity = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
+            <CompletionAnimation />
+            
             <motion.div
-              className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-[#3DFDFF] to-[#FC68B3] rounded-full flex items-center justify-center"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1, rotate: 360 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              className="mt-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 4.5, duration: 1 }}
             >
-              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </motion.div>
-            
-            <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-[#3DFDFF] to-[#FC68B3] bg-clip-text text-transparent">
-              M(in)dvincible Grounding Complete!
-            </h2>
-            
-            <p className="mb-8 text-gray-700">
-              Amazing job completing four sections of the grounding exercise! 
-              The last section (Taste) will be coming soon.
-            </p>
-            
-            <div className="space-x-4">
-              <Link to="/emotional-hacking">
-                <Button variant="outline">
-                  Return to Activities
-                </Button>
-              </Link>
+              <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-[#3DFDFF] to-[#FC68B3] bg-clip-text text-transparent">
+                M(in)dvincible Grounding Complete!
+              </h2>
               
-              <Button 
-                className="bg-gradient-to-r from-[#3DFDFF] to-[#FC68B3] hover:opacity-90"
-                onClick={handleCompleteActivity}
-              >
-                Complete Activity
-              </Button>
-            </div>
+              <div className="space-x-4 mt-6">
+                <Link to="/emotional-hacking">
+                  <Button variant="outline">
+                    Return to Activities
+                  </Button>
+                </Link>
+                
+                <Button 
+                  className="bg-gradient-to-r from-[#3DFDFF] to-[#FC68B3] hover:opacity-90"
+                  onClick={handleCompleteActivity}
+                >
+                  Complete Activity
+                </Button>
+              </div>
+            </motion.div>
           </motion.div>
         );
       default:

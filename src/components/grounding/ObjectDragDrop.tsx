@@ -114,8 +114,7 @@ function getEmojiForItem(item: string): string {
     floor: '🟤', 
     art: '🖼️',
     screen: '🖥️', 
-    keyboard: '⌨️',
-    mouse: '🖱️', 
+    mouse: '🖱️',
     dog: '🐶',
     cat: '🐱', 
     trees: '🌳',
@@ -163,7 +162,7 @@ function getEmojiForItem(item: string): string {
     "Fresh Bread": "🥖",
     "Cleaning Products": "🧹",
     
-    // Hear section objects from image
+    // Hear section objects
     music: '🎵',
     voice: '🗣️',
     conversation: '💬',
@@ -186,11 +185,42 @@ function getEmojiForItem(item: string): string {
     fan: '💨',
     stream: '🌊',
     ocean: '🌊',
-    breathing: '🫁'
+    breathing: '🫁',
+    
+    // Taste section objects
+    "Coffee": "☕",
+    "Tea": "🍵",
+    "Chocolate": "🍫",
+    "Mint": "🌿",
+    "Gum": "🍬",
+    "Toothpaste": "🪥",
+    "Water": "💧",
+    "Fruit": "🍎",
+    "Candy": "🍭",
+    "Bread": "🍞",
+    "Nothing": "🚫",
+    "Snack": "🍿",
+    "Salty": "🧂",
+    "Sweet": "🍯",
+    "Sour": "🍋",
+    "Spicy": "🌶️",
+    "Bitter": "☕",
+    "Juice": "🧃",
+    "Soda": "🥤",
+    "Smoothie": "🥤"
   };
 
-  // Strict emoji mapping without fallback
-  return emojiMap[item.toLowerCase()] || '';
+  // Convert item to lowercase for case-insensitive matching
+  const lowerItem = item.toLowerCase();
+  
+  // Try exact match first
+  if (emojiMap[item]) return emojiMap[item];
+  
+  // Try lowercase match
+  if (emojiMap[lowerItem]) return emojiMap[lowerItem];
+  
+  // If no match found, return a default emoji
+  return '✨';
 }
 
 export default ObjectDragDrop;
