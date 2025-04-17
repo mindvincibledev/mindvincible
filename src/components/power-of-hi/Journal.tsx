@@ -12,6 +12,7 @@ import MoodSelector from '@/components/mood/MoodSelector';
 import { Star, Trophy, Target, ArrowRight, Mic, MicOff, Upload, Image, Camera, Smile, X } from 'lucide-react';
 import { useMoodWheel } from '@/hooks/useMoodWheel';
 import { v4 as uuidv4 } from 'uuid';
+import ReflectionSection, { ReflectionData } from './ReflectionSection';
 
 const MOODS = ["Happy", "Excited", "Proud", "Confident", "Nervous", "Awkward", "Uncomfortable", "Scared"];
 
@@ -346,24 +347,11 @@ const Journal = () => {
 
       if (error) throw error;
 
-      toast.success('Goal completed successfully!', {
-        description: 'This goal is now marked as complete and cannot be updated further.'
-      });
+      // Show success message
+      toast.success('Progress saved! Time for some quick reflection.');
       
-      // Refresh goals to remove the completed one
-      fetchJournalEntries();
-      
-      // Reset form
-      setWho('');
-      setHowItWent('');
-      setFeeling('');
-      setWhoFile(null);
-      setHowItWentFile(null);
-      setFeelingFile(null);
-      setWhoPreview(null);
-      setHowItWentPreview(null);
-      setFeelingPreview(null);
-      setSelectedGoal('');
+      // Move to reflection section
+      setActiveSection('reflection');
     } catch (error: any) {
       console.error('Error saving progress:', error);
       toast.error('Failed to save progress');
@@ -371,6 +359,54 @@ const Journal = () => {
       setIsSubmitting(false);
     }
   };
+
+  const handleReflectionSubmit = async (reflectionData: ReflectionData) => {
+    if (!user?.id || !selectedGoal) return;
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('simple_hi_challenges')
+        .update({
+          what_felt_easy: reflectionData.whatFeltEasy,
+          what_felt_hard: reflectionData.whatFeltHard,
+          other_people_responses: reflectionData.otherPeopleResponses,
+          try_next_time: reflectionData.tryNextTime,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedGoal)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast.success('Goal completed successfully!', {
+        description: 'This goal is now marked as complete and cannot be updated further.'
+      });
+      
+      // Refresh goals to remove the completed one
+      fetchJournalEntries();
+      
+      // Reset form and go back to initial section
+      setWho('');
+      setHowItWent('');
+      setFeeling('');
+      setWhoFile(null);
+      setHowItWentFile(null);
+      setWhoPreview(null);
+      setHowItWentPreview(null);
+      setFeelingPreview(null);
+      setSelectedGoal('');
+      setActiveSection('initial');
+    } catch (error: any) {
+      console.error('Error saving reflection:', error);
+      toast.error('Failed to save reflection');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Add state for managing sections
+  const [activeSection, setActiveSection] = React.useState<'initial' | 'reflection'>('initial');
 
   // Custom handler for selecting a mood directly with the simplified interface
   const handleMoodSelect = (mood: string) => {
@@ -441,219 +477,228 @@ const Journal = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Select Goal to Update</label>
-                <Select
-                  value={selectedGoal}
-                  onValueChange={setSelectedGoal}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Choose a goal..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {incompleteGoals.map((goal) => (
-                      <SelectItem
-                        key={goal.id}
-                        value={goal.id}
-                        className={`${
-                          goal.challenge_level === 'easy'
-                            ? 'text-[#2AC20E]'
-                            : goal.challenge_level === 'medium'
-                            ? 'text-[#F5DF4D]'
-                            : 'text-[#FC68B3]'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Target className="h-4 w-4" />
-                          <span>{goal.goal}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {selectedGoal && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="space-y-6"
-                >
+              {activeSection === 'initial' ? (
+                <>
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Who did you interact with?</label>
-                    <Textarea
-                      value={who}
-                      onChange={(e) => setWho(e.target.value)}
-                      placeholder="Describe the person or situation..."
-                      className="min-h-[80px]"
-                    />
-                    
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      <label htmlFor="who-file" className="cursor-pointer">
-                        <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
-                          <Image className="w-4 h-4" />
-                          <span>Add Photo</span>
-                        </div>
-                        <input
-                          id="who-file"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileChange(e, 'who')}
-                          className="hidden"
-                        />
-                      </label>
-                      
-                      {isRecordingWho ? (
-                        <button 
-                          onClick={() => stopRecording('who')}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
-                        >
-                          <MicOff className="w-4 h-4" />
-                          <span>Stop</span>
-                        </button>
-                      ) : (
-                        <button 
-                          onClick={() => startRecording('who')}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
-                        >
-                          <Mic className="w-4 h-4" />
-                          <span>Record Audio</span>
-                        </button>
-                      )}
-                    </div>
-                    
-                    {renderFilePreview(whoPreview, 'who')}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">How did it go?</label>
-                    <Textarea
-                      value={howItWent}
-                      onChange={(e) => setHowItWent(e.target.value)}
-                      placeholder="Share your experience..."
-                      className="min-h-[120px]"
-                    />
-                    
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      <label htmlFor="howItWent-file" className="cursor-pointer">
-                        <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
-                          <Image className="w-4 h-4" />
-                          <span>Add Photo</span>
-                        </div>
-                        <input
-                          id="howItWent-file"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileChange(e, 'howItWent')}
-                          className="hidden"
-                        />
-                      </label>
-                      
-                      {isRecordingHowItWent ? (
-                        <button 
-                          onClick={() => stopRecording('howItWent')}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
-                        >
-                          <MicOff className="w-4 h-4" />
-                          <span>Stop</span>
-                        </button>
-                      ) : (
-                        <button 
-                          onClick={() => startRecording('howItWent')}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
-                        >
-                          <Mic className="w-4 h-4" />
-                          <span>Record Audio</span>
-                        </button>
-                      )}
-                    </div>
-                    
-                    {renderFilePreview(howItWentPreview, 'howItWent')}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">How did it make you feel?</label>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <MoodSelector
-                        moods={MOODS}
-                        selectedMoodIndex={selectedMoodIndex}
-                        onMoodSelect={setSelectedMoodIndex}
-                        onChangeMood={changeMood}
-                        wheelRef={wheelRef}
-                        handleTouchStart={handleTouchStart}
-                        handleTouchMove={handleTouchMove}
-                        handleTouchEnd={handleTouchEnd}
-                        onMoodHover={setHoveredMoodIndex}
-                        onSelect={handleMoodSelect}
-                        selectedMood={feeling}
-                      />
-                    </div>
-                    
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <label htmlFor="feeling-file" className="cursor-pointer">
-                        <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
-                          <Image className="w-4 h-4" />
-                          <span>Add Image</span>
-                        </div>
-                        <input
-                          id="feeling-file"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileChange(e, 'feeling')}
-                          className="hidden"
-                        />
-                      </label>
-                      
-                      {isRecordingFeeling ? (
-                        <button 
-                          onClick={() => stopRecording('feeling')}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
-                        >
-                          <MicOff className="w-4 h-4" />
-                          <span>Stop</span>
-                        </button>
-                      ) : (
-                        <button 
-                          onClick={() => startRecording('feeling')}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
-                        >
-                          <Mic className="w-4 h-4" />
-                          <span>Record Audio</span>
-                        </button>
-                      )}
-                      
-                      <button 
-                        className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
-                      >
-                        <Smile className="w-4 h-4" />
-                        <span>Add Sticker</span>
-                      </button>
-                    </div>
-                    
-                    {renderFilePreview(feelingPreview, 'feeling')}
-                  </div>
-
-                  <motion.div
-                    className="flex justify-center mt-8"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Button
-                      onClick={handleSubmit}
-                      disabled={isSubmitting || !who || !howItWent || !feeling}
-                      className="w-full md:w-auto px-8 py-6 text-lg font-semibold rounded-full bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90 transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
+                    <label className="block text-sm font-medium text-gray-700">Select Goal to Update</label>
+                    <Select
+                      value={selectedGoal}
+                      onValueChange={setSelectedGoal}
                     >
-                      {isSubmitting ? (
-                        'Saving...'
-                      ) : (
-                        <>
-                          Complete Goal
-                          <ArrowRight className="h-5 w-5" />
-                        </>
-                      )}
-                    </Button>
-                  </motion.div>
-                </motion.div>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Choose a goal..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {incompleteGoals.map((goal) => (
+                          <SelectItem
+                            key={goal.id}
+                            value={goal.id}
+                            className={`${
+                              goal.challenge_level === 'easy'
+                                ? 'text-[#2AC20E]'
+                                : goal.challenge_level === 'medium'
+                                ? 'text-[#F5DF4D]'
+                                : 'text-[#FC68B3]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Target className="h-4 w-4" />
+                              <span>{goal.goal}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedGoal && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="space-y-6"
+                    >
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">Who did you interact with?</label>
+                        <Textarea
+                          value={who}
+                          onChange={(e) => setWho(e.target.value)}
+                          placeholder="Describe the person or situation..."
+                          className="min-h-[80px]"
+                        />
+                        
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <label htmlFor="who-file" className="cursor-pointer">
+                            <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                              <Image className="w-4 h-4" />
+                              <span>Add Photo</span>
+                            </div>
+                            <input
+                              id="who-file"
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleFileChange(e, 'who')}
+                              className="hidden"
+                            />
+                          </label>
+                          
+                          {isRecordingWho ? (
+                            <button 
+                              onClick={() => stopRecording('who')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                            >
+                              <MicOff className="w-4 h-4" />
+                              <span>Stop</span>
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => startRecording('who')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                            >
+                              <Mic className="w-4 h-4" />
+                              <span>Record Audio</span>
+                            </button>
+                          )}
+                        </div>
+                        
+                        {renderFilePreview(whoPreview, 'who')}
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">How did it go?</label>
+                        <Textarea
+                          value={howItWent}
+                          onChange={(e) => setHowItWent(e.target.value)}
+                          placeholder="Share your experience..."
+                          className="min-h-[120px]"
+                        />
+                        
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <label htmlFor="howItWent-file" className="cursor-pointer">
+                            <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                              <Image className="w-4 h-4" />
+                              <span>Add Photo</span>
+                            </div>
+                            <input
+                              id="howItWent-file"
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleFileChange(e, 'howItWent')}
+                              className="hidden"
+                            />
+                          </label>
+                          
+                          {isRecordingHowItWent ? (
+                            <button 
+                              onClick={() => stopRecording('howItWent')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                            >
+                              <MicOff className="w-4 h-4" />
+                              <span>Stop</span>
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => startRecording('howItWent')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                            >
+                              <Mic className="w-4 h-4" />
+                              <span>Record Audio</span>
+                            </button>
+                          )}
+                        </div>
+                        
+                        {renderFilePreview(howItWentPreview, 'howItWent')}
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">How did it make you feel?</label>
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <MoodSelector
+                            moods={MOODS}
+                            selectedMoodIndex={selectedMoodIndex}
+                            onMoodSelect={setSelectedMoodIndex}
+                            onChangeMood={changeMood}
+                            wheelRef={wheelRef}
+                            handleTouchStart={handleTouchStart}
+                            handleTouchMove={handleTouchMove}
+                            handleTouchEnd={handleTouchEnd}
+                            onMoodHover={setHoveredMoodIndex}
+                            onSelect={handleMoodSelect}
+                            selectedMood={feeling}
+                          />
+                        </div>
+                        
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <label htmlFor="feeling-file" className="cursor-pointer">
+                            <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                              <Image className="w-4 h-4" />
+                              <span>Add Image</span>
+                            </div>
+                            <input
+                              id="feeling-file"
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleFileChange(e, 'feeling')}
+                              className="hidden"
+                            />
+                          </label>
+                          
+                          {isRecordingFeeling ? (
+                            <button 
+                              onClick={() => stopRecording('feeling')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                            >
+                              <MicOff className="w-4 h-4" />
+                              <span>Stop</span>
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => startRecording('feeling')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                            >
+                              <Mic className="w-4 h-4" />
+                              <span>Record Audio</span>
+                            </button>
+                          )}
+                          
+                          <button 
+                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                          >
+                            <Smile className="w-4 h-4" />
+                            <span>Add Sticker</span>
+                          </button>
+                        </div>
+                        
+                        {renderFilePreview(feelingPreview, 'feeling')}
+                      </div>
+
+                      <motion.div
+                        className="flex justify-center mt-8"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Button
+                          onClick={handleSubmit}
+                          disabled={isSubmitting || !who || !howItWent || !feeling}
+                          className="w-full md:w-auto px-8 py-6 text-lg font-semibold rounded-full bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90 transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
+                        >
+                          {isSubmitting ? (
+                            'Saving...'
+                          ) : (
+                            <>
+                              Complete Goal
+                              <ArrowRight className="h-5 w-5" />
+                            </>
+                          )}
+                        </Button>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </>
+              ) : (
+                <ReflectionSection 
+                  onSubmit={handleReflectionSubmit}
+                  isSubmitting={isSubmitting}
+                />
               )}
             </div>
           )}
