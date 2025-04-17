@@ -122,7 +122,6 @@ function getEmojiForItem(item: string): string {
     clouds: '☁️',
 
     // Touch section additional objects
-    keyboard: '⌨️',
     fabric: '🧵',
     hair: '💇',
     skin: '✋',
@@ -154,11 +153,12 @@ function getEmojiForItem(item: string): string {
     laundry: '👕',
     cleaningproducts: '🧽',
     fruit: '🍎',
-    books: '📚',
     grass: '🌿',
     dessert: '🍰',
     fire: '🔥',
-    essentialoil: '🌼'
+    essentialoil: '🌼',
+    bottle: '🍾',
+    clothing: '👚'
   };
 
   // Strict emoji mapping without fallback
@@ -166,4 +166,3 @@ function getEmojiForItem(item: string): string {
 }
 
 export default ObjectDragDrop;
-
