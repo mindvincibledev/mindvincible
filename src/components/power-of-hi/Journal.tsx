@@ -82,6 +82,7 @@ const Journal = () => {
         .select('*')
         .eq('user_id', user.id)
         .is('how_it_went', null)  // Only fetch incomplete goals
+        .is('feeling', null)      // Ensure goal is truly incomplete
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -309,7 +310,9 @@ const Journal = () => {
 
       if (error) throw error;
 
-      toast.success('Goal completed successfully!');
+      toast.success('Goal completed successfully!', {
+        description: 'This goal is now marked as complete and cannot be updated further.'
+      });
       
       // Refresh goals to remove the completed goal
       fetchGoals();
