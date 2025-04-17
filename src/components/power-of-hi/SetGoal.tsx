@@ -16,19 +16,19 @@ const challengeLevels = [
   {
     level: 'easy',
     title: 'Easy',
-    description: 'Smile & make eye contact with someone.',
+    description: "Smile & make eye contact with someone.",
     xp: 10,
   },
   {
     level: 'medium',
     title: 'Medium',
-    description: 'Say hi to a classmate or colleague you don't usually talk to.',
+    description: "Say hi to a classmate or colleague you don't usually talk to.",
     xp: 20,
   },
   {
     level: 'advanced',
     title: 'Advanced',
-    description: 'Start a short convo or join a group.',
+    description: "Start a short convo or join a group.",
     xp: 30,
   },
 ];
