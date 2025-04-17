@@ -18,18 +18,36 @@ const challengeLevels = [
     title: 'Easy',
     description: "Smile & make eye contact with someone.",
     xp: 10,
+    colorClass: {
+      border: "border-green-500",
+      bg: "bg-green-100",
+      text: "text-green-600",
+      hover: "hover:border-green-500 hover:bg-green-50"
+    }
   },
   {
     level: 'medium',
     title: 'Medium',
     description: "Say hi to a classmate or colleague you don't usually talk to.",
     xp: 20,
+    colorClass: {
+      border: "border-yellow-500",
+      bg: "bg-yellow-100",
+      text: "text-yellow-600",
+      hover: "hover:border-yellow-500 hover:bg-yellow-50"
+    }
   },
   {
     level: 'advanced',
     title: 'Advanced',
     description: "Start a short convo or join a group.",
     xp: 30,
+    colorClass: {
+      border: "border-red-500",
+      bg: "bg-red-100",
+      text: "text-red-600",
+      hover: "hover:border-red-500 hover:bg-red-50"
+    }
   },
 ];
 
@@ -94,19 +112,20 @@ const SetGoal: React.FC<SetGoalProps> = ({ onComplete }) => {
               key={challenge.level}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              className="w-full"
             >
               <Button
                 variant="outline"
-                className={`w-full h-auto p-4 flex flex-col items-center gap-2 border-2 ${
-                  selectedLevel === challenge.level
-                    ? 'border-[#2AC20E] bg-[#E5FFF2]'
-                    : 'border-gray-200'
-                }`}
+                className={`w-full h-auto p-4 flex flex-col items-center gap-2 border-2 
+                  ${selectedLevel === challenge.level 
+                    ? `${challenge.colorClass.border} ${challenge.colorClass.bg}` 
+                    : `border-gray-200 ${challenge.colorClass.hover}`
+                  }`}
                 onClick={() => setSelectedLevel(challenge.level)}
               >
                 <span className="font-bold">{challenge.title}</span>
                 <span className="text-sm text-gray-600 text-center">{challenge.description}</span>
-                <span className="text-[#2AC20E] font-bold mt-2">+{challenge.xp} XP</span>
+                <span className={`${challenge.colorClass.text} font-bold mt-2`}>+{challenge.xp} XP</span>
               </Button>
             </motion.div>
           ))}
