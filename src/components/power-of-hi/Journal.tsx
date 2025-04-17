@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -296,19 +295,20 @@ const Journal = () => {
         feelingPath = await uploadFile(feelingFile, 'feeling');
       }
       
-      // Insert interaction data
+      // Update the challenge record with reflection data
       const { error } = await supabase
-        .from('simple_hi_interactions')
-        .insert({
-          user_id: user.id,
-          challenge_id: selectedGoal,
+        .from('simple_hi_challenges')
+        .update({
           who,
-          how_it_went: howItWent,
-          feeling,
           who_path: whoPath,
+          how_it_went: howItWent,
           how_it_went_path: howItWentPath,
-          feeling_path: feelingPath
-        });
+          feeling,
+          feeling_path: feelingPath,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedGoal)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
