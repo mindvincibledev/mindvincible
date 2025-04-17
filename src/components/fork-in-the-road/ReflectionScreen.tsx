@@ -34,7 +34,7 @@ interface ReflectionData {
 interface ReflectionScreenProps {
   onNext: (data: ReflectionData) => void;
   initialValues: Partial<ReflectionData> & {
-    considerationPath: string;
+    consideration_path: string;
     otherPath: string;
   };
 }
@@ -169,7 +169,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
             className={`rounded-full ${activeRoad === "A" ? "bg-gradient-to-r from-[#D5D5F1] to-[#3DFDFF]" : ""}`}
           >
             {activeRoad === "A" && <Check className="mr-1 h-4 w-4" />}
-            Road A: {initialValues.considerationPath}
+            Road A: {initialValues.consideration_path}
           </Button>
           <Button
             variant={activeRoad === "B" ? "default" : "outline"}
@@ -212,7 +212,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                     <Label>
                       What will change in your daily life if you take 
                       {activeRoad === "A" 
-                        ? ` ${initialValues.considerationPath}`
+                        ? ` ${initialValues.consideration_path}`
                         : ` ${initialValues.otherPath}`}?
                     </Label>
                     <Textarea
@@ -261,7 +261,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                     <Label>
                       What challenges might pop up on 
                       {activeRoad === "A" 
-                        ? ` ${initialValues.considerationPath}`
+                        ? ` ${initialValues.consideration_path}`
                         : ` ${initialValues.otherPath}`}?
                     </Label>
                     <Textarea
@@ -347,7 +347,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                     <Label>
                       How does 
                       {activeRoad === "A" 
-                        ? ` ${initialValues.considerationPath}`
+                        ? ` ${initialValues.consideration_path}`
                         : ` ${initialValues.otherPath}`}
                       match your values, interests, or long-term goals?
                     </Label>
@@ -381,7 +381,7 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
                     <Label>
                       Imagine it's a year from now. What have you gained from 
                       {activeRoad === "A" 
-                        ? ` ${initialValues.considerationPath}`
+                        ? ` ${initialValues.consideration_path}`
                         : ` ${initialValues.otherPath}`}?
                     </Label>
                     <Textarea

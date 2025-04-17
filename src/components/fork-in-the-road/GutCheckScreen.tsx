@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 interface GutCheckScreenProps {
   onComplete: (selection: string) => void;
   decisionData: {
-    considerationPath: string;
+    consideration_path: string;
     otherPath: string;
     change_a?: string;
     feel_a?: string;
@@ -129,7 +129,7 @@ const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionDat
             >
               <CardHeader className="pb-2">
                 <CardTitle className="flex justify-between items-center">
-                  <span>Road A: {decisionData.considerationPath}</span>
+                  <span>Road A: {decisionData.consideration_path}</span>
                   {selection === 'A' && (
                     <motion.div
                       initial={{ scale: 0 }}

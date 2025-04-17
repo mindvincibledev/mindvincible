@@ -21,7 +21,7 @@ const ForkInTheRoadActivity = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [decisionData, setDecisionData] = useState({
     choice: '',
-    considerationPath: '',
+    consideration_path: '',
     otherPath: '',
     change_a: '',
     feel_a: '',
@@ -123,7 +123,7 @@ const ForkInTheRoadActivity = () => {
             <p className="text-gray-700">
               You were leaning toward: <span className="font-medium">{
                 decisionData.selection === 'A' 
-                  ? decisionData.considerationPath 
+                  ? decisionData.consideration_path 
                   : decisionData.selection === 'B' 
                     ? decisionData.otherPath 
                     : "Still deciding"
@@ -144,7 +144,7 @@ const ForkInTheRoadActivity = () => {
             onClick={() => {
               setDecisionData({
                 choice: '',
-                considerationPath: '',
+                consideration_path: '',
                 otherPath: '',
                 change_a: '',
                 feel_a: '',
@@ -185,7 +185,7 @@ const ForkInTheRoadActivity = () => {
     <RoadLabelsScreen 
       onNext={(paths) => handleNextStep(paths)}
       initialValues={{
-        considerationPath: decisionData.considerationPath, 
+        consideration_path: decisionData.consideration_path, 
         otherPath: decisionData.otherPath
       }}
     />,
