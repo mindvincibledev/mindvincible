@@ -2,283 +2,165 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Check, Sparkles } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { ArrowRight } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface GutCheckScreenProps {
   onComplete: (selection: string) => void;
   decisionData: {
     consideration_path: string;
     other_path: string;
-    change_a?: string;
-    feel_a?: string;
-    change_b?: string;
-    feel_b?: string;
-    challenges_a?: string;
-    challenges_b?: string;
-    strengths_a?: string[];
-    strengths_b?: string[];
-    values_a?: string;
-    values_b?: string;
-    tag_a?: string[];
-    tag_b?: string[];
-    gain_a?: string;
-    gain_b?: string;
-    future_a?: string;
-    future_b?: string;
+    [key: string]: any;
   };
 }
 
-// Helper function to get summary points with default fallbacks
-const getSummaryPoints = (data: GutCheckScreenProps['decisionData'], path: 'A' | 'B') => {
-  const points = [];
-  const field = path === 'A' ? 'A' : 'B';
-  
-  // Daily impact
-  if (data[`change${field}` as keyof typeof data]) {
-    points.push({
-      emoji: '💡',
-      title: 'Daily Impact',
-      content: data[`change${field}` as keyof typeof data] as string
-    });
-  }
-  
-  // Challenges
-  if (data[`challenges${field}` as keyof typeof data]) {
-    points.push({
-      emoji: '🧱',
-      title: 'Challenges',
-      content: data[`challenges${field}` as keyof typeof data] as string
-    });
-  }
-  
-  // Strengths
-  const strengths = data[`strengths${field}` as keyof typeof data] as string[] | undefined;
-  if (strengths && strengths.length > 0) {
-    points.push({
-      emoji: '💪',
-      title: 'Strengths',
-      content: strengths.join(', ')
-    });
-  }
-  
-  // Values alignment
-  if (data[`values${field}` as keyof typeof data]) {
-    points.push({
-      emoji: '🧭',
-      title: 'Values',
-      content: data[`values${field}` as keyof typeof data] as string
-    });
-  }
-  
-  // Future gains
-  if (data[`gain${field}` as keyof typeof data]) {
-    points.push({
-      emoji: '🔮',
-      title: 'Future Gains',
-      content: data[`gain${field}` as keyof typeof data] as string
-    });
-  }
-  
-  return points;
-};
-
 const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionData }) => {
-  const [selection, setSelection] = useState<string>('');
-  
-  const summaryPointsA = getSummaryPoints(decisionData, 'A');
-  const summaryPointsB = getSummaryPoints(decisionData, 'B');
-  
-  const handleComplete = () => {
-    if (!selection) {
-      return;
-    }
-    console.log("Completing with selection:", selection);
-    onComplete(selection);
+  const [selectedOption, setSelectedOption] = useState<'A' | 'B' | 'undecided'>('undecided');
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleSelect = (option: 'A' | 'B' | 'undecided') => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      setSelectedOption(option);
+      setIsAnimating(false);
+    }, 300);
   };
-  
+
+  const handleComplete = () => {
+    onComplete(selectedOption);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
+      className="text-center"
     >
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-center mb-4">
-          Gut Check: Which Path Feels Right?
-        </h2>
-        
-        <p className="text-gray-600 text-center mb-8">
-          Now that you've reflected, let's see which path resonates with you the most.
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-          {/* Road A */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+      <h2 className="text-2xl font-bold mb-4">
+        Gut Check: Which Path Feels Right?
+      </h2>
+      
+      <p className="text-gray-600 mb-8">
+        Now that you've reflected on both paths, listen to your gut.
+        Which option are you leaning toward?
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        {/* Path A */}
+        <motion.div
+          animate={selectedOption === 'A' ? { scale: 1.05 } : { scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        >
+          <Card 
+            className={`cursor-pointer hover:shadow-lg transition-all p-2 ${
+              selectedOption === 'A' 
+                ? 'ring-2 ring-[#3DFDFF] bg-gradient-to-r from-[#D5D5F1]/20 to-[#3DFDFF]/20' 
+                : ''
+            }`}
+            onClick={() => handleSelect('A')}
           >
-            <Card 
-              className={`cursor-pointer border-2 transition-all ${
-                selection === 'A' 
-                  ? 'border-[#3DFDFF] bg-gradient-to-br from-white to-[#D5D5F1]/10 shadow-lg' 
-                  : 'hover:border-[#D5D5F1]'
-              }`}
-              onClick={() => setSelection('A')}
-            >
-              <CardHeader className="pb-2">
-                <CardTitle className="flex justify-between items-center">
-                  <span>Road A: {decisionData.consideration_path}</span>
-                  {selection === 'A' && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="bg-[#3DFDFF] rounded-full p-1"
-                    >
-                      <Check className="h-4 w-4 text-white" />
-                    </motion.div>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {summaryPointsA.length > 0 ? (
-                    summaryPointsA.map((point, index) => (
-                      <div key={index}>
-                        {index > 0 && <Separator className="my-2" />}
-                        <div className="flex gap-2">
-                          <div className="text-xl">{point.emoji}</div>
-                          <div>
-                            <h4 className="font-medium text-sm">{point.title}</h4>
-                            <p className="text-sm text-gray-600">{point.content}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-400 italic text-sm">No reflection data provided</p>
-                  )}
-                  
-                  {decisionData.future_a && (
-                    <div className="text-center mt-4">
-                      <div className="text-3xl mb-1">{decisionData.future_a}</div>
-                      <p className="text-xs text-gray-500">Future symbol</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          
-          {/* Road B */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            <CardContent className="p-6 text-center">
+              <div className="text-3xl mb-3">🛣️</div>
+              <h3 className="text-xl font-medium mb-2">Road A</h3>
+              <p className="font-bold text-lg">{decisionData.consideration_path}</p>
+              
+              {selectedOption === 'A' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-4 flex justify-center"
+                >
+                  <div className="w-8 h-8 rounded-full bg-[#3DFDFF] flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                </motion.div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Path B */}
+        <motion.div
+          animate={selectedOption === 'B' ? { scale: 1.05 } : { scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        >
+          <Card 
+            className={`cursor-pointer hover:shadow-lg transition-all p-2 ${
+              selectedOption === 'B' 
+                ? 'ring-2 ring-[#F5DF4D] bg-gradient-to-r from-[#3DFDFF]/20 to-[#F5DF4D]/20' 
+                : ''
+            }`}
+            onClick={() => handleSelect('B')}
           >
-            <Card 
-              className={`cursor-pointer border-2 transition-all ${
-                selection === 'B' 
-                  ? 'border-[#3DFDFF] bg-gradient-to-br from-white to-[#3DFDFF]/10 shadow-lg' 
-                  : 'hover:border-[#3DFDFF]'
-              }`}
-              onClick={() => setSelection('B')}
-            >
-              <CardHeader className="pb-2">
-                <CardTitle className="flex justify-between items-center">
-                  <span>Road B: {decisionData.other_path}</span>
-                  {selection === 'B' && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="bg-[#3DFDFF] rounded-full p-1"
-                    >
-                      <Check className="h-4 w-4 text-white" />
-                    </motion.div>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {summaryPointsB.length > 0 ? (
-                    summaryPointsB.map((point, index) => (
-                      <div key={index}>
-                        {index > 0 && <Separator className="my-2" />}
-                        <div className="flex gap-2">
-                          <div className="text-xl">{point.emoji}</div>
-                          <div>
-                            <h4 className="font-medium text-sm">{point.title}</h4>
-                            <p className="text-sm text-gray-600">{point.content}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-400 italic text-sm">No reflection data provided</p>
-                  )}
-                  
-                  {decisionData.future_b && (
-                    <div className="text-center mt-4">
-                      <div className="text-3xl mb-1">{decisionData.future_b}</div>
-                      <p className="text-xs text-gray-500">Future symbol</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-        
-        <div className="text-center">
-          <p className="font-medium mb-6">Which path feels more like you right now?</p>
+            <CardContent className="p-6 text-center">
+              <div className="text-3xl mb-3">🪧</div>
+              <h3 className="text-xl font-medium mb-2">Road B</h3>
+              <p className="font-bold text-lg">{decisionData.other_path}</p>
+              
+              {selectedOption === 'B' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-4 flex justify-center"
+                >
+                  <div className="w-8 h-8 rounded-full bg-[#F5DF4D] flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                </motion.div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      <Separator className="my-6" />
+      
+      {/* Still undecided option */}
+      <Card 
+        className={`cursor-pointer hover:shadow-lg transition-all p-2 mb-8 max-w-md mx-auto ${
+          selectedOption === 'undecided' 
+            ? 'ring-2 ring-[#FC68B3] bg-gradient-to-r from-[#FC68B3]/20 to-[#FF8A48]/20' 
+            : ''
+        }`}
+        onClick={() => handleSelect('undecided')}
+      >
+        <CardContent className="p-4 text-center">
+          <p className="text-lg">I'm still undecided</p>
           
-          <div className="flex flex-col md:flex-row justify-center gap-4">
-            <Button
-              variant={selection === 'A' ? 'default' : 'outline'}
-              onClick={() => setSelection('A')}
-              className={`${
-                selection === 'A' ? 'bg-gradient-to-r from-[#D5D5F1] to-[#3DFDFF]' : ''
-              } min-w-[150px]`}
+          {selectedOption === 'undecided' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mt-2 flex justify-center"
             >
-              Road A feels right
-            </Button>
-            
-            <Button
-              variant={selection === 'B' ? 'default' : 'outline'}
-              onClick={() => setSelection('B')}
-              className={`${
-                selection === 'B' ? 'bg-gradient-to-r from-[#3DFDFF] to-[#F5DF4D]' : ''
-              } min-w-[150px]`}
-            >
-              Road B feels right
-            </Button>
-            
-            <Button
-              variant={selection === 'undecided' ? 'default' : 'outline'}
-              onClick={() => setSelection('undecided')}
-              className={`${
-                selection === 'undecided' ? 'bg-gradient-to-r from-[#FC68B3] to-[#FF8A48]' : ''
-              } min-w-[150px]`}
-            >
-              Still deciding
-            </Button>
-          </div>
-          
-          <div className="mt-8">
-            <Button 
-              onClick={handleComplete}
-              disabled={!selection}
-              className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90 px-8"
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              Complete Decision Map
-            </Button>
-          </div>
-          
-          <p className="text-sm text-gray-500 mt-4">
-            Remember, your choice isn't permanent! You can always revisit this later.
-          </p>
-        </div>
+              <div className="w-6 h-6 rounded-full bg-[#FC68B3] flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+            </motion.div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="mt-8">
+        <Button 
+          onClick={handleComplete}
+          className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90 px-8 py-2"
+          disabled={isAnimating}
+        >
+          Complete My Decision Journey
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
       </div>
     </motion.div>
   );

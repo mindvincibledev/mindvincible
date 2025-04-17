@@ -245,7 +245,6 @@ const ForkInTheRoadActivity = () => {
                 </TabsContent>
                 
                 <TabsContent value="past-decisions">
-                  {/* TODO: Implement past decisions view */}
                   <p className="text-center text-gray-500">No past decisions yet.</p>
                 </TabsContent>
               </Tabs>
