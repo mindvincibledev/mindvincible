@@ -1,166 +1,88 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import MoodSelector from '@/components/mood/MoodSelector';
-import { Star, Trophy, Target } from 'lucide-react';
-import { useMoodWheel } from '@/hooks/useMoodWheel';
+import { Star, Trophy, Target, ArrowRight } from 'lucide-react';
 
 const MOODS = ["Happy", "Excited", "Proud", "Confident", "Nervous", "Awkward", "Uncomfortable", "Scared"];
 
 const Journal = () => {
   const { user } = useAuth();
-  const [challenge, setChallenge] = useState<any>(null);
-  const [interactions, setInteractions] = useState<any[]>([]);
+  const [goals, setGoals] = useState<any[]>([]);
+  const [selectedGoal, setSelectedGoal] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [progress, setProgress] = useState(0);
 
   // Form states
   const [who, setWho] = useState('');
   const [howItWent, setHowItWent] = useState('');
   const [feeling, setFeeling] = useState('');
-  const [whatFeltEasy, setWhatFeltEasy] = useState('');
-  const [whatFeltHard, setWhatFeltHard] = useState('');
-  const [otherResponses, setOtherResponses] = useState('');
-  const [nextTime, setNextTime] = useState('');
-
-  // Set up mood wheel interaction
-  const wheelRef = useRef<HTMLDivElement>(null);
-  const { 
-    selectedMoodIndex, 
-    setSelectedMoodIndex, 
-    changeMood, 
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd
-  } = useMoodWheel({
-    moodsCount: MOODS.length,
-    initialMoodIndex: 0,
-    wheelRef
-  });
-  
-  // State for mood hover effects
-  const [hoveredMoodIndex, setHoveredMoodIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchChallengeAndInteractions();
+    fetchGoals();
   }, [user]);
 
-  useEffect(() => {
-    // Update feeling whenever selectedMoodIndex changes
-    if (MOODS[selectedMoodIndex]) {
-      setFeeling(MOODS[selectedMoodIndex]);
-    }
-  }, [selectedMoodIndex]);
-
-  const fetchChallengeAndInteractions = async () => {
+  const fetchGoals = async () => {
     if (!user?.id) return;
 
     try {
-      // Fetch the most recent challenge
-      const { data: challengeData, error: challengeError } = await supabase
+      const { data: goalsData, error } = await supabase
         .from('simple_hi_challenges')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        .order('created_at', { ascending: false });
 
-      if (challengeError) throw challengeError;
-      setChallenge(challengeData);
-
-      // Fetch interactions for this challenge
-      if (challengeData) {
-        const { data: interactionsData, error: interactionsError } = await supabase
-          .from('simple_hi_interactions')
-          .select('*')
-          .eq('challenge_id', challengeData.id)
-          .order('completed_at', { ascending: false });
-
-        if (interactionsError) throw interactionsError;
-        setInteractions(interactionsData || []);
-
-        // Calculate progress
-        const targetCount = challengeData.goal.includes('3') ? 3 : 1;
-        const progress = Math.min((interactionsData?.length || 0) / targetCount * 100, 100);
-        setProgress(progress);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      toast.error('Failed to load your challenge data');
+      if (error) throw error;
+      setGoals(goalsData || []);
+    } catch (error: any) {
+      console.error('Error fetching goals:', error);
+      toast.error('Failed to load your goals');
     } finally {
       setLoading(false);
     }
   };
 
   const handleSubmit = async () => {
-    if (!user?.id || !challenge) return;
+    if (!user?.id || !selectedGoal) return;
 
     setIsSubmitting(true);
     try {
-      // Save interaction
-      const { error: interactionError } = await supabase
+      const { error } = await supabase
         .from('simple_hi_interactions')
         .insert({
           user_id: user.id,
-          challenge_id: challenge.id,
+          challenge_id: selectedGoal,
           who,
           how_it_went: howItWent,
           feeling,
         });
 
-      if (interactionError) throw interactionError;
+      if (error) throw error;
 
-      // Update challenge with reflection answers
-      const { error: updateError } = await supabase
-        .from('simple_hi_challenges')
-        .update({
-          what_felt_easy: whatFeltEasy,
-          what_felt_hard: whatFeltHard,
-          other_people_responses: otherResponses,
-          try_next_time: nextTime,
-        })
-        .eq('id', challenge.id);
-
-      if (updateError) throw updateError;
-
-      toast.success('Journal entry saved successfully!');
-      fetchChallengeAndInteractions(); // Refresh data
-      
-      // Reset form
+      toast.success('Progress updated successfully!');
       setWho('');
       setHowItWent('');
       setFeeling('');
-    } catch (error) {
-      console.error('Error saving journal entry:', error);
-      toast.error('Failed to save journal entry');
+    } catch (error: any) {
+      console.error('Error saving progress:', error);
+      toast.error('Failed to save progress');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (loading) {
-    return <div className="text-center p-8">Loading...</div>;
-  }
-
-  if (!challenge) {
     return (
-      <div className="text-center p-8">
-        <p className="text-lg text-gray-700 mb-4">No active challenge found.</p>
-        <Button
-          onClick={() => window.location.href = '/emotional-hacking/power-of-hi'}
-          className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
-        >
-          Start a Challenge
-        </Button>
+      <div className="flex justify-center items-center min-h-[400px]">
+        <p className="text-lg text-gray-600">Loading your goals...</p>
       </div>
     );
   }
@@ -170,109 +92,119 @@ const Journal = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="max-w-3xl mx-auto space-y-8"
+      className="w-full max-w-4xl mx-auto px-4 space-y-8"
     >
-      <Card className="p-8 bg-white/90 backdrop-blur-lg shadow-xl">
+      <Card className="p-8 bg-white/95 backdrop-blur-lg shadow-lg rounded-2xl">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-center mb-4">Your Progress</h2>
-          <Progress value={progress} className="h-3" />
-          <div className="flex justify-between text-sm mt-2">
-            <span>{interactions.length} interactions logged</span>
-            <span>{progress}% Complete</span>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Who did you talk to?</h3>
-            <Textarea
-              value={who}
-              onChange={(e) => setWho(e.target.value)}
-              placeholder="Describe the person or situation..."
-            />
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-2">How did it go?</h3>
-            <Textarea
-              value={howItWent}
-              onChange={(e) => setHowItWent(e.target.value)}
-              placeholder="Share your experience..."
-            />
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-2">How did it make you feel?</h3>
-            <MoodSelector
-              moods={MOODS}
-              selectedMoodIndex={selectedMoodIndex}
-              onMoodSelect={setSelectedMoodIndex}
-              onChangeMood={changeMood}
-              wheelRef={wheelRef}
-              handleTouchStart={handleTouchStart}
-              handleTouchMove={handleTouchMove}
-              handleTouchEnd={handleTouchEnd}
-              onMoodHover={setHoveredMoodIndex}
-              // For backward compatibility
-              onSelect={(mood: string) => setFeeling(mood)}
-              selectedMood={feeling}
-            />
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Reflection</h3>
-            <div className="space-y-4">
-              <Textarea
-                value={whatFeltEasy}
-                onChange={(e) => setWhatFeltEasy(e.target.value)}
-                placeholder="What felt easy?"
-                className="mb-2"
-              />
-              <Textarea
-                value={whatFeltHard}
-                onChange={(e) => setWhatFeltHard(e.target.value)}
-                placeholder="What felt hard?"
-                className="mb-2"
-              />
-              <Textarea
-                value={otherResponses}
-                onChange={(e) => setOtherResponses(e.target.value)}
-                placeholder="What surprised you about other people's responses?"
-                className="mb-2"
-              />
-              <Textarea
-                value={nextTime}
-                onChange={(e) => setNextTime(e.target.value)}
-                placeholder="What will you try next time?"
-              />
+          <h2 className="text-3xl font-bold text-center mb-6">Track Your Progress</h2>
+          
+          {goals.length === 0 ? (
+            <div className="text-center space-y-4">
+              <p className="text-gray-600">You haven't set any goals yet.</p>
+              <Button
+                onClick={() => window.location.href = '/emotional-hacking/power-of-hi?tab=goal'}
+                className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
+              >
+                Set Your First Goal
+              </Button>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Select Goal to Update</label>
+                <Select
+                  value={selectedGoal}
+                  onValueChange={setSelectedGoal}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose a goal..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {goals.map((goal) => (
+                      <SelectItem
+                        key={goal.id}
+                        value={goal.id}
+                        className={`${
+                          goal.challenge_level === 'easy'
+                            ? 'text-[#2AC20E]'
+                            : goal.challenge_level === 'medium'
+                            ? 'text-[#F5DF4D]'
+                            : 'text-[#FC68B3]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Target className="h-4 w-4" />
+                          <span>{goal.goal}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="flex justify-center">
-            <Button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white px-8 py-6 text-lg rounded-full hover:opacity-90 transition-all duration-300"
-            >
-              {isSubmitting ? 'Saving...' : 'Save Journal Entry'}
-            </Button>
-          </div>
+              {selectedGoal && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="space-y-6"
+                >
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Who did you interact with?</label>
+                    <Textarea
+                      value={who}
+                      onChange={(e) => setWho(e.target.value)}
+                      placeholder="Describe the person or situation..."
+                      className="min-h-[80px]"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">How did it go?</label>
+                    <Textarea
+                      value={howItWent}
+                      onChange={(e) => setHowItWent(e.target.value)}
+                      placeholder="Share your experience..."
+                      className="min-h-[120px]"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">How did it make you feel?</label>
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <MoodSelector
+                        moods={MOODS}
+                        selectedMood={feeling}
+                        onSelect={setFeeling}
+                      />
+                    </div>
+                  </div>
+
+                  <motion.div
+                    className="flex justify-center mt-8"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting || !who || !howItWent || !feeling}
+                      className="w-full md:w-auto px-8 py-6 text-lg font-semibold rounded-full bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90 transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {isSubmitting ? (
+                        'Saving...'
+                      ) : (
+                        <>
+                          Update Progress
+                          <ArrowRight className="h-5 w-5" />
+                        </>
+                      )}
+                    </Button>
+                  </motion.div>
+                </motion.div>
+              )}
+            </div>
+          )}
         </div>
       </Card>
-
-      {progress === 100 && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center p-6 bg-gradient-to-r from-[#FFD700]/20 to-[#FFA500]/20 rounded-lg backdrop-blur-sm"
-        >
-          <Trophy className="h-12 w-12 text-[#FFD700] mx-auto mb-4" />
-          <h3 className="text-xl font-bold mb-2">Challenge Complete! 🎉</h3>
-          <p className="text-gray-700">
-            Congratulations! You've completed your social challenge and earned the "Hi Hero 🦸" badge!
-          </p>
-        </motion.div>
-      )}
     </motion.div>
   );
 };
