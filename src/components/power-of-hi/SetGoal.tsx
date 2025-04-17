@@ -23,7 +23,7 @@ const challengeLevels = [
   {
     level: 'medium',
     title: 'Medium',
-    description: 'Say hi to a classmate or colleague you don't usually talk to.',
+    description: "Say hi to a classmate or colleague you don't usually talk to.",
     xp: 20,
     color: 'yellow',
   },
