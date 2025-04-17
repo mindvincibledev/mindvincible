@@ -16,23 +16,20 @@ const challengeLevels = [
   {
     level: 'easy',
     title: 'Easy',
-    description: 'Smile & make eye contact with someone.',
+    description: "Smile & make eye contact with someone.",
     xp: 10,
-    color: 'green',
   },
   {
     level: 'medium',
     title: 'Medium',
-    description: 'Say hi to a classmate or colleague you don\'t usually talk to.',
+    description: "Say hi to a classmate or colleague you don't usually talk to.",
     xp: 20,
-    color: 'yellow',
   },
   {
     level: 'advanced',
     title: 'Advanced',
-    description: 'Start a short convo or join a group.',
+    description: "Start a short convo or join a group.",
     xp: 30,
-    color: 'red',
   },
 ];
 
@@ -91,28 +88,25 @@ const SetGoal: React.FC<SetGoalProps> = ({ onComplete }) => {
       <Card className="p-8 bg-white/90 backdrop-blur-lg shadow-xl">
         <h2 className="text-2xl font-bold text-center mb-6">Choose Your Challenge Level</h2>
         
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {challengeLevels.map((challenge) => (
             <motion.div
               key={challenge.level}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full"
             >
               <Button
                 variant="outline"
-                className={`
-                  w-full h-auto p-4 flex flex-col items-center gap-2 border-2
-                  ${selectedLevel === challenge.level
-                    ? `border-${challenge.color}-500 bg-${challenge.color}-100`
-                    : 'border-gray-200'}
-                  hover:border-${challenge.color}-500 hover:bg-${challenge.color}-50
-                `}
+                className={`w-full h-auto p-4 flex flex-col items-center gap-2 border-2 ${
+                  selectedLevel === challenge.level
+                    ? 'border-[#2AC20E] bg-[#E5FFF2]'
+                    : 'border-gray-200'
+                }`}
                 onClick={() => setSelectedLevel(challenge.level)}
               >
                 <span className="font-bold">{challenge.title}</span>
                 <span className="text-sm text-gray-600 text-center">{challenge.description}</span>
-                <span className={`text-${challenge.color}-500 font-bold mt-2`}>+{challenge.xp} XP</span>
+                <span className="text-[#2AC20E] font-bold mt-2">+{challenge.xp} XP</span>
               </Button>
             </motion.div>
           ))}
