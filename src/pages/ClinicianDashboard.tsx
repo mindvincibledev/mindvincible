@@ -12,7 +12,7 @@ import Navbar from '@/components/Navbar';
 import ActivityDropdown from '@/components/dashboard/ActivityDropdown';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 
-// Update StudentData interface
+// Keep the existing interfaces but update StudentData
 interface StudentData {
   id: string;
   name: string;
@@ -136,7 +136,7 @@ const ClinicianDashboard = () => {
       const weekStart = startOfWeek(now);
       const weekEnd = endOfWeek(now);
       
-      // Get mood entries for the week - FIXED: Removed invalid user_type filter
+      // Get mood entries for the week
       const { data: weekMoodData, error: weekMoodError } = await supabase
         .from('mood_data')
         .select('user_id, mood, created_at')
