@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 const HomePage = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
@@ -77,7 +78,7 @@ const HomePage = () => {
         if (!moodData || moodData.length === 0) {
           navigate('/mood-entry'); // No mood entry today
         } else {
-          navigate('/home'); // Redirect to home page instead of dashboard when mood entry exists
+          navigate('/dashboard'); // Redirect to dashboard when mood entry exists
         }
       } catch (error) {
         console.error('Routing error:', error);

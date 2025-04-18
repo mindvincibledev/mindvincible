@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -66,7 +65,7 @@ const Home = () => {
       if (!moodData || moodData.length === 0) {
         navigate('/mood-entry');
       } else {
-        navigate('/dashboard');
+        navigate('/dashboard'); 
       }
     } catch (error) {
       console.error('Navigation error:', error);
@@ -76,10 +75,11 @@ const Home = () => {
         description: "There was a problem navigating you to the right place."
       });
       // Default to mood-entry for students on error
-      navigate('/home');
+      navigate('/dashboard');
     }
   };
 
+  
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen flex flex-col">
