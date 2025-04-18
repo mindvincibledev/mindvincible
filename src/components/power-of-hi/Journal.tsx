@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -497,31 +498,31 @@ const Journal = () => {
         .eq('id', selectedGoal)
         .eq('user_id', user.id);
 
-    if (error) throw error;
+      if (error) throw error;
 
-    toast.success('Goal completed successfully! This goal is now marked as complete and cannot be updated further.');
-    
-    // Refresh goals to remove the completed one
-    fetchJournalEntries();
-    
-    // Reset form and go back to initial section
-    setWho('');
-    setHowItWent('');
-    setFeeling('');
-    setWhoFile(null);
-    setHowItWentFile(null);
-    setWhoPreview(null);
-    setHowItWentPreview(null);
-    setFeelingPreview(null);
-    setSelectedGoal('');
-    setActiveSection('initial');
-  } catch (error: any) {
-    console.error('Error saving reflection:', error);
-    toast.error('Failed to save reflection');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      toast.success('Goal completed successfully! This goal is now marked as complete and cannot be updated further.');
+      
+      // Refresh goals to remove the completed one
+      fetchJournalEntries();
+      
+      // Reset form and go back to initial section
+      setWho('');
+      setHowItWent('');
+      setFeeling('');
+      setWhoFile(null);
+      setHowItWentFile(null);
+      setWhoPreview(null);
+      setHowItWentPreview(null);
+      setFeelingPreview(null);
+      setSelectedGoal('');
+      setActiveSection('initial');
+    } catch (error: any) {
+      console.error('Error saving reflection:', error);
+      toast.error('Failed to save reflection');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Add state for managing sections
   const [activeSection, setActiveSection] = React.useState<'initial' | 'reflection'>('initial');
@@ -808,4 +809,87 @@ const Journal = () => {
                           {isRecordingFeeling ? (
                             <button 
                               onClick={() => stopRecording('feeling')}
-                              className="flex items-center gap-1 px-3 py-1.
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                            >
+                              <MicOff className="w-4 h-4" />
+                              <span>Stop</span>
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => startRecording('feeling')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                            >
+                              <Mic className="w-4 h-4" />
+                              <span>Record Audio</span>
+                            </button>
+                          )}
+                          
+                          <button 
+                            onClick={() => openStickerDialog('feeling')}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                          >
+                            <Smile className="w-4 h-4" />
+                            <span>Add Sticker</span>
+                          </button>
+                        </div>
+                        
+                        {renderFilePreview(feelingPreview, 'feeling')}
+                        {renderStickers(feelingStickers)}
+                      </div>
+
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={isSubmitting || !who || !howItWent || !feeling}
+                        className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
+                      >
+                        {isSubmitting ? (
+                          "Saving..."
+                        ) : (
+                          <>
+                            Save Progress
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </>
+                        )}
+                      </Button>
+                    </motion.div>
+                  )}
+                </>
+              ) : (
+                <ReflectionSection 
+                  onSubmit={handleReflectionSubmit} 
+                  isSubmitting={isSubmitting} 
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Sticker Dialog */}
+      <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Select a Sticker</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-4 p-4">
+            {STICKERS.map(sticker => (
+              <button
+                key={sticker.id}
+                onClick={() => addSticker(sticker.emoji || sticker.src)}
+                className="p-3 bg-gray-50 hover:bg-gray-100 rounded-lg flex items-center justify-center transition-colors"
+              >
+                {sticker.emoji ? (
+                  <span className="text-3xl">{sticker.emoji}</span>
+                ) : (
+                  <img src={sticker.src} alt={sticker.alt} className="h-10 w-10 object-contain" />
+                )}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
+  );
+};
+
+export default Journal;
