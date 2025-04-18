@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, GitFork } from 'lucide-react';
+import { ArrowLeft, GitFork, Edit, Trash2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from "sonner";
@@ -48,6 +55,10 @@ const ForkInTheRoadActivity = () => {
 
   const navigate = useNavigate();
   const { user } = useAuth();
+  
+  const [editingDecision, setEditingDecision] = useState<any>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [decisionToDelete, setDecisionToDelete] = useState<any>(null);
 
   // Fetch past decisions when component loads
   useEffect(() => {
@@ -248,6 +259,58 @@ const ForkInTheRoadActivity = () => {
     </motion.div>
   );
 
+  const handleEditDecision = (decision: any) => {
+    setEditingDecision(decision);
+    setDecisionData({
+      choice: decision.choice,
+      consideration_path: decision.consideration_path,
+      other_path: decision.other_path,
+      change_a: decision.change_a,
+      feel_a: decision.feel_a,
+      change_b: decision.change_b,
+      feel_b: decision.feel_b,
+      challenges_a: decision.challenges_a,
+      challenges_b: decision.challenges_b,
+      strengths_a: decision.strengths_a || [],
+      strengths_b: decision.strengths_b || [],
+      values_a: decision.values_a,
+      values_b: decision.values_b,
+      tag_a: decision.tag_a || [],
+      tag_b: decision.tag_b || [],
+      gain_a: decision.gain_a,
+      gain_b: decision.gain_b,
+      future_a: decision.future_a,
+      future_b: decision.future_b,
+      selection: decision.selection
+    });
+    setCurrentStep(0);
+  };
+
+  const handleDeleteDecision = async (decision: any) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('fork_in_road_decisions')
+        .delete()
+        .eq('decision_id', decision.decision_id);
+
+      if (error) {
+        console.error('Error deleting decision:', error);
+        toast.error(`Failed to delete decision: ${error.message}`);
+        return;
+      }
+
+      toast.success("Decision deleted successfully!");
+      fetchPastDecisions();
+      setDeleteConfirmOpen(false);
+      setDecisionToDelete(null);
+    } catch (error: any) {
+      console.error('Exception deleting decision:', error);
+      toast.error(`An error occurred: ${error.message}`);
+    }
+  };
+
   // Component to display past decisions
   const PastDecisionsView = () => (
     <div className="py-4">
@@ -264,36 +327,83 @@ const ForkInTheRoadActivity = () => {
           {pastDecisions.map(decision => (
             <Card key={decision.decision_id} className="p-4 hover:shadow-md transition-shadow">
               <div className="flex flex-col md:flex-row justify-between">
-                <div>
+                <div className="flex-grow">
                   <h4 className="font-medium">{decision.choice}</h4>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-500 mb-2">
                     {new Date(decision.created_at).toLocaleDateString()}
                   </div>
+                  <div>
+                    {decision.selection ? (
+                      <Badge className={
+                        decision.selection === 'A' 
+                          ? "bg-gradient-to-r from-[#D5D5F1] to-[#3DFDFF]" 
+                          : decision.selection === 'B'
+                            ? "bg-gradient-to-r from-[#3DFDFF] to-[#F5DF4D]"
+                            : "bg-gradient-to-r from-[#FC68B3] to-[#FF8A48]"
+                      }>
+                        {decision.selection === 'A' 
+                          ? `Chose ${decision.consideration_path}` 
+                          : decision.selection === 'B'
+                            ? `Chose ${decision.other_path}`
+                            : "Still deciding"}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">No selection made</Badge>
+                    )}
+                  </div>
                 </div>
-                <div className="mt-2 md:mt-0">
-                  {decision.selection ? (
-                    <Badge className={
-                      decision.selection === 'A' 
-                        ? "bg-gradient-to-r from-[#D5D5F1] to-[#3DFDFF]" 
-                        : decision.selection === 'B'
-                          ? "bg-gradient-to-r from-[#3DFDFF] to-[#F5DF4D]"
-                          : "bg-gradient-to-r from-[#FC68B3] to-[#FF8A48]"
-                    }>
-                      {decision.selection === 'A' 
-                        ? `Chose ${decision.consideration_path}` 
-                        : decision.selection === 'B'
-                          ? `Chose ${decision.other_path}`
-                          : "Still deciding"}
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline">No selection made</Badge>
-                  )}
+                <div className="flex gap-2 mt-4 md:mt-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                    onClick={() => handleEditDecision(decision)}
+                  >
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 text-red-500 hover:text-red-600"
+                    onClick={() => {
+                      setDecisionToDelete(decision);
+                      setDeleteConfirmOpen(true);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
                 </div>
               </div>
             </Card>
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Decision</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this decision? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="default"
+              className="bg-red-500 hover:bg-red-600 text-white"
+              onClick={() => decisionToDelete && handleDeleteDecision(decisionToDelete)}
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 
