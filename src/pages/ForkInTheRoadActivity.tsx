@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, GitFork } from 'lucide-react';
@@ -43,13 +43,50 @@ const ForkInTheRoadActivity = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
+  const [pastDecisions, setPastDecisions] = useState<any[]>([]);
+  const [loadingPastDecisions, setLoadingPastDecisions] = useState(false);
 
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // Fetch past decisions when component loads
+  useEffect(() => {
+    if (user) {
+      fetchPastDecisions();
+    }
+  }, [user]);
+
+  const fetchPastDecisions = async () => {
+    if (!user) return;
+    
+    try {
+      setLoadingPastDecisions(true);
+      const { data, error } = await supabase
+        .from('fork_in_road_decisions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+        
+      if (error) {
+        console.error('Error fetching past decisions:', error);
+        toast.error(`Failed to load your past decisions: ${error.message}`);
+        return;
+      }
+      
+      setPastDecisions(data || []);
+    } catch (error: any) {
+      console.error('Exception fetching past decisions:', error);
+    } finally {
+      setLoadingPastDecisions(false);
+    }
+  };
+
   const handleNextStep = (data: Partial<typeof decisionData>) => {
     console.log("handleNextStep - Current step:", currentStep, "Received data:", data);
-    setDecisionData(prev => ({ ...prev, ...data }));
+    
+    // Make a deep copy to ensure we're not losing any data
+    const updatedDecisionData = { ...decisionData, ...data };
+    setDecisionData(updatedDecisionData);
     
     // If this is the final step (GutCheckScreen), save data to Supabase
     if (currentStep === 3) {
@@ -114,6 +151,10 @@ const ForkInTheRoadActivity = () => {
 
       console.log("Decision saved successfully:", data);
       toast.success("Your decision has been saved!");
+      
+      // Refresh past decisions list
+      fetchPastDecisions();
+      
       setShowCompletionMessage(true);
       setCurrentStep(prev => prev + 1);
       
@@ -201,11 +242,61 @@ const ForkInTheRoadActivity = () => {
     </motion.div>
   );
 
+  // Component to display past decisions
+  const PastDecisionsView = () => (
+    <div className="py-4">
+      <h3 className="text-xl font-medium mb-4">Your Past Decisions</h3>
+      
+      {loadingPastDecisions ? (
+        <div className="text-center py-8">Loading your past decisions...</div>
+      ) : pastDecisions.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          You haven't made any decisions yet. Start by making your first decision!
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {pastDecisions.map(decision => (
+            <Card key={decision.decision_id} className="p-4 hover:shadow-md transition-shadow">
+              <div className="flex flex-col md:flex-row justify-between">
+                <div>
+                  <h4 className="font-medium">{decision.choice}</h4>
+                  <div className="text-sm text-gray-500">
+                    {new Date(decision.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="mt-2 md:mt-0">
+                  {decision.selection ? (
+                    <Badge className={
+                      decision.selection === 'A' 
+                        ? "bg-gradient-to-r from-[#D5D5F1] to-[#3DFDFF]" 
+                        : decision.selection === 'B'
+                          ? "bg-gradient-to-r from-[#3DFDFF] to-[#F5DF4D]"
+                          : "bg-gradient-to-r from-[#FC68B3] to-[#FF8A48]"
+                    }>
+                      {decision.selection === 'A' 
+                        ? `Chose ${decision.consideration_path}` 
+                        : decision.selection === 'B'
+                          ? `Chose ${decision.other_path}`
+                          : "Still deciding"}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline">No selection made</Badge>
+                  )}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   const screens = [
-    <WelcomeScreen onNext={() => setCurrentStep(1)} />,
+    <WelcomeScreen onNext={() => setCurrentStep(1)} key="welcome" />,
     <DecisionInputScreen 
-      onNext={(choice) => handleNextStep({ choice })} 
+      onNext={(data) => handleNextStep({ choice: data })} 
       initialValue={decisionData.choice}
+      key="decision-input"
     />,
     <RoadLabelsScreen 
       onNext={(paths) => handleNextStep(paths)}
@@ -213,16 +304,19 @@ const ForkInTheRoadActivity = () => {
         consideration_path: decisionData.consideration_path, 
         other_path: decisionData.other_path
       }}
+      key="road-labels"
     />,
     <ReflectionScreen 
       onNext={(reflectionData) => handleNextStep(reflectionData)}
       initialValues={decisionData}
+      key="reflection"
     />,
     <GutCheckScreen 
       onComplete={(selection) => handleNextStep({ selection })}
       decisionData={decisionData}
+      key="gut-check"
     />,
-    <CompletionScreen />
+    <CompletionScreen key="completion" />
   ];
 
   return (
@@ -270,8 +364,7 @@ const ForkInTheRoadActivity = () => {
                 </TabsContent>
                 
                 <TabsContent value="past-decisions">
-                  {/* TODO: Implement past decisions view */}
-                  <p className="text-center text-gray-500">No past decisions yet.</p>
+                  <PastDecisionsView />
                 </TabsContent>
               </Tabs>
             </Card>

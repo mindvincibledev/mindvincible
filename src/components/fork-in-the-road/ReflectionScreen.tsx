@@ -69,11 +69,12 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
   const [activeTab, setActiveTab] = useState<string>("daily-impact");
   const [activeRoad, setActiveRoad] = useState<"A" | "B">("A");
   
+  // Initialize formData with either the initialValues or empty defaults
   const [formData, setFormData] = useState<ReflectionData>({
     change_a: initialValues.change_a || "",
-    feel_a: initialValues.feel_a || "5", // Default to middle of the slider
+    feel_a: initialValues.feel_a || "5", 
     change_b: initialValues.change_b || "",
-    feel_b: initialValues.feel_b || "5", // Default to middle of the slider
+    feel_b: initialValues.feel_b || "5",
     challenges_a: initialValues.challenges_a || "",
     challenges_b: initialValues.challenges_b || "",
     strengths_a: initialValues.strengths_a || [],
