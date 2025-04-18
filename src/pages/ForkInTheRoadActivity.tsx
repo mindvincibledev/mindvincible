@@ -59,6 +59,7 @@ const ForkInTheRoadActivity = () => {
   const [editingDecision, setEditingDecision] = useState<any>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [decisionToDelete, setDecisionToDelete] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("make-decision");
 
   // Fetch past decisions when component loads
   useEffect(() => {
@@ -152,22 +153,35 @@ const ForkInTheRoadActivity = () => {
         selection: selection
       };
       
-      console.log("Final data being saved to Supabase:", dataToSave);
+      let result;
       
-      const { data, error } = await supabase
-        .from('fork_in_road_decisions')
-        .insert(dataToSave)
-        .select();
-
-      if (error) {
-        console.error('Error saving decision:', error);
-        toast.error(`Failed to save your decision: ${error.message}`);
-        setIsSubmitting(false);
-        return;
+      // If we're editing, update the existing decision
+      if (editingDecision) {
+        console.log("Updating existing decision:", editingDecision.decision_id);
+        const { data, error } = await supabase
+          .from('fork_in_road_decisions')
+          .update(dataToSave)
+          .eq('decision_id', editingDecision.decision_id)
+          .select();
+          
+        if (error) throw error;
+        result = data;
+        toast.success("Your decision has been updated!");
+        setEditingDecision(null);
+      } else {
+        // Otherwise insert a new decision
+        console.log("Creating new decision");
+        const { data, error } = await supabase
+          .from('fork_in_road_decisions')
+          .insert(dataToSave)
+          .select();
+          
+        if (error) throw error;
+        result = data;
+        toast.success("Your decision has been saved!");
       }
 
-      console.log("Decision saved successfully:", data);
-      toast.success("Your decision has been saved!");
+      console.log("Decision saved successfully:", result);
       
       // Refresh past decisions list
       fetchPastDecisions();
@@ -176,8 +190,8 @@ const ForkInTheRoadActivity = () => {
       setCurrentStep(prev => prev + 1);
       
     } catch (error: any) {
-      console.error('Exception saving decision:', error);
-      toast.error(`An error occurred: ${error.message}`);
+      console.error('Error saving decision:', error);
+      toast.error(`Failed to save your decision: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -260,30 +274,32 @@ const ForkInTheRoadActivity = () => {
   );
 
   const handleEditDecision = (decision: any) => {
+    console.log("Editing decision:", decision);
     setEditingDecision(decision);
     setDecisionData({
-      choice: decision.choice,
-      consideration_path: decision.consideration_path,
-      other_path: decision.other_path,
-      change_a: decision.change_a,
-      feel_a: decision.feel_a,
-      change_b: decision.change_b,
-      feel_b: decision.feel_b,
-      challenges_a: decision.challenges_a,
-      challenges_b: decision.challenges_b,
+      choice: decision.choice || '',
+      consideration_path: decision.consideration_path || '',
+      other_path: decision.other_path || '',
+      change_a: decision.change_a || '',
+      feel_a: decision.feel_a || '',
+      change_b: decision.change_b || '',
+      feel_b: decision.feel_b || '',
+      challenges_a: decision.challenges_a || '',
+      challenges_b: decision.challenges_b || '',
       strengths_a: decision.strengths_a || [],
       strengths_b: decision.strengths_b || [],
-      values_a: decision.values_a,
-      values_b: decision.values_b,
+      values_a: decision.values_a || '',
+      values_b: decision.values_b || '',
       tag_a: decision.tag_a || [],
       tag_b: decision.tag_b || [],
-      gain_a: decision.gain_a,
-      gain_b: decision.gain_b,
-      future_a: decision.future_a,
-      future_b: decision.future_b,
-      selection: decision.selection
+      gain_a: decision.gain_a || '',
+      gain_b: decision.gain_b || '',
+      future_a: decision.future_a || '',
+      future_b: decision.future_b || '',
+      selection: decision.selection || ''
     });
     setCurrentStep(0);
+    setActiveTab("make-decision");
   };
 
   const handleDeleteDecision = async (decision: any) => {
@@ -469,7 +485,11 @@ const ForkInTheRoadActivity = () => {
                 </p>
               </div>
               
-              <Tabs defaultValue="make-decision" className="w-full">
+              <Tabs 
+                value={activeTab} 
+                onValueChange={setActiveTab} 
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="make-decision">Make a Decision</TabsTrigger>
                   <TabsTrigger value="past-decisions">Past Decisions</TabsTrigger>
