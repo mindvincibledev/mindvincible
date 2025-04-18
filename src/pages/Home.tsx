@@ -14,7 +14,7 @@ const Home = () => {
   
   const handleGetStarted = () => {
     if (user) {
-      navigate('/mood-entry');
+      navigate('/home');
     } else {
       navigate('/login');
     }
