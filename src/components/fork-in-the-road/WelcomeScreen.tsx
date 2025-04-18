@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -19,36 +18,63 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
           <motion.div
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ 
-              scale: [0.7, 1.05, 1], 
-              opacity: [0, 1, 1],
-              rotate: [-5, 5, -5, 0]
+              scale: [0.7, 1.1, 0.9, 1], 
+              opacity: 1,
+              rotate: [-5, 5, -3, 3, 0],
+              y: [0, -10, 5, -5, 0]
             }}
             transition={{
-              duration: 1.5,
+              duration: 3,
               repeat: Infinity,
-              repeatType: "mirror",
-              ease: "easeInOut"
+              repeatType: "reverse",
+              ease: "easeInOut",
+              times: [0, 0.2, 0.4, 0.6, 1]
             }}
             className="absolute inset-0 flex items-center justify-center"
           >
             <img 
               src="/lovable-uploads/26b93893-5c35-4903-b3d9-a74d20fa676c.png" 
               alt="Confused Student" 
-              className="max-w-full max-h-full object-contain"
+              className="max-w-full max-h-full object-contain transform-gpu"
             />
           </motion.div>
           
-          {/* Wavy background effect */}
+          {/* Floating bubbles background effect */}
           <motion.div 
-            className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-[#3DFDFF]/20 to-transparent"
+            className="absolute w-20 h-20 rounded-full bg-[#3DFDFF]/10"
             animate={{ 
-              y: [0, -5, 0],
-              opacity: [0.7, 1, 0.7],
+              x: [0, 30, -20, 0],
+              y: [0, -30, 20, 0],
+              scale: [1, 1.2, 0.8, 1],
             }}
             transition={{
-              duration: 3,
+              duration: 4,
               repeat: Infinity,
+              repeatType: "reverse",
               ease: "easeInOut"
+            }}
+            style={{
+              left: '20%',
+              top: '30%'
+            }}
+          />
+          
+          <motion.div 
+            className="absolute w-16 h-16 rounded-full bg-[#2AC20E]/10"
+            animate={{ 
+              x: [0, -20, 30, 0],
+              y: [0, 20, -30, 0],
+              scale: [1, 0.8, 1.2, 1],
+            }}
+            transition={{
+              duration: 3.5,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+            style={{
+              right: '25%',
+              bottom: '20%'
             }}
           />
         </div>
@@ -73,4 +99,3 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
 };
 
 export default WelcomeScreen;
-
