@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, user } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,15 +26,15 @@ const Login = () => {
     try {
       await signIn(email, password);
       
-      // After successful login, redirect based on user type and mood entry status
+      // After successful login, retrieve user data
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('user_type')
-        .eq('id', user?.id)
+        .select('user_type, id')
+        .eq('email', email)
         .single();
       
       if (userError) {
-        throw new Error(`Error fetching user type: ${userError.message}`);
+        throw new Error(`Error fetching user data: ${userError.message}`);
       }
       
       // Admin and clinicians go directly to their dashboards
@@ -57,7 +56,7 @@ const Login = () => {
       const { data: moodData, error: moodError } = await supabase
         .from('mood_data')
         .select('id')
-        .eq('user_id', user?.id)
+        .eq('user_id', userData.id)
         .gte('created_at', startOfDay)
         .lt('created_at', endOfDay)
         .limit(1);
@@ -89,6 +88,7 @@ const Login = () => {
     }
   };
 
+  
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
@@ -115,6 +115,7 @@ const Login = () => {
                 {error}
               </div>
             )}
+            
             
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>

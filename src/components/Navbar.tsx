@@ -51,6 +51,7 @@ const Navbar = () => {
   };
 
   const handleLogoClick = async () => {
+    // If not logged in, go to main landing page
     if (!user) {
       navigate('/');
       return;
@@ -64,7 +65,10 @@ const Navbar = () => {
         .eq('id', user.id)
         .single();
       
-      if (userError) throw new Error(userError.message);
+      if (userError) {
+        console.error("Error fetching user type:", userError);
+        throw new Error(userError.message);
+      }
       
       // Route based on user type
       if (userData.user_type === 0) {
@@ -90,7 +94,10 @@ const Navbar = () => {
         .lt('created_at', endOfDay)
         .limit(1);
       
-      if (moodError) throw new Error(moodError.message);
+      if (moodError) {
+        console.error("Error checking mood entries:", moodError);
+        throw new Error(moodError.message);
+      }
       
       // Navigate based on mood entry status
       if (!moodData || moodData.length === 0) {
@@ -100,11 +107,12 @@ const Navbar = () => {
       }
     } catch (error) {
       console.error('Error navigating from logo click:', error);
-      // Modified: navigate to home router handler rather than directly to /home
+      // On error, navigate to the routing page which will handle redirection properly
       navigate('/home');
     }
   };
 
+  
   return (
     <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-[#fcfcfc] shadow-md">
       <div className="container mx-auto px-4 py-3">

@@ -11,17 +11,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 const Home = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   
   const handleGetStarted = async () => {
+    if (loading) return;
+    
     if (!user) {
       navigate('/login');
       return;
     }
 
     try {
-      // For admin and clinicians, route directly to their dashboards
+      // Check user type
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('user_type')
@@ -32,6 +34,7 @@ const Home = () => {
         throw new Error(`Error fetching user type: ${userError.message}`);
       }
 
+      // For admin and clinicians, route directly to their dashboards
       if (userData.user_type === 0) {
         navigate('/admin-dashboard');
         return;
@@ -72,10 +75,8 @@ const Home = () => {
         title: "Navigation error",
         description: "There was a problem navigating you to the right place."
       });
-      // Modified: Default to main landing page on error rather than directly to mood-entry
-      if (user) {
-        navigate('/home'); 
-      }
+      // Default to mood-entry for students on error
+      navigate('/home');
     }
   };
 

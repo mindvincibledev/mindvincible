@@ -6,21 +6,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 const HomePage = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const routeUser = async () => {
-      // If no user is logged in, redirect to main landing page
-      if (!user) {
-        navigate('/');
-        return;
-      }
-
-      setIsLoading(true);
-      
+    const checkUserAndRoute = async () => {
       try {
+        setIsLoading(true);
+        
+        // If no user is logged in, redirect to main landing page
+        if (!user) {
+          navigate('/');
+          return;
+        }
+        
         // Check user type
         const { data: userData, error: userError } = await supabase
           .from('users')
@@ -29,9 +29,15 @@ const HomePage = () => {
           .single();
         
         if (userError) {
-          throw new Error(`Error fetching user type: ${userError.message}`);
+          console.error("Error fetching user type:", userError);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not determine user type. Please try again or contact support."
+          });
+          return;
         }
-
+        
         // For admin and clinicians, route directly to their dashboards
         if (userData.user_type === 0) {
           navigate('/admin-dashboard');
@@ -57,9 +63,16 @@ const HomePage = () => {
           .limit(1);
         
         if (moodError) {
-          throw new Error(`Error checking mood entries: ${moodError.message}`);
+          console.error("Error checking mood entries:", moodError);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not check mood entry status. Redirecting to mood entry page."
+          });
+          navigate('/mood-entry');
+          return;
         }
-
+        
         // Direct students based on their mood entry status
         if (!moodData || moodData.length === 0) {
           navigate('/mood-entry'); // No mood entry today
@@ -73,16 +86,19 @@ const HomePage = () => {
           title: "Navigation error",
           description: "An error occurred while navigating. Please try again."
         });
-        navigate('/mood-entry'); // Default fallback
+        // Default fallback for errors
+        navigate('/mood-entry');
       } finally {
         setIsLoading(false);
       }
     };
-
-    routeUser();
-  }, [user, navigate]);
-
-  if (isLoading) {
+    
+    if (!authLoading) {
+      checkUserAndRoute();
+    }
+  }, [user, navigate, authLoading]);
+  
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FC68B3]"></div>
@@ -90,7 +106,7 @@ const HomePage = () => {
       </div>
     );
   }
-
+  
   return null;
 };
 
