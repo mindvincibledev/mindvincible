@@ -1,21 +1,48 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Button } from '@/components/ui/button';
 
 const AdminDashboard = () => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-  // Redirect non-admin users
-  React.useEffect(() => {
-    if (!isAdmin()) {
-      navigate('/dashboard');
-    }
-  }, [isAdmin, navigate]);
+  useEffect(() => {
+    const checkAdminAccess = async () => {
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const { data: userData, error } = await supabase
+          .from('users')
+          .select('user_type')
+          .eq('id', user.id)
+          .single();
+
+        if (error || !userData || userData.user_type !== 0) {
+          navigate('/dashboard');
+          return;
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error:', error);
+        navigate('/dashboard');
+      }
+    };
+
+    checkAdminAccess();
+  }, [user, navigate]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <BackgroundWithEmojis>
