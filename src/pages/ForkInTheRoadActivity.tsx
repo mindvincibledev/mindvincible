@@ -83,12 +83,12 @@ const ForkInTheRoadActivity = () => {
   };
 
   const handleNextStep = (data: Partial<typeof decisionData>) => {
-    console.log("handleNextStep - Current step:", currentStep, "Received data:", data);
-    
     // Make a deep copy to ensure we're not losing any data
     const updatedDecisionData = { ...decisionData, ...data };
+    
+    console.log("handleNextStep - Current step:", currentStep, "Received data:", data);
     setDecisionData(updatedDecisionData);
-
+    
     // Log the updated state after merging data
     console.log("Decision data after update:", updatedDecisionData);
     
