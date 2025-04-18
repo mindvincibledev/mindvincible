@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, Heart, Archive, Book, Home } from 'lucide-react';
+import { Menu, X, LogOut, Heart, Archive, Book } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -50,14 +51,71 @@ const Navbar = () => {
     }
   };
 
+  const handleLogoClick = async () => {
+    if (!user) {
+      navigate('/');
+      return;
+    }
+
+    try {
+      // Check user type first
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('user_type')
+        .eq('id', user.id)
+        .single();
+      
+      if (userError) throw new Error(userError.message);
+      
+      // Route based on user type
+      if (userData.user_type === 0) {
+        navigate('/admin-dashboard');
+        return;
+      }
+      
+      if (userData.user_type === 1) {
+        navigate('/clinician-dashboard');
+        return;
+      }
+      
+      // For students, check if they've logged a mood today
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
+      
+      const { data: moodData, error: moodError } = await supabase
+        .from('mood_data')
+        .select('id')
+        .eq('user_id', user.id)
+        .gte('created_at', startOfDay)
+        .lt('created_at', endOfDay)
+        .limit(1);
+      
+      if (moodError) throw new Error(moodError.message);
+      
+      // Navigate based on mood entry status
+      if (!moodData || moodData.length === 0) {
+        navigate('/mood-entry');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Error navigating from logo click:', error);
+      navigate('/home');
+    }
+  };
+
   return (
     <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-[#fcfcfc] shadow-md">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          {/* Change from "/" to "/home" for authenticated users */}
-          <Link to={user ? "/home" : "/"} className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+          {/* Logo with proper role-based navigation */}
+          <button 
+            onClick={handleLogoClick}
+            className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent border-none bg-transparent cursor-pointer"
+          >
             M(in)dvincible
-          </Link>
+          </button>
 
           {/* Mobile Menu Button */}
           <div className="block md:hidden">

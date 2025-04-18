@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import BackgroundWithEmojis from "@/components/BackgroundWithEmojis";
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
+import { toast } from '@/hooks/use-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -18,70 +19,6 @@ const Login = () => {
   const { signIn, user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // If user is already logged in, check if they've logged a mood today
-    if (user) {
-      checkTodaysMoodEntry(user.id);
-    }
-  }, [user]);
-
-  const checkTodaysMoodEntry = async (userId: string) => {
-    try {
-      const today = new Date();
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
-      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
-      
-      // Check if user has logged a mood today
-      const { data: moodData, error: moodError } = await supabase
-        .from('mood_data')
-        .select('id')
-        .eq('user_id', userId)
-        .gte('created_at', startOfDay)
-        .lt('created_at', endOfDay)
-        .limit(1);
-      
-      if (moodError) {
-        console.error('Error checking mood entries:', moodError);
-        navigate('/mood-entry');
-        return;
-      }
-
-      // If no mood entry today, redirect to mood entry
-      if (!moodData || moodData.length === 0) {
-        navigate('/mood-entry');
-      } else {
-        // If they have a mood entry, check their user type
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select('user_type')
-          .eq('id', userId)
-          .single();
-
-        if (userError) {
-          console.error('Error fetching user type:', userError);
-          navigate('/home');
-          return;
-        }
-
-        if (userData) {
-          switch (userData.user_type) {
-            case 0: // Admin
-              navigate('/admin-dashboard');
-              break;
-            case 1: // Clinician
-              navigate('/clinician-dashboard');
-              break;
-            default: // Student or any other type
-              navigate('/dashboard');
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Error checking mood entries:', err);
-      navigate('/mood-entry');
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -89,13 +26,65 @@ const Login = () => {
     
     try {
       await signIn(email, password);
-      // Don't navigate here - the useEffect will handle it once user is set
+      
+      // After successful login, redirect based on user type and mood entry status
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('user_type')
+        .eq('id', user?.id)
+        .single();
+      
+      if (userError) {
+        throw new Error(`Error fetching user type: ${userError.message}`);
+      }
+      
+      // Admin and clinicians go directly to their dashboards
+      if (userData.user_type === 0) {
+        navigate('/admin-dashboard');
+        return;
+      }
+      
+      if (userData.user_type === 1) {
+        navigate('/clinician-dashboard');
+        return;
+      }
+      
+      // For students, check if they've logged a mood today
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
+      
+      const { data: moodData, error: moodError } = await supabase
+        .from('mood_data')
+        .select('id')
+        .eq('user_id', user?.id)
+        .gte('created_at', startOfDay)
+        .lt('created_at', endOfDay)
+        .limit(1);
+      
+      if (moodError) {
+        throw new Error(`Error checking mood entries: ${moodError.message}`);
+      }
+      
+      // Navigate based on mood entry status
+      if (!moodData || moodData.length === 0) {
+        navigate('/mood-entry');
+      } else {
+        navigate('/dashboard');
+      }
+      
+      toast({
+        title: "Success!",
+        description: "You've been signed in.",
+      });
     } catch (err) {
+      console.error('Login error:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError('Failed to log in. Please check your credentials.');
       }
+    } finally {
       setLoading(false);
     }
   };

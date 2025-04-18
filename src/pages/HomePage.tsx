@@ -1,27 +1,52 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const HomePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const checkUserTypeAndRedirect = async () => {
+    const routeUser = async () => {
       if (!user) {
         navigate('/login');
         return;
       }
 
+      setIsLoading(true);
+      
       try {
-        // Check if user has logged a mood today
+        // Check user type
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('user_type')
+          .eq('id', user.id)
+          .single();
+        
+        if (userError) {
+          throw new Error(`Error fetching user type: ${userError.message}`);
+        }
+
+        // For admin and clinicians, route directly to their dashboards
+        if (userData.user_type === 0) {
+          navigate('/admin-dashboard');
+          return;
+        }
+        
+        if (userData.user_type === 1) {
+          navigate('/clinician-dashboard');
+          return;
+        }
+        
+        // For students, check if they have a mood entry today
         const today = new Date();
         const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
         const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
         
-        // First check for mood entry today
         const { data: moodData, error: moodError } = await supabase
           .from('mood_data')
           .select('id')
@@ -31,52 +56,41 @@ const HomePage = () => {
           .limit(1);
         
         if (moodError) {
-          console.error('Error checking mood entries:', moodError);
-          navigate('/mood-entry'); // Default to mood entry if there's an error
-          return;
+          throw new Error(`Error checking mood entries: ${moodError.message}`);
         }
 
-        // If no mood entry today, redirect to mood entry
+        // Direct students based on their mood entry status
         if (!moodData || moodData.length === 0) {
-          navigate('/mood-entry');
-          return;
-        }
-
-        // If they have logged a mood, check user type and redirect accordingly
-        const { data: userData, error } = await supabase
-          .from('users')
-          .select('user_type')
-          .eq('id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching user type:', error);
-          navigate('/home');
-          return;
-        }
-
-        if (userData) {
-          switch (userData.user_type) {
-            case 0: // Admin
-              navigate('/admin-dashboard');
-              break;
-            case 1: // Clinician
-              navigate('/clinician-dashboard');
-              break;
-            default: // Student or any other type
-              navigate('/dashboard');
-          }
+          navigate('/mood-entry'); // No mood entry today
+        } else {
+          navigate('/dashboard'); // Has mood entry today
         }
       } catch (error) {
-        console.error('Error:', error);
-        navigate('/mood-entry'); // Default to mood entry if there's an error
+        console.error('Routing error:', error);
+        toast({
+          variant: "destructive",
+          title: "Navigation error",
+          description: "An error occurred while navigating. Please try again."
+        });
+        navigate('/mood-entry'); // Default fallback
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    checkUserTypeAndRedirect();
+    routeUser();
   }, [user, navigate]);
 
-  return null; // This component just handles routing
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FC68B3]"></div>
+        <p className="mt-4 text-lg">Routing you to the right place...</p>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default HomePage;

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
 import { Typewriter } from '@/components/ui/typewriter';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const Home = () => {
   const { user } = useAuth();
@@ -20,11 +21,32 @@ const Home = () => {
     }
 
     try {
+      // For admin and clinicians, route directly to their dashboards
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('user_type')
+        .eq('id', user.id)
+        .single();
+      
+      if (userError) {
+        throw new Error(`Error fetching user type: ${userError.message}`);
+      }
+
+      if (userData.user_type === 0) {
+        navigate('/admin-dashboard');
+        return;
+      }
+      
+      if (userData.user_type === 1) {
+        navigate('/clinician-dashboard');
+        return;
+      }
+      
+      // For students, check mood entry status
       const today = new Date();
       const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
       const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
       
-      // Check if user has logged a mood today
       const { data: moodData, error: moodError } = await supabase
         .from('mood_data')
         .select('id')
@@ -34,20 +56,23 @@ const Home = () => {
         .limit(1);
       
       if (moodError) {
-        console.error('Error checking mood entries:', moodError);
-        navigate('/mood-entry');
-        return;
+        throw new Error(`Error checking mood entries: ${moodError.message}`);
       }
 
-      // If no mood entry today, redirect to mood entry
+      // Direct students based on their mood entry status
       if (!moodData || moodData.length === 0) {
         navigate('/mood-entry');
       } else {
         navigate('/dashboard');
       }
     } catch (error) {
-      console.error('Error:', error);
-      navigate('/mood-entry');
+      console.error('Navigation error:', error);
+      toast({
+        variant: "destructive",
+        title: "Navigation error",
+        description: "There was a problem navigating you to the right place."
+      });
+      navigate('/mood-entry'); // Default fallback
     }
   };
 
