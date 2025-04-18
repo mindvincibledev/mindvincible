@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -155,7 +156,7 @@ const ClinicianDashboard = () => {
         // Get all moods for this student this week
         const studentMoods = moodData?.filter(m => m.user_id === student.id) || [];
         const moodCounts: Record<string, number> = {};
-        let mostCommonMood = "-";
+        let mostCommonMood = "-"; // Defined here to fix the error
         let maxCount = 0;
         
         studentMoods.forEach(entry => {
@@ -183,16 +184,31 @@ const ClinicianDashboard = () => {
           id: student.id,
           name: student.name,
           latestMood,
-          weeklyAverageMood: mostCommonMood,
+          weeklyAverageMood: mostCommonMood, // Using the defined variable
           completedActivities
         };
       }) || [];
 
       setStudents(processedStudents);
 
-      // Calculate overall stats
+      // Calculate overall stats - fix reference to mostCommonMood by calculating it separately
+      let allMoodCounts: Record<string, number> = {};
+      let overallMostCommonMood = "-";
+      let overallMaxCount = 0;
+      
+      // Calculate the most common mood across all students
+      if (moodData && moodData.length > 0) {
+        moodData.forEach(entry => {
+          allMoodCounts[entry.mood] = (allMoodCounts[entry.mood] || 0) + 1;
+          if (allMoodCounts[entry.mood] > overallMaxCount) {
+            overallMaxCount = allMoodCounts[entry.mood];
+            overallMostCommonMood = entry.mood;
+          }
+        });
+      }
+
       setStats({
-        averageMood: mostCommonMood,
+        averageMood: overallMostCommonMood,
         activitiesCompleted: activityData?.length || 0,
         sharedJournals: 0, // This will be implemented in the future
         moodAlerts: processedStudents.filter(s => 
