@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge'; // Add this import
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -88,6 +88,9 @@ const ForkInTheRoadActivity = () => {
     // Make a deep copy to ensure we're not losing any data
     const updatedDecisionData = { ...decisionData, ...data };
     setDecisionData(updatedDecisionData);
+
+    // Log the updated state after merging data
+    console.log("Decision data after update:", updatedDecisionData);
     
     // If this is the final step (GutCheckScreen), save data to Supabase
     if (currentStep === 3) {
@@ -111,28 +114,31 @@ const ForkInTheRoadActivity = () => {
       
       console.log("Preparing data to save to Supabase with selection:", selection);
       
+      // Include the most up-to-date decision data INCLUDING the selection
+      const fullDecisionData = { ...decisionData, selection };
+      
       // Make sure all field names exactly match the column names in Supabase
       const dataToSave = {
         user_id: user.id,
-        choice: decisionData.choice,
-        consideration_path: decisionData.consideration_path,
-        other_path: decisionData.other_path,
-        change_a: decisionData.change_a,
-        feel_a: decisionData.feel_a,
-        change_b: decisionData.change_b,
-        feel_b: decisionData.feel_b,
-        challenges_a: decisionData.challenges_a,
-        challenges_b: decisionData.challenges_b,
-        strengths_a: decisionData.strengths_a,
-        strengths_b: decisionData.strengths_b,
-        values_a: decisionData.values_a,
-        values_b: decisionData.values_b,
-        tag_a: decisionData.tag_a,
-        tag_b: decisionData.tag_b,
-        gain_a: decisionData.gain_a,
-        gain_b: decisionData.gain_b,
-        future_a: decisionData.future_a,
-        future_b: decisionData.future_b,
+        choice: fullDecisionData.choice,
+        consideration_path: fullDecisionData.consideration_path,
+        other_path: fullDecisionData.other_path,
+        change_a: fullDecisionData.change_a,
+        feel_a: fullDecisionData.feel_a,
+        change_b: fullDecisionData.change_b,
+        feel_b: fullDecisionData.feel_b,
+        challenges_a: fullDecisionData.challenges_a,
+        challenges_b: fullDecisionData.challenges_b,
+        strengths_a: fullDecisionData.strengths_a,
+        strengths_b: fullDecisionData.strengths_b,
+        values_a: fullDecisionData.values_a,
+        values_b: fullDecisionData.values_b,
+        tag_a: fullDecisionData.tag_a,
+        tag_b: fullDecisionData.tag_b,
+        gain_a: fullDecisionData.gain_a,
+        gain_b: fullDecisionData.gain_b,
+        future_a: fullDecisionData.future_a,
+        future_b: fullDecisionData.future_b,
         selection: selection
       };
       

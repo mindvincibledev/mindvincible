@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -86,6 +86,10 @@ const getSummaryPoints = (data: GutCheckScreenProps['decisionData'], path: 'A' |
 
 const GutCheckScreen: React.FC<GutCheckScreenProps> = ({ onComplete, decisionData }) => {
   const [selection, setSelection] = useState<string>('');
+  
+  useEffect(() => {
+    console.log("GutCheckScreen received data:", decisionData);
+  }, [decisionData]);
   
   const summaryPointsA = getSummaryPoints(decisionData, 'A');
   const summaryPointsB = getSummaryPoints(decisionData, 'B');

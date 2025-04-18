@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -69,6 +70,11 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
   const [activeTab, setActiveTab] = useState<string>("daily-impact");
   const [activeRoad, setActiveRoad] = useState<"A" | "B">("A");
   
+  // Use useEffect to log initialValues when the component mounts
+  useEffect(() => {
+    console.log("ReflectionScreen received initialValues:", initialValues);
+  }, [initialValues]);
+
   // Initialize formData with either the initialValues or empty defaults
   const [formData, setFormData] = useState<ReflectionData>({
     change_a: initialValues.change_a || "",
@@ -89,9 +95,14 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
     future_b: initialValues.future_b || "",
   });
   
-  // Helper function to update form data
+  // Helper function to update form data with improved logging
   const updateFormData = (field: keyof ReflectionData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    console.log(`Updating ${field} to:`, value);
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      console.log(`Updated formData:`, updated);
+      return updated;
+    });
   };
 
   // Helper function to handle checkbox changes for strengths
@@ -116,16 +127,19 @@ const ReflectionScreen: React.FC<ReflectionScreenProps> = ({ onNext, initialValu
     }
   };
 
-  // Navigation between tabs
+  // Navigation between tabs with improved logging
   const nextTab = () => {
     switch (activeTab) {
       case "daily-impact":
+        console.log("Moving from daily-impact to obstacles tab");
         setActiveTab("obstacles");
         break;
       case "obstacles":
+        console.log("Moving from obstacles to alignment tab");
         setActiveTab("alignment");
         break;
       case "alignment":
+        console.log("Moving from alignment to future tab");
         setActiveTab("future");
         break;
       case "future":
