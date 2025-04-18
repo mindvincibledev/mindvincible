@@ -1,5 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Book, Archive, AreaChart, Images, Home as HomeIcon } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
@@ -7,9 +8,52 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const HomePage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  // Check user type and redirect on component mount
+  useEffect(() => {
+    if (user) {
+      checkUserTypeAndRedirect();
+    }
+  }, [user]);
+
+  // Function to check user type and redirect accordingly
+  const checkUserTypeAndRedirect = async () => {
+    try {
+      // Get user type from the users table
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('user_type')
+        .eq('id', user?.id)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching user data:", error);
+        return;
+      }
+      
+      // Redirect based on user type
+      if (userData) {
+        switch (userData.user_type) {
+          case 0: // Admin
+            navigate('/admin-dashboard');
+            break;
+          case 1: // Clinician
+            navigate('/clinician-dashboard');
+            break;
+          default: // Student (user_type=2) or other types
+            // Show this page as is (no redirect)
+            break;
+        }
+      }
+    } catch (err) {
+      console.error("Error checking user type:", err);
+    }
+  };
   
   const containerVariants = {
     hidden: { opacity: 0 },

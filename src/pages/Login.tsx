@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,21 +10,56 @@ import { useAuth } from '@/context/AuthContext';
 import BackgroundWithEmojis from "@/components/BackgroundWithEmojis";
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { UserType } from '@/context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, user } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // If user is already logged in, check if they've logged a mood today
-    if (user) {
-      checkTodaysMoodEntry(user.id);
+  const redirectUserBasedOnType = async (userId: string) => {
+    try {
+      // Fetch user type from database
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('user_type')
+        .eq('id', userId)
+        .single();
+      
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+        // Default to home page if there's an error
+        navigate('/home');
+        return;
+      }
+      
+      // Redirect based on user type
+      if (userData) {
+        switch (userData.user_type) {
+          case UserType.Admin:
+            navigate('/admin-dashboard');
+            break;
+          case UserType.Clinician:
+            navigate('/clinician-dashboard');
+            break;
+          case UserType.Student:
+            // Check if student has already logged a mood today
+            checkTodaysMoodEntry(userId);
+            break;
+          default:
+            navigate('/home');
+        }
+      } else {
+        navigate('/home');
+      }
+    } catch (err) {
+      console.error('Error redirecting user:', err);
+      navigate('/home');
     }
-  }, [user]);
+  };
 
   const checkTodaysMoodEntry = async (userId: string) => {
     try {
@@ -49,7 +85,7 @@ const Login = () => {
       
       // If user has a mood entry today, redirect to home, otherwise to mood entry
       if (moodData && moodData.length > 0) {
-        navigate('/home');
+        navigate('/dashboard');
       } else {
         navigate('/mood-entry');
       }
@@ -66,8 +102,9 @@ const Login = () => {
     setLoading(true);
     
     try {
-      await signIn(email, password);
-      // Don't navigate here - the useEffect will handle it once user is set
+      const result = await signIn(email, password);
+      // After successful login, redirect based on user type
+      redirectUserBasedOnType(result.id);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

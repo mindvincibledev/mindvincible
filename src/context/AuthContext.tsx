@@ -27,7 +27,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   session: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<User>;
   signUp: (userData: {
     email: string;
     password: string;
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<User> => {
     try {
       setLoading(true);
       
@@ -86,14 +86,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Invalid email or password');
       }
       
-      setUser(userData as User);
+      const userObject = userData as User;
+      
+      setUser(userObject);
       setSession(true);
-      localStorage.setItem('mindvincible_user', JSON.stringify(userData));
+      localStorage.setItem('mindvincible_user', JSON.stringify(userObject));
       
       toast({
         title: "Success!",
         description: "You've been signed in.",
       });
+      
+      return userObject;
     } catch (error: any) {
       toast({
         variant: "destructive",
