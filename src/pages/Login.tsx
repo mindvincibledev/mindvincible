@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -20,47 +19,6 @@ const Login = () => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
-  const redirectUserBasedOnType = async (userId: string) => {
-    try {
-      // Fetch user type from database
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('user_type')
-        .eq('id', userId)
-        .single();
-      
-      if (userError) {
-        console.error('Error fetching user data:', userError);
-        // Default to home page if there's an error
-        navigate('/home');
-        return;
-      }
-      
-      // Redirect based on user type
-      if (userData) {
-        switch (userData.user_type) {
-          case UserType.Admin:
-            navigate('/admin-dashboard');
-            break;
-          case UserType.Clinician:
-            navigate('/clinician-dashboard');
-            break;
-          case UserType.Student:
-            // Check if student has already logged a mood today
-            checkTodaysMoodEntry(userId);
-            break;
-          default:
-            navigate('/home');
-        }
-      } else {
-        navigate('/home');
-      }
-    } catch (err) {
-      console.error('Error redirecting user:', err);
-      navigate('/home');
-    }
-  };
-
   const checkTodaysMoodEntry = async (userId: string) => {
     try {
       const today = new Date();
@@ -78,20 +36,57 @@ const Login = () => {
       
       if (moodError) {
         console.error('Error checking mood entries:', moodError);
-        // Default to home page if there's an error
+        return false;
+      }
+      
+      return moodData && moodData.length > 0;
+    } catch (err) {
+      console.error('Error checking mood entries:', err);
+      return false;
+    }
+  };
+
+  const redirectUserBasedOnType = async (userId: string) => {
+    try {
+      // Fetch user type from database
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('user_type')
+        .eq('id', userId)
+        .single();
+      
+      if (userError) {
+        console.error('Error fetching user data:', userError);
         navigate('/home');
         return;
       }
       
-      // If user has a mood entry today, redirect to home, otherwise to mood entry
-      if (moodData && moodData.length > 0) {
-        navigate('/dashboard');
+      // Redirect based on user type
+      if (userData) {
+        switch (userData.user_type) {
+          case UserType.Admin:
+            navigate('/admin-dashboard');
+            break;
+          case UserType.Clinician:
+            navigate('/clinician-dashboard');
+            break;
+          case UserType.Student:
+            // Check if student has already logged a mood today
+            const hasMoodEntry = await checkTodaysMoodEntry(userId);
+            if (hasMoodEntry) {
+              navigate('/dashboard');
+            } else {
+              navigate('/mood-entry');
+            }
+            break;
+          default:
+            navigate('/home');
+        }
       } else {
-        navigate('/mood-entry');
+        navigate('/home');
       }
     } catch (err) {
-      console.error('Error checking mood entries:', err);
-      // Default to home page if there's an error
+      console.error('Error redirecting user:', err);
       navigate('/home');
     }
   };
