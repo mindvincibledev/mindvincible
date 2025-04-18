@@ -116,6 +116,7 @@ const ForkInTheRoadActivity = () => {
       
       // Include the most up-to-date decision data INCLUDING the selection
       const fullDecisionData = { ...decisionData, selection };
+      console.log(fullDecisionData)
       
       // Make sure all field names exactly match the column names in Supabase
       const dataToSave = {
