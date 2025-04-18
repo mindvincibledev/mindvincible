@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -437,6 +436,11 @@ const Journal = () => {
         feelingPath = await uploadFile(feelingFile, 'feeling');
       }
       
+      // Fix: Convert string arrays to either string or null
+      const whoStickersValue = whoStickers.length > 0 ? JSON.stringify(whoStickers) : null;
+      const howItWentStickersValue = howItWentStickers.length > 0 ? JSON.stringify(howItWentStickers) : null;
+      const feelingStickersValue = feelingStickers.length > 0 ? JSON.stringify(feelingStickers) : null;
+      
       // Update the challenge record and mark it as complete
       const { error } = await supabase
         .from('simple_hi_challenges')
@@ -449,9 +453,9 @@ const Journal = () => {
           how_it_went_rating: howItWentRating[0],
           feeling,
           feeling_path: feelingPath,
-          who_stickers: whoStickers.length > 0 ? whoStickers : null,
-          how_it_went_stickers: howItWentStickers.length > 0 ? howItWentStickers : null,
-          feeling_stickers: feelingStickers.length > 0 ? feelingStickers : null,
+          who_stickers: whoStickersValue,
+          how_it_went_stickers: howItWentStickersValue,
+          feeling_stickers: feelingStickersValue,
           updated_at: new Date().toISOString()
         })
         .eq('id', selectedGoal)
@@ -804,94 +808,4 @@ const Journal = () => {
                           {isRecordingFeeling ? (
                             <button 
                               onClick={() => stopRecording('feeling')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
-                            >
-                              <MicOff className="w-4 h-4" />
-                              <span>Stop</span>
-                            </button>
-                          ) : (
-                            <button 
-                              onClick={() => startRecording('feeling')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
-                            >
-                              <Mic className="w-4 h-4" />
-                              <span>Record Audio</span>
-                            </button>
-                          )}
-                          
-                          <button 
-                            onClick={() => openStickerDialog('feeling')}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
-                          >
-                            <Smile className="w-4 h-4" />
-                            <span>Add Sticker</span>
-                          </button>
-                        </div>
-                        
-                        {renderFilePreview(feelingPreview, 'feeling')}
-                        {renderStickers(feelingStickers)}
-                      </div>
-
-                      <motion.div
-                        className="flex justify-center mt-8"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Button
-                          onClick={handleSubmit}
-                          disabled={isSubmitting || !who || !howItWent || !feeling}
-                          className="w-full md:w-auto px-8 py-6 text-lg font-semibold rounded-full bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90 transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
-                        >
-                          {isSubmitting ? (
-                            'Saving...'
-                          ) : (
-                            <>
-                              Complete Goal
-                              <ArrowRight className="h-5 w-5" />
-                            </>
-                          )}
-                        </Button>
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </>
-              ) : (
-                <ReflectionSection 
-                  onSubmit={handleReflectionSubmit}
-                  isSubmitting={isSubmitting}
-                />
-              )}
-            </div>
-          )}
-        </div>
-      </Card>
-
-      {/* Sticker Selection Dialog */}
-      <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-center">Choose a Sticker</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-3 gap-4 p-4">
-            {STICKERS.map((sticker) => (
-              <button
-                key={sticker.id}
-                onClick={() => addSticker(sticker.emoji || sticker.src)}
-                className="flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                {sticker.emoji ? (
-                  <span className="text-3xl">{sticker.emoji}</span>
-                ) : (
-                  <img src={sticker.src} alt={sticker.alt} className="h-10 w-10" />
-                )}
-              </button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </motion.div>
-  );
-};
-
-export default Journal;
-
+                              className="flex items-center gap-1 px-3 py-1.
