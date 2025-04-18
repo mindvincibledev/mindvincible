@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,7 +13,7 @@ import Navbar from '@/components/Navbar';
 import ActivityDropdown from '@/components/dashboard/ActivityDropdown';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 
-// Keep the existing interfaces but update StudentData
+// Update StudentData interface
 interface StudentData {
   id: string;
   name: string;
@@ -141,7 +142,8 @@ const ClinicianDashboard = () => {
         .from('mood_data')
         .select('user_id, mood, created_at')
         .gte('created_at', weekStart.toISOString())
-        .lte('created_at', weekEnd.toISOString());
+        .lte('created_at', weekEnd.toISOString())
+        .eq('user_type', 2); // Only get student mood data
       
       if (weekMoodError) throw weekMoodError;
 
