@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Book, Archive, AreaChart, Brain, Sparkles, Images, Home as HomeIcon } from 'lucide-react';
@@ -32,6 +31,13 @@ const HomePage = () => {
   };
 
   const modules = [
+    {
+      title: "Resources Hub",
+      description: "Explore our collection of tools and activities for emotional well-being.",
+      icon: <Brain className="h-8 w-8 text-[#FC68B3]" />,
+      link: "/resources",
+      color: "from-[#FC68B3] to-[#FF8A48]"
+    },
     {
       title: "Mood Entry",
       description: "Record how you're feeling today with our interactive mood tracker.",

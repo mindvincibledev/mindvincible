@@ -359,10 +359,12 @@ export type Database = {
           created_at: string
           feeling: string | null
           feeling_path: string | null
+          feeling_stickers: string | null
           goal: string
           how_it_went: string | null
           how_it_went_path: string | null
           how_it_went_rating: number | null
+          how_it_went_stickers: string | null
           id: string
           other_people_rating: number | null
           other_people_responses: string | null
@@ -377,16 +379,19 @@ export type Database = {
           who: string | null
           who_difficulty: number | null
           who_path: string | null
+          who_stickers: string | null
         }
         Insert: {
           challenge_level: string
           created_at?: string
           feeling?: string | null
           feeling_path?: string | null
+          feeling_stickers?: string | null
           goal: string
           how_it_went?: string | null
           how_it_went_path?: string | null
           how_it_went_rating?: number | null
+          how_it_went_stickers?: string | null
           id?: string
           other_people_rating?: number | null
           other_people_responses?: string | null
@@ -401,16 +406,19 @@ export type Database = {
           who?: string | null
           who_difficulty?: number | null
           who_path?: string | null
+          who_stickers?: string | null
         }
         Update: {
           challenge_level?: string
           created_at?: string
           feeling?: string | null
           feeling_path?: string | null
+          feeling_stickers?: string | null
           goal?: string
           how_it_went?: string | null
           how_it_went_path?: string | null
           how_it_went_rating?: number | null
+          how_it_went_stickers?: string | null
           id?: string
           other_people_rating?: number | null
           other_people_responses?: string | null
@@ -425,6 +433,7 @@ export type Database = {
           who?: string | null
           who_difficulty?: number | null
           who_path?: string | null
+          who_stickers?: string | null
         }
         Relationships: [
           {

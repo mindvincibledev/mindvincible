@@ -29,6 +29,7 @@ import MoodReminderNotification from "./components/MoodReminderNotification";
 import PowerOfHiActivity from "./pages/PowerOfHiActivity";
 import MirrorMirrorActivity from "./pages/MirrorMirrorActivity";
 import ForkInTheRoadActivity from "./pages/ForkInTheRoadActivity";
+import ResourcesHub from "./pages/ResourcesHub";
 
 // Update document title to correct app name
 document.title = "M(in)dvincible";
@@ -150,6 +151,11 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         
+        <Route path="/resources" element={
+          <ProtectedRoute>
+            <ResourcesHub />
+          </ProtectedRoute>
+        } />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
