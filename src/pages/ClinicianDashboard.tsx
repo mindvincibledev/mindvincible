@@ -184,7 +184,7 @@ const ClinicianDashboard = () => {
       });
       
       // Count mood alerts (angry, overwhelmed, sad, or anxious moods)
-      const alertMoods = ['angry', 'overwhelmed', 'sad', 'anxious'];
+      const alertMoods = ['Angry', 'Overwhelmed', 'Sad', 'Anxious'];
       const uniqueStudentsWithAlertMoods = new Set();
       
       moodData?.forEach(entry => {
