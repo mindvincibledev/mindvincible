@@ -93,7 +93,7 @@ const ForkInTheRoadActivity = () => {
     console.log("Decision data after update:", updatedDecisionData);
     
     // If this is the final step (GutCheckScreen), save data to Supabase
-    if (currentStep === 3) {
+    if (currentStep === 2) {
       handleSubmitDecision(data.selection || '');
     } else {
       setCurrentStep(prev => prev + 1);
