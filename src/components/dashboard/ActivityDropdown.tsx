@@ -30,26 +30,20 @@ const ActivityDropdown = ({ completedActivities }: ActivityDropdownProps) => {
       <SelectTrigger className="w-[200px] bg-white">
         <SelectValue placeholder={`${completedActivities.length}/${allActivities.length} Done`} />
       </SelectTrigger>
-      <SelectContent className="bg-white backdrop-blur-md border border-gray-200 z-50">
+      <SelectContent className="bg-white backdrop-blur-md border border-gray-200">
         <SelectGroup>
-          {allActivities.map((activity) => {
-            const isCompleted = completedActivities.includes(activity);
-            return (
-              <SelectItem 
-                key={activity} 
-                value={activity}
-              >
-                <div className="flex items-center gap-2">
-                  {isCompleted ? (
-                    <CheckCircle2 className="h-5 w-5 text-[#2AC20E]" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-[#FC68B3]" />
-                  )}
-                  <span>{activity}</span>
-                </div>
-              </SelectItem>
-            );
-          })}
+          {allActivities.map((activity) => (
+            <SelectItem key={activity} value={activity} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {completedActivities.includes(activity) ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-red-500" />
+                )}
+                {activity}
+              </div>
+            </SelectItem>
+          ))}
         </SelectGroup>
       </SelectContent>
     </Select>
