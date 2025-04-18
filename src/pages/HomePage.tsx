@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Book, Archive, AreaChart, Brain, Sparkles, Images, Home as HomeIcon } from 'lucide-react';
+import { Heart, Book, Archive, AreaChart, Images, Home as HomeIcon } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,7 +34,7 @@ const HomePage = () => {
     {
       title: "Resources Hub",
       description: "Explore our collection of tools and activities for emotional well-being.",
-      icon: <Brain className="h-8 w-8 text-[#FC68B3]" />,
+      icon: <HomeIcon className="h-8 w-8 text-[#FC68B3]" />,
       link: "/resources",
       color: "from-[#FC68B3] to-[#FF8A48]"
     },
@@ -65,20 +65,6 @@ const HomePage = () => {
       icon: <Images className="h-8 w-8 text-[#D5D5F1]" />,
       link: "/recent-mood-jars",
       color: "from-[#D5D5F1] to-[#FC68B3]"
-    },
-    {
-      title: "Self Awareness",
-      description: "Because understanding yourself is the ultimate glow-up ✨🧠.",
-      icon: <HomeIcon className="h-8 w-8 text-[#FF8A48]" />,
-      link: "/emotional-airbnb",
-      color: "from-[#FF8A48] to-[#FC68B3]"
-    },
-    {
-      title: "Emotional Hacking",
-      description: "Explore activities and techniques to manage intense emotions and ground yourself.",
-      icon: <Brain className="h-8 w-8 text-[#FC68B3]" />,
-      link: "/emotional-hacking",
-      color: "from-[#FC68B3] to-[#3DFDFF]"
     },
     {
       title: "Dashboard",

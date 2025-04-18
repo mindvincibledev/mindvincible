@@ -2,10 +2,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Brain, Heart } from 'lucide-react';
+import { Brain, Heart, ArrowRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 const ResourcesHub = () => {
   const modules = [
@@ -55,19 +56,25 @@ const ResourcesHub = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
               >
-                <Link to={module.link}>
-                  <Card className={`h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${module.bgColor}`}>
-                    <CardHeader>
-                      <div className="p-3 rounded-full bg-white shadow-md w-fit">
-                        {module.icon}
-                      </div>
-                      <CardTitle className="text-2xl font-bold mt-4">{module.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription className="text-base">{module.description}</CardDescription>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <Card className={`h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${module.bgColor}`}>
+                  <CardHeader>
+                    <div className="p-3 rounded-full bg-white shadow-md w-fit">
+                      {module.icon}
+                    </div>
+                    <CardTitle className="text-2xl font-bold mt-4">{module.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-base mb-6">{module.description}</CardDescription>
+                    <Link to={module.link}>
+                      <Button 
+                        className={`w-full bg-gradient-to-r ${module.color} text-white hover:opacity-90 flex items-center justify-center gap-2`}
+                      >
+                        <span>Open {module.title}</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </div>
