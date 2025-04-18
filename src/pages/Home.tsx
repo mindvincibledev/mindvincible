@@ -7,16 +7,47 @@ import { Typewriter } from '@/components/ui/typewriter';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
+import { supabase } from '@/integrations/supabase/client';
 
 const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  const handleGetStarted = () => {
-    if (user) {
-      navigate('/mood-entry');
-    } else {
+  const handleGetStarted = async () => {
+    if (!user) {
       navigate('/login');
+      return;
+    }
+
+    try {
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
+      
+      // Check if user has logged a mood today
+      const { data: moodData, error: moodError } = await supabase
+        .from('mood_data')
+        .select('id')
+        .eq('user_id', user.id)
+        .gte('created_at', startOfDay)
+        .lt('created_at', endOfDay)
+        .limit(1);
+      
+      if (moodError) {
+        console.error('Error checking mood entries:', moodError);
+        navigate('/mood-entry');
+        return;
+      }
+
+      // If no mood entry today, redirect to mood entry
+      if (!moodData || moodData.length === 0) {
+        navigate('/mood-entry');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      navigate('/mood-entry');
     }
   };
 

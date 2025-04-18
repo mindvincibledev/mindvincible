@@ -42,21 +42,43 @@ const Login = () => {
       
       if (moodError) {
         console.error('Error checking mood entries:', moodError);
-        // Default to home page if there's an error
-        navigate('/home');
+        navigate('/mood-entry');
         return;
       }
-      
-      // If user has a mood entry today, redirect to home, otherwise to mood entry
-      if (moodData && moodData.length > 0) {
-        navigate('/home');
-      } else {
+
+      // If no mood entry today, redirect to mood entry
+      if (!moodData || moodData.length === 0) {
         navigate('/mood-entry');
+      } else {
+        // If they have a mood entry, check their user type
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('user_type')
+          .eq('id', userId)
+          .single();
+
+        if (userError) {
+          console.error('Error fetching user type:', userError);
+          navigate('/home');
+          return;
+        }
+
+        if (userData) {
+          switch (userData.user_type) {
+            case 0: // Admin
+              navigate('/admin-dashboard');
+              break;
+            case 1: // Clinician
+              navigate('/clinician-dashboard');
+              break;
+            default: // Student or any other type
+              navigate('/dashboard');
+          }
+        }
       }
     } catch (err) {
       console.error('Error checking mood entries:', err);
-      // Default to home page if there's an error
-      navigate('/home');
+      navigate('/mood-entry');
     }
   };
 
