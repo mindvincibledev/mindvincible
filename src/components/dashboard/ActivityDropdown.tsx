@@ -12,23 +12,14 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 
 interface ActivityDropdownProps {
   completedActivities: string[];
+  allActivities: string[];
 }
 
-const ActivityDropdown = ({ completedActivities }: ActivityDropdownProps) => {
-  // Define all available activities from resource hub
-  const allActivities = [
-    'Emotional Airbnb',
-    'Box Breathing',
-    'Fork in the Road',
-    'Grounding Technique',
-    'Mirror Mirror',
-    'Power of Hi'
-  ];
-
+const ActivityDropdown = ({ completedActivities, allActivities }: ActivityDropdownProps) => {
   return (
     <Select>
       <SelectTrigger className="w-[200px]">
-        <SelectValue placeholder={`${completedActivities.length}/${allActivities.length} Done`} />
+        <SelectValue placeholder="View Activities" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
