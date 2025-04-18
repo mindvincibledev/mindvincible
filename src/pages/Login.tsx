@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,15 +8,57 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import BackgroundWithEmojis from "@/components/BackgroundWithEmojis";
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // If user is already logged in, check if they've logged a mood today
+    if (user) {
+      checkTodaysMoodEntry(user.id);
+    }
+  }, [user]);
+
+  const checkTodaysMoodEntry = async (userId: string) => {
+    try {
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
+      
+      // Check if user has logged a mood today
+      const { data: moodData, error: moodError } = await supabase
+        .from('mood_data')
+        .select('id')
+        .eq('user_id', userId)
+        .gte('created_at', startOfDay)
+        .lt('created_at', endOfDay)
+        .limit(1);
+      
+      if (moodError) {
+        console.error('Error checking mood entries:', moodError);
+        // Default to home page if there's an error
+        navigate('/home');
+        return;
+      }
+      
+      // If user has a mood entry today, redirect to home, otherwise to mood entry
+      if (moodData && moodData.length > 0) {
+        navigate('/home');
+      } else {
+        navigate('/mood-entry');
+      }
+    } catch (err) {
+      console.error('Error checking mood entries:', err);
+      // Default to home page if there's an error
+      navigate('/home');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,70 +67,17 @@ const Login = () => {
     
     try {
       await signIn(email, password);
-      
-      // After successful login, retrieve user data
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('user_type, id')
-        .eq('email', email)
-        .single();
-      
-      if (userError) {
-        throw new Error(`Error fetching user data: ${userError.message}`);
-      }
-      
-      // Admin and clinicians go directly to their dashboards
-      if (userData.user_type === 0) {
-        navigate('/admin-dashboard');
-        return;
-      }
-      
-      if (userData.user_type === 1) {
-        navigate('/clinician-dashboard');
-        return;
-      }
-      
-      // For students, check if they've logged a mood today
-      const today = new Date();
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
-      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
-      
-      const { data: moodData, error: moodError } = await supabase
-        .from('mood_data')
-        .select('id')
-        .eq('user_id', userData.id)
-        .gte('created_at', startOfDay)
-        .lt('created_at', endOfDay)
-        .limit(1);
-      
-      if (moodError) {
-        throw new Error(`Error checking mood entries: ${moodError.message}`);
-      }
-      
-      // Navigate based on mood entry status
-      if (!moodData || moodData.length === 0) {
-        navigate('/mood-entry');
-      } else {
-        navigate('/dashboard'); // Redirect to dashboard when mood entry exists
-      }
-      
-      toast({
-        title: "Success!",
-        description: "You've been signed in.",
-      });
+      // Don't navigate here - the useEffect will handle it once user is set
     } catch (err) {
-      console.error('Login error:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError('Failed to log in. Please check your credentials.');
       }
-    } finally {
       setLoading(false);
     }
   };
 
-  
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
@@ -115,7 +104,6 @@ const Login = () => {
                 {error}
               </div>
             )}
-            
             
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
