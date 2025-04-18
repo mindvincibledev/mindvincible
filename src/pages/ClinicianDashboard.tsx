@@ -128,15 +128,12 @@ const ClinicianDashboard = () => {
       
       if (activityError) throw activityError;
       
-      // Get journal entries
+      // Get total journal entries count (not filtering by date for total count)
       const { data: journalData, error: journalError } = await supabase
         .from('journal_entries')
-        .select('count')
-        .gte('created_at', startOfDay)
-        .lte('created_at', endOfDay)
-        .single();
+        .select('id', { count: 'exact' });
       
-      if (journalError && journalError.code !== 'PGRST116') throw journalError;
+      if (journalError) throw journalError;
       
       // Process student data
       const processedStudents: StudentData[] = [];
@@ -200,7 +197,7 @@ const ClinicianDashboard = () => {
       setStats({
         averageMood: mostCommonMood,
         activitiesCompleted: activityData?.length || 0,
-        sharedJournals: journalData?.count || 0,
+        sharedJournals: journalData?.count || 0, // Use the count from the query
         moodAlerts: uniqueStudentsWithAlertMoods.size
       });
       
