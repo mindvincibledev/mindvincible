@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { AlertTriangle, Book, CheckCircle2, Frown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import Navbar from '@/components/Navbar';
 import ActivityDropdown from '@/components/dashboard/ActivityDropdown';
@@ -368,7 +369,8 @@ const ClinicianDashboard = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-[200px]">Student Name</TableHead>
-                        <TableHead className="w-[200px]">Weekly Average Mood</TableHead>
+                        <TableHead className="w-[150px]">Current Mood</TableHead>
+                        <TableHead className="w-[200px]">Weekly Average</TableHead>
                         <TableHead className="w-[250px]">Activities</TableHead>
                         <TableHead className="w-[150px]">Shared Responses</TableHead>
                       </TableRow>
@@ -387,20 +389,30 @@ const ClinicianDashboard = () => {
                                 </span>
                               </div>
                             </TableCell>
+                            <TableCell className={`${getMoodBackground(student.weeklyAverageMood)}`}>
+                              <div className="flex items-center">
+                                <span className="text-xl mr-2">{getMoodEmoji(student.weeklyAverageMood)}</span>
+                                <span>
+                                  {student.weeklyAverageMood.charAt(0).toUpperCase() + 
+                                   student.weeklyAverageMood.slice(1)}
+                                </span>
+                              </div>
+                            </TableCell>
                             <TableCell>
                               <ActivityDropdown
                                 completedActivities={student.completedActivities}
-                                allActivities={allActivities}
                               />
                             </TableCell>
-                            <TableCell className="text-center">
-                              {student.sharedResponses}
+                            <TableCell>
+                              <Button variant="outline" className="w-full" disabled>
+                                Coming Soon
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center py-6">
+                          <TableCell colSpan={5} className="text-center py-6">
                             No student data available
                           </TableCell>
                         </TableRow>
