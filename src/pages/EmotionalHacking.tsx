@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Eye } from 'lucide-react';
+import { Eye, Wind } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +20,17 @@ const activities = [
     chartColor: "#F5DF4D",
     shortName: "Ground"
   },
-  // Add any new emotional hacking activities here
+  {
+    id: "box-breathing",
+    title: "Breathe in a Box",
+    description: "A calming breathing exercise to help you relax and focus.",
+    icon: <Wind className="h-8 w-8 text-[#3DFDFF]" />,
+    link: "/emotional-hacking/box-breathing",
+    color: "from-[#3DFDFF] to-[#2AC20E]",
+    bgColor: "bg-[#E5FFF2]",
+    chartColor: "#3DFDFF",
+    shortName: "Breathe"
+  }
 ];
 
 const EmotionalHacking = () => {
