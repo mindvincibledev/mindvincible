@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
@@ -92,9 +91,10 @@ const ForkInTheRoadActivity = () => {
     // Log the updated state after merging data
     console.log("Decision data after update:", updatedDecisionData);
     
-    // If this is the final step (GutCheckScreen), save data to Supabase
-    if (currentStep === 2) {
-      handleSubmitDecision(data.selection || '');
+    // Check if we're receiving data from GutCheckScreen (it will have a selection property)
+    if (data.selection !== undefined) {
+      console.log("GutCheck selection received:", data.selection);
+      handleSubmitDecision(data.selection);
     } else {
       setCurrentStep(prev => prev + 1);
     }
@@ -106,19 +106,17 @@ const ForkInTheRoadActivity = () => {
       return;
     }
     
-    // Prevent double submissions
     if (isSubmitting) return;
     
     try {
       setIsSubmitting(true);
       
-      console.log("Preparing data to save to Supabase with selection:", selection);
+      console.log("Preparing to save decision with selection:", selection);
       
       // Include the most up-to-date decision data INCLUDING the selection
       const fullDecisionData = { ...decisionData, selection };
-      console.log("Full decision data:",fullDecisionData)
+      console.log("Full decision data to save:", fullDecisionData);
       
-      // Make sure all field names exactly match the column names in Supabase
       const dataToSave = {
         user_id: user.id,
         choice: fullDecisionData.choice,
@@ -143,7 +141,7 @@ const ForkInTheRoadActivity = () => {
         selection: selection
       };
       
-      console.log("Final data to save:", dataToSave);
+      console.log("Final data being saved to Supabase:", dataToSave);
       
       const { data, error } = await supabase
         .from('fork_in_road_decisions')
