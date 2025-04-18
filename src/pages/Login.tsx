@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -69,7 +70,7 @@ const Login = () => {
       if (!moodData || moodData.length === 0) {
         navigate('/mood-entry');
       } else {
-        navigate('/dashboard');
+        navigate('/home'); // Redirect to home page instead of dashboard when mood entry exists
       }
       
       toast({

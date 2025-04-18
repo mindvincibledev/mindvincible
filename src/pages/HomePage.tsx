@@ -77,7 +77,7 @@ const HomePage = () => {
         if (!moodData || moodData.length === 0) {
           navigate('/mood-entry'); // No mood entry today
         } else {
-          navigate('/dashboard'); // Has mood entry today
+          navigate('/home'); // Redirect to home page instead of dashboard when mood entry exists
         }
       } catch (error) {
         console.error('Routing error:', error);
