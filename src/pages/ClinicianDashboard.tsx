@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,9 +6,10 @@ import { useAuth } from '@/context/AuthContext';
 import { AlertTriangle, Book, CheckCircle2, Frown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import Navbar from '@/components/Navbar';
-import Wave from '@/components/Wave';
+import ActivityDropdown from '@/components/ActivityDropdown';
 import { format } from 'date-fns';
 
 // Define interfaces for our data
@@ -17,6 +17,7 @@ interface StudentData {
   id: string;
   name: string;
   latestMood: string;
+  weeklyAverageMood: string;
   completedActivities: string[];
 }
 
@@ -36,20 +37,38 @@ const ClinicianDashboard = () => {
     sharedJournals: 0,
     moodAlerts: 0
   });
+  const [clinicianName, setClinicianName] = useState("");
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const today = format(new Date(), 'EEEE, MMMM d, yyyy');
 
   useEffect(() => {
-    // Check if user is clinician
     checkUserType();
-    
-    // Load dashboard data
     if (user) {
+      fetchClinicianName();
       fetchDashboardData();
     }
   }, [user]);
+
+  const fetchClinicianName = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('name')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) throw error;
+      if (data) {
+        setClinicianName(data.name);
+      }
+    } catch (error) {
+      console.error("Error fetching clinician name:", error);
+    }
+  };
 
   const checkUserType = async () => {
     if (!user) {
@@ -100,128 +119,87 @@ const ClinicianDashboard = () => {
       const { data: studentsData, error: studentsError } = await supabase
         .from('users')
         .select('id, name')
-        .eq('user_type', 2); // Students have user_type = 2
+        .eq('user_type', 2);
       
       if (studentsError) throw studentsError;
       
-      // Get today's date range for filtering
-      const today = new Date();
-      const startOfDay = new Date(today.setHours(0,0,0,0)).toISOString();
-      const endOfDay = new Date(today.setHours(23,59,59,999)).toISOString();
+      // Get weekly date range
+      const now = new Date();
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - now.getDay());
+      weekStart.setHours(0, 0, 0, 0);
+      const weekEnd = new Date(now);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      weekEnd.setHours(23, 59, 59, 999);
       
-      // Get latest mood entries for today
-      const { data: todayMoodData, error: todayMoodError } = await supabase
+      // Get mood data for the week
+      const { data: moodData, error: moodError } = await supabase
         .from('mood_data')
-        .select('user_id, mood, created_at')
-        .gte('created_at', startOfDay)
-        .lte('created_at', endOfDay)
-        .order('created_at', { ascending: false });
+        .select('*')
+        .gte('created_at', weekStart.toISOString())
+        .lte('created_at', weekEnd.toISOString());
       
-      if (todayMoodError) throw todayMoodError;
+      if (moodError) throw moodError;
       
-      // Get activity completions for today
+      // Get activity completions for the week
       const { data: activityData, error: activityError } = await supabase
         .from('activity_completions')
-        .select('user_id, activity_name, completed_at')
-        .gte('completed_at', startOfDay)
-        .lte('completed_at', endOfDay);
+        .select('*')
+        .gte('completed_at', weekStart.toISOString())
+        .lte('completed_at', weekEnd.toISOString());
       
       if (activityError) throw activityError;
 
-      // Get current week's date range for journal entries
-      const now = new Date();
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay()); // Start from Sunday
-      startOfWeek.setHours(0, 0, 0, 0);
-      const endOfWeek = new Date(now);
-      endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
-      endOfWeek.setHours(23, 59, 59, 999);
+      // Process student data with weekly averages and completed activities
+      const processedStudents = studentsData?.map(student => {
+        // Get all moods for this student this week
+        const studentMoods = moodData?.filter(m => m.user_id === student.id) || [];
+        const moodCounts: Record<string, number> = {};
+        let mostCommonMood = "-";
+        let maxCount = 0;
+        
+        studentMoods.forEach(entry => {
+          moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
+          if (moodCounts[entry.mood] > maxCount) {
+            maxCount = moodCounts[entry.mood];
+            mostCommonMood = entry.mood;
+          }
+        });
 
-      // Get journal entries for the current week
-      const { data: journalData, error: journalError } = await supabase
-        .from('journal_entries')
-        .select('*', { count: 'exact' })
-        .gte('created_at', startOfWeek.toISOString())
-        .lte('created_at', endOfWeek.toISOString());
+        // Get completed activities for this student
+        const completedActivities = [
+          ...new Set(
+            activityData
+              ?.filter(a => a.user_id === student.id)
+              .map(a => a.activity_name) || []
+          )
+        ];
 
-      if (journalError && journalError.code !== 'PGRST116') throw journalError;
+        // Get latest mood
+        const latestMood = studentMoods
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.mood || "-";
 
-      // Get current mood entries (most recent for each student)
-      const { data: moodData, error: moodError } = await supabase
-        .from('mood_data')
-        .select('user_id, mood, created_at');
-
-      if (moodError) throw moodError;
-
-      // Process student data and find current mood alerts
-      const alertMoods = ['Angry', 'Overwhelmed', 'Sad', 'Anxious'];
-      const uniqueStudentsWithAlertMoods = new Set();
-
-      // Create a map to store the most recent mood for each student
-      const latestStudentMoods = new Map();
-      moodData?.forEach(entry => {
-        const currentLatest = latestStudentMoods.get(entry.user_id);
-        if (!currentLatest || new Date(entry.created_at) > new Date(currentLatest.created_at)) {
-          latestStudentMoods.set(entry.user_id, entry);
-        }
-      });
-
-      // Check for alert moods in the latest mood entries
-      latestStudentMoods.forEach(entry => {
-        if (alertMoods.includes(entry.mood)) {
-          uniqueStudentsWithAlertMoods.add(entry.user_id);
-        }
-      });
-      
-      // Process student data
-      const processedStudents: StudentData[] = [];
-      const processedActivities = new Set<string>();
-      
-      // Create a map of activities completed by each student
-      const studentActivities = new Map();
-      activityData?.forEach(activity => {
-        if (!studentActivities.has(activity.user_id)) {
-          studentActivities.set(activity.user_id, []);
-        }
-        studentActivities.get(activity.user_id).push(activity.activity_name);
-        processedActivities.add(activity.activity_name);
-      });
-      
-      // Build the complete student data array
-      studentsData?.forEach(student => {
-        const latestMood = latestStudentMoods.get(student.id);
-        processedStudents.push({
+        return {
           id: student.id,
           name: student.name,
-          latestMood: latestMood ? latestMood.mood : '-',
-          completedActivities: studentActivities.get(student.id) || []
-        });
-      });
-      
-      // Calculate stats
-      // Count mood types for average calculation
-      const moodCounts: Record<string, number> = {};
-      let mostCommonMood = "-";
-      let maxCount = 0;
-      
-      todayMoodData?.forEach(entry => {
-        moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
-        if (moodCounts[entry.mood] > maxCount) {
-          maxCount = moodCounts[entry.mood];
-          mostCommonMood = entry.mood;
-        }
-      });
+          latestMood,
+          weeklyAverageMood: mostCommonMood,
+          completedActivities
+        };
+      }) || [];
 
-      // Set stats with the new calculations
+      setStudents(processedStudents);
+
+      // Calculate overall stats
       setStats({
         averageMood: mostCommonMood,
         activitiesCompleted: activityData?.length || 0,
-        sharedJournals: journalData?.length || 0,
-        moodAlerts: uniqueStudentsWithAlertMoods.size
+        sharedJournals: 0, // This will be implemented in the future
+        moodAlerts: processedStudents.filter(s => 
+          ['Angry', 'Overwhelmed', 'Sad', 'Anxious'].includes(s.latestMood)
+        ).length
       });
-      
-      // Set processed student data
-      setStudents(processedStudents);
+
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       toast({
@@ -233,8 +211,7 @@ const ClinicianDashboard = () => {
       setLoading(false);
     }
   };
-  
-  // Function to get emoji based on mood
+
   const getMoodEmoji = (mood: string) => {
     switch(mood.toLowerCase()) {
       case 'happy': return '😊';
@@ -261,19 +238,6 @@ const ClinicianDashboard = () => {
       default: return 'bg-gray-100';
     }
   };
-  
-  // Function to get icon color based on stat type
-  const getStatColor = (statType: string) => {
-    switch(statType) {
-      case 'mood': return 'text-blue-500';
-      case 'activities': return 'text-yellow-500';
-      case 'journals': return 'text-pink-500';
-      case 'alerts': return 'text-red-500';
-      default: return 'text-gray-500';
-    }
-  };
-
-  const activities = ['Emotional Airbnb', 'Digital Detox', 'Confidence'];
 
   return (
     <BackgroundWithEmojis>
@@ -283,7 +247,7 @@ const ClinicianDashboard = () => {
         <div className="relative z-10 container mx-auto px-4 py-20">
           <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Clinician Dashboard</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Welcome, {clinicianName}</h1>
               <p className="text-gray-600 mt-1">{today}</p>
             </div>
           </div>
@@ -368,11 +332,11 @@ const ClinicianDashboard = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[200px]">Student Name</TableHead>
-                        <TableHead className="w-[200px]">Mood Status</TableHead>
-                        {activities.map((activity) => (
-                          <TableHead key={activity} className="text-center">{activity}</TableHead>
-                        ))}
+                        <TableHead>Student Name</TableHead>
+                        <TableHead>Current Mood</TableHead>
+                        <TableHead>Weekly Average</TableHead>
+                        <TableHead>Activities</TableHead>
+                        <TableHead>Shared Responses</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -383,23 +347,32 @@ const ClinicianDashboard = () => {
                             <TableCell className={`${getMoodBackground(student.latestMood)}`}>
                               <div className="flex items-center">
                                 <span className="text-xl mr-2">{getMoodEmoji(student.latestMood)}</span>
-                                <span>{student.latestMood.charAt(0).toUpperCase() + student.latestMood.slice(1)}</span>
+                                <span>{student.latestMood}</span>
                               </div>
                             </TableCell>
-                            {activities.map((activity) => (
-                              <TableCell key={activity} className="text-center">
-                                {student.completedActivities.includes(activity) ? (
-                                  <CheckCircle2 className="mx-auto h-6 w-6 text-[#2AC20E]" />
-                                ) : (
-                                  <div className="h-6 w-6 border border-gray-300 rounded-md mx-auto"></div>
-                                )}
-                              </TableCell>
-                            ))}
+                            <TableCell className={`${getMoodBackground(student.weeklyAverageMood)}`}>
+                              <div className="flex items-center">
+                                <span className="text-xl mr-2">{getMoodEmoji(student.weeklyAverageMood)}</span>
+                                <span>{student.weeklyAverageMood}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <ActivityDropdown completedActivities={student.completedActivities} />
+                            </TableCell>
+                            <TableCell>
+                              <Button 
+                                variant="outline" 
+                                className="border-[#FC68B3] text-[#FC68B3] hover:bg-[#FC68B3]/10"
+                                disabled
+                              >
+                                Coming Soon
+                              </Button>
+                            </TableCell>
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={4 + activities.length} className="text-center py-6">
+                          <TableCell colSpan={5} className="text-center py-6">
                             No student data available
                           </TableCell>
                         </TableRow>
