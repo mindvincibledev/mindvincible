@@ -27,10 +27,10 @@ const ActivityDropdown = ({ completedActivities }: ActivityDropdownProps) => {
 
   return (
     <Select>
-      <SelectTrigger className="w-[200px]">
+      <SelectTrigger className="w-[200px] bg-white">
         <SelectValue placeholder={`${completedActivities.length}/${allActivities.length} Done`} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-white backdrop-blur-md border border-gray-200">
         <SelectGroup>
           {allActivities.map((activity) => (
             <SelectItem key={activity} value={activity} className="flex items-center justify-between">

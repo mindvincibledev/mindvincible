@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -137,13 +136,12 @@ const ClinicianDashboard = () => {
       const weekStart = startOfWeek(now);
       const weekEnd = endOfWeek(now);
       
-      // Get mood entries for the week
+      // Get mood entries for the week - FIXED: Removed invalid user_type filter
       const { data: weekMoodData, error: weekMoodError } = await supabase
         .from('mood_data')
         .select('user_id, mood, created_at')
         .gte('created_at', weekStart.toISOString())
-        .lte('created_at', weekEnd.toISOString())
-        .eq('user_type', 2); // Only get student mood data
+        .lte('created_at', weekEnd.toISOString());
       
       if (weekMoodError) throw weekMoodError;
 
