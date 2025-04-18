@@ -513,6 +513,7 @@ export type Database = {
           password: string
           updated_at: string
           user_phone: string | null
+          user_type: number
         }
         Insert: {
           address?: string | null
@@ -527,6 +528,7 @@ export type Database = {
           password: string
           updated_at?: string
           user_phone?: string | null
+          user_type?: number
         }
         Update: {
           address?: string | null
@@ -541,6 +543,7 @@ export type Database = {
           password?: string
           updated_at?: string
           user_phone?: string | null
+          user_type?: number
         }
         Relationships: []
       }

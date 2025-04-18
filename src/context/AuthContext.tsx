@@ -4,6 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
 
+export enum UserType {
+  Admin = 0,
+  Clinician = 1,
+  Student = 2,
+}
+
 interface User {
   id: string;
   email: string;
@@ -14,12 +20,13 @@ interface User {
   guardian2_name?: string | null;
   user_phone?: string | null;
   address?: string | null;
+  user_type: UserType;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  session: boolean; // Added session property
+  session: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (userData: {
     email: string;
@@ -31,8 +38,12 @@ interface AuthContextType {
     guardian2_name?: string;
     user_phone?: string;
     address?: string;
+    user_type?: UserType;
   }) => Promise<void>;
   signOut: () => Promise<void>;
+  isAdmin: () => boolean;
+  isClinician: () => boolean;
+  isStudent: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,7 +51,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState(false); // Added session state
+  const [session, setSession] = useState(false);
   const { toast } = useToast();
 
   // Check for stored user on initial load
@@ -49,11 +60,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-        setSession(true); // Set session to true when user exists
+        setSession(true);
       } catch (error) {
         console.error('Failed to parse stored user data', error);
         localStorage.removeItem('mindvincible_user');
-        setSession(false); // Set session to false on error
+        setSession(false);
       }
     }
     setLoading(false);
@@ -68,16 +79,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .from('users')
         .select('*')
         .eq('email', email)
-        .eq('password', password) // Direct password comparison
+        .eq('password', password)
         .single();
       
       if (userError || !userData) {
         throw new Error('Invalid email or password');
       }
       
-      // Store user in state and localStorage
       setUser(userData as User);
-      setSession(true); // Set session to true on successful sign in
+      setSession(true);
       localStorage.setItem('mindvincible_user', JSON.stringify(userData));
       
       toast({
@@ -106,11 +116,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     guardian2_name?: string;
     user_phone?: string;
     address?: string;
+    user_type?: UserType;
   }) => {
     try {
       setLoading(true);
       
-      // Check if user already exists
       const { data: existingUser, error: checkError } = await supabase
         .from('users')
         .select('id')
@@ -121,7 +131,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('User with this email already exists');
       }
       
-      // Insert the new user directly into users table
       const { data: newUser, error: insertError } = await supabase
         .from('users')
         .insert({
@@ -134,6 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           guardian2_name: userData.guardian2_name || null,
           user_phone: userData.user_phone || null,
           address: userData.address || null,
+          user_type: userData.user_type || UserType.Student,
         } as Database['public']['Tables']['users']['Insert'])
         .select()
         .single();
@@ -143,9 +153,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Failed to create account. Please try again.');
       }
       
-      // Store the new user in state and localStorage
       setUser(newUser as User);
-      setSession(true); // Set session to true on successful sign up
+      setSession(true);
       localStorage.setItem('mindvincible_user', JSON.stringify(newUser));
       
       toast({
@@ -168,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setUser(null);
-      setSession(false); // Set session to false on sign out
+      setSession(false);
       localStorage.removeItem('mindvincible_user');
       
       toast({
@@ -186,8 +195,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Helper functions to check user type
+  const isAdmin = () => user?.user_type === UserType.Admin;
+  const isClinician = () => user?.user_type === UserType.Clinician;
+  const isStudent = () => user?.user_type === UserType.Student;
+
   return (
-    <AuthContext.Provider value={{ user, loading, session, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      session, 
+      signIn, 
+      signUp, 
+      signOut,
+      isAdmin,
+      isClinician,
+      isStudent
+    }}>
       {children}
     </AuthContext.Provider>
   );
