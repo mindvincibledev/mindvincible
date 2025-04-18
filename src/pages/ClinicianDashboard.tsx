@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -141,6 +140,15 @@ const ClinicianDashboard = () => {
         .lte('created_at', weekEnd.toISOString());
       
       if (moodError) throw moodError;
+
+      // Get journal entries for the week
+      const { data: journalData, error: journalError } = await supabase
+        .from('journal_entries')
+        .select('*')
+        .gte('created_at', weekStart.toISOString())
+        .lte('created_at', weekEnd.toISOString());
+      
+      if (journalError) throw journalError;
       
       // Get activity completions for the week
       const { data: activityData, error: activityError } = await supabase
@@ -210,7 +218,7 @@ const ClinicianDashboard = () => {
       setStats({
         averageMood: overallMostCommonMood,
         activitiesCompleted: activityData?.length || 0,
-        sharedJournals: 0, // This will be implemented in the future
+        sharedJournals: journalData?.length || 0, // Now showing actual journal count
         moodAlerts: processedStudents.filter(s => 
           ['Angry', 'Overwhelmed', 'Sad', 'Anxious'].includes(s.latestMood)
         ).length
