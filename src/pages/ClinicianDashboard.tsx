@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,15 +8,16 @@ import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import Navbar from '@/components/Navbar';
-import Wave from '@/components/Wave';
-import { format } from 'date-fns';
+import ActivityDropdown from '@/components/dashboard/ActivityDropdown';
+import { format, startOfWeek, endOfWeek } from 'date-fns';
 
-// Define interfaces for our data
+// Keep the existing interfaces but update StudentData
 interface StudentData {
   id: string;
   name: string;
-  latestMood: string;
+  weeklyAverageMood: string;
   completedActivities: string[];
+  sharedResponses: number;
 }
 
 interface StatData {
@@ -41,12 +41,19 @@ const ClinicianDashboard = () => {
   const { toast } = useToast();
   const today = format(new Date(), 'EEEE, MMMM d, yyyy');
 
+  // Add state for clinician name
+  const [clinicianName, setClinicianName] = useState<string>("");
+
+  // Define all available activities
+  const allActivities = ['Emotional Airbnb', 'Digital Detox', 'Confidence', 'Mirror Mirror', 'Power of Hi'];
+
   useEffect(() => {
     // Check if user is clinician
     checkUserType();
     
     // Load dashboard data
     if (user) {
+      fetchClinicianName();
       fetchDashboardData();
     }
   }, [user]);
@@ -93,6 +100,25 @@ const ClinicianDashboard = () => {
     }
   };
 
+  const fetchClinicianName = async () => {
+    if (!user) return;
+    
+    try {
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('name')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) throw error;
+      if (userData) {
+        setClinicianName(userData.name);
+      }
+    } catch (error) {
+      console.error("Error fetching clinician name:", error);
+    }
+  };
+
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
@@ -100,111 +126,89 @@ const ClinicianDashboard = () => {
       const { data: studentsData, error: studentsError } = await supabase
         .from('users')
         .select('id, name')
-        .eq('user_type', 2); // Students have user_type = 2
+        .eq('user_type', 2);
       
       if (studentsError) throw studentsError;
       
-      // Get today's date range for filtering
-      const today = new Date();
-      const startOfDay = new Date(today.setHours(0,0,0,0)).toISOString();
-      const endOfDay = new Date(today.setHours(23,59,59,999)).toISOString();
+      // Get current week's date range
+      const now = new Date();
+      const weekStart = startOfWeek(now);
+      const weekEnd = endOfWeek(now);
       
-      // Get latest mood entries for today
-      const { data: todayMoodData, error: todayMoodError } = await supabase
+      // Get mood entries for the week
+      const { data: weekMoodData, error: weekMoodError } = await supabase
         .from('mood_data')
         .select('user_id, mood, created_at')
-        .gte('created_at', startOfDay)
-        .lte('created_at', endOfDay)
-        .order('created_at', { ascending: false });
+        .gte('created_at', weekStart.toISOString())
+        .lte('created_at', weekEnd.toISOString());
       
-      if (todayMoodError) throw todayMoodError;
-      
-      // Get activity completions for today
+      if (weekMoodError) throw weekMoodError;
+
+      // Get activity completions for the week
       const { data: activityData, error: activityError } = await supabase
         .from('activity_completions')
-        .select('user_id, activity_name, completed_at')
-        .gte('completed_at', startOfDay)
-        .lte('completed_at', endOfDay);
+        .select('user_id, activity_name')
+        .gte('completed_at', weekStart.toISOString())
+        .lte('completed_at', weekEnd.toISOString());
       
       if (activityError) throw activityError;
 
-      // Get current week's date range for journal entries
-      const now = new Date();
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay()); // Start from Sunday
-      startOfWeek.setHours(0, 0, 0, 0);
-      const endOfWeek = new Date(now);
-      endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
-      endOfWeek.setHours(23, 59, 59, 999);
-
-      // Get journal entries for the current week
+      // Get journal entries for the week
       const { data: journalData, error: journalError } = await supabase
         .from('journal_entries')
-        .select('*', { count: 'exact' })
-        .gte('created_at', startOfWeek.toISOString())
-        .lte('created_at', endOfWeek.toISOString());
+        .select('user_id')
+        .gte('created_at', weekStart.toISOString())
+        .lte('created_at', weekEnd.toISOString());
 
-      if (journalError && journalError.code !== 'PGRST116') throw journalError;
+      if (journalError) throw journalError;
 
-      // Get current mood entries (most recent for each student)
-      const { data: moodData, error: moodError } = await supabase
-        .from('mood_data')
-        .select('user_id, mood, created_at');
-
-      if (moodError) throw moodError;
-
-      // Process student data and find current mood alerts
-      const alertMoods = ['Angry', 'Overwhelmed', 'Sad', 'Anxious'];
-      const uniqueStudentsWithAlertMoods = new Set();
-
-      // Create a map to store the most recent mood for each student
-      const latestStudentMoods = new Map();
-      moodData?.forEach(entry => {
-        const currentLatest = latestStudentMoods.get(entry.user_id);
-        if (!currentLatest || new Date(entry.created_at) > new Date(currentLatest.created_at)) {
-          latestStudentMoods.set(entry.user_id, entry);
-        }
-      });
-
-      // Check for alert moods in the latest mood entries
-      latestStudentMoods.forEach(entry => {
-        if (alertMoods.includes(entry.mood)) {
-          uniqueStudentsWithAlertMoods.add(entry.user_id);
-        }
-      });
-      
       // Process student data
-      const processedStudents: StudentData[] = [];
-      const processedActivities = new Set<string>();
-      
-      // Create a map of activities completed by each student
-      const studentActivities = new Map();
-      activityData?.forEach(activity => {
-        if (!studentActivities.has(activity.user_id)) {
-          studentActivities.set(activity.user_id, []);
-        }
-        studentActivities.get(activity.user_id).push(activity.activity_name);
-        processedActivities.add(activity.activity_name);
-      });
-      
-      // Build the complete student data array
-      studentsData?.forEach(student => {
-        const latestMood = latestStudentMoods.get(student.id);
-        processedStudents.push({
+      const processedStudents: StudentData[] = studentsData?.map(student => {
+        // Calculate weekly average mood for each student
+        const studentMoods = weekMoodData?.filter(mood => mood.user_id === student.id) || [];
+        const moodCounts: Record<string, number> = {};
+        let mostCommonMood = "-";
+        let maxCount = 0;
+
+        studentMoods.forEach(entry => {
+          moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
+          if (moodCounts[entry.mood] > maxCount) {
+            maxCount = moodCounts[entry.mood];
+            mostCommonMood = entry.mood;
+          }
+        });
+
+        // Get completed activities for the student
+        const completedActivities = [
+          ...new Set(
+            activityData
+              ?.filter(activity => activity.user_id === student.id)
+              .map(activity => activity.activity_name) || []
+          ),
+        ];
+
+        // Count shared responses (journal entries)
+        const sharedResponses = journalData?.filter(
+          entry => entry.user_id === student.id
+        ).length || 0;
+
+        return {
           id: student.id,
           name: student.name,
-          latestMood: latestMood ? latestMood.mood : '-',
-          completedActivities: studentActivities.get(student.id) || []
-        });
-      });
+          weeklyAverageMood: mostCommonMood,
+          completedActivities,
+          sharedResponses,
+        };
+      }) || [];
+
+      setStudents(processedStudents);
       
-      // Calculate stats
       // Count mood types for average calculation
       const moodCounts: Record<string, number> = {};
       let mostCommonMood = "-";
       let maxCount = 0;
       
-      todayMoodData?.forEach(entry => {
+      weekMoodData?.forEach(entry => {
         moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
         if (moodCounts[entry.mood] > maxCount) {
           maxCount = moodCounts[entry.mood];
@@ -217,11 +221,8 @@ const ClinicianDashboard = () => {
         averageMood: mostCommonMood,
         activitiesCompleted: activityData?.length || 0,
         sharedJournals: journalData?.length || 0,
-        moodAlerts: uniqueStudentsWithAlertMoods.size
+        moodAlerts: 0
       });
-      
-      // Set processed student data
-      setStudents(processedStudents);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       toast({
@@ -233,7 +234,7 @@ const ClinicianDashboard = () => {
       setLoading(false);
     }
   };
-  
+
   // Function to get emoji based on mood
   const getMoodEmoji = (mood: string) => {
     switch(mood.toLowerCase()) {
@@ -273,8 +274,6 @@ const ClinicianDashboard = () => {
     }
   };
 
-  const activities = ['Emotional Airbnb', 'Digital Detox', 'Confidence'];
-
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen relative">
@@ -283,8 +282,8 @@ const ClinicianDashboard = () => {
         <div className="relative z-10 container mx-auto px-4 py-20">
           <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Clinician Dashboard</h1>
-              <p className="text-gray-600 mt-1">{today}</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Welcome, {clinicianName}</h1>
+              <p className="text-gray-600 mt-1">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
             </div>
           </div>
           
@@ -360,7 +359,7 @@ const ClinicianDashboard = () => {
                 </Card>
               </div>
               
-              {/* Students Table */}
+              {/* Updated Students Table */}
               <div className="bg-white/80 backdrop-blur-md rounded-lg shadow-lg p-6 border border-gray-200">
                 <h2 className="text-2xl font-semibold mb-6">Student Overview</h2>
                 
@@ -369,10 +368,9 @@ const ClinicianDashboard = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-[200px]">Student Name</TableHead>
-                        <TableHead className="w-[200px]">Mood Status</TableHead>
-                        {activities.map((activity) => (
-                          <TableHead key={activity} className="text-center">{activity}</TableHead>
-                        ))}
+                        <TableHead className="w-[200px]">Weekly Average Mood</TableHead>
+                        <TableHead className="w-[250px]">Activities</TableHead>
+                        <TableHead className="w-[150px]">Shared Responses</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -380,26 +378,29 @@ const ClinicianDashboard = () => {
                         students.map((student) => (
                           <TableRow key={student.id}>
                             <TableCell className="font-medium">{student.name}</TableCell>
-                            <TableCell className={`${getMoodBackground(student.latestMood)}`}>
+                            <TableCell className={`${getMoodBackground(student.weeklyAverageMood)}`}>
                               <div className="flex items-center">
-                                <span className="text-xl mr-2">{getMoodEmoji(student.latestMood)}</span>
-                                <span>{student.latestMood.charAt(0).toUpperCase() + student.latestMood.slice(1)}</span>
+                                <span className="text-xl mr-2">{getMoodEmoji(student.weeklyAverageMood)}</span>
+                                <span>
+                                  {student.weeklyAverageMood.charAt(0).toUpperCase() + 
+                                   student.weeklyAverageMood.slice(1)}
+                                </span>
                               </div>
                             </TableCell>
-                            {activities.map((activity) => (
-                              <TableCell key={activity} className="text-center">
-                                {student.completedActivities.includes(activity) ? (
-                                  <CheckCircle2 className="mx-auto h-6 w-6 text-[#2AC20E]" />
-                                ) : (
-                                  <div className="h-6 w-6 border border-gray-300 rounded-md mx-auto"></div>
-                                )}
-                              </TableCell>
-                            ))}
+                            <TableCell>
+                              <ActivityDropdown
+                                completedActivities={student.completedActivities}
+                                allActivities={allActivities}
+                              />
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {student.sharedResponses}
+                            </TableCell>
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={4 + activities.length} className="text-center py-6">
+                          <TableCell colSpan={4} className="text-center py-6">
                             No student data available
                           </TableCell>
                         </TableRow>
