@@ -162,7 +162,6 @@ const AdminDashboard = () => {
                       {stats.totalStudents}
                     </span>
                   </div>
-                  <Wave className="text-[#90caf9]" />
                 </Card>
                 
                 {/* Total Clinicians Card */}
@@ -178,7 +177,6 @@ const AdminDashboard = () => {
                       {stats.totalClinicians}
                     </span>
                   </div>
-                  <Wave className="text-[#a5d6a7]" />
                 </Card>
                 
                 {/* Total Activities Card */}
@@ -194,7 +192,6 @@ const AdminDashboard = () => {
                       {stats.totalActivities}
                     </span>
                   </div>
-                  <Wave className="text-[#ffcc80]" />
                 </Card>
                 
                 {/* Total Mood Entries Card */}
@@ -210,7 +207,6 @@ const AdminDashboard = () => {
                       {stats.totalMoodEntries}
                     </span>
                   </div>
-                  <Wave className="text-[#ce93d8]" />
                 </Card>
               </div>
               

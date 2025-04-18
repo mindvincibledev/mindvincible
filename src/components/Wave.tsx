@@ -1,10 +1,15 @@
 
 // components/Wave.tsx
 import React from 'react';
+import { cn } from "@/lib/utils";
 
-const Wave = () => {
+interface WaveProps {
+  className?: string;
+}
+
+const Wave: React.FC<WaveProps> = ({ className }) => {
   return (
-    <div className="waves-container fixed inset-0 z-0 overflow-hidden pointer-events-none">
+    <div className={cn("waves-container fixed inset-0 z-0 overflow-hidden pointer-events-none", className)}>
       <svg
         className="waves h-full w-full"
         xmlns="http://www.w3.org/2000/svg"

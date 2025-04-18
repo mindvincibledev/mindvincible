@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -109,14 +110,14 @@ const ClinicianDashboard = () => {
       const endOfDay = new Date(today.setHours(23,59,59,999)).toISOString();
       
       // Get latest mood entries for today
-      const { data: moodData, error: moodError } = await supabase
+      const { data: todayMoodData, error: todayMoodError } = await supabase
         .from('mood_data')
         .select('user_id, mood, created_at')
         .gte('created_at', startOfDay)
         .lte('created_at', endOfDay)
         .order('created_at', { ascending: false });
       
-      if (moodError) throw moodError;
+      if (todayMoodError) throw todayMoodError;
       
       // Get activity completions for today
       const { data: activityData, error: activityError } = await supabase
@@ -139,7 +140,7 @@ const ClinicianDashboard = () => {
       // Get journal entries for the current week
       const { data: journalData, error: journalError } = await supabase
         .from('journal_entries')
-        .select('count', { count: 'exact' })
+        .select('*', { count: 'exact' })
         .gte('created_at', startOfWeek.toISOString())
         .lte('created_at', endOfWeek.toISOString());
 
@@ -176,15 +177,6 @@ const ClinicianDashboard = () => {
       const processedStudents: StudentData[] = [];
       const processedActivities = new Set<string>();
       
-      // Create a map for the latest mood per student
-      const latestStudentMoods2 = new Map();
-      moodData?.forEach(entry => {
-        if (!latestStudentMoods2.has(entry.user_id) || 
-            new Date(entry.created_at) > new Date(latestStudentMoods2.get(entry.user_id).created_at)) {
-          latestStudentMoods2.set(entry.user_id, entry);
-        }
-      });
-      
       // Create a map of activities completed by each student
       const studentActivities = new Map();
       activityData?.forEach(activity => {
@@ -197,7 +189,7 @@ const ClinicianDashboard = () => {
       
       // Build the complete student data array
       studentsData?.forEach(student => {
-        const latestMood = latestStudentMoods2.get(student.id);
+        const latestMood = latestStudentMoods.get(student.id);
         processedStudents.push({
           id: student.id,
           name: student.name,
@@ -212,21 +204,11 @@ const ClinicianDashboard = () => {
       let mostCommonMood = "-";
       let maxCount = 0;
       
-      moodData?.forEach(entry => {
+      todayMoodData?.forEach(entry => {
         moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
         if (moodCounts[entry.mood] > maxCount) {
           maxCount = moodCounts[entry.mood];
           mostCommonMood = entry.mood;
-        }
-      });
-      
-      // Count mood alerts (angry, overwhelmed, sad, or anxious moods)
-      const alertMoods2 = ['Angry', 'Overwhelmed', 'Sad', 'Anxious'];
-      const uniqueStudentsWithAlertMoods2 = new Set();
-      
-      moodData?.forEach(entry => {
-        if (alertMoods2.includes(entry.mood)) {
-          uniqueStudentsWithAlertMoods2.add(entry.user_id);
         }
       });
 
@@ -234,7 +216,7 @@ const ClinicianDashboard = () => {
       setStats({
         averageMood: mostCommonMood,
         activitiesCompleted: activityData?.length || 0,
-        sharedJournals: journalData?.count || 0,
+        sharedJournals: journalData?.length || 0,
         moodAlerts: uniqueStudentsWithAlertMoods.size
       });
       
@@ -330,7 +312,6 @@ const ClinicianDashboard = () => {
                       {stats.averageMood.charAt(0).toUpperCase() + stats.averageMood.slice(1)}
                     </span>
                   </div>
-                  <Wave className="text-[#80deea]" />
                 </Card>
                 
                 {/* Activities Completed Card */}
@@ -346,7 +327,6 @@ const ClinicianDashboard = () => {
                       {stats.activitiesCompleted}
                     </span>
                   </div>
-                  <Wave className="text-[#ffe082]" />
                 </Card>
                 
                 {/* Shared Journals Card */}
@@ -362,7 +342,6 @@ const ClinicianDashboard = () => {
                       {stats.sharedJournals}
                     </span>
                   </div>
-                  <Wave className="text-[#ffcdd2]" />
                 </Card>
                 
                 {/* Mood Alerts Card */}
@@ -378,7 +357,6 @@ const ClinicianDashboard = () => {
                       {stats.moodAlerts}
                     </span>
                   </div>
-                  <Wave className="text-[#f8bbd0]" />
                 </Card>
               </div>
               
