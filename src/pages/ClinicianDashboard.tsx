@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -127,27 +126,62 @@ const ClinicianDashboard = () => {
         .lte('completed_at', endOfDay);
       
       if (activityError) throw activityError;
-      
-      // Get journal entries
+
+      // Get current week's date range for journal entries
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay()); // Start from Sunday
+      startOfWeek.setHours(0, 0, 0, 0);
+      const endOfWeek = new Date(now);
+      endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
+      endOfWeek.setHours(23, 59, 59, 999);
+
+      // Get journal entries for the current week
       const { data: journalData, error: journalError } = await supabase
         .from('journal_entries')
-        .select('count')
-        .gte('created_at', startOfDay)
-        .lte('created_at', endOfDay)
-        .single();
-      
+        .select('count', { count: 'exact' })
+        .gte('created_at', startOfWeek.toISOString())
+        .lte('created_at', endOfWeek.toISOString());
+
       if (journalError && journalError.code !== 'PGRST116') throw journalError;
+
+      // Get current mood entries (most recent for each student)
+      const { data: moodData, error: moodError } = await supabase
+        .from('mood_data')
+        .select('user_id, mood, created_at');
+
+      if (moodError) throw moodError;
+
+      // Process student data and find current mood alerts
+      const alertMoods = ['Angry', 'Overwhelmed', 'Sad', 'Anxious'];
+      const uniqueStudentsWithAlertMoods = new Set();
+
+      // Create a map to store the most recent mood for each student
+      const latestStudentMoods = new Map();
+      moodData?.forEach(entry => {
+        const currentLatest = latestStudentMoods.get(entry.user_id);
+        if (!currentLatest || new Date(entry.created_at) > new Date(currentLatest.created_at)) {
+          latestStudentMoods.set(entry.user_id, entry);
+        }
+      });
+
+      // Check for alert moods in the latest mood entries
+      latestStudentMoods.forEach(entry => {
+        if (alertMoods.includes(entry.mood)) {
+          uniqueStudentsWithAlertMoods.add(entry.user_id);
+        }
+      });
       
       // Process student data
       const processedStudents: StudentData[] = [];
       const processedActivities = new Set<string>();
       
       // Create a map for the latest mood per student
-      const latestStudentMoods = new Map();
+      const latestStudentMoods2 = new Map();
       moodData?.forEach(entry => {
-        if (!latestStudentMoods.has(entry.user_id) || 
-            new Date(entry.created_at) > new Date(latestStudentMoods.get(entry.user_id).created_at)) {
-          latestStudentMoods.set(entry.user_id, entry);
+        if (!latestStudentMoods2.has(entry.user_id) || 
+            new Date(entry.created_at) > new Date(latestStudentMoods2.get(entry.user_id).created_at)) {
+          latestStudentMoods2.set(entry.user_id, entry);
         }
       });
       
@@ -163,7 +197,7 @@ const ClinicianDashboard = () => {
       
       // Build the complete student data array
       studentsData?.forEach(student => {
-        const latestMood = latestStudentMoods.get(student.id);
+        const latestMood = latestStudentMoods2.get(student.id);
         processedStudents.push({
           id: student.id,
           name: student.name,
@@ -187,16 +221,16 @@ const ClinicianDashboard = () => {
       });
       
       // Count mood alerts (angry, overwhelmed, sad, or anxious moods)
-      const alertMoods = ['Angry', 'Overwhelmed', 'Sad', 'Anxious'];
-      const uniqueStudentsWithAlertMoods = new Set();
+      const alertMoods2 = ['Angry', 'Overwhelmed', 'Sad', 'Anxious'];
+      const uniqueStudentsWithAlertMoods2 = new Set();
       
       moodData?.forEach(entry => {
-        if (alertMoods.includes(entry.mood)) {
-          uniqueStudentsWithAlertMoods.add(entry.user_id);
+        if (alertMoods2.includes(entry.mood)) {
+          uniqueStudentsWithAlertMoods2.add(entry.user_id);
         }
       });
-      
-      // Set stats
+
+      // Set stats with the new calculations
       setStats({
         averageMood: mostCommonMood,
         activitiesCompleted: activityData?.length || 0,
