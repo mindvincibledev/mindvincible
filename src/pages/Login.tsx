@@ -74,20 +74,20 @@ const Login = () => {
             // Check if student has already logged a mood today
             const hasMoodEntry = await checkTodaysMoodEntry(userId);
             if (hasMoodEntry) {
-              navigate('/dashboard');
+              navigate('/');
             } else {
               navigate('/mood-entry');
             }
             break;
           default:
-            navigate('/home');
+            navigate('/');
         }
       } else {
-        navigate('/home');
+        navigate('/');
       }
     } catch (err) {
       console.error('Error redirecting user:', err);
-      navigate('/home');
+      navigate('/');
     }
   };
 
