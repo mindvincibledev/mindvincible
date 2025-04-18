@@ -30,6 +30,8 @@ import PowerOfHiActivity from "./pages/PowerOfHiActivity";
 import MirrorMirrorActivity from "./pages/MirrorMirrorActivity";
 import ForkInTheRoadActivity from "./pages/ForkInTheRoadActivity";
 import ResourcesHub from "./pages/ResourcesHub";
+import AdminDashboard from "./pages/AdminDashboard";
+import ClinicianDashboard from "./pages/ClinicianDashboard";
 
 // Update document title to correct app name
 document.title = "M(in)dvincible";
@@ -68,11 +70,24 @@ const AppRoutes = () => {
         } />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        
+        {/* Role-based dashboard routes */}
+        <Route path="/admin-dashboard" element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/clinician-dashboard" element={
+          <ProtectedRoute>
+            <ClinicianDashboard />
+          </ProtectedRoute>
+        } />
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
         } />
+        
         <Route path="/mood-entry" element={
           <ProtectedRoute>
             <MoodEntry />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Book, Archive, AreaChart, Images, Home as HomeIcon } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
@@ -7,10 +7,25 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
+import { useEffect } from 'react';
 
 const HomePage = () => {
-  const { user } = useAuth();
+  const { user, isAdmin, isClinician } = useAuth();
+  const navigate = useNavigate();
   
+  // Redirect to appropriate dashboard based on user type
+  useEffect(() => {
+    if (user) {
+      if (isAdmin()) {
+        navigate('/admin-dashboard');
+      } else if (isClinician()) {
+        navigate('/clinician-dashboard');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [user, isAdmin, isClinician, navigate]);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
