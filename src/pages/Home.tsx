@@ -65,7 +65,7 @@ const Home = () => {
       if (!moodData || moodData.length === 0) {
         navigate('/mood-entry');
       } else {
-        navigate('/homepage'); 
+        navigate('/home'); 
       }
     } catch (error) {
       console.error('Navigation error:', error);
@@ -75,7 +75,7 @@ const Home = () => {
         description: "There was a problem navigating you to the right place."
       });
       // Default to mood-entry for students on error
-      navigate('/homepage');
+      navigate('/home');
     }
   };
 

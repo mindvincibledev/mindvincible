@@ -70,7 +70,7 @@ const HomePage = () => {
             title: "Error",
             description: "Could not check mood entry status. Redirecting to mood entry page."
           });
-          navigate('/homepage');
+          navigate('/home');
           return;
         }
         
@@ -78,7 +78,7 @@ const HomePage = () => {
         if (!moodData || moodData.length === 0) {
           navigate('/mood-entry'); // No mood entry today
         } else {
-          navigate('/homepage'); // Redirect to dashboard when mood entry exists
+          navigate('/home'); // Redirect to dashboard when mood entry exists
         }
       } catch (error) {
         console.error('Routing error:', error);
@@ -88,7 +88,7 @@ const HomePage = () => {
           description: "An error occurred while navigating. Please try again."
         });
         // Default fallback for errors
-        navigate('/homepage');
+        navigate('/home');
       } finally {
         setIsLoading(false);
       }
