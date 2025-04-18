@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -15,8 +16,22 @@ import { v4 as uuidv4 } from 'uuid';
 import ReflectionSection, { ReflectionData } from './ReflectionSection';
 import EmojiSlider from '@/components/ui/EmojiSlider';
 import { startOfWeek, endOfWeek } from 'date-fns';
+import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
 
 const MOODS = ["Happy", "Excited", "Proud", "Confident", "Nervous", "Awkward", "Uncomfortable", "Scared"];
+
+// Define sticker options
+const STICKERS = [
+  { id: "sticker1", src: "/lovable-uploads/77db59f9-422e-4ac5-9fe1-7d5b4848772c.png", alt: "Sticker 1" },
+  { id: "star", emoji: "⭐", alt: "Star" },
+  { id: "heart", emoji: "❤️", alt: "Heart" },
+  { id: "smile", emoji: "😊", alt: "Smile" },
+  { id: "thumbsup", emoji: "👍", alt: "Thumbs Up" },
+  { id: "fire", emoji: "🔥", alt: "Fire" },
+  { id: "rocket", emoji: "🚀", alt: "Rocket" },
+  { id: "clap", emoji: "👏", alt: "Clapping Hands" },
+  { id: "party", emoji: "🎉", alt: "Party" }
+];
 
 const Journal = () => {
   const { user } = useAuth();
@@ -44,6 +59,13 @@ const Journal = () => {
   const [isRecordingWho, setIsRecordingWho] = useState(false);
   const [isRecordingHowItWent, setIsRecordingHowItWent] = useState(false);
   const [isRecordingFeeling, setIsRecordingFeeling] = useState(false);
+  
+  // Sticker states
+  const [isStickerDialogOpen, setIsStickerDialogOpen] = useState(false);
+  const [selectedStickerType, setSelectedStickerType] = useState<'who' | 'howItWent' | 'feeling' | null>(null);
+  const [whoStickers, setWhoStickers] = useState<string[]>([]);
+  const [howItWentStickers, setHowItWentStickers] = useState<string[]>([]);
+  const [feelingStickers, setFeelingStickers] = useState<string[]>([]);
   
   const whoAudioRef = useRef<MediaRecorder | null>(null);
   const howItWentAudioRef = useRef<MediaRecorder | null>(null);
@@ -81,6 +103,43 @@ const Journal = () => {
   useEffect(() => {
     fetchGoals();
   }, [user]);
+
+  // Show sticker dialog
+  const openStickerDialog = (type: 'who' | 'howItWent' | 'feeling') => {
+    setSelectedStickerType(type);
+    setIsStickerDialogOpen(true);
+  };
+
+  // Add sticker to the selected section
+  const addSticker = (sticker: string) => {
+    if (!selectedStickerType) return;
+    
+    if (selectedStickerType === 'who') {
+      setWhoStickers(prev => [...prev, sticker]);
+    } else if (selectedStickerType === 'howItWent') {
+      setHowItWentStickers(prev => [...prev, sticker]);
+    } else {
+      setFeelingStickers(prev => [...prev, sticker]);
+    }
+    
+    setIsStickerDialogOpen(false);
+    toast.success("Sticker added!");
+  };
+
+  // Render stickers
+  const renderStickers = (stickers: string[]) => {
+    if (stickers.length === 0) return null;
+    
+    return (
+      <div className="flex flex-wrap gap-2 mt-2">
+        {stickers.map((sticker, index) => (
+          <div key={index} className="text-2xl">
+            {sticker}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   const fetchJournalEntries = async () => {
     if (!user?.id) {
@@ -390,6 +449,9 @@ const Journal = () => {
           how_it_went_rating: howItWentRating[0],
           feeling,
           feeling_path: feelingPath,
+          who_stickers: whoStickers.length > 0 ? whoStickers : null,
+          how_it_went_stickers: howItWentStickers.length > 0 ? howItWentStickers : null,
+          feeling_stickers: feelingStickers.length > 0 ? feelingStickers : null,
           updated_at: new Date().toISOString()
         })
         .eq('id', selectedGoal)
@@ -629,9 +691,18 @@ const Journal = () => {
                               <span>Record Audio</span>
                             </button>
                           )}
+                          
+                          <button 
+                            onClick={() => openStickerDialog('who')}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                          >
+                            <Smile className="w-4 h-4" />
+                            <span>Add Sticker</span>
+                          </button>
                         </div>
                         
                         {renderFilePreview(whoPreview, 'who')}
+                        {renderStickers(whoStickers)}
                       </div>
 
                       <div className="space-y-2">
@@ -683,9 +754,18 @@ const Journal = () => {
                               <span>Record Audio</span>
                             </button>
                           )}
+                          
+                          <button 
+                            onClick={() => openStickerDialog('howItWent')}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                          >
+                            <Smile className="w-4 h-4" />
+                            <span>Add Sticker</span>
+                          </button>
                         </div>
                         
                         {renderFilePreview(howItWentPreview, 'howItWent')}
+                        {renderStickers(howItWentStickers)}
                       </div>
 
                       <div className="space-y-2">
@@ -740,6 +820,7 @@ const Journal = () => {
                           )}
                           
                           <button 
+                            onClick={() => openStickerDialog('feeling')}
                             className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
                           >
                             <Smile className="w-4 h-4" />
@@ -748,6 +829,7 @@ const Journal = () => {
                         </div>
                         
                         {renderFilePreview(feelingPreview, 'feeling')}
+                        {renderStickers(feelingStickers)}
                       </div>
 
                       <motion.div
@@ -783,8 +865,33 @@ const Journal = () => {
           )}
         </div>
       </Card>
+
+      {/* Sticker Selection Dialog */}
+      <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
+        <DialogContent className="sm:max-w-md bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-center">Choose a Sticker</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-4 p-4">
+            {STICKERS.map((sticker) => (
+              <button
+                key={sticker.id}
+                onClick={() => addSticker(sticker.emoji || sticker.src)}
+                className="flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                {sticker.emoji ? (
+                  <span className="text-3xl">{sticker.emoji}</span>
+                ) : (
+                  <img src={sticker.src} alt={sticker.alt} className="h-10 w-10" />
+                )}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
 
 export default Journal;
+

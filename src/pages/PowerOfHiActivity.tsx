@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Star, Hand, MessageSquare, Award } from 'lucide-react';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
@@ -13,11 +13,27 @@ import Journal from '@/components/power-of-hi/Journal';
 import { toast } from 'sonner';
 
 const PowerOfHiActivity = () => {
-  const [activeTab, setActiveTab] = useState('welcome');
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam || 'welcome');
   const navigate = useNavigate();
+
+  // Update activeTab when URL param changes
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   const handleStartChallenge = () => {
     setActiveTab('goal');
+    navigate('?tab=goal', { replace: true });
+  };
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`?tab=${value}`, { replace: true });
   };
 
   return (
@@ -31,7 +47,7 @@ const PowerOfHiActivity = () => {
             Back to All Activities
           </Link>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
             <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto">
               <TabsTrigger value="welcome">Welcome</TabsTrigger>
               <TabsTrigger value="goal">Goals</TabsTrigger>
@@ -97,7 +113,7 @@ const PowerOfHiActivity = () => {
             </TabsContent>
 
             <TabsContent value="goal">
-              <SetGoal onComplete={() => setActiveTab('journal')} />
+              <SetGoal onComplete={() => handleTabChange('journal')} />
             </TabsContent>
 
             <TabsContent value="journal">
