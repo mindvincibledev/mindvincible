@@ -12,8 +12,9 @@ const HomePage = () => {
   
   useEffect(() => {
     const routeUser = async () => {
+      // If no user is logged in, redirect to main landing page
       if (!user) {
-        navigate('/login');
+        navigate('/');
         return;
       }
 

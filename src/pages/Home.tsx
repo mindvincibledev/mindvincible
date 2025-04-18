@@ -42,7 +42,7 @@ const Home = () => {
         return;
       }
       
-      // For students, check mood entry status
+      // For students, check if they've logged a mood today
       const today = new Date();
       const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
       const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
@@ -59,7 +59,7 @@ const Home = () => {
         throw new Error(`Error checking mood entries: ${moodError.message}`);
       }
 
-      // Direct students based on their mood entry status
+      // Direct students based on mood entry status
       if (!moodData || moodData.length === 0) {
         navigate('/mood-entry');
       } else {
@@ -72,7 +72,10 @@ const Home = () => {
         title: "Navigation error",
         description: "There was a problem navigating you to the right place."
       });
-      navigate('/mood-entry'); // Default fallback
+      // Modified: Default to main landing page on error rather than directly to mood-entry
+      if (user) {
+        navigate('/home'); 
+      }
     }
   };
 

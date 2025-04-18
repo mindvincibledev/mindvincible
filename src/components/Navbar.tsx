@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, LogOut, Heart, Archive, Book } from 'lucide-react';
@@ -101,6 +100,7 @@ const Navbar = () => {
       }
     } catch (error) {
       console.error('Error navigating from logo click:', error);
+      // Modified: navigate to home router handler rather than directly to /home
       navigate('/home');
     }
   };
@@ -121,12 +121,12 @@ const Navbar = () => {
           <div className="block md:hidden">
             <button
               onClick={toggleMenu}
-              className="text-white focus:outline-none"
+              className="text-gray-700 focus:outline-none"
             >
               {isMenuOpen ? (
-                <X className="h-6 w-6" />
+                <X className="h-6 w-6 text-gray-700" />
               ) : (
-                <Menu className="h-6 w-6" />
+                <Menu className="h-6 w-6 text-gray-700" />
               )}
             </button>
           </div>
