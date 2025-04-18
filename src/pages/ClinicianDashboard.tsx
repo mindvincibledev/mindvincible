@@ -27,11 +27,6 @@ interface StatData {
   moodAlerts: number;
 }
 
-// Define props for Wave component to accept className
-interface WaveProps {
-  className?: string;
-}
-
 const ClinicianDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<StudentData[]>([]);
@@ -134,9 +129,9 @@ const ClinicianDashboard = () => {
       if (activityError) throw activityError;
       
       // Get total journal entries count (not filtering by date for total count)
-      const { count: journalCount, error: journalError } = await supabase
+      const { data: journalData, error: journalError } = await supabase
         .from('journal_entries')
-        .select('*', { count: 'exact', head: true });
+        .select('id', { count: 'exact' });
       
       if (journalError) throw journalError;
       
@@ -202,7 +197,7 @@ const ClinicianDashboard = () => {
       setStats({
         averageMood: mostCommonMood,
         activitiesCompleted: activityData?.length || 0,
-        sharedJournals: journalCount || 0, // Use the count directly from the query
+        sharedJournals: journalData?.count || 0, // Use the count from the query
         moodAlerts: uniqueStudentsWithAlertMoods.size
       });
       
