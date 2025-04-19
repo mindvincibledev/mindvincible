@@ -109,12 +109,14 @@ const ResourcesHub = () => {
       // Calculate statistics for each activity
       const stats: {[key: string]: {id: string, title: string, shortName: string, count: number, color: string}} = {};
       modules.forEach(activity => {
+        if (!activity.id) return;
+        
         stats[activity.id] = {
           id: activity.id,
           title: activity.title,
-          shortName: activity.shortName,
+          shortName: activity.shortName || activity.title,
           count: 0,
-          color: activity.chartColor
+          color: activity.chartColor || '#3DFDFF'
         };
       });
       
@@ -129,7 +131,7 @@ const ResourcesHub = () => {
       
       // Calculate progress percentage
       const completedActivities = Object.values(stats).filter(stat => stat.count > 0).length;
-      const progressPercentage = (completedActivities / modules.length) * 100;
+      const progressPercentage = (completedActivities / modules.filter(m => m.id).length) * 100;
       setProgress(progressPercentage);
       
     } catch (error: any) {

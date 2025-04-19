@@ -23,6 +23,7 @@ import DecisionInputScreen from '@/components/fork-in-the-road/DecisionInputScre
 import RoadLabelsScreen from '@/components/fork-in-the-road/RoadLabelsScreen';
 import ReflectionScreen from '@/components/fork-in-the-road/ReflectionScreen';
 import GutCheckScreen from '@/components/fork-in-the-road/GutCheckScreen';
+import FeedbackDialog from '@/components/FeedbackDialog';
 
 const ForkInTheRoadActivity = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -60,6 +61,7 @@ const ForkInTheRoadActivity = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [decisionToDelete, setDecisionToDelete] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("make-decision");
+  const [showFeedback, setShowFeedback] = useState(false);
 
   // Fetch past decisions when component loads
   useEffect(() => {
@@ -186,7 +188,7 @@ const ForkInTheRoadActivity = () => {
       // Refresh past decisions list
       fetchPastDecisions();
       
-      setShowCompletionMessage(true);
+      setShowFeedback(true);
       setCurrentStep(prev => prev + 1);
       
     } catch (error: any) {
@@ -509,6 +511,16 @@ const ForkInTheRoadActivity = () => {
             </Card>
           </motion.div>
         </div>
+        
+        <FeedbackDialog 
+          isOpen={showFeedback}
+          onClose={() => {
+            setShowFeedback(false);
+            navigate('/resources');
+          }}
+          activityName="Fork in the Road"
+          activityId="fork-in-the-road"
+        />
       </div>
     </BackgroundWithEmojis>
   );

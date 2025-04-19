@@ -17,6 +17,7 @@ import HearSection from '@/components/grounding/HearSection';
 import SmellSection from '@/components/grounding/SmellSection';
 import TasteSection from '@/components/grounding/TasteSection';
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
+import FeedbackDialog from '@/components/FeedbackDialog';
 
 enum GroundingStep {
   Welcome,
@@ -32,6 +33,7 @@ const GroundingTechniqueActivity = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState<GroundingStep>(GroundingStep.Welcome);
+  const [showFeedback, setShowFeedback] = useState(false);
   
   const handleBegin = () => {
     setCurrentStep(GroundingStep.See);
@@ -57,27 +59,7 @@ const GroundingTechniqueActivity = () => {
       return;
     }
     
-    try {
-      // Record activity completion in the database
-      const { error } = await supabase
-        .from('activity_completions')
-        .insert({
-          user_id: user.id,
-          activity_id: 'grounding-technique',
-          activity_name: '5-4-3-2-1: The Grounding Quest',
-          feedback: 'completed'
-        });
-      
-      if (error) throw error;
-      
-      toast.success("Activity completed successfully!");
-    } catch (error) {
-      console.error("Error completing activity:", error);
-      toast.error("Failed to record activity completion");
-    }
-
-    // Navigate to resources hub after completion
-    navigate('/resources-hub');
+    setShowFeedback(true);
   };
   
   const renderContent = () => {
@@ -151,6 +133,16 @@ const GroundingTechniqueActivity = () => {
             {renderContent()}
           </div>
         </div>
+        
+        <FeedbackDialog 
+          isOpen={showFeedback}
+          onClose={() => {
+            setShowFeedback(false);
+            navigate('/resources');
+          }}
+          activityName="5-4-3-2-1: The Grounding Quest"
+          activityId="grounding-technique"
+        />
       </div>
     </BackgroundWithEmojis>
   );
