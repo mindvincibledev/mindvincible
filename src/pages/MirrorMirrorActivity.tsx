@@ -1,19 +1,17 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Camera, Eye, RefreshCw, CheckCircle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/context/AuthContext';
 import IntroSection from '@/components/mirror-mirror/IntroSection';
 import BreathingSection from '@/components/mirror-mirror/BreathingSection';
 import MirrorSection from '@/components/mirror-mirror/MirrorSection';
 import ExitSection from '@/components/mirror-mirror/ExitSection';
-import FeedbackDialog from '@/components/FeedbackDialog';
+import ActivityFeedbackDialog from '@/components/ActivityFeedbackDialog';
 
 const MirrorMirrorActivity = () => {
   const { user } = useAuth();
@@ -45,30 +43,6 @@ const MirrorMirrorActivity = () => {
 
   const handleAnotherPrompt = () => {
     setCurrentSection('mirror');
-  };
-
-  const recordActivityCompletion = async () => {
-    if (!user) return;
-    
-    try {
-      const { error } = await supabase
-        .from('activity_completions')
-        .insert({
-          user_id: user.id,
-          activity_name: 'Mirror Mirror On the Wall',
-          activity_id: 'mirror-mirror',
-        });
-      
-      if (error) {
-        console.error('Error recording activity completion:', error);
-        toast.error('Failed to record your activity completion');
-        return;
-      }
-      
-      toast.success('Activity completion recorded!');
-    } catch (err) {
-      console.error('Error:', err);
-    }
   };
 
   const handlePromptCompleted = (prompt: string) => {
@@ -118,7 +92,7 @@ const MirrorMirrorActivity = () => {
           </motion.div>
         </div>
         
-        <FeedbackDialog 
+        <ActivityFeedbackDialog 
           isOpen={showFeedback}
           onClose={() => {
             setShowFeedback(false);
