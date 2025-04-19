@@ -450,13 +450,14 @@ const EmotionalAirbnb = () => {
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen">
-      <Link to="/resources" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Resources Hub
-          </Link>
+      
         <Navbar />
         
         <div className="container mx-auto px-4 pt-24 pb-12">
+        <Link to="/resources" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Resources Hub
+          </Link>
           <div className="max-w-3xl mx-auto">
             {/* Progress indicator */}
             <div className="mb-6">
