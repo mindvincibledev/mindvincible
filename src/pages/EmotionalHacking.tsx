@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Eye, Wind } from 'lucide-react';
+import { Eye, Wind,ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,6 +40,10 @@ const EmotionalHacking = () => {
         <Navbar />
         
         <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
+        <Link to="/resources" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Resources Hub
+          </Link>
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
