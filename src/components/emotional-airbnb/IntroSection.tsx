@@ -1,10 +1,27 @@
 
 import React from 'react';
-import { Brain, Heart, MessageCircle } from 'lucide-react';
+import { Brain, Heart, MessageCircle,ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check } from 'lucide-react';
+import { useParams, Link, Navigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import Navbar from '@/components/Navbar';
+import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import Affirmation from '@/components/Affirmation';
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from '@/context/AuthContext';
+
 
 const IntroSection = () => {
   return (
     <div className="space-y-6 py-4">
+                <Link to="/emotional-hacking" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Emotional Hacking
+          </Link>
       <h2 className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent text-center">
         Welcome to Emotional Airbnb
       </h2>
