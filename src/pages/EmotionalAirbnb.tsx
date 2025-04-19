@@ -19,6 +19,11 @@ import { motion } from 'framer-motion';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { WavyBackground } from '@/components/ui/wavy-background';
 
+
+import { useParams, Link, Navigate } from 'react-router-dom';
+
+import { ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
+
 const EmotionalAirbnb = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -445,6 +450,10 @@ const EmotionalAirbnb = () => {
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen">
+      <Link to="/resources" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Resources Hub
+          </Link>
         <Navbar />
         
         <div className="container mx-auto px-4 pt-24 pb-12">
