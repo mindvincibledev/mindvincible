@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react'; // Add the useState import here
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Star, Loader } from 'lucide-react';
