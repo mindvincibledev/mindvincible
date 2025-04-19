@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -30,6 +29,7 @@ enum GroundingStep {
 }
 
 const GroundingTechniqueActivity = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState<GroundingStep>(GroundingStep.Welcome);
   
@@ -75,6 +75,9 @@ const GroundingTechniqueActivity = () => {
       console.error("Error completing activity:", error);
       toast.error("Failed to record activity completion");
     }
+
+    // Navigate to resources hub after completion
+    navigate('/resources-hub');
   };
   
   const renderContent = () => {
@@ -139,9 +142,9 @@ const GroundingTechniqueActivity = () => {
         <Navbar />
         
         <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
-          <Link to="/emotional-hacking" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
+          <Link to="/resources-hub" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to All Activities
+            Back to Resources Hub
           </Link>
           
           <div className="max-w-4xl mx-auto">

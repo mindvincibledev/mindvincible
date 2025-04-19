@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -37,8 +36,8 @@ const MirrorMirrorActivity = () => {
         setCurrentSection('exit');
         break;
       case 'exit':
-        // Navigate back to emotional hacking page
-        navigate('/emotional-hacking');
+        // Navigate back to resources hub instead
+        navigate('/resources-hub');
         break;
     }
   };
@@ -81,9 +80,9 @@ const MirrorMirrorActivity = () => {
         <Navbar />
         
         <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
-          <Link to="/emotional-hacking" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
+          <Link to="/resources-hub" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to All Activities
+            Back to Resources Hub
           </Link>
           
           <motion.div

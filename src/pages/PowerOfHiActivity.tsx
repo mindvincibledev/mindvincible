@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -42,9 +41,9 @@ const PowerOfHiActivity = () => {
         <Navbar />
         
         <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
-          <Link to="/emotional-hacking" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
+          <Link to="/resources-hub" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to All Activities
+            Back to Resources Hub
           </Link>
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
