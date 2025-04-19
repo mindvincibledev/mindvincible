@@ -9,14 +9,12 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SetGoal from '@/components/power-of-hi/SetGoal';
 import Journal from '@/components/power-of-hi/Journal';
-import FeedbackDialog from '@/components/FeedbackDialog';
 import { toast } from 'sonner';
 
 const PowerOfHiActivity = () => {
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabParam || 'welcome');
-  const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
 
   // Update activeTab when URL param changes
@@ -122,16 +120,6 @@ const PowerOfHiActivity = () => {
             </TabsContent>
           </Tabs>
         </div>
-        
-        <FeedbackDialog 
-          isOpen={showFeedback}
-          onClose={() => {
-            setShowFeedback(false);
-            navigate('/resources');
-          }}
-          activityName="Power of a Simple Hi"
-          activityId="power-of-hi"
-        />
       </div>
     </BackgroundWithEmojis>
   );
