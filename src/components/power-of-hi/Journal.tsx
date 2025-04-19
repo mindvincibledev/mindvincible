@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -12,7 +11,6 @@ import { CalendarIcon } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
-import FeedbackDialog from '@/components/FeedbackDialog';
 
 const Journal = () => {
   const { user } = useAuth();
@@ -30,12 +28,10 @@ const Journal = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from('journal_entries').insert({
+      const { error } = await supabase.from('simple_hi_journal').insert({
         user_id: user?.id,
-        content: entry,
-        title: `Power of Hi Journal - ${date ? format(date, "yyyy-MM-dd") : new Date().toISOString()}`,
-        entry_type: 'power_of_hi',
-        journal_area: date ? format(date, "yyyy-MM-dd") : null,
+        entry,
+        date: date ? format(date, "yyyy-MM-dd") : null,
       });
 
       if (error) throw error;
@@ -59,12 +55,10 @@ const Journal = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from('journal_entries').insert({
+      const { error } = await supabase.from('simple_hi_journal').insert({
         user_id: user?.id,
-        content: entry,
-        title: `Power of Hi Journal - ${date ? format(date, "yyyy-MM-dd") : new Date().toISOString()}`,
-        entry_type: 'power_of_hi',
-        journal_area: date ? format(date, "yyyy-MM-dd") : null,
+        entry,
+        date: date ? format(date, "yyyy-MM-dd") : null,
       });
 
       if (error) throw error;
@@ -153,15 +147,6 @@ const Journal = () => {
           </motion.div>
         </motion.div>
       </Card>
-      
-      <FeedbackDialog 
-        isOpen={showFeedback}
-        onClose={() => {
-          setShowFeedback(false);
-        }}
-        activityName="Power of a Simple Hi"
-        activityId="power-of-hi"
-      />
     </motion.div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -40,13 +39,13 @@ const EmotionalAirbnb = () => {
       if (!user) throw new Error("Not authenticated");
 
       const { data, error } = await supabase
-        .from('emotional_airbnb')
+        .from('emotional_airbnb_entries')
         .insert([
           {
             user_id: user.id,
-            emotion_text: currentEmotion,
-            appearance_description_text: emotionDescription,
-            message_description_text: safePlaceDescription,
+            emotion: currentEmotion,
+            emotion_description: emotionDescription,
+            safe_place_description: safePlaceDescription,
           },
         ]);
 
