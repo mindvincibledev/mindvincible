@@ -18,10 +18,6 @@ import { useAuth } from '@/context/AuthContext';
 const IntroSection = () => {
   return (
     <div className="space-y-6 py-4">
-                <Link to="/resources" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Resources Hub
-          </Link>
       <h2 className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent text-center">
         Welcome to Emotional Airbnb
       </h2>
