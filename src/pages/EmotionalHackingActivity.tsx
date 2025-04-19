@@ -455,8 +455,8 @@ const EmotionalHackingActivity = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Activity Not Found</h1>
-          <Link to="/emotional-hacking">
-            <Button>Back to Emotional Hacking</Button>
+          <Link to="/resources">
+            <Button>Back to Resources Hub</Button>
           </Link>
         </div>
       </div>
@@ -471,9 +471,9 @@ const EmotionalHackingActivity = () => {
           <Navbar />
           
           <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
-            <Link to="/emotional-hacking" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
+            <Link to="/resources" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to All Activities
+              Back to Resources Hub
             </Link>
             
             <motion.div
@@ -585,9 +585,9 @@ const EmotionalHackingActivity = () => {
         <Navbar />
         
         <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
-          <Link to="/emotional-hacking" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
+          <Link to="/resources" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to All Activities
+            Back to Resources Hub
           </Link>
           
           <motion.div

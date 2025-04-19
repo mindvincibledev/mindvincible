@@ -41,7 +41,7 @@ const PowerOfHiActivity = () => {
         <Navbar />
         
         <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
-          <Link to="/resources-hub" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
+          <Link to="/resources" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Resources Hub
           </Link>
