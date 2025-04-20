@@ -278,7 +278,7 @@ const ForkInTheRoadActivity = () => {
           <Button 
             onClick={() => 
             {setShowFeedback(true);
-              navigate("/resources")}  } 
+              navigate("/resources");}  } 
             variant="outline"
             className="px-6"
           >
