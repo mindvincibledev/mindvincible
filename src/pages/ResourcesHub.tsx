@@ -161,7 +161,7 @@ const ResourcesHub = () => {
       setWeeklyStats(stats);
       
       // Calculate progress
-      const totalActivities = activities.length + 2; // Adding 2 for sub-activities
+      const totalActivities = activities.length + 1; // Adding 2 for sub-activities
       console.log(activities.length)
       const uniqueCompletedActivities = new Set();
       
