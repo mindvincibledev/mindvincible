@@ -16,6 +16,11 @@ type ActivityStatsProps = {
 
 const ActivityStatsChart = ({ weeklyStats, weekStartDate, weekEndDate }: ActivityStatsProps) => {
   // Format dates for display
+  const idToRemove = "emotional-hacking";
+
+const filteredStats = weeklyStats.some(stat => stat.id === idToRemove)
+  ? weeklyStats.filter(stat => stat.id !== idToRemove)
+  : weeklyStats;
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -33,10 +38,10 @@ const ActivityStatsChart = ({ weeklyStats, weekStartDate, weekEndDate }: Activit
       </CardHeader>
       <CardContent className="text-black">
         <div className="h-[400px] w-full">
-          {weeklyStats.length > 0 ? (
+          {filteredStats.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={weeklyStats}
+                data={filteredStats}
                 margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                 layout="vertical"
                 barSize={24}
