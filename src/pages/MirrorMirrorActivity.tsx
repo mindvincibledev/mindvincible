@@ -13,14 +13,12 @@ import IntroSection from '@/components/mirror-mirror/IntroSection';
 import BreathingSection from '@/components/mirror-mirror/BreathingSection';
 import MirrorSection from '@/components/mirror-mirror/MirrorSection';
 import ExitSection from '@/components/mirror-mirror/ExitSection';
-import FeedbackDialog from '@/components/FeedbackDialog';
 
 const MirrorMirrorActivity = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentSection, setCurrentSection] = useState<'intro' | 'breathing' | 'mirror' | 'exit'>('intro');
   const [completedPrompts, setCompletedPrompts] = useState<string[]>([]);
-  const [showFeedback, setShowFeedback] = useState(false);
 
   const handleSectionComplete = (section: 'intro' | 'breathing' | 'mirror' | 'exit') => {
     switch (section) {
@@ -33,11 +31,12 @@ const MirrorMirrorActivity = () => {
       case 'mirror':
         // Record activity completion
         if (user) {
-          setShowFeedback(true);
+          recordActivityCompletion();
         }
         setCurrentSection('exit');
         break;
       case 'exit':
+        // Navigate back to resources hub instead
         navigate('/resources');
         break;
     }
@@ -117,16 +116,6 @@ const MirrorMirrorActivity = () => {
             )}
           </motion.div>
         </div>
-        
-        <FeedbackDialog 
-          isOpen={showFeedback}
-          onClose={() => {
-            setShowFeedback(false);
-            navigate('/resources');
-          }}
-          activityName="Mirror Mirror On the Wall"
-          activityId="mirror-mirror"
-        />
       </div>
     </BackgroundWithEmojis>
   );
