@@ -176,11 +176,6 @@ const GroundingTechniqueActivity = () => {
         {/* Celebration dialog */}
         <Dialog open={showCelebration} onOpenChange={handleCelebrationClose}>
           <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
-            <DialogHeader>
-              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-                Grounding Complete!
-              </DialogTitle>
-            </DialogHeader>
             <div className="relative py-10">
               {/* Add celebration content similar to BoxBreathingActivity */}
               <CompletionAnimation />
