@@ -85,6 +85,17 @@ const ResourcesHub = () => {
     }
   ];
 
+  const isActivityCompleted = (activityId: string): boolean => {
+    if (activityId === 'emotional-hacking') {
+      // For emotional hacking, check if both sub-activities are completed this week
+      const hasGrounding = weeklyCompletions.some(c => c.activity_id === 'grounding-technique');
+      const hasBoxBreathing = weeklyCompletions.some(c => c.activity_id === 'box-breathing');
+      return hasGrounding && hasBoxBreathing;
+    }
+    // For regular activities, check if they've been completed at least once this week
+    return weeklyCompletions.some(completion => completion.activity_id === activityId);
+  };
+
   useEffect(() => {
     if (user?.id) {
       fetchWeeklyCompletions();
@@ -132,20 +143,17 @@ const ResourcesHub = () => {
       }));
 
       // Add Emotional Hacking sub-activities to stats
-      const groundingCount = (completions || []).filter(c => c.activity_id === 'grounding-technique').length;
-      const boxBreathingCount = (completions || []).filter(c => c.activity_id === 'box-breathing').length;
-      
       stats.push(
         {
           id: 'grounding-technique',
           title: 'Grounding Technique',
-          count: groundingCount,
+          count: (completions || []).filter(c => c.activity_id === 'grounding-technique').length,
           color: '#3DFDFF'
         },
         {
           id: 'box-breathing',
           title: 'Box Breathing',
-          count: boxBreathingCount,
+          count: (completions || []).filter(c => c.activity_id === 'box-breathing').length,
           color: '#2AC20E'
         }
       );
@@ -156,6 +164,7 @@ const ResourcesHub = () => {
       const totalActivities = activities.length + 2; // Adding 2 for sub-activities
       const uniqueCompletedActivities = new Set();
       
+      // Count unique completed activities
       completions?.forEach(completion => {
         uniqueCompletedActivities.add(completion.activity_id);
       });
@@ -175,16 +184,6 @@ const ResourcesHub = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const isActivityCompleted = (activityId: string): boolean => {
-    if (activityId === 'emotional-hacking') {
-      // Check if both emotional hacking activities are completed this week
-      const hasGrounding = weeklyCompletions.some(c => c.activity_id === 'grounding-technique');
-      const hasBoxBreathing = weeklyCompletions.some(c => c.activity_id === 'box-breathing');
-      return hasGrounding && hasBoxBreathing;
-    }
-    return weeklyCompletions.some(completion => completion.activity_id === activityId);
   };
 
   return (
