@@ -22,7 +22,6 @@ const ResourcesHub = () => {
   const [weekStartDate, setWeekStartDate] = useState<Date>(new Date());
   const [weekEndDate, setWeekEndDate] = useState<Date>(new Date());
 
-  // Define all activities
   const activities = [
     {
       id: "digital-detox",
@@ -113,7 +112,7 @@ const ResourcesHub = () => {
       setWeekEndDate(endOfWeek);
 
       // Fetch completions for current week
-      const { data, error } = await supabase
+      const { data: completions, error } = await supabase
         .from('activity_completions')
         .select('*')
         .eq('user_id', user.id)
@@ -122,36 +121,54 @@ const ResourcesHub = () => {
         
       if (error) throw error;
       
-      setWeeklyCompletions(data || []);
+      setWeeklyCompletions(completions || []);
 
       // Process data for stats
       const stats = activities.map(activity => ({
         id: activity.id,
         title: activity.title,
-        count: (data || []).filter(c => c.activity_id === activity.id).length,
+        count: (completions || []).filter(c => c.activity_id === activity.id).length,
         color: activity.chartColor
       }));
 
+      // Add Emotional Hacking sub-activities to stats
+      const groundingCount = (completions || []).filter(c => c.activity_id === 'grounding-technique').length;
+      const boxBreathingCount = (completions || []).filter(c => c.activity_id === 'box-breathing').length;
+      
+      stats.push(
+        {
+          id: 'grounding-technique',
+          title: 'Grounding Technique',
+          count: groundingCount,
+          color: '#3DFDFF'
+        },
+        {
+          id: 'box-breathing',
+          title: 'Box Breathing',
+          count: boxBreathingCount,
+          color: '#2AC20E'
+        }
+      );
+
       setWeeklyStats(stats);
       
-      // Calculate progress (percentage of unique activities completed this week)
-      const uniqueCompletedActivities = new Set(data?.map(c => c.activity_id) || []);
+      // Calculate progress
+      const totalActivities = activities.length + 2; // Adding 2 for sub-activities
+      const uniqueCompletedActivities = new Set();
+      
+      completions?.forEach(completion => {
+        uniqueCompletedActivities.add(completion.activity_id);
+      });
       
       // For emotional hacking, check if both sub-activities are completed
-      const emotionalHackingActivities = ['grounding-technique', 'box-breathing'];
-      const hasCompletedEmotionalHacking = emotionalHackingActivities.every(
-        id => uniqueCompletedActivities.has(id)
-      );
-      
-      if (hasCompletedEmotionalHacking) {
+      const hasCompletedGrounding = uniqueCompletedActivities.has('grounding-technique');
+      const hasCompletedBoxBreathing = uniqueCompletedActivities.has('box-breathing');
+      if (hasCompletedGrounding && hasCompletedBoxBreathing) {
         uniqueCompletedActivities.add('emotional-hacking');
       }
       
-      const completedCount = uniqueCompletedActivities.size;
-      const totalActivities = activities.length;
-      const progressPercentage = (completedCount / totalActivities) * 100;
-      
-      setProgress(progressPercentage);
+      const progressPercentage = (uniqueCompletedActivities.size / totalActivities) * 100;
+      setProgress(Math.min(progressPercentage, 100)); // Ensure progress doesn't exceed 100%
       
     } catch (error: any) {
       console.error('Error fetching completions:', error);
@@ -160,13 +177,12 @@ const ResourcesHub = () => {
     }
   };
 
-  const isActivityCompleted = (activityId: string) => {
+  const isActivityCompleted = (activityId: string): boolean => {
     if (activityId === 'emotional-hacking') {
-      // Check if both emotional hacking activities are completed
-      const subActivities = ['grounding-technique', 'box-breathing'];
-      return subActivities.every(id => 
-        weeklyCompletions.some(completion => completion.activity_id === id)
-      );
+      // Check if both emotional hacking activities are completed this week
+      const hasGrounding = weeklyCompletions.some(c => c.activity_id === 'grounding-technique');
+      const hasBoxBreathing = weeklyCompletions.some(c => c.activity_id === 'box-breathing');
+      return hasGrounding && hasBoxBreathing;
     }
     return weeklyCompletions.some(completion => completion.activity_id === activityId);
   };
