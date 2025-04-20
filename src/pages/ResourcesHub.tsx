@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -88,60 +87,71 @@ const ResourcesHub = () => {
   ];
 
   useEffect(() => {
-    // Calculate week start and end dates
-    const calculateWeekDates = () => {
-      const today = new Date();
-      const dayOfWeek = today.getDay(); // 0 for Sunday, 1 for Monday, etc.
+    if (user?.id) {
+      fetchWeeklyCompletions();
+    }
+  }, [user]);
+
+  const fetchWeeklyCompletions = async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoading(true);
       
-      // Calculate start of week (Sunday)
+      // Calculate week start and end dates
+      const today = new Date();
+      const dayOfWeek = today.getDay();
       const startOfWeek = new Date(today);
       startOfWeek.setDate(today.getDate() - dayOfWeek);
       startOfWeek.setHours(0, 0, 0, 0);
       
-      // Calculate end of week (Saturday)
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
       endOfWeek.setHours(23, 59, 59, 999);
       
       setWeekStartDate(startOfWeek);
       setWeekEndDate(endOfWeek);
-      
-      return { startOfWeek, endOfWeek };
-    };
-    
-    const { startOfWeek, endOfWeek } = calculateWeekDates();
-    
-    if (user?.id) {
-      fetchWeeklyCompletions(startOfWeek, endOfWeek);
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
 
-  const fetchWeeklyCompletions = async (startDate: Date, endDate: Date) => {
-    if (!user?.id) return;
-
-    try {
-      setLoading(true);
-      
-      // Format dates to ISO strings for Supabase query
-      const startDateStr = startDate.toISOString();
-      const endDateStr = endDate.toISOString();
-      
       // Fetch completions for current week
       const { data, error } = await supabase
         .from('activity_completions')
         .select('*')
         .eq('user_id', user.id)
-        .gte('completed_at', startDateStr)
-        .lte('completed_at', endDateStr);
+        .gte('completed_at', startOfWeek.toISOString())
+        .lte('completed_at', endOfWeek.toISOString());
         
       if (error) throw error;
       
       setWeeklyCompletions(data || []);
+
+      // Process data for stats
+      const stats = activities.map(activity => ({
+        id: activity.id,
+        title: activity.title,
+        count: (data || []).filter(c => c.activity_id === activity.id).length,
+        color: activity.chartColor
+      }));
+
+      setWeeklyStats(stats);
       
-      // Process data for stats and progress
-      processActivityData(data || []);
+      // Calculate progress (percentage of unique activities completed this week)
+      const uniqueCompletedActivities = new Set(data?.map(c => c.activity_id) || []);
+      
+      // For emotional hacking, check if both sub-activities are completed
+      const emotionalHackingActivities = ['grounding-technique', 'box-breathing'];
+      const hasCompletedEmotionalHacking = emotionalHackingActivities.every(
+        id => uniqueCompletedActivities.has(id)
+      );
+      
+      if (hasCompletedEmotionalHacking) {
+        uniqueCompletedActivities.add('emotional-hacking');
+      }
+      
+      const completedCount = uniqueCompletedActivities.size;
+      const totalActivities = activities.length;
+      const progressPercentage = (completedCount / totalActivities) * 100;
+      
+      setProgress(progressPercentage);
       
     } catch (error: any) {
       console.error('Error fetching completions:', error);
@@ -150,31 +160,15 @@ const ResourcesHub = () => {
     }
   };
 
-  const processActivityData = (completionsData: any[]) => {
-    // Initialize stats for each activity with zero counts
-    const stats = activities.map(activity => ({
-      id: activity.id,
-      title: activity.title,
-      count: 0,
-      color: activity.chartColor
-    }));
-    
-    // Count completions for each activity
-    completionsData.forEach((completion) => {
-      const activityId = completion.activity_id;
-      const activityIndex = stats.findIndex(s => s.id === activityId);
-      
-      if (activityIndex !== -1) {
-        stats[activityIndex].count += 1;
-      }
-    });
-    
-    setWeeklyStats(stats);
-    
-    // Calculate progress (percentage of activities completed at least once this week)
-    const uniqueActivitiesCompleted = new Set(completionsData.map(c => c.activity_id)).size;
-    const progressPercentage = (uniqueActivitiesCompleted / activities.length) * 100;
-    setProgress(progressPercentage);
+  const isActivityCompleted = (activityId: string) => {
+    if (activityId === 'emotional-hacking') {
+      // Check if both emotional hacking activities are completed
+      const subActivities = ['grounding-technique', 'box-breathing'];
+      return subActivities.every(id => 
+        weeklyCompletions.some(completion => completion.activity_id === id)
+      );
+    }
+    return weeklyCompletions.some(completion => completion.activity_id === activityId);
   };
 
   return (
@@ -272,12 +266,10 @@ const ResourcesHub = () => {
                         <div className="p-3 rounded-full bg-white shadow-md w-fit">
                           {activity.icon}
                         </div>
-                        {user && completedThisWeek && (
+                        {isActivityCompleted(activity.id) && (
                           <div className="text-xs font-medium px-3 py-1 rounded-full bg-[#2AC20E]/20 text-[#2AC20E] flex items-center">
                             <span className="mr-1">✓</span>
-                            {completionCount === 1 ? 
-                              'Completed this week' : 
-                              `Completed ${completionCount} times this week`}
+                            Completed this week
                           </div>
                         )}
                       </div>

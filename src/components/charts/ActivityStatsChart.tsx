@@ -32,7 +32,7 @@ const ActivityStatsChart = ({ weeklyStats, weekStartDate, weekEndDate }: Activit
         </CardDescription>
       </CardHeader>
       <CardContent className="text-black">
-        <div className="h-64 md:h-72">
+        <div className="h-96 md:h-[32rem]">
           {weeklyStats.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -45,9 +45,10 @@ const ActivityStatsChart = ({ weeklyStats, weekStartDate, weekEndDate }: Activit
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: '#000000', fontSize: 12 }}
-                  angle={-25}
+                  angle={-45}
                   textAnchor="end"
-                  height={60}
+                  height={100}
+                  interval={0}
                 />
                 <YAxis 
                   axisLine={false}
