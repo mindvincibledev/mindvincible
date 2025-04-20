@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Add useNavigate import
 import { motion } from 'framer-motion';
 import { ArrowLeft, Clock, Play, RotateCcw, Check, Heart, Volume2, VolumeX } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -412,6 +412,7 @@ const WelcomeScreen = ({
 // Main activity component
 const BoxBreathingActivity = () => {
   const { user } = useAuth();
+  const navigate = useNavigate(); // Add navigate hook
   const [isBreathingActive, setIsBreathingActive] = useState(false);
   const [activityCompleted, setActivityCompleted] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -481,6 +482,9 @@ const BoxBreathingActivity = () => {
     recordActivityCompletion(feedback);
     setShowFeedback(false);
     toast.success('Thanks for your feedback!');
+    
+    // Redirect to Emotional Hacking page after feedback
+    navigate('/emotional-hacking');
   };
 
   // Handle closing the celebration dialog
