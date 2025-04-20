@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -112,9 +113,7 @@ const EmotionalAirbnb = () => {
       })();
 
       if (!hasTextInput && !hasDrawingInput) {
-        toast({
-          variant: "destructive",
-          title: "Missing input",
+        toast.error("Missing input", {
           description: "Please provide either text or a drawing before proceeding.",
         });
         return;
@@ -177,9 +176,7 @@ const EmotionalAirbnb = () => {
   // Update handleSubmit to show celebration
   const handleSubmit = async () => {
     if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Not logged in",
+      toast.error("Not logged in", {
         description: "You must be logged in to save your emotional airbnb.",
       });
       return;
@@ -274,9 +271,7 @@ const EmotionalAirbnb = () => {
       setShowCelebration(true);
     } catch (error: any) {
       console.error('Error saving emotional airbnb:', error);
-      toast({
-        variant: "destructive",
-        title: "Error saving",
+      toast.error("Error saving", {
         description: error.message || "There was a problem saving your emotional airbnb entry.",
       });
     } finally {
