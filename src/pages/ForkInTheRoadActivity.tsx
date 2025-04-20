@@ -132,8 +132,8 @@ const ForkInTheRoadActivity = () => {
         .from('activity_completions')
         .insert({
           user_id: user.id,
-          activity_id: 'journal-power-of-hi',
-          activity_name: 'Power of Hi Journal Entry',
+          activity_id: 'fork',
+          activity_name: 'For in the Road',
           feedback: feedback
         });
       
