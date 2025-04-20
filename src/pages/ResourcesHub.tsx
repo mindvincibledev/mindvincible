@@ -146,7 +146,7 @@ const ResourcesHub = () => {
       stats.push(
         {
           id: 'grounding-technique',
-          title: 'Grounding Technique',
+          title: '5-4-3-2-1: The Grounding Quest',
           count: (completions || []).filter(c => c.activity_id === 'grounding-technique').length,
           color: '#3DFDFF'
         },
@@ -162,6 +162,7 @@ const ResourcesHub = () => {
       
       // Calculate progress
       const totalActivities = activities.length + 2; // Adding 2 for sub-activities
+      console.log(activities.length)
       const uniqueCompletedActivities = new Set();
       
       // Count unique completed activities

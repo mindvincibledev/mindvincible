@@ -438,8 +438,8 @@ const Journal = () => {
         .from('activity_completions')
         .insert({
           user_id: user.id,
-          activity_id: 'journal-power-of-hi',
-          activity_name: 'Power of Hi Journal Entry',
+          activity_id: 'power-of-hi',
+          activity_name: 'Power of Hi',
           feedback: feedback
         });
       

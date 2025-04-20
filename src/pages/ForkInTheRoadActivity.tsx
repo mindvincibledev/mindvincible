@@ -132,8 +132,8 @@ const ForkInTheRoadActivity = () => {
         .from('activity_completions')
         .insert({
           user_id: user.id,
-          activity_id: 'fork',
-          activity_name: 'For in the Road',
+          activity_id: 'fork-in-the-road',
+          activity_name: 'Fork in Road',
           feedback: feedback
         });
       
