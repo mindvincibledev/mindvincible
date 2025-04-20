@@ -92,7 +92,7 @@ const GroundingTechniqueActivity = () => {
   
   const handleActivityComplete = () => {
     setActivityCompleted(true);
-    setShowCelebration(true);
+    setShowFeedback(true);
   };
 
   // Handle closing the celebration dialog
