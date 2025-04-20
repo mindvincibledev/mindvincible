@@ -3,7 +3,30 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Check } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import { Star, Trophy, Target, ArrowRight, Mic, MicOff, Upload, Image, Camera, Smile, X } from 'lucide-react';
+import { ArrowLeft, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
+import CompletionAnimation from '@/components/grounding/CompletionAnimation';
+import { ArrowLeft as ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useParams, Link, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
+import {  useNavigate } from 'react-router-dom';
+import {  GitFork, Edit, Trash2 } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from "sonner";
 
 interface ExitSectionProps {
   onAnotherPrompt: () => void;
@@ -12,10 +35,91 @@ interface ExitSectionProps {
 }
 
 const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, promptsCompleted }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const handleFeedback = async (feedback: string) => {
+    if (!user?.id) {
+      toast.error("You need to be logged in to complete this activity");
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      
+      // Record activity completion in the database
+      const { error } = await supabase
+        .from('activity_completions')
+        .insert({
+          user_id: user.id,
+          activity_id: 'mirror-mirror',
+          activity_name: 'Mirror Mirror on the Wall',
+          feedback: feedback
+        });
+      
+      if (error) {
+        console.error("Error completing activity:", error);
+        toast.error("Failed to record activity completion");
+        return;
+      }
+      
+      toast.success("Activity completed successfully!");
+      setShowFeedback(false);
+      
+      // Navigate to resources hub after completion
+      navigate('/resources');
+    } catch (error) {
+      console.error("Error completing activity:", error);
+      toast.error("Failed to record activity completion");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
+    
     <Card className="p-8 bg-white/90 backdrop-blur-lg shadow-xl border-none">
       <CardContent className="p-0 flex flex-col items-center">
         <div className="text-center mb-8">
+        <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
+          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                How was your experience?
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-3 gap-4 py-10 px-4">
+              <Button 
+                onClick={() => handleFeedback('positive')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-green-50 hover:border-green-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👍</div>
+                <span>Helpful</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('neutral')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">😐</div>
+                <span>Neutral</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('negative')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👎</div>
+                <span>Not helpful</span>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -72,7 +176,7 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
             whileTap={{ scale: 0.95 }}
           >
             <Button 
-              onClick={onComplete}
+              onClick={() => {setShowFeedback(true);onComplete;}}
               variant="outline"
               className="border-[#9b87f5] text-[#9b87f5] hover:bg-[#9b87f5]/10 px-6 py-2"
             >
