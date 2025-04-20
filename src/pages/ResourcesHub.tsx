@@ -250,9 +250,7 @@ const ResourcesHub = () => {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>{Math.round(progress)}% Complete</span>
-                  <span>
-                    {new Set(weeklyCompletions.map(c => c.activity_id)).size} of {activities.length} Activities
-                  </span>
+
                 </div>
                 <Progress value={progress} className="h-3 bg-gray-200" />
                 
