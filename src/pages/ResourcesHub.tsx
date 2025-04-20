@@ -176,6 +176,8 @@ const ResourcesHub = () => {
       if (hasCompletedGrounding && hasCompletedBoxBreathing) {
         uniqueCompletedActivities.add('emotional-hacking');
       }
+      console.log(uniqueCompletedActivities.size)
+      console.log(totalActivities)
       
       const progressPercentage = (uniqueCompletedActivities.size / totalActivities) * 100;
       setProgress(Math.min(progressPercentage, 100)); // Ensure progress doesn't exceed 100%
