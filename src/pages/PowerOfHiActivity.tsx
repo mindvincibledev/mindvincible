@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -10,14 +11,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SetGoal from '@/components/power-of-hi/SetGoal';
 import Journal from '@/components/power-of-hi/Journal';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from '@/context/AuthContext';
 
 const PowerOfHiActivity = () => {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabParam || 'welcome');
   const navigate = useNavigate();
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [selectedEmoji, setSelectedEmoji] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Update activeTab when URL param changes
   useEffect(() => {
     if (tabParam) {
       setActiveTab(tabParam);
@@ -29,10 +42,44 @@ const PowerOfHiActivity = () => {
     navigate('?tab=goal', { replace: true });
   };
 
-  // Update URL when tab changes
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     navigate(`?tab=${value}`, { replace: true });
+  };
+
+  const handleJournalComplete = () => {
+    setShowCompletionDialog(true);
+  };
+
+  const handleCompletionSubmit = async () => {
+    if (!selectedEmoji) {
+      toast.error("Please select how you're feeling");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      if (user) {
+        const { error } = await supabase.from('activity_completions').insert({
+          user_id: user.id,
+          activity_name: 'Power of Hi',
+          activity_id: 'power-of-hi',
+          feedback: selectedEmoji
+        });
+
+        if (error) throw error;
+      }
+
+      toast.success("Activity completed successfully!");
+      setShowCompletionDialog(false);
+      navigate('/resources');
+    } catch (error) {
+      console.error('Error saving completion:', error);
+      toast.error("Failed to save completion");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -116,10 +163,53 @@ const PowerOfHiActivity = () => {
             </TabsContent>
 
             <TabsContent value="journal">
-              <Journal />
+              <Journal onComplete={handleJournalComplete} />
             </TabsContent>
           </Tabs>
         </div>
+
+        <Dialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl font-bold">
+                Congratulations! 🎉
+              </DialogTitle>
+              <DialogDescription className="text-center">
+                You've completed the Power of Hi activity! How are you feeling?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-3 gap-4 py-4">
+              <Button
+                variant="outline"
+                className={`p-6 ${selectedEmoji === '😊' ? 'border-[#2AC20E] border-2' : ''}`}
+                onClick={() => setSelectedEmoji('😊')}
+              >
+                <span className="text-4xl">😊</span>
+              </Button>
+              <Button
+                variant="outline"
+                className={`p-6 ${selectedEmoji === '😐' ? 'border-[#2AC20E] border-2' : ''}`}
+                onClick={() => setSelectedEmoji('😐')}
+              >
+                <span className="text-4xl">😐</span>
+              </Button>
+              <Button
+                variant="outline"
+                className={`p-6 ${selectedEmoji === '😔' ? 'border-[#2AC20E] border-2' : ''}`}
+                onClick={() => setSelectedEmoji('😔')}
+              >
+                <span className="text-4xl">😔</span>
+              </Button>
+            </div>
+            <Button
+              onClick={handleCompletionSubmit}
+              disabled={!selectedEmoji || isSubmitting}
+              className="w-full bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
+            >
+              {isSubmitting ? 'Saving...' : 'Complete Activity'}
+            </Button>
+          </DialogContent>
+        </Dialog>
       </div>
     </BackgroundWithEmojis>
   );
