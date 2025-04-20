@@ -10,6 +10,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SetGoal from '@/components/power-of-hi/SetGoal';
 import Journal from '@/components/power-of-hi/Journal';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 const PowerOfHiActivity = () => {
   const [searchParams] = useSearchParams();
@@ -33,6 +42,44 @@ const PowerOfHiActivity = () => {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     navigate(`?tab=${value}`, { replace: true });
+  };
+  
+  const { user } = useAuth();
+  
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+  const [feedback, setFeedback] = useState('');
+
+  const handleActivityComplete = async () => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('activity_completions')
+        .insert({
+          user_id: user.id,
+          activity_name: 'Power of a Simple Hi',
+          activity_id: 'power-of-hi',
+          feedback: feedback
+        });
+
+      if (error) {
+        console.error('Error recording completion:', error);
+        toast.error('Failed to record completion');
+        return;
+      }
+
+      toast.success('Activity completed successfully!');
+      navigate('/resources');
+    } catch (err) {
+      console.error('Error:', err);
+      toast.error('Something went wrong');
+    }
+  };
+
+  const handleFeedbackSubmit = () => {
+    setShowFeedbackDialog(false);
+    handleActivityComplete();
   };
 
   return (
@@ -121,6 +168,61 @@ const PowerOfHiActivity = () => {
           </Tabs>
         </div>
       </div>
+      
+      <Dialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Congratulations! 🎉</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-4">
+            <h3 className="text-lg font-semibold mb-2">
+              You've completed the Power of Hi activity!
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Your journey of connection matters. Would you like to share your feedback?
+            </p>
+            <Button 
+              onClick={() => {
+                setShowCompletionDialog(false);
+                setShowFeedbackDialog(true);
+              }}
+              className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
+            >
+              Share Feedback
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Your Feedback</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <textarea
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              placeholder="How was your experience with this activity?"
+              className="w-full h-32 p-3 border rounded-md"
+            />
+            <div className="flex justify-end gap-3 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => handleFeedbackSubmit()}
+              >
+                Skip
+              </Button>
+              <Button
+                onClick={() => handleFeedbackSubmit()}
+                className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
+              >
+                Submit
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </BackgroundWithEmojis>
   );
 };

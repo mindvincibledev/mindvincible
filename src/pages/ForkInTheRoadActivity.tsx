@@ -60,6 +60,10 @@ const ForkInTheRoadActivity = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [decisionToDelete, setDecisionToDelete] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("make-decision");
+  
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+  const [feedback, setFeedback] = useState('');
 
   // Fetch past decisions when component loads
   useEffect(() => {
@@ -329,6 +333,38 @@ const ForkInTheRoadActivity = () => {
       toast.error(`An error occurred: ${error.message}`);
     }
   };
+  
+  const handleActivityComplete = async () => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('activity_completions')
+        .insert({
+          user_id: user.id,
+          activity_name: 'Fork in the Road',
+          activity_id: 'fork-in-road',
+          feedback: feedback
+        });
+
+      if (error) {
+        console.error('Error recording completion:', error);
+        toast.error('Failed to record completion');
+        return;
+      }
+
+      toast.success('Activity completed successfully!');
+      navigate('/resources');
+    } catch (err) {
+      console.error('Error:', err);
+      toast.error('Something went wrong');
+    }
+  };
+
+  const handleFeedbackSubmit = () => {
+    setShowFeedbackDialog(false);
+    handleActivityComplete();
+  };
 
   // Component to display past decisions
   const PastDecisionsView = () => (
@@ -509,7 +545,62 @@ const ForkInTheRoadActivity = () => {
             </Card>
           </motion.div>
         </div>
-      </div>
+      </div >
+      
+      <Dialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Congratulations! 🎉</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-4">
+            <h3 className="text-lg font-semibold mb-2">
+              You've completed the Fork in the Road activity!
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Your decision-making journey matters. Would you like to share your feedback?
+            </p>
+            <Button 
+              onClick={() => {
+                setShowCompletionDialog(false);
+                setShowFeedbackDialog(true);
+              }}
+              className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
+            >
+              Share Feedback
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Your Feedback</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <textarea
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              placeholder="How was your experience with this activity?"
+              className="w-full h-32 p-3 border rounded-md"
+            />
+            <div className="flex justify-end gap-3 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => handleFeedbackSubmit()}
+              >
+                Skip
+              </Button>
+              <Button
+                onClick={() => handleFeedbackSubmit()}
+                className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
+              >
+                Submit
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </BackgroundWithEmojis>
   );
 };
