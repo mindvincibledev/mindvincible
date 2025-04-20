@@ -278,7 +278,7 @@ const ForkInTheRoadActivity = () => {
           <Button 
             onClick={() => 
             {setShowFeedback(true);
-              navigate("/resources");}  } 
+              }  } 
             variant="outline"
             className="px-6"
           >
@@ -515,7 +515,7 @@ const ForkInTheRoadActivity = () => {
             
             <div className="grid grid-cols-3 gap-4 py-10 px-4">
               <Button 
-                onClick={() => handleFeedback('positive')} 
+                onClick={() => {handleFeedback('positive');navigate("/resources");}} 
                 variant="outline" 
                 className="flex flex-col items-center p-4 hover:bg-green-50 hover:border-green-200 transition-colors h-auto"
               >
@@ -524,7 +524,7 @@ const ForkInTheRoadActivity = () => {
               </Button>
               
               <Button 
-                onClick={() => handleFeedback('neutral')} 
+                onClick={() => {handleFeedback('neutral');navigate("/resources");}} 
                 variant="outline" 
                 className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
               >
@@ -533,7 +533,7 @@ const ForkInTheRoadActivity = () => {
               </Button>
               
               <Button 
-                onClick={() => handleFeedback('negative')} 
+                onClick={() => {handleFeedback('negative');navigate("/resources");}} 
                 variant="outline" 
                 className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
               >
