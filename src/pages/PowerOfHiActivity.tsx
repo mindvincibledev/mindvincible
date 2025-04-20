@@ -10,12 +10,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SetGoal from '@/components/power-of-hi/SetGoal';
 import Journal from '@/components/power-of-hi/Journal';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogCancel,
+  AlertDialogAction,
+  AlertDialogFooter,
+} from '@/components/ui/alert-dialog';
 
 const PowerOfHiActivity = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabParam || 'welcome');
-  const navigate = useNavigate();
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [feedback, setFeedback] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Update activeTab when URL param changes
   useEffect(() => {
@@ -33,6 +49,41 @@ const PowerOfHiActivity = () => {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     navigate(`?tab=${value}`, { replace: true });
+
+    // Show completion dialog when user reaches the journal tab
+    if (value === 'journal') {
+      setShowCompletionDialog(true);
+    }
+  };
+
+  const handleActivityCompletion = async () => {
+    if (!user) {
+      toast.error('Please login to save your progress');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('activity_completions')
+        .insert({
+          user_id: user.id,
+          activity_name: 'Power of Hi',
+          activity_id: 'power-of-hi',
+          feedback: feedback,
+        });
+
+      if (error) throw error;
+
+      toast.success('Progress saved successfully!');
+      navigate('/resources');
+    } catch (error: any) {
+      console.error('Error saving progress:', error);
+      toast.error('Failed to save progress');
+    } finally {
+      setIsSubmitting(false);
+      setShowCompletionDialog(false);
+    }
   };
 
   return (
@@ -120,6 +171,38 @@ const PowerOfHiActivity = () => {
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Activity Completion Dialog */}
+        <AlertDialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>
+          <AlertDialogContent className="max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>🎉 Activity Completed!</AlertDialogTitle>
+              <AlertDialogDescription>
+                <div className="space-y-4">
+                  <p>
+                    Congratulations on completing the Power of Hi activity! Would you like to share any feedback about your experience?
+                  </p>
+                  <textarea
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    placeholder="Share your thoughts about this activity..."
+                    className="w-full min-h-[100px] p-3 border rounded-md"
+                  />
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Keep Working</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleActivityCompletion}
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
+              >
+                {isSubmitting ? 'Saving...' : 'Complete & Return to Hub'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </BackgroundWithEmojis>
   );
