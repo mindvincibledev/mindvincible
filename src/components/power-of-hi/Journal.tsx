@@ -886,7 +886,6 @@ const Journal = () => {
                       <Button
                         onClick={() => {
                           handleSubmit;
-                          setShowFeedback(true);
                         }}
 
                         disabled={isSubmitting || !who || !howItWent || !feeling}
@@ -906,7 +905,10 @@ const Journal = () => {
                 </>
               ) : (
                 <ReflectionSection 
-                  onSubmit={handleReflectionSubmit} 
+                  onSubmit={() => {
+                    handleReflectionSubmit;
+                    setShowFeedback(true);
+                  }}
                   isSubmitting={isSubmitting} 
                 />
               )}
