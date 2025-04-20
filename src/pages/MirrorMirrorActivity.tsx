@@ -31,7 +31,6 @@ const MirrorMirrorActivity = () => {
       case 'mirror':
         // Record activity completion
         if (user) {
-          recordActivityCompletion();
         }
         setCurrentSection('exit');
         break;
@@ -44,30 +43,6 @@ const MirrorMirrorActivity = () => {
 
   const handleAnotherPrompt = () => {
     setCurrentSection('mirror');
-  };
-
-  const recordActivityCompletion = async () => {
-    if (!user) return;
-    
-    try {
-      const { error } = await supabase
-        .from('activity_completions')
-        .insert({
-          user_id: user.id,
-          activity_name: 'Mirror Mirror On the Wall',
-          activity_id: 'mirror-mirror',
-        });
-      
-      if (error) {
-        console.error('Error recording activity completion:', error);
-        toast.error('Failed to record your activity completion');
-        return;
-      }
-      
-      toast.success('Activity completion recorded!');
-    } catch (err) {
-      console.error('Error:', err);
-    }
   };
 
   const handlePromptCompleted = (prompt: string) => {
