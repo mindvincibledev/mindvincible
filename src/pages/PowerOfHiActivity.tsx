@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Star, Hand, MessageSquare, Award } from 'lucide-react';
+import { ArrowLeft, Star, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
+import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,11 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SetGoal from '@/components/power-of-hi/SetGoal';
 import Journal from '@/components/power-of-hi/Journal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+
 
 const PowerOfHiActivity = () => {
   const [searchParams] = useSearchParams();
@@ -34,6 +39,9 @@ const PowerOfHiActivity = () => {
     setActiveTab(value);
     navigate(`?tab=${value}`, { replace: true });
   };
+
+ 
+
 
   return (
     <BackgroundWithEmojis>

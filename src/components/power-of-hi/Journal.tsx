@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,6 +11,12 @@ import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import MoodSelector from '@/components/mood/MoodSelector';
 import { Star, Trophy, Target, ArrowRight, Mic, MicOff, Upload, Image, Camera, Smile, X } from 'lucide-react';
+import { ArrowLeft, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
+import CompletionAnimation from '@/components/grounding/CompletionAnimation';
+import { ArrowLeft as ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useParams, Link, Navigate } from 'react-router-dom';
+
+import { motion } from 'framer-motion';
 import { useMoodWheel } from '@/hooks/useMoodWheel';
 import { v4 as uuidv4 } from 'uuid';
 import ReflectionSection, { ReflectionData } from './ReflectionSection';
@@ -41,6 +47,7 @@ const Journal = () => {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hoveredMoodIndex, setHoveredMoodIndex] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   // Form states
   const [who, setWho] = useState('');
@@ -415,6 +422,45 @@ const Journal = () => {
     return publicUrlData.publicUrl;
   };
 
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const handleFeedback = async (feedback: string) => {
+    if (!user?.id) {
+      toast.error("You need to be logged in to complete this activity");
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      
+      // Record activity completion in the database
+      const { error } = await supabase
+        .from('activity_completions')
+        .insert({
+          user_id: user.id,
+          activity_id: 'journal-power-of-hi',
+          activity_name: 'Power of Hi Journal Entry',
+          feedback: feedback
+        });
+      
+      if (error) {
+        console.error("Error completing activity:", error);
+        toast.error("Failed to record activity completion");
+        return;
+      }
+      
+      toast.success("Activity completed successfully!");
+      setShowFeedback(false);
+      
+      // Navigate to resources hub after completion
+      navigate('/resources');
+    } catch (error) {
+      console.error("Error completing activity:", error);
+      toast.error("Failed to record activity completion");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const handleSubmit = async () => {
     if (!user?.id || !selectedGoal) return;
 
@@ -838,7 +884,11 @@ const Journal = () => {
                       </div>
 
                       <Button
-                        onClick={handleSubmit}
+                        onClick={() => {
+                          handleSubmit;
+                          setShowFeedback(true);
+                        }}
+
                         disabled={isSubmitting || !who || !howItWent || !feeling}
                         className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
                       >
@@ -864,6 +914,44 @@ const Journal = () => {
           )}
         </div>
       </Card>
+      <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
+          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                How was your experience?
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-3 gap-4 py-10 px-4">
+              <Button 
+                onClick={() => handleFeedback('positive')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-green-50 hover:border-green-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👍</div>
+                <span>Helpful</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('neutral')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">😐</div>
+                <span>Neutral</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('negative')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👎</div>
+                <span>Not helpful</span>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
       {/* Sticker Dialog */}
       <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>

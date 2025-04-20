@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -22,9 +22,9 @@ import { ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 
+
 import { useParams, Link, Navigate } from 'react-router-dom';
 
-import { ArrowLeft as ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 const EmotionalAirbnb = () => {
   const { user } = useAuth();
