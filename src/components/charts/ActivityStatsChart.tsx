@@ -37,7 +37,7 @@ const ActivityStatsChart = ({ weeklyStats, weekStartDate, weekEndDate }: Activit
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={weeklyStats}
-                margin={{ top: 20, right: 30, left: 160, bottom: 20 }}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                 layout="vertical"
                 barSize={24}
                 barGap={8}
