@@ -13,12 +13,6 @@ import IntroSection from '@/components/mirror-mirror/IntroSection';
 import BreathingSection from '@/components/mirror-mirror/BreathingSection';
 import MirrorSection from '@/components/mirror-mirror/MirrorSection';
 import ExitSection from '@/components/mirror-mirror/ExitSection';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 const MirrorMirrorActivity = () => {
   const { user } = useAuth();
@@ -79,42 +73,6 @@ const MirrorMirrorActivity = () => {
   const handlePromptCompleted = (prompt: string) => {
     setCompletedPrompts([...completedPrompts, prompt]);
   };
-  
-  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
-  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
-  const [feedback, setFeedback] = useState('');
-
-  const handleActivityComplete = async () => {
-    if (!user) return;
-    
-    try {
-      const { error } = await supabase
-        .from('activity_completions')
-        .insert({
-          user_id: user.id,
-          activity_name: 'Mirror Mirror On the Wall',
-          activity_id: 'mirror-mirror',
-          feedback: feedback
-        });
-
-      if (error) {
-        console.error('Error recording completion:', error);
-        toast.error('Failed to record completion');
-        return;
-      }
-
-      toast.success('Activity completed successfully!');
-      navigate('/resources');
-    } catch (err) {
-      console.error('Error:', err);
-      toast.error('Something went wrong');
-    }
-  };
-
-  const handleFeedbackSubmit = () => {
-    setShowFeedbackDialog(false);
-    handleActivityComplete();
-  };
 
   return (
     <BackgroundWithEmojis>
@@ -143,13 +101,7 @@ const MirrorMirrorActivity = () => {
             
             {currentSection === 'mirror' && (
               <MirrorSection 
-                onComplete={() => {
-                  if (user) {
-                    setShowCompletionDialog(true);
-                  } else {
-                    handleSectionComplete('mirror');
-                  }
-                }}
+                onComplete={() => handleSectionComplete('mirror')} 
                 completedPrompts={completedPrompts}
                 onPromptCompleted={handlePromptCompleted}
               />
@@ -165,61 +117,6 @@ const MirrorMirrorActivity = () => {
           </motion.div>
         </div>
       </div>
-      
-      <Dialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Congratulations! 🎉</DialogTitle>
-          </DialogHeader>
-          <div className="text-center py-4">
-            <h3 className="text-lg font-semibold mb-2">
-              You've completed the Mirror Mirror activity!
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Your self-reflection journey matters. Would you like to share your feedback?
-            </p>
-            <Button 
-              onClick={() => {
-                setShowCompletionDialog(false);
-                setShowFeedbackDialog(true);
-              }}
-              className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
-            >
-              Share Feedback
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Your Feedback</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <textarea
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              placeholder="How was your experience with this activity?"
-              className="w-full h-32 p-3 border rounded-md"
-            />
-            <div className="flex justify-end gap-3 mt-4">
-              <Button
-                variant="outline"
-                onClick={() => handleFeedbackSubmit()}
-              >
-                Skip
-              </Button>
-              <Button
-                onClick={() => handleFeedbackSubmit()}
-                className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
-              >
-                Submit
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </BackgroundWithEmojis>
   );
 };
