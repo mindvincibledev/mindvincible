@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -13,7 +14,6 @@ import Affirmation from '@/components/Affirmation';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/context/AuthContext';
 import BoxBreathingActivity from './BoxBreathingActivity';
-import ActivityFeedbackDialog from '@/components/ActivityFeedbackDialog';
 
 // Added activity content details for each activity
 const activities = {
@@ -55,6 +55,53 @@ interface Activity {
 
 type ActivityParams = {
   activityId: string;
+};
+
+// Updated feedback dialog component
+const FeedbackDialog = ({ isOpen, onClose, onSubmit }: { isOpen: boolean, onClose: () => void, onSubmit: (feedback: string) => void }) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+        <DialogHeader>
+          <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+            How was your experience?
+          </DialogTitle>
+          <DialogDescription className="text-center">
+            Your feedback helps us improve our activities
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="grid grid-cols-3 gap-4 py-10 px-4">
+          <Button 
+            onClick={() => onSubmit('positive')} 
+            variant="outline" 
+            className="flex flex-col items-center p-4 hover:bg-green-50 hover:border-green-200 transition-colors h-auto"
+          >
+            <ThumbsUp size={32} className="text-green-500 mb-2" />
+            <span>Helpful</span>
+          </Button>
+          
+          <Button 
+            onClick={() => onSubmit('neutral')} 
+            variant="outline" 
+            className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+          >
+            <div className="text-3xl mb-2">😐</div>
+            <span>Neutral</span>
+          </Button>
+          
+          <Button 
+            onClick={() => onSubmit('negative')} 
+            variant="outline" 
+            className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+          >
+            <ThumbsDown size={32} className="text-red-500 mb-2" />
+            <span>Not helpful</span>
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 // Add a celebration dialog component
@@ -372,6 +419,13 @@ const EmotionalHackingActivity = () => {
     }
   };
 
+  // Handle feedback submission
+  const handleFeedback = (feedback: string) => {
+    recordActivityCompletion(feedback);
+    setShowFeedback(false);
+    toast.success('Thanks for your feedback!');
+  };
+
   // Handle activity completion - show celebration and then feedback dialog
   const handleActivityComplete = () => {
     setActivityCompleted(true);
@@ -514,11 +568,10 @@ const EmotionalHackingActivity = () => {
           />
           
           {/* Feedback dialog */}
-          <ActivityFeedbackDialog 
+          <FeedbackDialog 
             isOpen={showFeedback} 
             onClose={() => setShowFeedback(false)} 
-            activityName={activity.title}
-            activityId={activityId || ''}
+            onSubmit={handleFeedback}
           />
         </div>
       </BackgroundWithEmojis>
@@ -580,11 +633,10 @@ const EmotionalHackingActivity = () => {
           />
           
           {/* Feedback dialog */}
-          <ActivityFeedbackDialog 
+          <FeedbackDialog 
             isOpen={showFeedback} 
             onClose={() => setShowFeedback(false)} 
-            activityName={activity.title}
-            activityId={activityId || ''}
+            onSubmit={handleFeedback}
           />
         </div>
       </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -11,14 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SetGoal from '@/components/power-of-hi/SetGoal';
 import Journal from '@/components/power-of-hi/Journal';
 import { toast } from 'sonner';
-import ActivityFeedbackDialog from '@/components/ActivityFeedbackDialog';
 
 const PowerOfHiActivity = () => {
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabParam || 'welcome');
   const navigate = useNavigate();
-  const [showFeedback, setShowFeedback] = useState(false);
 
   // Update activeTab when URL param changes
   useEffect(() => {
@@ -36,18 +33,6 @@ const PowerOfHiActivity = () => {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     navigate(`?tab=${value}`, { replace: true });
-    
-    // Show feedback dialog when journal tab is completed
-    if (value === 'journal' && tabParam === 'goal') {
-      // Give user time to see the journal before showing feedback
-      setTimeout(() => {
-        setShowFeedback(true);
-      }, 3000);
-    }
-  };
-
-  const handleCloseDialog = () => {
-    setShowFeedback(false);
   };
 
   return (
@@ -131,17 +116,10 @@ const PowerOfHiActivity = () => {
             </TabsContent>
 
             <TabsContent value="journal">
-              <Journal onComplete={() => setShowFeedback(true)} />
+              <Journal />
             </TabsContent>
           </Tabs>
         </div>
-        
-        <ActivityFeedbackDialog 
-          isOpen={showFeedback}
-          onClose={handleCloseDialog}
-          activityName="Power of a Simple Hi"
-          activityId="power-of-hi"
-        />
       </div>
     </BackgroundWithEmojis>
   );

@@ -23,7 +23,7 @@ import DecisionInputScreen from '@/components/fork-in-the-road/DecisionInputScre
 import RoadLabelsScreen from '@/components/fork-in-the-road/RoadLabelsScreen';
 import ReflectionScreen from '@/components/fork-in-the-road/ReflectionScreen';
 import GutCheckScreen from '@/components/fork-in-the-road/GutCheckScreen';
-import ActivityFeedbackDialog from '@/components/ActivityFeedbackDialog';
+import FeedbackDialog from '@/components/FeedbackDialog';
 
 const ForkInTheRoadActivity = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -512,7 +512,7 @@ const ForkInTheRoadActivity = () => {
           </motion.div>
         </div>
         
-        <ActivityFeedbackDialog 
+        <FeedbackDialog 
           isOpen={showFeedback}
           onClose={() => {
             setShowFeedback(false);

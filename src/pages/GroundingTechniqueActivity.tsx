@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -6,7 +5,9 @@ import { ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Button } from '@/components/ui/button';
+import { WavyBackground } from '@/components/ui/wavy-background';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 import AnimatedWelcome from '@/components/grounding/AnimatedWelcome';
@@ -16,7 +17,7 @@ import HearSection from '@/components/grounding/HearSection';
 import SmellSection from '@/components/grounding/SmellSection';
 import TasteSection from '@/components/grounding/TasteSection';
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
-import ActivityFeedbackDialog from '@/components/ActivityFeedbackDialog';
+import FeedbackDialog from '@/components/FeedbackDialog';
 
 enum GroundingStep {
   Welcome,
@@ -133,7 +134,7 @@ const GroundingTechniqueActivity = () => {
           </div>
         </div>
         
-        <ActivityFeedbackDialog 
+        <FeedbackDialog 
           isOpen={showFeedback}
           onClose={() => {
             setShowFeedback(false);
