@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -32,6 +33,9 @@ const GroundingTechniqueActivity = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState<GroundingStep>(GroundingStep.Welcome);
+  const [activityCompleted, setActivityCompleted] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   
   const handleBegin = () => {
     setCurrentStep(GroundingStep.See);
@@ -50,8 +54,9 @@ const GroundingTechniqueActivity = () => {
       return nextStep < GroundingStep.Welcome ? GroundingStep.Welcome : nextStep;
     });
   };
-  
-  const handleCompleteActivity = async () => {
+
+  // Handle feedback submission
+  const handleFeedback = async (feedback: string) => {
     if (!user?.id) {
       toast.error("You need to be logged in to complete this activity");
       return;
@@ -65,19 +70,35 @@ const GroundingTechniqueActivity = () => {
           user_id: user.id,
           activity_id: 'grounding-technique',
           activity_name: '5-4-3-2-1: The Grounding Quest',
-          feedback: 'completed'
+          feedback: feedback
         });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error completing activity:", error);
+        toast.error("Failed to record activity completion");
+        return;
+      }
       
       toast.success("Activity completed successfully!");
+      setShowFeedback(false);
+      
+      // Navigate to resources hub after completion
+      navigate('/emotional-hacking');
     } catch (error) {
       console.error("Error completing activity:", error);
       toast.error("Failed to record activity completion");
     }
+  };
+  
+  const handleActivityComplete = () => {
+    setActivityCompleted(true);
+    setShowCelebration(true);
+  };
 
-    // Navigate to resources hub after completion
-    navigate('/resources-hub');
+  // Handle closing the celebration dialog
+  const handleCelebrationClose = () => {
+    setShowCelebration(false);
+    setShowFeedback(true); // Show feedback dialog after celebration
   };
   
   const renderContent = () => {
@@ -123,7 +144,7 @@ const GroundingTechniqueActivity = () => {
                 
                 <Button 
                   className="bg-gradient-to-r from-[#3DFDFF] to-[#FC68B3] hover:opacity-90"
-                  onClick={handleCompleteActivity}
+                  onClick={handleActivityComplete}
                 >
                   Complete Activity
                 </Button>
@@ -151,6 +172,67 @@ const GroundingTechniqueActivity = () => {
             {renderContent()}
           </div>
         </div>
+
+        {/* Celebration dialog */}
+        <Dialog open={showCelebration} onOpenChange={handleCelebrationClose}>
+          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                Grounding Complete!
+              </DialogTitle>
+            </DialogHeader>
+            <div className="relative py-10">
+              {/* Add celebration content similar to BoxBreathingActivity */}
+              <CompletionAnimation />
+              <Button 
+                className="mt-6 bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
+                onClick={handleCelebrationClose}
+              >
+                Continue
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Feedback dialog */}
+        <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
+          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                How was your experience?
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-3 gap-4 py-10 px-4">
+              <Button 
+                onClick={() => handleFeedback('positive')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-green-50 hover:border-green-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👍</div>
+                <span>Helpful</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('neutral')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">😐</div>
+                <span>Neutral</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('negative')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👎</div>
+                <span>Not helpful</span>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </BackgroundWithEmojis>
   );
