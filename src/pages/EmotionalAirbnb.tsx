@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext';
+import { motion } from 'framer-motion';
+import { ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import Navbar from '@/components/Navbar';
 import IntroSection from '@/components/emotional-airbnb/IntroSection';
 import EmotionSection from '@/components/emotional-airbnb/EmotionSection';
 import LocationSection from '@/components/emotional-airbnb/LocationSection';
@@ -15,14 +15,15 @@ import AppearanceSection from '@/components/emotional-airbnb/AppearanceSection';
 import IntensitySection from '@/components/emotional-airbnb/IntensitySection';
 import SoundSection from '@/components/emotional-airbnb/SoundSection';
 import MessageSection from '@/components/emotional-airbnb/MessageSection';
-import { motion } from 'framer-motion';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { WavyBackground } from '@/components/ui/wavy-background';
-
+import { ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 
 import { useParams, Link, Navigate } from 'react-router-dom';
 
-import { ArrowLeft, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ArrowLeft as ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 const EmotionalAirbnb = () => {
   const { user } = useAuth();
@@ -45,6 +46,8 @@ const EmotionalAirbnb = () => {
     soundDrawing: null as Blob | null,
     messageDrawing: null as Blob | null
   });
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   // Save data from the current step
   const handleSaveStep = (type: string, value: string | Blob | null) => {
@@ -126,7 +129,52 @@ const EmotionalAirbnb = () => {
     setCurrentStep(prev => prev > 0 ? prev - 1 : prev);
   };
 
-  // Submit all data
+  // Handle feedback submission
+  const handleFeedback = async (feedback: string) => {
+    if (!user?.id) {
+      toast.error("You need to be logged in to complete this activity");
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      
+      // Record activity completion in the database
+      const { error } = await supabase
+        .from('activity_completions')
+        .insert({
+          user_id: user.id,
+          activity_id: 'emotional-airbnb',
+          activity_name: 'Emotional Airbnb',
+          feedback: feedback
+        });
+      
+      if (error) {
+        console.error("Error completing activity:", error);
+        toast.error("Failed to record activity completion");
+        return;
+      }
+      
+      toast.success("Activity completed successfully!");
+      setShowFeedback(false);
+      
+      // Navigate to resources hub after completion
+      navigate('/resources');
+    } catch (error) {
+      console.error("Error completing activity:", error);
+      toast.error("Failed to record activity completion");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle closing the celebration dialog
+  const handleCelebrationClose = () => {
+    setShowCelebration(false);
+    setShowFeedback(true); // Show feedback dialog after celebration
+  };
+
+  // Update handleSubmit to show celebration
   const handleSubmit = async () => {
     if (!user) {
       toast({
@@ -221,14 +269,9 @@ const EmotionalAirbnb = () => {
       if (error) {
         throw error;
       }
-
-      toast({
-        title: "Saved successfully",
-        description: "Your emotional airbnb entry has been saved.",
-      });
-
-      // Navigate to home page after successful save
-      navigate('/home');
+      
+      // Show celebration instead of navigating immediately
+      setShowCelebration(true);
     } catch (error: any) {
       console.error('Error saving emotional airbnb:', error);
       toast({
@@ -455,7 +498,7 @@ const EmotionalAirbnb = () => {
         
         <div className="container mx-auto px-4 pt-24 pb-12">
         <Link to="/resources" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeftIcon className="mr-2 h-4 w-4" />
             Back to Resources Hub
           </Link>
           <div className="max-w-3xl mx-auto">
@@ -525,6 +568,61 @@ const EmotionalAirbnb = () => {
             </div>
           </div>
         </div>
+
+        {/* Celebration dialog */}
+        <Dialog open={showCelebration} onOpenChange={handleCelebrationClose}>
+          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+            <div className="relative py-10">
+              <CompletionAnimation />
+              <Button 
+                className="mt-6 bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
+                onClick={handleCelebrationClose}
+              >
+                Continue
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Feedback dialog */}
+        <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
+          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                How was your experience?
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-3 gap-4 py-10 px-4">
+              <Button 
+                onClick={() => handleFeedback('positive')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-green-50 hover:border-green-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👍</div>
+                <span>Helpful</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('neutral')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">😐</div>
+                <span>Neutral</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('negative')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👎</div>
+                <span>Not helpful</span>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </BackgroundWithEmojis>
   );
