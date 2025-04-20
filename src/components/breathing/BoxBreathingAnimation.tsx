@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Progress } from "@/components/ui/progress";
@@ -167,15 +168,18 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
         clearInterval(timerRef);
       }
       
-      // Define the interval for progress updates
+      // Define the interval for progress updates (100ms)
       const intervalId = window.setInterval(() => {
         setBreathingState(state => {
           // Update progress
-          const phaseDurationToUse = state.phase === 'prepare' ? 3 : phaseDuration;
-          const newProgress = state.progress + (100 / (phaseDurationToUse * 10)); // 10 updates per second
+          const phaseDurationMs = state.phase === 'prepare' ? 3000 : phaseDuration * 1000;
+          const progressIncrement = (100 / phaseDurationMs) * 100; // Progress per 100ms
+          const newProgress = state.progress + progressIncrement;
           
-          // Calculate countdown number
-          const newCountDown = Math.ceil((100 - newProgress) / (100 / phaseDurationToUse));
+          // Calculate countdown number - Fix: More accurate countdown calculation
+          const remainingProgress = 100 - state.progress;
+          const remainingTimeMs = (remainingProgress / 100) * phaseDurationMs;
+          const newCountDown = Math.ceil(remainingTimeMs / 1000);
           
           // If total duration has been reached, complete the exercise
           if (totalProgress >= 100) {
@@ -192,12 +196,13 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
           if (newProgress >= 100) {
             // Get the next phase
             const nextPhase = getNextPhase(state.phase);
+            const nextPhaseDuration = nextPhase === 'prepare' ? 3 : phaseDuration;
             
             return {
               phase: nextPhase,
               progress: 0,
               message: getPhaseMessage(nextPhase),
-              countDown: nextPhase === 'prepare' ? 3 : phaseDuration
+              countDown: nextPhaseDuration
             };
           }
           
@@ -223,13 +228,20 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
     };
   }, [isActive, isPaused, phaseDuration, onComplete, totalProgress]);
   
-  // Reset progress when the exercise is restarted
+  // Reset when inactive
   useEffect(() => {
     if (!isActive) {
       setTotalProgress(0);
       progressRef.current = 0;
       startTimeRef.current = null;
       setCycleCount(0);
+      // Reset breathing state to initial
+      setBreathingState({
+        phase: 'prepare',
+        progress: 0,
+        message: 'Get ready...',
+        countDown: 3
+      });
     }
   }, [isActive]);
 
