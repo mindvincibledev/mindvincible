@@ -32,15 +32,15 @@ const ActivityStatsChart = ({ weeklyStats, weekStartDate, weekEndDate }: Activit
         </CardDescription>
       </CardHeader>
       <CardContent className="text-black">
-        <div className="h-[400px] w-full">
+        <div className="h-[500px] w-full">
           {weeklyStats.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={weeklyStats}
-                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                margin={{ top: 20, right: 30, left: 180, bottom: 20 }}
                 layout="vertical"
-                barSize={24}
-                barGap={8}
+                barSize={20}
+                barGap={12}
               >
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} opacity={0.3} />
                 <XAxis 
@@ -57,7 +57,7 @@ const ActivityStatsChart = ({ weeklyStats, weekStartDate, weekEndDate }: Activit
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: '#000000', fontSize: 12 }}
-                  width={150}
+                  width={170}
                   interval={0}
                 />
                 <Tooltip

@@ -96,12 +96,6 @@ const ResourcesHub = () => {
     return weeklyCompletions.some(completion => completion.activity_id === activityId);
   };
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchWeeklyCompletions();
-    }
-  }, [user]);
-
   const fetchWeeklyCompletions = async () => {
     if (!user?.id) return;
 
@@ -160,27 +154,14 @@ const ResourcesHub = () => {
 
       setWeeklyStats(stats);
       
-      // Calculate progress
-      const totalActivities = activities.length + 1; // Adding 2 for sub-activities
-      console.log(activities.length)
-      const uniqueCompletedActivities = new Set();
+      // Calculate progress based on main activities only
+      const totalMainActivities = activities.length; // Should be 6
+      const completedMainActivities = activities.reduce((count, activity) => {
+        return count + (isActivityCompleted(activity.id) ? 1 : 0);
+      }, 0);
       
-      // Count unique completed activities
-      completions?.forEach(completion => {
-        uniqueCompletedActivities.add(completion.activity_id);
-      });
-      
-      // For emotional hacking, check if both sub-activities are completed
-      const hasCompletedGrounding = uniqueCompletedActivities.has('grounding-technique');
-      const hasCompletedBoxBreathing = uniqueCompletedActivities.has('box-breathing');
-      if (hasCompletedGrounding && hasCompletedBoxBreathing) {
-        uniqueCompletedActivities.add('emotional-hacking');
-      }
-      console.log(uniqueCompletedActivities.size)
-      console.log(totalActivities)
-      
-      const progressPercentage = (uniqueCompletedActivities.size / totalActivities) * 100;
-      setProgress(Math.min(progressPercentage, 100)); // Ensure progress doesn't exceed 100%
+      const progressPercentage = (completedMainActivities / totalMainActivities) * 100;
+      setProgress(progressPercentage);
       
     } catch (error: any) {
       console.error('Error fetching completions:', error);
@@ -251,7 +232,7 @@ const ResourcesHub = () => {
                 <div className="flex justify-between text-sm mb-1">
                   <span>{Math.round(progress)}% Complete</span>
                   <span>
-                    {new Set(weeklyCompletions.map(c => c.activity_id)).size} of {activities.length} Activities
+                    {activities.filter(activity => isActivityCompleted(activity.id)).length} of {activities.length} Activities
                   </span>
                 </div>
                 <Progress value={progress} className="h-3 bg-gray-200" />
