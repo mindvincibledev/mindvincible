@@ -884,9 +884,7 @@ const Journal = () => {
                       </div>
 
                       <Button
-                        onClick={() => {
-                          handleSubmit;
-                        }}
+                        onClick={handleSubmit}
 
                         disabled={isSubmitting || !who || !howItWent || !feeling}
                         className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
