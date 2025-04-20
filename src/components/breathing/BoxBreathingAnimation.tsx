@@ -39,8 +39,11 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
   const [cycleCount, setCycleCount] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [totalProgress, setTotalProgress] = useState(0);
-  const progressRef = useRef<number>(0);
+  const totalProgressRef = useRef<number>(0);
+  
+  // References for precise timing
   const startTimeRef = useRef<number | null>(null);
+  const phaseStartTimeRef = useRef<number | null>(null);
   
   // Convert totalDuration from minutes to seconds for calculations
   const totalDurationSeconds = totalDuration * 60;
@@ -118,22 +121,23 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
     if (isActive && !isPaused) {
       // Set start time if not already set
       if (startTimeRef.current === null) {
-        startTimeRef.current = performance.now();
+        startTimeRef.current = Date.now();
       }
       
       const updateProgress = () => {
         if (!startTimeRef.current) return;
         
-        const currentTime = performance.now();
+        // Calculate based on real elapsed time
+        const currentTime = Date.now();
         const elapsedSeconds = (currentTime - startTimeRef.current) / 1000;
         
         // Calculate total progress percentage based on totalDurationSeconds
         const newProgress = Math.min((elapsedSeconds / totalDurationSeconds) * 100, 100);
         
         // Only update state when there's a meaningful change to avoid excessive renders
-        if (Math.abs(newProgress - progressRef.current) > 0.1) {
+        if (Math.abs(newProgress - totalProgressRef.current) > 0.1) {
           setTotalProgress(newProgress);
-          progressRef.current = newProgress;
+          totalProgressRef.current = newProgress;
         }
         
         // Check if we've reached the total duration
@@ -160,7 +164,7 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
     };
   }, [isActive, isPaused, totalDurationSeconds, onComplete]);
   
-  // Start and manage the breathing cycle
+  // Start and manage the breathing cycle with accurate timing
   useEffect(() => {
     if (isActive && !isPaused) {
       // Clear any existing timer
@@ -168,35 +172,54 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
         clearInterval(timerRef);
       }
       
-      // Define the interval for progress updates (100ms)
+      // Initialize phase start time if needed
+      if (phaseStartTimeRef.current === null) {
+        phaseStartTimeRef.current = Date.now();
+      }
+      
+      // Use requestAnimationFrame for smoother and more accurate timing
       const intervalId = window.setInterval(() => {
-        setBreathingState(state => {
-          // Update progress
-          const phaseDurationMs = state.phase === 'prepare' ? 3000 : phaseDuration * 1000;
-          const progressIncrement = (100 / phaseDurationMs) * 100; // Progress per 100ms
-          const newProgress = state.progress + progressIncrement;
+        const now = Date.now();
+        
+        setBreathingState(prevState => {
+          // If no phase start time, set it now
+          if (phaseStartTimeRef.current === null) {
+            phaseStartTimeRef.current = now;
+            return prevState;
+          }
           
-          // Calculate countdown number - Fix: More accurate countdown calculation
-          const remainingProgress = 100 - state.progress;
-          const remainingTimeMs = (remainingProgress / 100) * phaseDurationMs;
+          // Calculate phase duration in milliseconds
+          const phaseDurationMs = prevState.phase === 'prepare' ? 3000 : phaseDuration * 1000;
+          
+          // Calculate elapsed time in this phase
+          const elapsedInPhase = now - phaseStartTimeRef.current;
+          
+          // Calculate progress as a percentage
+          const newProgress = Math.min((elapsedInPhase / phaseDurationMs) * 100, 100);
+          
+          // Calculate seconds remaining in this phase (ceiling for natural countdown feel)
+          const remainingTimeMs = Math.max(phaseDurationMs - elapsedInPhase, 0);
           const newCountDown = Math.ceil(remainingTimeMs / 1000);
           
-          // If total duration has been reached, complete the exercise
-          if (totalProgress >= 100) {
+          // If we've reached the total duration, complete exercise
+          if (totalProgressRef.current >= 100) {
             if (timerRef !== null) {
               clearInterval(timerRef);
             }
             if (onComplete) {
               setTimeout(onComplete, 500);
             }
-            return state;
+            return prevState;
           }
           
-          // If we've completed this phase
+          // Check if this phase is complete
           if (newProgress >= 100) {
             // Get the next phase
-            const nextPhase = getNextPhase(state.phase);
+            const nextPhase = getNextPhase(prevState.phase);
             const nextPhaseDuration = nextPhase === 'prepare' ? 3 : phaseDuration;
+            
+            // Reset phase start time for the new phase
+            phaseStartTimeRef.current = now;
             
             return {
               phase: nextPhase,
@@ -208,12 +231,12 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
           
           // Otherwise just update progress
           return {
-            ...state,
+            ...prevState,
             progress: newProgress,
             countDown: newCountDown
           };
         });
-      }, 100); // Update 10 times per second
+      }, 50); // Update more frequently (50ms) for smoother countdown
       
       setTimerRef(intervalId);
     } else if (timerRef !== null) {
@@ -226,14 +249,15 @@ const BoxBreathingAnimation: React.FC<BoxBreathingAnimationProps> = ({
         clearInterval(timerRef);
       }
     };
-  }, [isActive, isPaused, phaseDuration, onComplete, totalProgress]);
+  }, [isActive, isPaused, phaseDuration, onComplete]);
   
   // Reset when inactive
   useEffect(() => {
     if (!isActive) {
       setTotalProgress(0);
-      progressRef.current = 0;
+      totalProgressRef.current = 0;
       startTimeRef.current = null;
+      phaseStartTimeRef.current = null;
       setCycleCount(0);
       // Reset breathing state to initial
       setBreathingState({
