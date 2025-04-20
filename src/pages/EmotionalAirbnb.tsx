@@ -268,7 +268,7 @@ const EmotionalAirbnb = () => {
       }
       
       // Show celebration instead of navigating immediately
-      setShowCelebration(true);
+      setShowFeedback(true);
     } catch (error: any) {
       console.error('Error saving emotional airbnb:', error);
       toast.error("Error saving", {
