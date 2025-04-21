@@ -10,12 +10,12 @@ interface ActivityDropdownProps {
 const ActivityDropdown: React.FC<ActivityDropdownProps> = ({ completedActivities }) => {
   const allActivities = [
     'Digital Detox',
-    'Mirror Mirror',
+    'Mirror Mirror on the Wall',
     'Power of Hi',
     'Fork in the Road',
     'Emotional Airbnb',
-    'Battery Boost',
-    'Confidence Tree'
+    'Box Breathing',
+    '5-4-3-2-1: The Grounding Quest'
   ];
 
   const completedCount = completedActivities.length;
