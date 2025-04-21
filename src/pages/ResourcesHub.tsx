@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, ChevronDown, ChevronUp, Layers } from 'lucide-react'; 
+import { User, ChevronDown, ChevronUp, Layers } from 'lucide-react'; // Changed Layer to Layers
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -242,12 +242,8 @@ const ResourcesHub = () => {
                   <span>
                     <b className="font-bold">{completedMainCount}/{selfAwarenessActivities.length}</b> Complete
                   </span>
-                  <span>{Math.round(progress)}%</span>
                 </div>
-                <Progress 
-                  value={progress} 
-                  className="h-3 bg-gray-200" 
-                />
+                <Progress value={progress} className="h-3 bg-gray-200" />
                 <p className="mt-2 text-sm text-gray-600">
                   {progress < 100 ? 
                     `Try to complete all activities this week (${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()})` : 

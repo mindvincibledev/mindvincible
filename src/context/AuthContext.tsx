@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .select('*')
         .eq('email', email)
         .eq('password', password)
-        .maybeSingle();
+        .single();
       
       if (userError || !userData) {
         throw new Error('Invalid email or password');
