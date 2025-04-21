@@ -29,20 +29,12 @@ const filteredStats = weeklyStats.some(stat => stat.id === idToRemove)
   };
 
   return (
-    <Card className="col-span-1 md:col-span-3 bg-white/95 backdrop-blur-lg border-gray-200 shadow-lg text-black">
-      <CardHeader>
-        <CardTitle className="text-gray-800">Weekly Activity Stats</CardTitle>
-        <CardDescription className="text-gray-600">
-          Activities completed this week ({formatDate(weekStartDate)} - {formatDate(weekEndDate)})
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="text-black">
-        <div className="h-[400px] w-full">
+    <div className="h-[400px] w-full">
           {filteredStats.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={filteredStats}
-                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
                 layout="vertical"
                 barSize={24}
                 barGap={8}
@@ -88,8 +80,7 @@ const filteredStats = weeklyStats.some(stat => stat.id === idToRemove)
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+
   );
 };
 
