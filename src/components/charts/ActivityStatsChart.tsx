@@ -34,7 +34,7 @@ const filteredStats = weeklyStats.some(stat => stat.id === idToRemove)
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={filteredStats}
-                margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
+                margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
                 layout="vertical"
                 barSize={24}
                 barGap={8}
