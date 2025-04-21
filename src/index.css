@@ -1,128 +1,51 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Animated Blobs */
-@keyframes float {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(-10px, 10px); }
-}
-
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(40px);
-  opacity: 0.4;
-  animation: float 8s infinite ease-in-out;
-}
-
-.blob-1 {
-  width: 300px;
-  height: 300px;
-  background: #3DFDFF;
-  top: -150px;
-  left: -150px;
-}
-
-.blob-2 {
-  width: 250px;
-  height: 250px;
-  background: #FC68B3;
-  bottom: -100px;
-  right: -100px;
-  animation-delay: -2s;
-}
-
-.blob-3 {
-  width: 200px;
-  height: 200px;
-  background: #FF8A48;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation-delay: -4s;
-}
-
-/* Fun Emoji Animation */
-@keyframes emoji-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.emoji {
-  display: inline-block;
-  animation: emoji-bounce 2s infinite ease-in-out;
-}
-
 @layer base {
   :root {
-    --orange: 22 100% 64%;
-    --lavender: 240 59% 89%;
-    --cyan: 183 98% 62%;
-    --yellow: 52 89% 63%;
-    --pink: 334 96% 70%;
-    --green: 118 82% 41%;
-    
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-
-    --primary: 22 100% 64%;
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 240 59% 89%;
-    --secondary-foreground: 240 5.9% 10%;
-
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-
-    --accent: 52 89% 63%;
-    --accent-foreground: 240 5.9% 10%;
-
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 22 100% 64%;
-    --primary-foreground: 240 5.9% 10%;
-
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-
-    --accent: 52 89% 63%;
-    --accent-foreground: 240 5.9% 10%;
-
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.5% 48%;
   }
 }
 
@@ -130,203 +53,16 @@
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground font-sans;
-    position: relative;
-    overflow-x: hidden;
-  }
-  
-  body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background: linear-gradient(
-      135deg,
-      hsl(var(--lavender) / 0.3),
-      hsl(var(--cyan) / 0.3),
-      hsl(var(--yellow) / 0.3),
-      hsl(var(--pink) / 0.3)
-    );
-    background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
+    @apply bg-background text-foreground;
   }
 }
-/* Wave Animations */
-@keyframes wave1 {
-  0% { transform: translate3d(-90px, 0, 0); }
-  100% { transform: translate3d(85px, 0, 0); }
-}
 
-@keyframes wave2 {
-  0% { transform: translate3d(-90px, 0, 0); }
-  100% { transform: translate3d(85px, 0, 0); }
-}
-
-@keyframes wave3 {
-  0% { transform: translate3d(-90px, 0, 0); }
-  100% { transform: translate3d(85px, 0, 0); }
-}
-
-@keyframes wave4 {
-  0% { transform: translate3d(-90px, 0, 0); }
-  100% { transform: translate3d(85px, 0, 0); }
-}
-
-.galaxy-bg {
-  background: linear-gradient(135deg, #3DFDFF 0%, #FC68B3 50%, #FF8A48 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.animate-wave1 {
-  animation: wave1 14s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
-}
-
-.animate-wave2 {
-  animation: wave2 10s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
-}
-
-.animate-wave3 {
-  animation: wave3 6s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
-}
-
-.animate-wave4 {
-  animation: wave4 4s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
-}
-
-.waves-container {
-  transform: rotate(180deg);
-}
-
-/* Animation for floating emojis */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes gradient {
-  0% {
+@keyframes gradient-shift {
+  0%, 100% {
     background-position: 0% 50%;
   }
   50% {
     background-position: 100% 50%;
   }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.gradient-background {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  bottom: 0;
-  left: 0;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(255, 138, 72, 0.1) 70%,
-    rgba(255, 138, 72, 0.2) 100%
-  );
-  z-index: -1;
-}
-
-.affirmation-container {
-  position: relative;
-  width: 100%;
-  max-width: 600px;
-  min-height: 120px;
-  margin: 0 auto;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.affirmation {
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 1s ease, transform 1s ease;
-}
-
-.affirmation.active {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Remove the navbar-transparent and navbar-scrolled classes as we now use a solid white background */
-
-.btn-primary {
-  @apply bg-primary text-white hover:bg-primary/90 px-4 py-2 rounded-md transition-colors;
-}
-
-.btn-secondary {
-  @apply bg-secondary text-foreground hover:bg-secondary/90 px-4 py-2 rounded-md transition-colors;
-}
-
-.btn-accent {
-  @apply bg-accent text-accent-foreground hover:bg-accent/90 px-4 py-2 rounded-md transition-colors;
-}
-
-.btn-outline {
-  @apply border border-primary text-primary hover:bg-primary/10 px-4 py-2 rounded-md transition-colors;
-}
-
-.section-padding {
-  @apply py-16 px-4 md:px-6 lg:px-8;
-}
-
-.card {
-  @apply bg-white bg-opacity-80 backdrop-blur-md rounded-lg shadow-lg p-6;
-}
-
-/* Bubble animations for emotional airbnb final message */
-.bubble-container {
-  position: relative;
-}
-
-.bubble {
-  position: relative;
-  transform-origin: center bottom;
-  animation: bubble-float 5s ease-in-out infinite;
-}
-
-@keyframes bubble-float {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-10px) scale(1.02); }
-}
-
-.bubble::after {
-  content: "";
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 16px;
-  height: 16px;
-  background: linear-gradient(to bottom right, rgba(252, 104, 179, 0.3), rgba(255, 138, 72, 0.3));
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-}
-
-/* Animations for the emoji in the bubble */
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.8; }
 }
