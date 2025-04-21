@@ -12,7 +12,7 @@ const ActivityDropdown: React.FC<ActivityDropdownProps> = ({ completedActivities
     'Digital Detox',
     'Mirror Mirror on the Wall',
     'Power of Hi',
-    'Fork in the Road',
+    'Fork in Road',
     'Emotional Airbnb',
     'Box Breathing',
     '5-4-3-2-1: The Grounding Quest'
