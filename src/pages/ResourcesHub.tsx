@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Brain, Heart, ArrowRight, GitFork, MessageSquare, UserPlus, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { User, ChevronDown, ChevronUp, Layer } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,12 +23,13 @@ const ResourcesHub = () => {
   const [weekStartDate, setWeekStartDate] = useState<Date>(new Date());
   const [weekEndDate, setWeekEndDate] = useState<Date>(new Date());
 
-  const activities = [
+  // All the activities go inside Self Awareness now
+  const selfAwarenessActivities = [
     {
       id: "digital-detox",
       title: "Digital Detox",
       description: "Give yourself a mental break by unplugging from electronic devices.",
-      icon: <X className="h-8 w-8 text-[#FF8A48]" />,
+      icon: <Layer className="h-8 w-8 text-[#FF8A48]" />,
       link: "/emotional-hacking/digital-detox",
       color: "from-[#FC68B3] to-[#FF8A48]",
       bgColor: "bg-[#FFF5F8]",
@@ -37,7 +39,7 @@ const ResourcesHub = () => {
       id: "mirror-mirror",
       title: "Mirror Mirror",
       description: "Because how you speak to yourself matters.",
-      icon: <MessageSquare className="h-8 w-8 text-[#FC68B3]" />,
+      icon: <Layer className="h-8 w-8 text-[#FC68B3]" />,
       link: "/emotional-hacking/mirror-mirror",
       color: "from-[#FC68B3] to-[#9b87f5]",
       bgColor: "bg-[#E5DEFF]",
@@ -47,7 +49,7 @@ const ResourcesHub = () => {
       id: "power-of-hi",
       title: "Power of Hi",
       description: "Small moments. Big confidence.",
-      icon: <UserPlus className="h-8 w-8 text-[#2AC20E]" />,
+      icon: <Layer className="h-8 w-8 text-[#2AC20E]" />,
       link: "/emotional-hacking/power-of-hi",
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#E5FFF2]",
@@ -57,7 +59,7 @@ const ResourcesHub = () => {
       id: "fork-in-the-road",
       title: "Fork in Road",
       description: "Explore your options. Choose with clarity.",
-      icon: <GitFork className="h-8 w-8 text-[#3DFDFF]" />,
+      icon: <Layer className="h-8 w-8 text-[#3DFDFF]" />,
       link: "/emotional-hacking/fork-in-the-road",
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#E5FFF2]",
@@ -67,7 +69,7 @@ const ResourcesHub = () => {
       id: "emotional-airbnb",
       title: "Emotional Airbnb",
       description: "Because understanding yourself is the ultimate glow-up ✨🧠",
-      icon: <Brain className="h-8 w-8 text-[#FF8A48]" />,
+      icon: <Layer className="h-8 w-8 text-[#FF8A48]" />,
       link: "/emotional-airbnb",
       color: "from-[#FF8A48] to-[#FC68B3]",
       bgColor: "bg-[#FFF5F8]",
@@ -77,7 +79,7 @@ const ResourcesHub = () => {
       id: "emotional-hacking",
       title: "Emotional Hacking",
       description: "Learn tricks to stay chill when emotions get extra.",
-      icon: <Heart className="h-8 w-8 text-[#3DFDFF]" />,
+      icon: <Layer className="h-8 w-8 text-[#3DFDFF]" />,
       link: "/emotional-hacking",
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#F0FFFE]",
@@ -87,12 +89,10 @@ const ResourcesHub = () => {
 
   const isActivityCompleted = (activityId: string): boolean => {
     if (activityId === 'emotional-hacking') {
-      // For emotional hacking, check if both sub-activities are completed this week
       const hasGrounding = weeklyCompletions.some(c => c.activity_id === 'grounding-technique');
       const hasBoxBreathing = weeklyCompletions.some(c => c.activity_id === 'box-breathing');
       return hasGrounding && hasBoxBreathing;
     }
-    // For regular activities, check if they've been completed at least once this week
     return weeklyCompletions.some(completion => completion.activity_id === activityId);
   };
 
@@ -100,6 +100,7 @@ const ResourcesHub = () => {
     if (user?.id) {
       fetchWeeklyCompletions();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchWeeklyCompletions = async () => {
@@ -107,42 +108,39 @@ const ResourcesHub = () => {
 
     try {
       setLoading(true);
-      
-      // Calculate week start and end dates
+
+      // Calculate week start and end
       const today = new Date();
       const dayOfWeek = today.getDay();
       const startOfWeek = new Date(today);
       startOfWeek.setDate(today.getDate() - dayOfWeek);
       startOfWeek.setHours(0, 0, 0, 0);
-      
+
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
       endOfWeek.setHours(23, 59, 59, 999);
-      
+
       setWeekStartDate(startOfWeek);
       setWeekEndDate(endOfWeek);
 
-      // Fetch completions for current week
       const { data: completions, error } = await supabase
         .from('activity_completions')
         .select('*')
         .eq('user_id', user.id)
         .gte('completed_at', startOfWeek.toISOString())
         .lte('completed_at', endOfWeek.toISOString());
-        
+
       if (error) throw error;
-      
+
       setWeeklyCompletions(completions || []);
 
-      // Process data for stats
-      const stats = activities.map(activity => ({
+      // Process data for stats chart (all activities and sub-activities still go to chart)
+      const stats = [...selfAwarenessActivities.map(activity => ({
         id: activity.id,
         title: activity.title,
         count: (completions || []).filter(c => c.activity_id === activity.id).length,
         color: activity.chartColor
-      }));
-
-      // Add Emotional Hacking sub-activities to stats
+      }))];
       stats.push(
         {
           id: 'grounding-technique',
@@ -157,31 +155,15 @@ const ResourcesHub = () => {
           color: '#2AC20E'
         }
       );
-
       setWeeklyStats(stats);
-      
-      // Calculate progress
-      const totalActivities = activities.length + 2; // Adding 2 for sub-activities
 
-      const uniqueCompletedActivities = new Set();
-      
-      // Count unique completed activities
-      completions?.forEach(completion => {
-        uniqueCompletedActivities.add(completion.activity_id);
+      // Only main activities count towards progress now (not sub-activities)
+      let completedCount = 0;
+      selfAwarenessActivities.forEach((activity) => {
+        if (isActivityCompleted(activity.id)) completedCount++;
       });
-      
-      // For emotional hacking, check if both sub-activities are completed
-      const hasCompletedGrounding = uniqueCompletedActivities.has('grounding-technique');
-      const hasCompletedBoxBreathing = uniqueCompletedActivities.has('box-breathing');
-      if (hasCompletedGrounding && hasCompletedBoxBreathing) {
-        uniqueCompletedActivities.add('emotional-hacking');
-      }
-      console.log(uniqueCompletedActivities.size)
-      console.log(totalActivities)
-      
-      const progressPercentage = (uniqueCompletedActivities.size / totalActivities) * 100;
-      setProgress(Math.min(progressPercentage, 100)); // Ensure progress doesn't exceed 100%
-      
+      setProgress((completedCount / selfAwarenessActivities.length) * 100);
+
     } catch (error: any) {
       console.error('Error fetching completions:', error);
     } finally {
@@ -189,12 +171,21 @@ const ResourcesHub = () => {
     }
   };
 
+  // Toggle self awareness module open/close
+  const [selfAwarenessOpen, setSelfAwarenessOpen] = useState(true);
+
+  // for 6/6 complete UI state
+  let completedMainCount = 0;
+  selfAwarenessActivities.forEach((activity) => {
+    if (isActivityCompleted(activity.id)) completedMainCount++;
+  });
+
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen relative">
         <Navbar />
-        
-        <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
+
+        <div className="container mx-auto px-4 pt-24 pb-12 relative z-10 max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -205,7 +196,7 @@ const ResourcesHub = () => {
               Resources Hub
             </h1>
             <p className="text-black text-lg max-w-2xl mx-auto">
-              Explore our collection of tools and activities to support your emotional well-being journey.
+              All your activities for the week are grouped under Self Awareness!
             </p>
           </motion.div>
 
@@ -218,10 +209,9 @@ const ResourcesHub = () => {
             >
               <div className="flex flex-col md:flex-row items-center justify-between mb-4">
                 <div className="flex items-center mb-4 md:mb-0">
-                  <ArrowRight className="h-6 w-6 text-[#FC68B3] mr-2" />
-                  <h2 className="text-xl font-semibold text-gray-800">This Week's Progress</h2>
+                  <User className="h-6 w-6 text-[#FC68B3] mr-2" />
+                  <h2 className="text-xl font-semibold text-gray-800">Self Awareness Progress</h2>
                 </div>
-                
                 <Sheet>
                   <SheetTrigger asChild>
                     <Button variant="outline" className="border-[#3DFDFF] text-[#3DFDFF] hover:bg-[#3DFDFF]/10">
@@ -246,14 +236,14 @@ const ResourcesHub = () => {
                   </SheetContent>
                 </Sheet>
               </div>
-              
+
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span>{Math.round(progress)}% Complete</span>
-
+                  <span>
+                    <b className="font-bold">{completedMainCount}/{selfAwarenessActivities.length}</b> Complete
+                  </span>
                 </div>
                 <Progress value={progress} className="h-3 bg-gray-200" />
-                
                 <p className="mt-2 text-sm text-gray-600">
                   {progress < 100 ? 
                     `Try to complete all activities this week (${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()})` : 
@@ -264,48 +254,81 @@ const ResourcesHub = () => {
             </motion.div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {activities.map((activity, index) => {
-              const completedThisWeek = user && weeklyCompletions.some(c => c.activity_id === activity.id);
-              const completionCount = user ? weeklyCompletions.filter(c => c.activity_id === activity.id).length : 0;
-              
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.2 }}
-                >
-                  <Card className={`h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${activity.bgColor}`}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="p-3 rounded-full bg-white shadow-md w-fit">
-                          {activity.icon}
-                        </div>
-                        {isActivityCompleted(activity.id) && (
-                          <div className="text-xs font-medium px-3 py-1 rounded-full bg-[#2AC20E]/20 text-[#2AC20E] flex items-center">
-                            <span className="mr-1">✓</span>
-                            Completed this week
-                          </div>
-                        )}
-                      </div>
-                      <CardTitle className="text-2xl font-bold mt-4">{activity.title}</CardTitle>
-                    </CardHeader>
+          {/* Self Awareness module (expandable) */}
+          <div className="max-w-2xl mx-auto">  
+            <Card className="mb-8 shadow-lg border border-[#FC68B3]/20">
+              <CardHeader
+                className="flex flex-row items-center justify-between cursor-pointer"
+                onClick={() => setSelfAwarenessOpen(open => !open)}
+              >
+                <div className="flex items-center gap-4">
+                  <span className="p-3 rounded-full bg-[#F5DF4D]/10">
+                    <User className="h-8 w-8 text-[#F5DF4D]" />
+                  </span>
+                  <CardTitle className="text-2xl text-black">Self Awareness</CardTitle>
+                </div>
+                <div>
+                  <Button 
+                    size="icon" 
+                    variant="ghost"
+                    tabIndex={-1}
+                    aria-label={selfAwarenessOpen ? "Collapse" : "Expand"}
+                  >
+                    {selfAwarenessOpen ? <ChevronUp className="h-6 w-6" /> : <ChevronDown className="h-6 w-6" />}
+                  </Button>
+                </div>
+              </CardHeader>
+              <AnimatePresence>
+                {selfAwarenessOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.4 }}
+                  >
                     <CardContent>
-                      <CardDescription className="text-base mb-6">{activity.description}</CardDescription>
-                      <Link to={activity.link}>
-                        <Button 
-                          className={`w-full bg-gradient-to-r ${activity.color} text-white hover:opacity-90 flex items-center justify-center gap-2`}
-                        >
-                          <span>Open {activity.title}</span>
-                          <ArrowRight className="h-4 w-4" />
-                        </Button>
-                      </Link>
+                      <CardDescription className="mb-5 text-base text-gray-700">
+                        Access these activities to increase your self awareness!
+                      </CardDescription>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {selfAwarenessActivities.map((activity, index) => {
+                          const completedThisWeek = user && isActivityCompleted(activity.id);
+
+                          return (
+                            <Card key={activity.id} className={`h-full ${activity.bgColor} border border-white/70`}>
+                              <CardHeader>
+                                <div className="flex items-center justify-between">
+                                  <div className="p-3 rounded-full bg-white shadow-md w-fit">
+                                    {activity.icon}
+                                  </div>
+                                  {completedThisWeek && (
+                                    <div className="text-xs font-medium px-3 py-1 rounded-full bg-[#2AC20E]/20 text-[#2AC20E] flex items-center">
+                                      <span className="mr-1">✓</span>
+                                      Completed this week
+                                    </div>
+                                  )}
+                                </div>
+                                <CardTitle className="text-lg font-bold mt-2">{activity.title}</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <CardDescription className="mb-5">{activity.description}</CardDescription>
+                                <Link to={activity.link}>
+                                  <Button
+                                    className={`w-full bg-gradient-to-r ${activity.color} text-white hover:opacity-90 flex items-center justify-center gap-2`}
+                                  >
+                                    <span>Open {activity.title}</span>
+                                  </Button>
+                                </Link>
+                              </CardContent>
+                            </Card>
+                          )
+                        })}
+                      </div>
                     </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Card>
           </div>
         </div>
       </div>
@@ -314,3 +337,4 @@ const ResourcesHub = () => {
 };
 
 export default ResourcesHub;
+
