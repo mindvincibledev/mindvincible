@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, ChevronDown, ChevronUp, Layer } from 'lucide-react';
+import { User, ChevronDown, ChevronUp, Layers } from 'lucide-react'; // Changed Layer to Layers
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +29,7 @@ const ResourcesHub = () => {
       id: "digital-detox",
       title: "Digital Detox",
       description: "Give yourself a mental break by unplugging from electronic devices.",
-      icon: <Layer className="h-8 w-8 text-[#FF8A48]" />,
+      icon: <Layers className="h-8 w-8 text-[#FF8A48]" />, // Changed Layer to Layers
       link: "/emotional-hacking/digital-detox",
       color: "from-[#FC68B3] to-[#FF8A48]",
       bgColor: "bg-[#FFF5F8]",
@@ -39,7 +39,7 @@ const ResourcesHub = () => {
       id: "mirror-mirror",
       title: "Mirror Mirror",
       description: "Because how you speak to yourself matters.",
-      icon: <Layer className="h-8 w-8 text-[#FC68B3]" />,
+      icon: <Layers className="h-8 w-8 text-[#FC68B3]" />, // Changed Layer to Layers
       link: "/emotional-hacking/mirror-mirror",
       color: "from-[#FC68B3] to-[#9b87f5]",
       bgColor: "bg-[#E5DEFF]",
@@ -49,7 +49,7 @@ const ResourcesHub = () => {
       id: "power-of-hi",
       title: "Power of Hi",
       description: "Small moments. Big confidence.",
-      icon: <Layer className="h-8 w-8 text-[#2AC20E]" />,
+      icon: <Layers className="h-8 w-8 text-[#2AC20E]" />, // Changed Layer to Layers
       link: "/emotional-hacking/power-of-hi",
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#E5FFF2]",
@@ -59,7 +59,7 @@ const ResourcesHub = () => {
       id: "fork-in-the-road",
       title: "Fork in Road",
       description: "Explore your options. Choose with clarity.",
-      icon: <Layer className="h-8 w-8 text-[#3DFDFF]" />,
+      icon: <Layers className="h-8 w-8 text-[#3DFDFF]" />, // Changed Layer to Layers
       link: "/emotional-hacking/fork-in-the-road",
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#E5FFF2]",
@@ -69,7 +69,7 @@ const ResourcesHub = () => {
       id: "emotional-airbnb",
       title: "Emotional Airbnb",
       description: "Because understanding yourself is the ultimate glow-up ✨🧠",
-      icon: <Layer className="h-8 w-8 text-[#FF8A48]" />,
+      icon: <Layers className="h-8 w-8 text-[#FF8A48]" />, // Changed Layer to Layers
       link: "/emotional-airbnb",
       color: "from-[#FF8A48] to-[#FC68B3]",
       bgColor: "bg-[#FFF5F8]",
@@ -79,7 +79,7 @@ const ResourcesHub = () => {
       id: "emotional-hacking",
       title: "Emotional Hacking",
       description: "Learn tricks to stay chill when emotions get extra.",
-      icon: <Layer className="h-8 w-8 text-[#3DFDFF]" />,
+      icon: <Layers className="h-8 w-8 text-[#3DFDFF]" />, // Changed Layer to Layers
       link: "/emotional-hacking",
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#F0FFFE]",
@@ -337,4 +337,3 @@ const ResourcesHub = () => {
 };
 
 export default ResourcesHub;
-
