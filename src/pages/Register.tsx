@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -222,48 +221,48 @@ const Register = () => {
                 >
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="user_phone" className="text-white mb-1.5 block">Your Phone Number</Label>
+                      <Label htmlFor="user_phone" className="text-black mb-1.5 block">Your Phone Number</Label>
                       <Input 
                         id="user_phone" 
                         type="tel" 
                         placeholder="Your phone number" 
-                        className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF]" 
+                        className="bg-white border-gray-300 text-black placeholder:text-gray-500" 
                         value={formData.user_phone} 
                         onChange={handleChange} 
                       />
                     </div>
                     
                     <div>
-                      <Label htmlFor="address" className="text-white mb-1.5 block">Your Address</Label>
+                      <Label htmlFor="address" className="text-black mb-1.5 block">Your Address</Label>
                       <Input 
                         id="address" 
                         type="text" 
                         placeholder="Your address" 
-                        className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF]" 
+                        className="bg-white border-gray-300 text-black placeholder:text-gray-500" 
                         value={formData.address} 
                         onChange={handleChange} 
                       />
                     </div>
                     
                     <div>
-                      <Label htmlFor="guardian1_name" className="text-white mb-1.5 block">Guardian 1 Name</Label>
+                      <Label htmlFor="guardian1_name" className="text-black mb-1.5 block">Guardian 1 Name</Label>
                       <Input 
                         id="guardian1_name" 
                         type="text" 
                         placeholder="Guardian 1 name" 
-                        className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF]" 
+                        className="bg-white border-gray-300 text-black placeholder:text-gray-500" 
                         value={formData.guardian1_name} 
                         onChange={handleChange} 
                       />
                     </div>
                     
                     <div>
-                      <Label htmlFor="guardian1_phone" className="text-white mb-1.5 block">Guardian 1 Phone</Label>
+                      <Label htmlFor="guardian1_phone" className="text-black mb-1.5 block">Guardian 1 Phone</Label>
                       <Input 
                         id="guardian1_phone" 
                         type="tel" 
                         placeholder="Guardian 1 phone number" 
-                        className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF]" 
+                        className="bg-white border-gray-300 text-black placeholder:text-gray-500" 
                         value={formData.guardian1_phone} 
                         onChange={handleChange} 
                       />
@@ -280,24 +279,24 @@ const Register = () => {
                 >
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="guardian2_name" className="text-white mb-1.5 block">Guardian 2 Name</Label>
+                      <Label htmlFor="guardian2_name" className="text-black mb-1.5 block">Guardian 2 Name</Label>
                       <Input 
                         id="guardian2_name" 
                         type="text" 
                         placeholder="Guardian 2 name" 
-                        className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF]" 
+                        className="bg-white border-gray-300 text-black placeholder:text-gray-500" 
                         value={formData.guardian2_name} 
                         onChange={handleChange} 
                       />
                     </div>
                     
                     <div>
-                      <Label htmlFor="guardian2_phone" className="text-white mb-1.5 block">Guardian 2 Phone</Label>
+                      <Label htmlFor="guardian2_phone" className="text-black mb-1.5 block">Guardian 2 Phone</Label>
                       <Input 
                         id="guardian2_phone" 
                         type="tel" 
                         placeholder="Guardian 2 phone number" 
-                        className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF]" 
+                        className="bg-white border-gray-300 text-black placeholder:text-gray-500" 
                         value={formData.guardian2_phone} 
                         onChange={handleChange} 
                       />
@@ -354,4 +353,3 @@ const Register = () => {
 };
 
 export default Register;
-
