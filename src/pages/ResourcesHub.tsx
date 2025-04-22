@@ -88,6 +88,8 @@ const ResourcesHub = () => {
   ];
 
   const isActivityCompleted = (activityId: string): boolean => {
+    if (!weeklyCompletions || weeklyCompletions.length === 0) return false;
+    
     if (activityId === 'emotional-hacking') {
       const hasGrounding = weeklyCompletions.some(c => c.activity_id === 'grounding-technique');
       const hasBoxBreathing = weeklyCompletions.some(c => c.activity_id === 'box-breathing');
@@ -133,6 +135,7 @@ const ResourcesHub = () => {
       if (error) throw error;
 
       setWeeklyCompletions(completions || []);
+      console.log("Weekly completions:", completions);
 
       // Process data for stats chart (all activities and sub-activities still go to chart)
       const stats = [...selfAwarenessActivities.map(activity => ({
@@ -157,15 +160,19 @@ const ResourcesHub = () => {
       );
       setWeeklyStats(stats);
 
-      // Only main activities count towards progress now (not sub-activities)
+      // Calculate completed activities count
       let completedCount = 0;
       selfAwarenessActivities.forEach((activity) => {
-        if (isActivityCompleted(activity.id)) completedCount++;
+        const completed = isActivityCompleted(activity.id);
+        console.log(`Activity ${activity.id} completed: ${completed}`);
+        if (completed) completedCount++;
       });
-      setProgress((completedCount / selfAwarenessActivities.length) * 100);
-      console.log(completedCount)
-      console.log(selfAwarenessActivities.length)
-      console.log(progress)
+      
+      // Update progress percentage
+      const progressPercentage = (completedCount / selfAwarenessActivities.length) * 100;
+      console.log(`Completed count: ${completedCount}, Total: ${selfAwarenessActivities.length}, Progress: ${progressPercentage}%`);
+      setProgress(progressPercentage);
+      
     } catch (error: any) {
       console.error('Error fetching completions:', error);
     } finally {
@@ -177,10 +184,20 @@ const ResourcesHub = () => {
   const [selfAwarenessOpen, setSelfAwarenessOpen] = useState(true);
 
   // for 6/6 complete UI state
-  let completedMainCount = 0;
-  selfAwarenessActivities.forEach((activity) => {
-    if (isActivityCompleted(activity.id)) completedMainCount++;
-  });
+  const completedMainCount = selfAwarenessActivities.reduce((count, activity) => {
+    return isActivityCompleted(activity.id) ? count + 1 : count;
+  }, 0);
+
+  // Add useEffect to ensure the progress is recomputed when weeklyCompletions changes
+  useEffect(() => {
+    if (weeklyCompletions.length > 0) {
+      const completedCount = selfAwarenessActivities.reduce((count, activity) => {
+        return isActivityCompleted(activity.id) ? count + 1 : count;
+      }, 0);
+      const progressPercentage = (completedCount / selfAwarenessActivities.length) * 100;
+      setProgress(progressPercentage);
+    }
+  }, [weeklyCompletions]);
 
   return (
     <BackgroundWithEmojis>
