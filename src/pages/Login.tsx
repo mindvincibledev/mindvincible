@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Mail, Lock, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import BackgroundWithEmojis from "@/components/BackgroundWithEmojis";
-import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { UserType } from '@/context/AuthContext';
 
@@ -19,88 +20,40 @@ const Login = () => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
-  const checkTodaysMoodEntry = async (userId: string) => {
-    try {
-      const today = new Date();
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
-      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
-      
-      // Check if user has logged a mood today
-      const { data: moodData, error: moodError } = await supabase
-        .from('mood_data')
-        .select('id')
-        .eq('user_id', userId)
-        .gte('created_at', startOfDay)
-        .lt('created_at', endOfDay)
-        .limit(1);
-      
-      if (moodError) {
-        console.error('Error checking mood entries:', moodError);
-        return false;
-      }
-      
-      return moodData && moodData.length > 0;
-    } catch (err) {
-      console.error('Error checking mood entries:', err);
-      return false;
-    }
-  };
-
-  const redirectUserBasedOnType = async (userId: string) => {
-    try {
-      // Fetch user type from database
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('user_type')
-        .eq('id', userId)
-        .single();
-      
-      if (userError) {
-        console.error('Error fetching user data:', userError);
-        navigate('/home');
-        return;
-      }
-      
-      // Redirect based on user type
-      if (userData) {
-        switch (userData.user_type) {
-          case UserType.Admin:
-            navigate('/admin-dashboard');
-            break;
-          case UserType.Clinician:
-            navigate('/clinician-dashboard');
-            break;
-          case UserType.Student:
-            // Check if student has already logged a mood today
-            const hasMoodEntry = await checkTodaysMoodEntry(userId);
-            if (hasMoodEntry) {
-              navigate('/');
-            } else {
-              navigate('/mood-entry');
-            }
-            break;
-          default:
-            navigate('/');
-        }
-      } else {
-        navigate('/');
-      }
-    } catch (err) {
-      console.error('Error redirecting user:', err);
-      navigate('/');
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     
     try {
-      const result = await signIn(email, password);
-      // After successful login, redirect based on user type
-      redirectUserBasedOnType(result.id);
+      const userData = await signIn(email, password);
+      
+      // Check user type and redirect accordingly
+      switch (userData?.user_type) {
+        case UserType.Admin:
+          toast({
+            title: "Welcome, Admin!",
+            description: "You have successfully logged in.",
+          });
+          navigate('/admin-dashboard');
+          break;
+        case UserType.Clinician:
+          toast({
+            title: "Welcome, Clinician!",
+            description: "You have successfully logged in.",
+          });
+          navigate('/clinician-dashboard');
+          break;
+        case UserType.Student:
+        default:
+          toast({
+            title: "Welcome!",
+            description: "You have successfully logged in.",
+          });
+          navigate('/mood-entry');
+      }
     } catch (err) {
+      console.error("Login error:", err);
       if (err instanceof Error) {
         setError(err.message);
       } else {

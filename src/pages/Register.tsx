@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -8,6 +9,7 @@ import Wave from '@/components/Wave';
 import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const Register = () => {
   const { signUp, user } = useAuth();
@@ -111,8 +113,14 @@ const Register = () => {
         throw new Error(authError.message);
       }
 
-      // If successful, the trigger will automatically create the user record
-      navigate('/dashboard');
+      // Show success message
+      toast({
+        title: "Account created successfully",
+        description: "You have successfully registered. You can now log in.",
+      });
+      
+      // Redirect to login page
+      navigate('/login');
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

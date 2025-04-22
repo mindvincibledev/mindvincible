@@ -1,7 +1,7 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Database } from '@/integrations/supabase/types';
 
 export enum UserType {
   Admin = 0,
@@ -9,7 +9,7 @@ export enum UserType {
   Student = 2,
 }
 
-interface User {
+export interface User {
   id: string;
   email: string;
   name: string;
@@ -26,7 +26,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   session: boolean;
-  signIn: (email: string, password: string) => Promise<User | undefined>;
+  signIn: (email: string, password: string) => Promise<User | null>;
   signUp: (userData: {
     email: string;
     password: string;
@@ -55,14 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Check for stored session on initial load
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        fetchUser(session.user.id);
-      }
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Set up auth state listener FIRST to prevent missed events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
       if (session) {
         fetchUser(session.user.id);
         setSession(true);
@@ -72,24 +67,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.id);
+      if (session) {
+        fetchUser(session.user.id);
+        setSession(true);
+      } else {
+        setLoading(false);
+      }
+    });
+
     return () => {
       subscription.unsubscribe();
     };
   }, []);
 
   const fetchUser = async (userId: string) => {
-    const { data: userData, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    console.log('Fetching user data for:', userId);
+    try {
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (error) {
-      console.error('Error fetching user:', error);
-      return;
+      if (error) {
+        console.error('Error fetching user:', error);
+        setLoading(false);
+        return;
+      }
+
+      console.log('User data fetched:', userData);
+      setUser(userData);
+      setLoading(false);
+    } catch (err) {
+      console.error('Exception in fetchUser:', err);
+      setLoading(false);
     }
-
-    setUser(userData);
   };
 
   const signUp = async (userData: {
@@ -103,23 +118,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user_phone?: string;
     address?: string;
   }) => {
-    // The actual signup is now handled in the Register component
-    // This method is kept for compatibility but just passes through
-    return userData;
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            name: userData.name,
+            guardian1_name: userData.guardian1_name,
+            guardian1_phone: userData.guardian1_phone,
+            guardian2_name: userData.guardian2_name,
+            guardian2_phone: userData.guardian2_phone,
+            user_phone: userData.user_phone,
+            address: userData.address,
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      return authData;
+    } catch (error) {
+      console.error('Error in signUp:', error);
+      throw error;
+    }
   };
 
-  const signIn = async (email: string, password: string): Promise<User | undefined> => {
-    const { data: { session }, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+  const signIn = async (email: string, password: string): Promise<User | null> => {
+    try {
+      console.log('Signing in with:', email);
+      const { data: { session }, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-    if (error) throw error;
-    if (!session?.user) throw new Error('No user returned from sign in');
+      if (error) throw error;
+      if (!session?.user) throw new Error('No user returned from sign in');
 
-    await fetchUser(session.user.id);
-    setSession(true);
-    return user;
+      console.log('Auth sign in successful, fetching user data');
+      
+      // Fetch the user data from the public.users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+        
+      if (userError) {
+        console.error('Error fetching user after sign in:', userError);
+        throw new Error('Could not retrieve user data');
+      }
+      
+      console.log('User data fetched after sign in:', userData);
+      setUser(userData);
+      setSession(true);
+      return userData;
+    } catch (error) {
+      console.error('Error in signIn:', error);
+      throw error;
+    }
   };
 
   const signOut = async () => {
