@@ -163,7 +163,7 @@ const ResourcesHub = () => {
         if (isActivityCompleted(activity.id)) completedCount++;
       });
       setProgress((completedCount / selfAwarenessActivities.length) * 100);
-
+      console.log(progress)
     } catch (error: any) {
       console.error('Error fetching completions:', error);
     } finally {
@@ -245,7 +245,6 @@ const ResourcesHub = () => {
                 </div>
                 
                 <Progress value={progress} className="h-3 bg-gray-200" />
-                console.console.log(progress);
                 
                 <p className="mt-2 text-sm text-gray-600">
                   {progress < 100 ? 
