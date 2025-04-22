@@ -163,6 +163,8 @@ const ResourcesHub = () => {
         if (isActivityCompleted(activity.id)) completedCount++;
       });
       setProgress((completedCount / selfAwarenessActivities.length) * 100);
+      console.log(completedCount)
+      console.log(selfAwarenessActivities.length)
       console.log(progress)
     } catch (error: any) {
       console.error('Error fetching completions:', error);
