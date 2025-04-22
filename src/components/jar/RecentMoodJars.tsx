@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 
 interface MoodJar {
   id: string;
@@ -14,12 +14,19 @@ interface MoodJar {
   created_at: string;
 }
 
-const RecentMoodJars = ({ userId }: { userId: string }) => {
+const RecentMoodJars = () => {
   const [moodJars, setMoodJars] = useState<MoodJar[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
     const fetchMoodJars = async () => {
       try {
         setLoading(true);
@@ -27,7 +34,6 @@ const RecentMoodJars = ({ userId }: { userId: string }) => {
         const { data, error } = await supabase
           .from('mood_jar_table')
           .select('id, image_path, created_at')
-          .eq('user_id', userId)
           .order('created_at', { ascending: false })
           .limit(5);
         
@@ -44,17 +50,15 @@ const RecentMoodJars = ({ userId }: { userId: string }) => {
         toast({
           variant: "destructive",
           title: "Failed to load mood jars",
-          description: "There was an error loading your mood jars.",
+          description: "Please try again later.",
         });
       } finally {
         setLoading(false);
       }
     };
 
-    if (userId) {
-      fetchMoodJars();
-    }
-  }, [userId, toast]);
+    fetchMoodJars();
+  }, [user, toast, navigate]);
 
   if (loading) {
     return (

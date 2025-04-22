@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, ArrowLeft } from 'lucide-react';
@@ -20,12 +19,22 @@ const RecentMoodJars = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
+  // Add authentication check
   useEffect(() => {
-    if (user) {
-      fetchMoodJars();
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please login to view your mood jars.",
+      });
+      navigate('/login');
+      return;
     }
-  }, [user]);
+
+    fetchMoodJars();
+  }, [user, navigate, toast]);
 
   const fetchMoodJars = async () => {
     if (!user) return;
