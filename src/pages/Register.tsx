@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -78,7 +77,7 @@ const Register = () => {
         return;
       }
 
-      // First, create the auth user
+      // First, create the auth user with display name
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -92,7 +91,8 @@ const Register = () => {
             user_phone: formData.user_phone,
             address: formData.address,
             password: formData.password,
-          }
+          },
+          emailRedirectTo: window.location.origin
         }
       });
 
