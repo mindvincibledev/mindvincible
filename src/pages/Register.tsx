@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -72,8 +73,9 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Prevent submission if not on final step
+    // Explicitly prevent default behavior and stop propagation
     if (step !== 3) {
+      e.preventDefault();
       e.stopPropagation();
       return;
     }
@@ -101,7 +103,6 @@ const Register = () => {
             guardian2_phone: formData.guardian2_phone,
             user_phone: formData.user_phone,
             address: formData.address,
-            password: formData.password,
           },
           emailRedirectTo: window.location.origin
         }
@@ -139,13 +140,13 @@ const Register = () => {
           transition={{ duration: 0.8, ease: "easeInOut" }} 
           className="w-full max-w-2xl"
         >
-          <div className="bg-white/80 backdrop-blur-md border border-gray-200 rounded-xl p-8 shadow-lg">
+          <div className="bg-white/90 backdrop-blur-md border border-gray-200 rounded-xl p-8 shadow-lg">
             <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
               Create Your M(in)dvincible Account
             </h2>
             
             {error && (
-              <div className="bg-red-500/20 border border-red-500/50 text-white rounded-md p-3 mb-4">
+              <div className="bg-red-500/20 border border-red-500/50 text-red-700 rounded-md p-3 mb-4">
                 {error}
               </div>
             )}
@@ -159,12 +160,12 @@ const Register = () => {
                 >
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="email" className="text-white mb-1.5 block">Email *</Label>
+                      <Label htmlFor="email" className="text-black mb-1.5 block">Email *</Label>
                       <Input 
                         id="email" 
                         type="email" 
                         placeholder="Enter your email" 
-                        className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF]" 
+                        className="bg-white border-gray-300 text-black placeholder:text-gray-500" 
                         value={formData.email} 
                         onChange={handleChange} 
                         required 
@@ -172,12 +173,12 @@ const Register = () => {
                     </div>
                     
                     <div>
-                      <Label htmlFor="name" className="text-white mb-1.5 block">Full Name *</Label>
+                      <Label htmlFor="name" className="text-black mb-1.5 block">Full Name *</Label>
                       <Input 
                         id="name" 
                         type="text" 
                         placeholder="Enter your full name" 
-                        className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF]" 
+                        className="bg-white border-gray-300 text-black placeholder:text-gray-500" 
                         value={formData.name} 
                         onChange={handleChange} 
                         required 
@@ -185,12 +186,12 @@ const Register = () => {
                     </div>
                     
                     <div>
-                      <Label htmlFor="password" className="text-white mb-1.5 block">Password *</Label>
+                      <Label htmlFor="password" className="text-black mb-1.5 block">Password *</Label>
                       <Input 
                         id="password" 
                         type="password" 
                         placeholder="Create a password" 
-                        className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF]" 
+                        className="bg-white border-gray-300 text-black placeholder:text-gray-500" 
                         value={formData.password} 
                         onChange={handleChange} 
                         required 
@@ -198,12 +199,12 @@ const Register = () => {
                     </div>
                     
                     <div>
-                      <Label htmlFor="confirmPassword" className="text-white mb-1.5 block">Confirm Password *</Label>
+                      <Label htmlFor="confirmPassword" className="text-black mb-1.5 block">Confirm Password *</Label>
                       <Input 
                         id="confirmPassword" 
                         type="password" 
                         placeholder="Confirm your password" 
-                        className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus:border-[#3DFDFF]" 
+                        className="bg-white border-gray-300 text-black placeholder:text-gray-500" 
                         value={formData.confirmPassword} 
                         onChange={handleChange} 
                         required 
@@ -338,7 +339,7 @@ const Register = () => {
             </form>
             
             <div className="mt-6 text-center">
-              <p className="text-white/70">
+              <p className="text-black/70">
                 Already have an account?{' '}
                 <Link to="/login" className="text-[#3DFDFF] hover:underline">
                   Log in
@@ -353,3 +354,4 @@ const Register = () => {
 };
 
 export default Register;
+
