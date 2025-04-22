@@ -85,27 +85,21 @@ const Dashboard = () => {
     }
   }, [allMoodEntries, dateFilter, selectedDate]);
 
-  // Fetch all mood data
+  // Fetch all mood data -- ENFORCE use of user_id, which is required for RLS
   const fetchAllMoodData = async () => {
     try {
       setLoading(true);
-      
-      console.log('Fetching mood data for user:', user?.id);
-      
-      // Fetch all mood entries for the user
+      // Only fetch records belonging to authenticated user (RLS enforced)
       const { data: moodEntries, error } = await supabase
         .from('mood_data')
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
-      
+
       if (error) {
         console.error('Error fetching mood data:', error);
         throw error;
       }
-      
-      console.log('Fetched mood entries:', moodEntries);
-      
       if (moodEntries) {
         setAllMoodEntries(moodEntries);
       } else {

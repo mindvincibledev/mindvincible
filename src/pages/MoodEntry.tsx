@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
@@ -75,7 +74,7 @@ const MoodEntry = () => {
       const { error } = await supabase
         .from('mood_data')
         .insert({
-          user_id: user.id,
+          user_id: user.id, // This is required by RLS
           mood: currentMood as MoodType,
           notes: moodFeeling,
           tags: selectedTags.length > 0 ? selectedTags : null,
