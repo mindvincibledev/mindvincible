@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -93,11 +92,14 @@ export function useJournalSave() {
     setIsSaving(true);
     
     try {
-      if (!user) {
+      // Get the current authenticated user from Supabase directly
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (!authUser) {
         throw new Error("User not authenticated");
       }
 
-      console.log("Starting journal save process with user ID:", user.id);
+      console.log("Starting journal save process with user ID:", authUser.id);
       
       // Handle file upload if needed
       let audioPath = null;
@@ -107,7 +109,6 @@ export function useJournalSave() {
         const timestamp = Date.now();
         const fileName = `audio_${timestamp}.webm`;
         
-        // No need for user-specific folder since RLS is disabled
         console.log(`Uploading audio file: ${fileName}`);
         
         // Upload audio file to the audio_files bucket
@@ -136,7 +137,6 @@ export function useJournalSave() {
         const timestamp = Date.now();
         const fileName = `drawing_${timestamp}.png`;
         
-        // No need for user-specific folder since RLS is disabled
         console.log(`Uploading drawing file: ${fileName}`);
         
         // Upload drawing file to the drawing_files bucket
@@ -161,13 +161,13 @@ export function useJournalSave() {
         console.log('Drawing uploaded successfully, URL:', drawingPath);
       }
       
-      console.log("About to insert journal entry with user_id:", user.id);
+      console.log("About to insert journal entry with auth user_id:", authUser.id);
       
-      // Insert journal entry - RLS is disabled so no need for special permissions
+      // Important: Use the auth user ID for RLS policies to work properly
       const { data, error } = await supabase
         .from('journal_entries')
         .insert({
-          user_id: user.id,
+          user_id: authUser.id, // Use the auth user ID here for RLS
           title: title.trim(),
           content: journalType === 'text' ? content.trim() : null,
           audio_path: audioPath,
