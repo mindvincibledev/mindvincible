@@ -43,7 +43,9 @@ const Register = () => {
     });
   };
 
-  const handleNextStep = () => {
+  const handleNextStep = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    
     // Validate first step
     if (step === 1) {
       if (!formData.email || !formData.password || !formData.confirmPassword || !formData.name) {
@@ -63,18 +65,26 @@ const Register = () => {
     setStep(step + 1);
   };
 
-  const handlePrevStep = () => {
+  const handlePrevStep = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
     setStep(step - 1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Only process submission if on the final step
+    if (step !== 3) {
+      return;
+    }
+    
     setError('');
     setLoading(true);
     
     try {
       if (formData.password !== formData.confirmPassword) {
         setError('Passwords do not match');
+        setLoading(false);
         return;
       }
 
@@ -115,7 +125,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-black relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-white relative overflow-hidden">
       <div className="absolute inset-0 z-0 overflow-hidden">
         <Wave />
       </div>
