@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { WavyBackground } from '@/components/ui/wavy-background';
 import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 
 const Register = () => {
   const { signUp, user } = useAuth();
@@ -72,18 +73,34 @@ const Register = () => {
     setLoading(true);
     
     try {
-      await signUp({
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+
+      // First, create the auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        name: formData.name,
-        guardian1_name: formData.guardian1_name,
-        guardian1_phone: formData.guardian1_phone,
-        guardian2_name: formData.guardian2_name,
-        guardian2_phone: formData.guardian2_phone,
-        user_phone: formData.user_phone,
-        address: formData.address,
+        options: {
+          data: {
+            name: formData.name,
+            guardian1_name: formData.guardian1_name,
+            guardian1_phone: formData.guardian1_phone,
+            guardian2_name: formData.guardian2_name,
+            guardian2_phone: formData.guardian2_phone,
+            user_phone: formData.user_phone,
+            address: formData.address,
+            password: formData.password,
+          }
+        }
       });
-      
+
+      if (authError) {
+        throw new Error(authError.message);
+      }
+
+      // If successful, the trigger will automatically create the user record
       navigate('/dashboard');
     } catch (err) {
       if (err instanceof Error) {

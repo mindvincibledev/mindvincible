@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -27,7 +26,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   session: boolean;
-  signIn: (email: string, password: string) => Promise<User>;
+  signIn: (email: string, password: string) => Promise<User | undefined>;
   signUp: (userData: {
     email: string;
     password: string;
@@ -39,7 +38,7 @@ interface AuthContextType {
     user_phone?: string;
     address?: string;
     user_type?: UserType;
-  }) => Promise<void>;
+  }) => Promise<any>;
   signOut: () => Promise<void>;
   isAdmin: () => boolean;
   isClinician: () => boolean;
@@ -54,60 +53,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState(false);
   const { toast } = useToast();
 
-  // Check for stored user on initial load
+  // Check for stored session on initial load
   useEffect(() => {
-    const storedUser = localStorage.getItem('mindvincible_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        fetchUser(session.user.id);
+      }
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        fetchUser(session.user.id);
         setSession(true);
-      } catch (error) {
-        console.error('Failed to parse stored user data', error);
-        localStorage.removeItem('mindvincible_user');
+      } else {
+        setUser(null);
         setSession(false);
       }
-    }
-    setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const signIn = async (email: string, password: string): Promise<User> => {
-    try {
-      setLoading(true);
-      
-      // Find user with matching email and password
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', email)
-        .eq('password', password)
-        .single();
-      
-      if (userError || !userData) {
-        throw new Error('Invalid email or password');
-      }
-      
-      const userObject = userData as User;
-      
-      setUser(userObject);
-      setSession(true);
-      localStorage.setItem('mindvincible_user', JSON.stringify(userObject));
-      
-      toast({
-        title: "Success!",
-        description: "You've been signed in.",
-      });
-      
-      return userObject;
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Authentication error",
-        description: error.message || "Failed to sign in. Please try again.",
-      });
-      throw error;
-    } finally {
-      setLoading(false);
+  const fetchUser = async (userId: string) => {
+    const { data: userData, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user:', error);
+      return;
     }
+
+    setUser(userData);
   };
 
   const signUp = async (userData: {
@@ -120,83 +102,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     guardian2_name?: string;
     user_phone?: string;
     address?: string;
-    user_type?: UserType;
   }) => {
-    try {
-      setLoading(true);
-      
-      const { data: existingUser, error: checkError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', userData.email)
-        .maybeSingle();
-      
-      if (existingUser) {
-        throw new Error('User with this email already exists');
-      }
-      
-      const { data: newUser, error: insertError } = await supabase
-        .from('users')
-        .insert({
-          email: userData.email,
-          name: userData.name,
-          password: userData.password,
-          guardian1_phone: userData.guardian1_phone || null,
-          guardian2_phone: userData.guardian2_phone || null,
-          guardian1_name: userData.guardian1_name || null,
-          guardian2_name: userData.guardian2_name || null,
-          user_phone: userData.user_phone || null,
-          address: userData.address || null,
-          user_type: userData.user_type || UserType.Student,
-        } as Database['public']['Tables']['users']['Insert'])
-        .select()
-        .single();
-        
-      if (insertError) {
-        console.error('Insert error:', insertError);
-        throw new Error('Failed to create account. Please try again.');
-      }
-      
-      setUser(newUser as User);
-      setSession(true);
-      localStorage.setItem('mindvincible_user', JSON.stringify(newUser));
-      
-      toast({
-        title: "Account created!",
-        description: "Welcome to M(in)dvincible! You've been signed in.",
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Registration failed",
-        description: error.message || "Failed to create account. Please try again.",
-      });
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+    // The actual signup is now handled in the Register component
+    // This method is kept for compatibility but just passes through
+    return userData;
+  };
+
+  const signIn = async (email: string, password: string): Promise<User | undefined> => {
+    const { data: { session }, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+    if (!session?.user) throw new Error('No user returned from sign in');
+
+    await fetchUser(session.user.id);
+    setSession(true);
+    return user;
   };
 
   const signOut = async () => {
-    try {
-      setLoading(true);
-      setUser(null);
-      setSession(false);
-      localStorage.removeItem('mindvincible_user');
-      
-      toast({
-        title: "Signed out",
-        description: "You've been successfully signed out.",
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error signing out",
-        description: error.message || "Failed to sign out. Please try again.",
-      });
-    } finally {
-      setLoading(false);
-    }
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    
+    setUser(null);
+    setSession(false);
   };
 
   // Helper functions to check user type
