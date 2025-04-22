@@ -243,6 +243,7 @@ const ResourcesHub = () => {
                     <b className="font-bold">{completedMainCount}/{selfAwarenessActivities.length}</b> Complete
                   </span>
                 </div>
+                console.log(progress)
                 <Progress value={progress} className="h-3 bg-gray-200" />
                 <p className="mt-2 text-sm text-gray-600">
                   {progress < 100 ? 
