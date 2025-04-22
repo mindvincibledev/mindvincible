@@ -20,10 +20,14 @@ const Progress = React.forwardRef<
       className="h-full w-full flex-1 bg-gradient-to-r from-[#3DFDFF] to-[#FC68B3] transition-all"
       style={{ 
         transform: `translateX(-${100 - (value || 0)}%)`,
+        
+        
         backgroundSize: "200% 100%",
         animation: "gradient-shift 3s ease infinite"
       }}
+      
     />
+    console.log(value);
   </ProgressPrimitive.Root>
 ))
 Progress.displayName = ProgressPrimitive.Root.displayName
