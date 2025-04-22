@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { WavyBackground } from '@/components/ui/wavy-background';
+import Wave from '@/components/Wave';
 import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -116,15 +117,7 @@ const Register = () => {
   return (
     <div className="min-h-screen flex flex-col bg-black relative overflow-hidden">
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <WavyBackground 
-          colors={["#FF8A48", "#D5D5F1", "#3DFDFF", "#F5DF4D", "#FC68B3", "#2AC20E"]} 
-          waveWidth={50} 
-          backgroundFill="black" 
-          blur={10} 
-          speed="fast" 
-          waveOpacity={0.5} 
-          className="w-full h-full" 
-        />
+        <Wave />
       </div>
       
       <Navbar />
