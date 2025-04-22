@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -73,8 +72,9 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Only process submission if on the final step
+    // Prevent submission if not on final step
     if (step !== 3) {
+      e.stopPropagation();
       return;
     }
     
@@ -139,7 +139,7 @@ const Register = () => {
           transition={{ duration: 0.8, ease: "easeInOut" }} 
           className="w-full max-w-2xl"
         >
-          <div className="bg-black/50 backdrop-blur-md border border-white/10 rounded-xl p-8 shadow-xl">
+          <div className="bg-white/80 backdrop-blur-md border border-gray-200 rounded-xl p-8 shadow-lg">
             <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
               Create Your M(in)dvincible Account
             </h2>
