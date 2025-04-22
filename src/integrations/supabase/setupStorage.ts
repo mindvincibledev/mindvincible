@@ -1,72 +1,67 @@
 
 import { supabase } from './client';
 
+// This function sets up the Supabase storage buckets for the application
 export async function setupJournalStorage() {
   try {
-    // Check if audio_files bucket exists
-    const { data: audioBuckets, error: audioCheckError } = await supabase.storage.listBuckets();
+    // Check if the buckets already exist
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
     
-    if (audioCheckError) {
-      console.error('Error checking audio bucket:', audioCheckError);
+    if (listError) {
+      console.error('Error checking storage buckets:', listError);
       return;
     }
-
-    const audioFilesBucketExists = audioBuckets.some(bucket => bucket.name === 'audio_files');
     
-    if (!audioFilesBucketExists) {
-      console.log('Creating audio_files bucket...');
-      const { error: audioCreateError } = await supabase.storage.createBucket('audio_files', {
-        public: true, // Allow public access to files
-        fileSizeLimit: 52428800, // 50MB file size limit
-      });
+    // Check for audio_files bucket
+    const audioBucketExists = buckets?.some(bucket => bucket.id === 'audio_files');
+    if (!audioBucketExists) {
+      console.error('Error: audio_files bucket not found. Please create it in Supabase.');
+    } else {
+      console.log('audio_files bucket exists');
       
-      if (audioCreateError) {
-        console.error('Error creating audio_files bucket:', audioCreateError);
-        throw new Error('audio_files bucket not found. Please create it in Supabase.');
+      // Let's check if we can access storage info
+      try {
+        const { data, error } = await supabase.storage.from('audio_files').list();
+        if (!error) {
+          console.log('Audio files storage is set up correctly with public access');
+          console.log('Available files:', data);
+        } else {
+          console.warn('Potential issue with audio files storage:', error.message);
+        }
+      } catch (err) {
+        console.error('Error checking audio files storage:', err);
       }
-      
-      console.log('audio_files bucket created successfully');
     }
-
-    // Check if drawing_files bucket exists
-    const drawingFilesBucketExists = audioBuckets.some(bucket => bucket.name === 'drawing_files');
     
-    if (!drawingFilesBucketExists) {
-      console.log('Creating drawing_files bucket...');
-      const { error: drawingCreateError } = await supabase.storage.createBucket('drawing_files', {
-        public: true, // Allow public access to files
-        fileSizeLimit: 52428800, // 50MB file size limit
-      });
+    // Check for drawing_files bucket
+    const drawingBucketExists = buckets?.some(bucket => bucket.id === 'drawing_files');
+    if (!drawingBucketExists) {
+      console.error('Error: drawing_files bucket not found. Please create it in Supabase.');
+    } else {
+      console.log('drawing_files bucket exists');
       
-      if (drawingCreateError) {
-        console.error('Error creating drawing_files bucket:', drawingCreateError);
-        throw new Error('drawing_files bucket not found. Please create it in Supabase.');
+      // Let's check if we can access storage info
+      try {
+        const { data, error } = await supabase.storage.from('drawing_files').list();
+        if (!error) {
+          console.log('Drawing files storage is set up correctly with public access');
+          console.log('Available files:', data);
+        } else {
+          console.warn('Potential issue with drawing files storage:', error.message);
+        }
+      } catch (err) {
+        console.error('Error checking drawing files storage:', err);
       }
-      
-      console.log('drawing_files bucket created successfully');
     }
-
-    // Check if mood_jars bucket exists
-    const moodJarsBucketExists = audioBuckets.some(bucket => bucket.name === 'mood_jars');
     
-    if (!moodJarsBucketExists) {
-      console.log('Creating mood_jars bucket...');
-      const { error: moodCreateError } = await supabase.storage.createBucket('mood_jars', {
-        public: true, // Allow public access to files
-        fileSizeLimit: 52428800, // 50MB file size limit
-      });
-      
-      if (moodCreateError) {
-        console.error('Error creating mood_jars bucket:', moodCreateError);
-        throw new Error('mood_jars bucket not found. Please create it in Supabase.');
-      }
-      
-      console.log('mood_jars bucket created successfully');
+    // Check for mood_jars bucket
+    const moodJarBucketExists = buckets?.some(bucket => bucket.id === 'mood_jars');
+    if (!moodJarBucketExists) {
+      console.error('Error: mood_jars bucket not found. Please create it in Supabase.');
+    } else {
+      console.log('mood_jars bucket exists');
     }
-
-    console.log('All storage buckets are set up correctly');
   } catch (error) {
-    console.error('Error setting up storage buckets:', error);
-    throw error;
+    console.error('Error setting up storage:', error);
   }
 }

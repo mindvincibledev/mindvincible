@@ -34,7 +34,15 @@ export type Database = {
           id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "activity_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       emotional_airbnb: {
         Row: {
@@ -88,7 +96,15 @@ export type Database = {
           sound_text?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "emotional_airbnb_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fork_in_road_decisions: {
         Row: {
@@ -169,7 +185,15 @@ export type Database = {
           values_a?: string | null
           values_b?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fork_in_road_decisions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       grounding_responses: {
         Row: {
@@ -205,7 +229,15 @@ export type Database = {
           section_name?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "grounding_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       journal_entries: {
         Row: {
@@ -244,7 +276,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mood_data: {
         Row: {
@@ -274,7 +314,15 @@ export type Database = {
           time_of_day?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "mood_data_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mood_jar_table: {
         Row: {
@@ -295,7 +343,15 @@ export type Database = {
           image_path?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "mood_jar_table_user_id_fkey1"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       simple_hi_challenges: {
         Row: {
@@ -379,7 +435,15 @@ export type Database = {
           who_path?: string | null
           who_stickers?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "simple_hi_challenges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       simple_hi_interactions: {
         Row: {
@@ -424,6 +488,13 @@ export type Database = {
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "simple_hi_challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simple_hi_interactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -507,7 +578,15 @@ export type Database = {
           values_a: string | null
           values_b: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fork_in_road_decisions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
