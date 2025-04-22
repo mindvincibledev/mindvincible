@@ -213,7 +213,7 @@ const ResourcesHub = () => {
               Resources Hub
             </h1>
             <p className="text-black text-lg max-w-2xl mx-auto">
-              All your activities for the week are grouped under Self Awareness!
+              All your activities grouped together
             </p>
           </motion.div>
 
@@ -307,7 +307,7 @@ const ResourcesHub = () => {
                   >
                     <CardContent>
                       <CardDescription className="mb-5 text-base text-gray-700">
-                        Access these activities to increase your self awareness!
+                      Because understanding yourself is the ultimate glow-up!
                       </CardDescription>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {selfAwarenessActivities.map((activity, index) => {
