@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -35,6 +34,7 @@ import ResourcesHub from "./pages/ResourcesHub";
 // Import new dashboard pages
 import ClinicianDashboard from "./pages/ClinicianDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import UserProfile from "./components/UserProfile";
 
 // Update document title to correct app name
 document.title = "M(in)dvincible";
@@ -171,6 +171,13 @@ const AppRoutes = () => {
             <ResourcesHub />
           </ProtectedRoute>
         } />
+        
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <UserProfile />
+          </ProtectedRoute>
+        } />
+        
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
