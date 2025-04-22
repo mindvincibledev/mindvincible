@@ -164,13 +164,11 @@ const ResourcesHub = () => {
       let completedCount = 0;
       selfAwarenessActivities.forEach((activity) => {
         const completed = isActivityCompleted(activity.id);
-        console.log(`Activity ${activity.id} completed: ${completed}`);
         if (completed) completedCount++;
       });
       
       // Update progress percentage
       const progressPercentage = (completedCount / selfAwarenessActivities.length) * 100;
-      console.log(`Completed count: ${completedCount}, Total: ${selfAwarenessActivities.length}, Progress: ${progressPercentage}%`);
       setProgress(progressPercentage);
       
     } catch (error: any) {
