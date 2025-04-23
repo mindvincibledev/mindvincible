@@ -381,53 +381,6 @@ export type Database = {
         }
         Relationships: []
       }
-      simple_hi_interactions: {
-        Row: {
-          challenge_id: string
-          completed_at: string
-          feeling: string | null
-          feeling_path: string | null
-          how_it_went: string | null
-          how_it_went_path: string | null
-          id: string
-          user_id: string
-          who: string | null
-          who_path: string | null
-        }
-        Insert: {
-          challenge_id: string
-          completed_at?: string
-          feeling?: string | null
-          feeling_path?: string | null
-          how_it_went?: string | null
-          how_it_went_path?: string | null
-          id?: string
-          user_id: string
-          who?: string | null
-          who_path?: string | null
-        }
-        Update: {
-          challenge_id?: string
-          completed_at?: string
-          feeling?: string | null
-          feeling_path?: string | null
-          how_it_went?: string | null
-          how_it_went_path?: string | null
-          id?: string
-          user_id?: string
-          who?: string | null
-          who_path?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "simple_hi_interactions_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "simple_hi_challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       users: {
         Row: {
           address: string | null

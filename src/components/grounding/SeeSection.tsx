@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Pencil, Mic, Hand, Type, Save, ArrowLeft } from 'lucide-react';

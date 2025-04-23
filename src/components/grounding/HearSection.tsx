@@ -90,12 +90,12 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
       toast.error("You need to be logged in to save your response");
       return;
     }
-    
+
     try {
       setSaving(true);
       let drawingPath = null;
       let audioPath = null;
-      
+
       // Upload drawing if any
       if (drawingBlob) {
         try {
@@ -103,17 +103,17 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
           // Check if the bucket exists first
           const { data: buckets } = await supabase.storage.listBuckets();
           const groudingDrawingsBucketExists = buckets?.some(bucket => bucket.name === 'grounding_drawings');
-          
+
           if (!groudingDrawingsBucketExists) {
             const { data: newBucket, error: createBucketError } = await supabase.storage.createBucket('grounding_drawings', { 
               public: true 
             });
-            
+
             if (createBucketError) {
               throw new Error(`Failed to create drawing bucket: ${createBucketError.message}`);
             }
           }
-          
+
           const { data: drawingData, error: drawingError } = await supabase
             .storage
             .from('grounding_drawings')
@@ -121,7 +121,7 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
               contentType: 'image/png',
               upsert: true
             });
-            
+
           if (drawingError) throw drawingError;
           drawingPath = drawingData.path;
         } catch (error) {
@@ -129,7 +129,7 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
           toast.error("Failed to upload drawing. Continuing with other data...");
         }
       }
-      
+
       // Upload audio if any
       if (audioBlob) {
         try {
@@ -137,17 +137,17 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
           // Check if the bucket exists first
           const { data: buckets } = await supabase.storage.listBuckets();
           const groundingAudioBucketExists = buckets?.some(bucket => bucket.name === 'grounding_audio');
-          
+
           if (!groundingAudioBucketExists) {
             const { data: newBucket, error: createBucketError } = await supabase.storage.createBucket('grounding_audio', { 
               public: true 
             });
-            
+
             if (createBucketError) {
               throw new Error(`Failed to create audio bucket: ${createBucketError.message}`);
             }
           }
-          
+
           const { data: audioData, error: audioError } = await supabase
             .storage
             .from('grounding_audio')
@@ -155,7 +155,7 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
               contentType: 'audio/webm',
               upsert: true
             });
-            
+
           if (audioError) throw audioError;
           audioPath = audioData.path;
         } catch (error) {
@@ -163,7 +163,7 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
           toast.error("Failed to upload audio. Continuing with other data...");
         }
       }
-      
+
       // Save to database
       const { error } = await supabase
         .from('grounding_responses')
@@ -176,12 +176,12 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
           response_audio_path: audioPath,
           response_selected_items: inputType === 'select' ? selectedObjects : null
         });
-        
+
       if (error) {
         console.error("Database error:", error);
         throw error;
       }
-      
+
       toast.success("Response saved successfully!");
       onComplete();
     } catch (error) {

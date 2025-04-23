@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Hand, Pencil, Mic, Type, Save, ArrowLeft } from 'lucide-react';
@@ -132,7 +131,7 @@ const TouchSection: React.FC<TouchSectionProps> = ({ onComplete, onBack }) => {
         audioPath = audioData.path;
       }
       
-      // Save to database
+      // Save to database (ensure user_id is set)
       const { error } = await supabase
         .from('grounding_responses')
         .insert({
