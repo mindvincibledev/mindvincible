@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -39,11 +40,11 @@ const STICKERS = [
 ];
 
 const Journal = () => {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const [goals, setGoals] = useState<any[]>([]);
   const [incompleteGoals, setIncompleteGoals] = useState<any[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hoveredMoodIndex, setHoveredMoodIndex] = useState<number | null>(null);
   const navigate = useNavigate();
@@ -460,6 +461,7 @@ const Journal = () => {
       setIsSubmitting(false);
     }
   };
+
   const handleSubmit = async () => {
     if (!user?.id || !selectedGoal) return;
 
@@ -610,7 +612,7 @@ const Journal = () => {
     );
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <p className="text-lg text-gray-600">Loading account info...</p>
@@ -657,160 +659,277 @@ const Journal = () => {
                 Set Your First Goal
               </Button>
             </div>
-          ) : (
+          ) : activeSection === 'initial' ? (
             <div className="space-y-6">
-              {activeSection === 'initial' ? (
-                <>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Select Goal to Update</label>
+                <Select
+                  value={selectedGoal}
+                  onValueChange={setSelectedGoal}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose a goal..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {incompleteGoals.map((goal) => (
+                      <SelectItem
+                        key={goal.id}
+                        value={goal.id}
+                        className={`${
+                          goal.challenge_level === 'easy'
+                            ? 'text-[#2AC20E]'
+                            : goal.challenge_level === 'medium'
+                            ? 'text-[#F5DF4D]'
+                            : 'text-[#FC68B3]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Target className="h-4 w-4" />
+                          <span>{goal.goal}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedGoal && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="space-y-6"
+                >
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Select Goal to Update</label>
-                    <Select
-                      value={selectedGoal}
-                      onValueChange={setSelectedGoal}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Choose a goal..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {incompleteGoals.map((goal) => (
-                          <SelectItem
-                            key={goal.id}
-                            value={goal.id}
-                            className={`${
-                              goal.challenge_level === 'easy'
-                                ? 'text-[#2AC20E]'
-                                : goal.challenge_level === 'medium'
-                                ? 'text-[#F5DF4D]'
-                                : 'text-[#FC68B3]'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <Target className="h-4 w-4" />
-                              <span>{goal.goal}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <label className="block text-sm font-medium text-gray-700">Who did you interact with?</label>
+                    <Textarea
+                      value={who}
+                      onChange={(e) => setWho(e.target.value)}
+                      placeholder="Describe the person or situation..."
+                      className="min-h-[80px]"
+                    />
+                    <EmojiSlider
+                      value={whoDifficulty}
+                      onValueChange={setWhoDifficulty}
+                      label="How difficult was the interaction? 🤔"
+                      minEmoji="😓"
+                      middleEmoji="🙂"
+                      maxEmoji="🌟"
+                    />
+                    
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <label htmlFor="who-file" className="cursor-pointer">
+                        <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                          <Image className="w-4 h-4" />
+                          <span>Add Photo</span>
+                        </div>
+                        <input
+                          id="who-file"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileChange(e, 'who')}
+                          className="hidden"
+                        />
+                      </label>
+                      
+                      {isRecordingWho ? (
+                        <button 
+                          onClick={() => stopRecording('who')}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                        >
+                          <MicOff className="w-4 h-4" />
+                          <span>Stop</span>
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => startRecording('who')}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                        >
+                          <Mic className="w-4 h-4" />
+                          <span>Record Audio</span>
+                        </button>
+                      )}
+                      
+                      <button 
+                        onClick={() => openStickerDialog('who')}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                      >
+                        <Smile className="w-4 h-4" />
+                        <span>Add Sticker</span>
+                      </button>
+                    </div>
+                    
+                    {renderFilePreview(whoPreview, 'who')}
+                    {renderStickers(whoStickers)}
                   </div>
 
-                  {selectedGoal && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="space-y-6"
-                    >
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Who did you interact with?</label>
-                        <Textarea
-                          value={who}
-                          onChange={(e) => setWho(e.target.value)}
-                          placeholder="Describe the person or situation..."
-                          className="min-h-[80px]"
-                        />
-                        <EmojiSlider
-                          value={whoDifficulty}
-                          onValueChange={setWhoDifficulty}
-                          label="How difficult was the interaction? 🤔"
-                          minEmoji="😓"
-                          middleEmoji="🙂"
-                          maxEmoji="🌟"
-                        />
-                        
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <label htmlFor="who-file" className="cursor-pointer">
-                            <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
-                              <Image className="w-4 h-4" />
-                              <span>Add Photo</span>
-                            </div>
-                            <input
-                              id="who-file"
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleFileChange(e, 'who')}
-                              className="hidden"
-                            />
-                          </label>
-                          
-                          {isRecordingWho ? (
-                            <button 
-                              onClick={() => stopRecording('who')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
-                            >
-                              <MicOff className="w-4 h-4" />
-                              <span>Stop</span>
-                            </button>
-                          ) : (
-                            <button 
-                              onClick={() => startRecording('who')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
-                            >
-                              <Mic className="w-4 h-4" />
-                              <span>Record Audio</span>
-                            </button>
-                          )}
-                          
-                          <button 
-                            onClick={() => openStickerDialog('who')}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
-                          >
-                            <Smile className="w-4 h-4" />
-                            <span>Add Sticker</span>
-                          </button>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">How did it go?</label>
+                    <Textarea
+                      value={howItWent}
+                      onChange={(e) => setHowItWent(e.target.value)}
+                      placeholder="Share your experience..."
+                      className="min-h-[120px]"
+                    />
+                    <EmojiSlider
+                      value={howItWentRating}
+                      onValueChange={setHowItWentRating}
+                      label="How would you rate the interaction? 🤔"
+                      minEmoji="😓"
+                      middleEmoji="🙂"
+                      maxEmoji="🌟"
+                    />
+                    
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <label htmlFor="howItWent-file" className="cursor-pointer">
+                        <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                          <Image className="w-4 h-4" />
+                          <span>Add Photo</span>
                         </div>
-                        
-                        {renderFilePreview(whoPreview, 'who')}
-                        {renderStickers(whoStickers)}
-                      </div>
+                        <input
+                          id="howItWent-file"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileChange(e, 'howItWent')}
+                          className="hidden"
+                        />
+                      </label>
+                      
+                      {isRecordingHowItWent ? (
+                        <button 
+                          onClick={() => stopRecording('howItWent')}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                        >
+                          <MicOff className="w-4 h-4" />
+                          <span>Stop</span>
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => startRecording('howItWent')}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                        >
+                          <Mic className="w-4 h-4" />
+                          <span>Record Audio</span>
+                        </button>
+                      )}
+                      
+                      <button 
+                        onClick={() => openStickerDialog('howItWent')}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                      >
+                        <Smile className="w-4 h-4" />
+                        <span>Add Sticker</span>
+                      </button>
+                    </div>
+                    
+                    {renderFilePreview(howItWentPreview, 'howItWent')}
+                    {renderStickers(howItWentStickers)}
+                  </div>
 
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">How did it go?</label>
-                        <Textarea
-                          value={howItWent}
-                          onChange={(e) => setHowItWent(e.target.value)}
-                          placeholder="Share your experience..."
-                          className="min-h-[120px]"
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">How did you feel?</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {MOODS.map((mood, idx) => (
+                        <Button
+                          key={mood}
+                          type="button"
+                          variant={feeling === mood ? 'default' : 'outline'}
+                          className={feeling === mood ? 'bg-[#FF8A48] text-white border-none' : ''}
+                          onClick={() => handleMoodSelect(mood)}
+                        >
+                          {mood}
+                        </Button>
+                      ))}
+                    </div>
+                    
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <label htmlFor="feeling-file" className="cursor-pointer">
+                        <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                          <Image className="w-4 h-4" />
+                          <span>Add Photo</span>
+                        </div>
+                        <input
+                          id="feeling-file"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileChange(e, 'feeling')}
+                          className="hidden"
                         />
-                        <EmojiSlider
-                          value={howItWentRating}
-                          onValueChange={setHowItWentRating}
-                          label="How would you rate the interaction? 🤔"
-                          minEmoji="😓"
-                          middleEmoji="🙂"
-                          maxEmoji="🌟"
-                        />
-                        
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <label htmlFor="howItWent-file" className="cursor-pointer">
-                            <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
-                              <Image className="w-4 h-4" />
-                              <span>Add Photo</span>
-                            </div>
-                            <input
-                              id="howItWent-file"
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleFileChange(e, 'howItWent')}
-                              className="hidden"
-                            />
-                          </label>
-                          
-                          {isRecordingHowItWent ? (
-                            <button 
-                              onClick={() => stopRecording('howItWent')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
-                            >
-                              <MicOff className="w-4 h-4" />
-                              <span>Stop</span>
-                            </button>
-                          ) : (
-                            <button 
-                              onClick={() => startRecording('howItWent')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
-                            >
-                              <Mic className="w-4 h-4" />
-                              <span>Record Audio</span>
-                            </button>
-                          )}
-                          
-                          <button 
-                            onClick={() => openSt
+                      </label>
+                      
+                      {isRecordingFeeling ? (
+                        <button 
+                          onClick={() => stopRecording('feeling')}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                        >
+                          <MicOff className="w-4 h-4" />
+                          <span>Stop</span>
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => startRecording('feeling')}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                        >
+                          <Mic className="w-4 h-4" />
+                          <span>Record Audio</span>
+                        </button>
+                      )}
+                      
+                      <button 
+                        onClick={() => openStickerDialog('feeling')}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                      >
+                        <Smile className="w-4 h-4" />
+                        <span>Add Sticker</span>
+                      </button>
+                    </div>
+                    
+                    {renderFilePreview(feelingPreview, 'feeling')}
+                    {renderStickers(feelingStickers)}
+                  </div>
+                  
+                  <div className="mt-6 flex justify-center">
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting || !who || !howItWent || !feeling}
+                      className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white px-8 py-2.5 rounded-full font-semibold hover:opacity-90 transition-all"
+                    >
+                      {isSubmitting ? 'Saving...' : 'Save Progress'}
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          ) : (
+            <ReflectionSection onSubmit={handleReflectionSubmit} isSubmitting={isSubmitting} />
+          )}
+        </div>
+      </Card>
+
+      {/* Sticker selection dialog */}
+      <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Choose a Sticker</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-4 p-4">
+            {STICKERS.map((sticker) => (
+              <button
+                key={sticker.id}
+                onClick={() => addSticker(sticker.emoji || sticker.src)}
+                className="p-3 h-16 flex items-center justify-center bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                {sticker.emoji ? (
+                  <span className="text-2xl">{sticker.emoji}</span>
+                ) : (
+                  <img src={sticker.src} alt={sticker.alt} className="h-10 w-10 object-contain" />
+                )}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
+  );
+};
+
+export default Journal;
