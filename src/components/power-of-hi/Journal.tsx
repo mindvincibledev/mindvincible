@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -13,7 +14,7 @@ import { Star, Trophy, Target, ArrowRight, Mic, MicOff, Upload, Image, Camera, S
 import { ArrowLeft, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 import { ArrowLeft as ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 import { useMoodWheel } from '@/hooks/useMoodWheel';
@@ -39,7 +40,8 @@ const STICKERS = [
 ];
 
 const Journal = () => {
-  const { user, loading } = useAuth();
+  // Fix duplicate loading variable issue
+  const { user, loading: authLoading } = useAuth();
   const [goals, setGoals] = useState<any[]>([]);
   const [incompleteGoals, setIncompleteGoals] = useState<any[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<string>('');
@@ -98,6 +100,13 @@ const Journal = () => {
   const [weeklyCompletedGoals, setWeeklyCompletedGoals] = useState<any[]>([]);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [totalGoals, setTotalGoals] = useState(0);
+
+  // Add state for managing sections
+  const [activeSection, setActiveSection] = React.useState<'initial' | 'reflection'>('initial');
+
+  // Dialog states
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   // Update feeling when mood changes
   useEffect(() => {
@@ -421,8 +430,6 @@ const Journal = () => {
     return publicUrlData.publicUrl;
   };
 
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
   const handleFeedback = async (feedback: string) => {
     if (!user?.id) {
       toast.error("You need to be logged in to complete this activity");
@@ -460,6 +467,7 @@ const Journal = () => {
       setIsSubmitting(false);
     }
   };
+
   const handleSubmit = async () => {
     if (!user?.id || !selectedGoal) return;
 
@@ -569,9 +577,6 @@ const Journal = () => {
     }
   };
 
-  // Add state for managing sections
-  const [activeSection, setActiveSection] = React.useState<'initial' | 'reflection'>('initial');
-
   // Custom handler for selecting a mood directly with the simplified interface
   const handleMoodSelect = (mood: string) => {
     const moodIndex = MOODS.findIndex(m => m === mood);
@@ -617,6 +622,7 @@ const Journal = () => {
       </div>
     );
   }
+  
   if (!user) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -626,191 +632,326 @@ const Journal = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="w-full max-w-4xl mx-auto px-4 space-y-8"
-    >
-      <Card className="p-8 bg-white/95 backdrop-blur-lg shadow-lg rounded-2xl">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-center mb-6">Track Your Progress</h2>
-          
-          <div className="space-y-4 mb-8">
-            <div className="flex justify-between items-center text-sm text-gray-600">
-              <span>This Week's Goal Progress</span>
-              <span>{Math.round(completionPercentage)}%</span>
+    <div className="w-full max-w-4xl mx-auto px-4 space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="p-8 bg-white/95 backdrop-blur-lg shadow-lg rounded-2xl">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-center mb-6">Track Your Progress</h2>
+            
+            <div className="space-y-4 mb-8">
+              <div className="flex justify-between items-center text-sm text-gray-600">
+                <span>This Week's Goal Progress</span>
+                <span>{Math.round(completionPercentage)}%</span>
+              </div>
+              <Progress value={completionPercentage} className="h-2" />
+              <p className="text-center text-sm text-gray-600">
+                {weeklyCompletedGoals.length} goals completed, {incompleteGoals.length} remaining this week
+              </p>
             </div>
-            <Progress value={completionPercentage} className="h-2" />
-            <p className="text-center text-sm text-gray-600">
-              {weeklyCompletedGoals.length} goals completed, {incompleteGoals.length} remaining this week
-            </p>
-          </div>
 
-          {incompleteGoals.length === 0 ? (
-            <div className="text-center space-y-4">
-              <p className="text-gray-600">You've completed all your goals!</p>
-              <Button
-                onClick={() => window.location.href = '/emotional-hacking/power-of-hi?tab=goal'}
-                className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
-              >
-                Set Your First Goal
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {activeSection === 'initial' ? (
-                <>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Select Goal to Update</label>
-                    <Select
-                      value={selectedGoal}
-                      onValueChange={setSelectedGoal}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Choose a goal..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {incompleteGoals.map((goal) => (
-                          <SelectItem
-                            key={goal.id}
-                            value={goal.id}
-                            className={`${
-                              goal.challenge_level === 'easy'
-                                ? 'text-[#2AC20E]'
-                                : goal.challenge_level === 'medium'
-                                ? 'text-[#F5DF4D]'
-                                : 'text-[#FC68B3]'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <Target className="h-4 w-4" />
-                              <span>{goal.goal}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+            {incompleteGoals.length === 0 ? (
+              <div className="text-center space-y-4">
+                <p className="text-gray-600">You've completed all your goals!</p>
+                <Button
+                  onClick={() => window.location.href = '/emotional-hacking/power-of-hi?tab=goal'}
+                  className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
+                >
+                  Set Your First Goal
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {activeSection === 'initial' ? (
+                  <>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">Select Goal to Update</label>
+                      <Select
+                        value={selectedGoal}
+                        onValueChange={setSelectedGoal}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Choose a goal..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {incompleteGoals.map((goal) => (
+                            <SelectItem
+                              key={goal.id}
+                              value={goal.id}
+                              className={`${
+                                goal.challenge_level === 'easy'
+                                  ? 'text-[#2AC20E]'
+                                  : goal.challenge_level === 'medium'
+                                  ? 'text-[#F5DF4D]'
+                                  : 'text-[#FC68B3]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Target className="h-4 w-4" />
+                                <span>{goal.goal}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  {selectedGoal && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="space-y-6"
-                    >
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Who did you interact with?</label>
-                        <Textarea
-                          value={who}
-                          onChange={(e) => setWho(e.target.value)}
-                          placeholder="Describe the person or situation..."
-                          className="min-h-[80px]"
-                        />
-                        <EmojiSlider
-                          value={whoDifficulty}
-                          onValueChange={setWhoDifficulty}
-                          label="How difficult was the interaction? 🤔"
-                          minEmoji="😓"
-                          middleEmoji="🙂"
-                          maxEmoji="🌟"
-                        />
-                        
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <label htmlFor="who-file" className="cursor-pointer">
-                            <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
-                              <Image className="w-4 h-4" />
-                              <span>Add Photo</span>
-                            </div>
-                            <input
-                              id="who-file"
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleFileChange(e, 'who')}
-                              className="hidden"
-                            />
-                          </label>
+                    {selectedGoal && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="space-y-6"
+                      >
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">Who did you interact with?</label>
+                          <Textarea
+                            value={who}
+                            onChange={(e) => setWho(e.target.value)}
+                            placeholder="Describe the person or situation..."
+                            className="min-h-[80px]"
+                          />
+                          <EmojiSlider
+                            value={whoDifficulty}
+                            onValueChange={setWhoDifficulty}
+                            label="How difficult was the interaction? 🤔"
+                            minEmoji="😓"
+                            middleEmoji="🙂"
+                            maxEmoji="🌟"
+                          />
                           
-                          {isRecordingWho ? (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <label htmlFor="who-file" className="cursor-pointer">
+                              <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                                <Image className="w-4 h-4" />
+                                <span>Add Photo</span>
+                              </div>
+                              <input
+                                id="who-file"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileChange(e, 'who')}
+                                className="hidden"
+                              />
+                            </label>
+                            
+                            {isRecordingWho ? (
+                              <button 
+                                onClick={() => stopRecording('who')}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                              >
+                                <MicOff className="w-4 h-4" />
+                                <span>Stop</span>
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={() => startRecording('who')}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                              >
+                                <Mic className="w-4 h-4" />
+                                <span>Record Audio</span>
+                              </button>
+                            )}
+                            
                             <button 
-                              onClick={() => stopRecording('who')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                              onClick={() => openStickerDialog('who')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
                             >
-                              <MicOff className="w-4 h-4" />
-                              <span>Stop</span>
+                              <Smile className="w-4 h-4" />
+                              <span>Add Sticker</span>
                             </button>
-                          ) : (
-                            <button 
-                              onClick={() => startRecording('who')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
-                            >
-                              <Mic className="w-4 h-4" />
-                              <span>Record Audio</span>
-                            </button>
-                          )}
+                          </div>
                           
-                          <button 
-                            onClick={() => openStickerDialog('who')}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
-                          >
-                            <Smile className="w-4 h-4" />
-                            <span>Add Sticker</span>
-                          </button>
+                          {renderFilePreview(whoPreview, 'who')}
+                          {renderStickers(whoStickers)}
                         </div>
-                        
-                        {renderFilePreview(whoPreview, 'who')}
-                        {renderStickers(whoStickers)}
-                      </div>
 
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">How did it go?</label>
-                        <Textarea
-                          value={howItWent}
-                          onChange={(e) => setHowItWent(e.target.value)}
-                          placeholder="Share your experience..."
-                          className="min-h-[120px]"
-                        />
-                        <EmojiSlider
-                          value={howItWentRating}
-                          onValueChange={setHowItWentRating}
-                          label="How would you rate the interaction? 🤔"
-                          minEmoji="😓"
-                          middleEmoji="🙂"
-                          maxEmoji="🌟"
-                        />
-                        
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <label htmlFor="howItWent-file" className="cursor-pointer">
-                            <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
-                              <Image className="w-4 h-4" />
-                              <span>Add Photo</span>
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">How did it go?</label>
+                          <Textarea
+                            value={howItWent}
+                            onChange={(e) => setHowItWent(e.target.value)}
+                            placeholder="Share your experience..."
+                            className="min-h-[120px]"
+                          />
+                          <EmojiSlider
+                            value={howItWentRating}
+                            onValueChange={setHowItWentRating}
+                            label="How would you rate the interaction? 🤔"
+                            minEmoji="😓"
+                            middleEmoji="🙂"
+                            maxEmoji="🌟"
+                          />
+                          
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <label htmlFor="howItWent-file" className="cursor-pointer">
+                              <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                                <Image className="w-4 h-4" />
+                                <span>Add Photo</span>
+                              </div>
+                              <input
+                                id="howItWent-file"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileChange(e, 'howItWent')}
+                                className="hidden"
+                              />
+                            </label>
+                            
+                            {isRecordingHowItWent ? (
+                              <button 
+                                onClick={() => stopRecording('howItWent')}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                              >
+                                <MicOff className="w-4 h-4" />
+                                <span>Stop</span>
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={() => startRecording('howItWent')}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                              >
+                                <Mic className="w-4 h-4" />
+                                <span>Record Audio</span>
+                              </button>
+                            )}
+                            
+                            <button 
+                              onClick={() => openStickerDialog('howItWent')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                            >
+                              <Smile className="w-4 h-4" />
+                              <span>Add Sticker</span>
+                            </button>
+                          </div>
+                          
+                          {renderFilePreview(howItWentPreview, 'howItWent')}
+                          {renderStickers(howItWentStickers)}
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">How did you feel?</label>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                            {MOODS.map((mood) => (
+                              <button
+                                key={mood}
+                                onClick={() => handleMoodSelect(mood)}
+                                className={`px-3 py-2 rounded-lg text-center transition-colors ${feeling === mood ? 'bg-[#3DFDFF]/80 font-medium' : 'bg-gray-100 hover:bg-gray-200'}`}
+                              >
+                                {mood}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          {feeling && (
+                            <div className="mt-4">
+                              <Textarea
+                                value={feeling}
+                                onChange={(e) => setFeeling(e.target.value)}
+                                placeholder="Tell us more about how you felt..."
+                                className="min-h-[80px]"
+                              />
+                              
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                <label htmlFor="feeling-file" className="cursor-pointer">
+                                  <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                                    <Image className="w-4 h-4" />
+                                    <span>Add Photo</span>
+                                  </div>
+                                  <input
+                                    id="feeling-file"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleFileChange(e, 'feeling')}
+                                    className="hidden"
+                                  />
+                                </label>
+                                
+                                {isRecordingFeeling ? (
+                                  <button 
+                                    onClick={() => stopRecording('feeling')}
+                                    className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                                  >
+                                    <MicOff className="w-4 h-4" />
+                                    <span>Stop</span>
+                                  </button>
+                                ) : (
+                                  <button 
+                                    onClick={() => startRecording('feeling')}
+                                    className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                                  >
+                                    <Mic className="w-4 h-4" />
+                                    <span>Record Audio</span>
+                                  </button>
+                                )}
+                                
+                                <button 
+                                  onClick={() => openStickerDialog('feeling')}
+                                  className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                                >
+                                  <Smile className="w-4 h-4" />
+                                  <span>Add Sticker</span>
+                                </button>
+                              </div>
+                              
+                              {renderFilePreview(feelingPreview, 'feeling')}
+                              {renderStickers(feelingStickers)}
                             </div>
-                            <input
-                              id="howItWent-file"
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleFileChange(e, 'howItWent')}
-                              className="hidden"
-                            />
-                          </label>
-                          
-                          {isRecordingHowItWent ? (
-                            <button 
-                              onClick={() => stopRecording('howItWent')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
-                            >
-                              <MicOff className="w-4 h-4" />
-                              <span>Stop</span>
-                            </button>
-                          ) : (
-                            <button 
-                              onClick={() => startRecording('howItWent')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
-                            >
-                              <Mic className="w-4 h-4" />
-                              <span>Record Audio</span>
-                            </button>
                           )}
-                          
-                          <button 
-                            onClick={() => openSt
+                        </div>
+
+                        <div className="pt-4 flex justify-end">
+                          <Button
+                            onClick={handleSubmit}
+                            disabled={isSubmitting || !who || !howItWent || !feeling}
+                            className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] text-white"
+                          >
+                            {isSubmitting ? "Saving..." : "Save & Continue to Reflection"}
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </>
+                ) : (
+                  <ReflectionSection 
+                    onSubmit={handleReflectionSubmit} 
+                    isSubmitting={isSubmitting} 
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </Card>
+      </motion.div>
+
+      {/* Sticker Dialog */}
+      <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Choose a Sticker</DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 p-4">
+            {STICKERS.map((sticker) => (
+              <button
+                key={sticker.id}
+                onClick={() => addSticker(sticker.emoji || sticker.src)}
+                className="p-2 h-14 w-14 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                {sticker.emoji ? (
+                  <span className="text-2xl">{sticker.emoji}</span>
+                ) : (
+                  <img src={sticker.src} alt={sticker.alt} className="h-10 w-10 object-contain" />
+                )}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default Journal;
