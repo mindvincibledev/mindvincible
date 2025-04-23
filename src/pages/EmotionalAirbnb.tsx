@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -27,7 +26,7 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 
 
 const EmotionalAirbnb = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth(); // Add loading state
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,6 +48,21 @@ const EmotionalAirbnb = () => {
   });
   const [showCelebration, setShowCelebration] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+
+  // If still loading auth context, show a loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-lg text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+
+  // Redirect to login if no user
+  if (!user) {
+    navigate('/auth');
+    return null;
+  }
 
   // Save data from the current step
   const handleSaveStep = (type: string, value: string | Blob | null) => {
@@ -173,7 +187,7 @@ const EmotionalAirbnb = () => {
     setShowFeedback(true); // Show feedback dialog after celebration
   };
 
-  // Update handleSubmit to show celebration
+  // Update handleSubmit to include correct user_id
   const handleSubmit = async () => {
     if (!user) {
       toast.error("Not logged in", {
@@ -248,25 +262,25 @@ const EmotionalAirbnb = () => {
       const { error } = await supabase
         .from('emotional_airbnb')
         .insert({
-          user_id: user.id,
+          user_id: user.id, // Always set user_id
           emotion_text: formData.emotionText || null,
           location_in_body_text: formData.locationText || null,
           appearance_description_text: formData.appearanceText || null,
           intensity_description_text: formData.intensityText || null,
-          sound_text: formData.soundText || null, // Changed from sound_description_text to sound_text
+          sound_text: formData.soundText || null,
           message_description_text: formData.messageText || null,
           emotion_drawing_path: emotionDrawingPath,
           location_in_body_drawing_path: locationDrawingPath,
           appearance_drawing_path: appearanceDrawingPath,
           intensity_drawing_path: intensityDrawingPath,
-          sound_drawing_path: soundDrawingPath, // Changed from sound_description_drawing_path to sound_drawing_path
+          sound_drawing_path: soundDrawingPath,
           message_drawing_path: messageDrawingPath
         });
 
       if (error) {
         throw error;
       }
-      
+
       // Show celebration instead of navigating immediately
       setShowFeedback(true);
     } catch (error: any) {
@@ -622,5 +636,4 @@ const EmotionalAirbnb = () => {
     </BackgroundWithEmojis>
   );
 };
-
 export default EmotionalAirbnb;
