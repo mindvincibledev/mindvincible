@@ -112,137 +112,90 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
     toast.info("Reset complete");
   };
 
-  // File upload helper function - completely rewritten for better RLS handling
-  const uploadFile = async (blob: Blob, fileType: string, bucketName: string): Promise<string | null> => {
+  // --- NEW: Helper for uploading a file (image/audio) to a bucket ---
+  const uploadFileToBucket = async (blob: Blob, type: "audio" | "drawing"): Promise<string | null> => {
     if (!user?.id) {
-      toast.error("You must be logged in to upload files");
-      throw new Error("Authentication required");
+      toast.error("You need to be logged in to upload files.");
+      return null;
     }
-
     try {
-      // Create unique filename with user ID to enforce ownership
       const timestamp = Date.now();
-      const fileExtension = fileType === 'image/png' ? 'png' : 'webm';
-      const fileName = `${user.id}/${timestamp}.${fileExtension}`;
-      
-      console.log(`Attempting to upload ${fileType} to ${bucketName}/${fileName}`);
-      
-      // Check if bucket exists before trying to upload
+      let fileName: string;
+      let bucketName: string;
+      let contentType: string;
+
+      if (type === "audio") {
+        bucketName = "grounding_audio";
+        fileName = `smell_section_${user.id}_${timestamp}.webm`;
+        contentType = "audio/webm";
+      } else {
+        bucketName = "grounding_drawings";
+        fileName = `smell_section_${user.id}_${timestamp}.png`;
+        contentType = "image/png";
+      }
+
+      // 1. Check if bucket exists, create if not (as PUBLIC, for consistency)
       const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      
-      if (bucketsError) {
-        console.error("Error checking buckets:", bucketsError);
-        toast.error("Storage system unavailable");
-        throw bucketsError;
+      if (bucketsError) throw bucketsError;
+
+      const hasBucket = buckets?.some(b => b.name === bucketName);
+      if (!hasBucket) {
+        const { error: bucketError } = await supabase.storage.createBucket(bucketName, { public: true });
+        if (bucketError) throw bucketError;
       }
-      
-      const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
-      
-      if (!bucketExists) {
-        console.log(`Creating bucket: ${bucketName}`);
-        
-        // Create the bucket with RLS protections
-        const { error: createBucketError } = await supabase.storage.createBucket(bucketName, {
-          public: false,  // Private bucket requiring authentication
-        });
-        
-        if (createBucketError) {
-          console.error(`Failed to create bucket ${bucketName}:`, createBucketError);
-          toast.error("Could not create storage area");
-          throw createBucketError;
-        }
-      }
-      
-      // Perform the upload
-      const { error: uploadError } = await supabase
+
+      // 2. Upload the file
+      const { data: uploadData, error: uploadError } = await supabase
         .storage
         .from(bucketName)
         .upload(fileName, blob, {
-          contentType: fileType,
+          contentType: contentType,
           upsert: true
         });
-      
-      if (uploadError) {
-        console.error("Upload failed:", uploadError);
-        toast.error("Could not upload file");
-        throw uploadError;
-      }
-      
-      // Get the public URL for the file
-      const { data: urlData } = supabase
-        .storage
-        .from(bucketName)
-        .getPublicUrl(fileName);
-        
-      console.log("File uploaded successfully:", urlData.publicUrl);
-      return urlData.publicUrl;
-      
-    } catch (error: any) {
-      console.error(`Storage operation failed:`, error);
-      toast.error(error.message || "Upload failed");
+
+      if (uploadError) throw uploadError;
+      return uploadData.path;
+    } catch (e: any) {
+      toast.error("Error uploading file: " + (e.message || 'unknown error'));
       return null;
     }
   };
-  
+
+  // --- NEW handleSave method ---
   const handleSave = async () => {
     if (!user?.id) {
       toast.error("You need to be logged in to save your response");
       return;
     }
-    
     if (!isComplete()) {
       toast.error("Please complete the section before saving");
       return;
     }
-    
+    setSaving(true);
+
     try {
-      setSaving(true);
-      
-      // Prepare data based on input type
-      let responseText = null;
-      let drawingUrl = null;
-      let audioUrl = null;
-      let selectedItems = null;
-      
-      switch (inputType) {
-        case "text":
-          responseText = textItems.join(', ');
-          break;
-        
-        case "select":
-          selectedItems = selectedObjects;
-          break;
-        
-        case "draw":
-          if (drawingBlob) {
-            drawingUrl = await uploadFile(drawingBlob, 'image/png', 'grounding_drawings');
-            if (!drawingUrl) {
-              setSaving(false);
-              return;
-            }
-          }
-          break;
-          
-        case "audio":
-          if (audioBlob) {
-            audioUrl = await uploadFile(audioBlob, 'audio/webm', 'grounding_audio');
-            if (!audioUrl) {
-              setSaving(false);
-              return;
-            }
-          }
-          break;
+      let drawingPath: string | null = null;
+      let audioPath: string | null = null;
+      let responseText: string | null = null;
+      let selectedItems: string[] | null = null;
+
+      // Only upload files if selected
+      if (inputType === "draw" && drawingBlob) {
+        drawingPath = await uploadFileToBucket(drawingBlob, "drawing");
+        if (!drawingPath) throw new Error("Image upload failed.");
       }
-      
-      console.log("Preparing database entry with:", {
-        userId: user.id,
-        responseText,
-        drawingUrl,
-        audioUrl,
-        selectedItems
-      });
-      
-      // Save response to database
+      if (inputType === "audio" && audioBlob) {
+        audioPath = await uploadFileToBucket(audioBlob, "audio");
+        if (!audioPath) throw new Error("Audio upload failed.");
+      }
+      if (inputType === "text") {
+        responseText = textItems.join(", ");
+      }
+      if (inputType === "select") {
+        selectedItems = selectedObjects;
+      }
+
+      // Insert to grounding_responses table (only paths, same as other sections)
       const { error } = await supabase
         .from('grounding_responses')
         .insert({
@@ -250,25 +203,19 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
           activity_id: 'grounding-technique',
           section_name: 'smell',
           response_text: responseText,
-          response_drawing_path: drawingUrl,
-          response_audio_path: audioUrl,
+          response_drawing_path: drawingPath,
+          response_audio_path: audioPath,
           response_selected_items: selectedItems
         });
-        
-      if (error) {
-        console.error("Database error:", error);
-        toast.error("Failed to save your response: " + error.message);
-        return;
-      }
-      
-      // Clear local storage cache
+
+      if (error) throw error;
+
       localStorage.removeItem('groundingSmellData');
-      
       toast.success("Your response was saved successfully!");
       onComplete();
-    } catch (error: any) {
-      console.error("Error saving response:", error);
-      toast.error(`Failed to save: ${error.message || "Unknown error"}`);
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Failed to save your response: " + (e.message || "unknown error"));
     } finally {
       setSaving(false);
     }
