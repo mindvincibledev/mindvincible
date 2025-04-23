@@ -55,13 +55,18 @@ const predefinedGoals = [
 ];
 
 const SetGoal: React.FC<SetGoalProps> = ({ onComplete }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [selectedLevel, setSelectedLevel] = useState<string>('');
   const [customGoal, setCustomGoal] = useState('');
   const [selectedGoal, setSelectedGoal] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSaveGoal = async () => {
+    if (!user) {
+      toast.error('You must be logged in to set a goal');
+      return;
+    }
+
     if (!selectedLevel) {
       toast.error('Please select a challenge level');
       return;
@@ -76,7 +81,7 @@ const SetGoal: React.FC<SetGoalProps> = ({ onComplete }) => {
 
     try {
       const { error } = await supabase.from('simple_hi_challenges').insert({
-        user_id: user?.id,
+        user_id: user.id,
         challenge_level: selectedLevel,
         goal: customGoal || selectedGoal,
       });
@@ -92,6 +97,21 @@ const SetGoal: React.FC<SetGoalProps> = ({ onComplete }) => {
       setIsSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <p className="text-lg text-gray-600">Loading account info...</p>
+      </div>
+    );
+  }
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <p className="text-lg text-red-500 font-semibold">Please log in to set and save a goal.</p>
+      </div>
+    );
+  }
 
   return (
     <motion.div
