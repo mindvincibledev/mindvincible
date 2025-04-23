@@ -11,6 +11,7 @@ import BackgroundWithEmojis from "@/components/BackgroundWithEmojis";
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { UserType } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -19,6 +20,27 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
+
+  // Helper to check mood entry for today
+  const checkMoodEntryToday = async (userId: string) => {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
+
+    const { data, error } = await supabase
+      .from('mood_data')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('created_at', startOfDay)
+      .lt('created_at', endOfDay)
+      .limit(1);
+
+    if (error) {
+      console.error("Error checking mood_data:", error);
+      return false;
+    }
+    return Array.isArray(data) && data.length > 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,11 +68,19 @@ const Login = () => {
           break;
         case UserType.Student:
         default:
-          toast({
-            title: "Welcome!",
-            description: "You have successfully logged in.",
-          });
-          navigate('/mood-entry');
+          // Check if the student user has already done mood entry today
+          if (userData) {
+            const hasMoodEntry = await checkMoodEntryToday(userData.id);
+            toast({
+              title: "Welcome!",
+              description: "You have successfully logged in.",
+            });
+            if (hasMoodEntry) {
+              navigate('/home');
+            } else {
+              navigate('/mood-entry');
+            }
+          }
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -79,17 +109,14 @@ const Login = () => {
                 Home
               </Link>
             </div>
-            
             <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
               Welcome Back
             </h2>
-            
             {error && (
               <div className="bg-red-500/20 border border-red-500/50 text-red-700 rounded-md p-3 mb-4">
                 {error}
               </div>
             )}
-            
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <Label htmlFor="email" className="text-gray-700 mb-1.5 block">Email</Label>
