@@ -15,6 +15,7 @@ import { ArrowLeft, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save,
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 import { ArrowLeft as ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useParams, Link, Navigate } from 'react-router-dom';
+
 import { motion } from 'framer-motion';
 import { useMoodWheel } from '@/hooks/useMoodWheel';
 import { v4 as uuidv4 } from 'uuid';
@@ -39,7 +40,7 @@ const STICKERS = [
 ];
 
 const Journal = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const [goals, setGoals] = useState<any[]>([]);
   const [incompleteGoals, setIncompleteGoals] = useState<any[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<string>('');
@@ -107,13 +108,7 @@ const Journal = () => {
   }, [selectedMoodIndex]);
 
   useEffect(() => {
-    if (user) {
-      fetchGoals();
-    } else {
-      setGoals([]);
-      setIncompleteGoals([]);
-      setLoading(false);
-    }
+    fetchGoals();
   }, [user]);
 
   // Show sticker dialog
@@ -153,7 +148,6 @@ const Journal = () => {
     );
   };
 
-  // Enforce authentication before any data fetching or mutation helpers
   const fetchJournalEntries = async () => {
     if (!user?.id) {
       console.error('Cannot fetch entries: No user logged in');
@@ -577,7 +571,7 @@ const Journal = () => {
   };
 
   // Add state for managing sections
-  const [activeSection, setActiveSection] = useState<'initial' | 'reflection'>('initial');
+  const [activeSection, setActiveSection] = React.useState<'initial' | 'reflection'>('initial');
 
   // Custom handler for selecting a mood directly with the simplified interface
   const handleMoodSelect = (mood: string) => {
@@ -617,28 +611,10 @@ const Journal = () => {
     );
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <p className="text-lg text-gray-600">Loading your goals...</p>
-      </div>
-    );
-  }
-  
-  if (!user) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <Card className="p-8 bg-white/95 rounded-2xl text-center shadow-lg max-w-sm mx-auto">
-          <p className="text-red-500 text-lg font-semibold mb-4">
-            You must be logged in to track and update your Power of Hi progress.
-          </p>
-          <Button
-            className="bg-gradient-to-r from-[#FC68B3] to-[#3DFDFF] text-white px-6 py-3 rounded-full font-medium"
-            onClick={() => navigate("/login")}
-          >
-            Log In to Access My Journal
-          </Button>
-        </Card>
       </div>
     );
   }
@@ -844,96 +820,93 @@ const Journal = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">How are you feeling?</label>
-                        <div className="grid gap-4">
-                          <div className="flex flex-wrap gap-2 justify-center">
-                            {MOODS.map((mood, index) => (
-                              <button
-                                key={mood}
-                                type="button"
-                                onClick={() => handleMoodSelect(mood)}
-                                onMouseEnter={() => setHoveredMoodIndex(index)}
-                                onMouseLeave={() => setHoveredMoodIndex(null)}
-                                className={`px-4 py-2 rounded-full transition-all ${
-                                  feeling === mood
-                                    ? 'bg-[#FC68B3] text-white'
-                                    : 'bg-[#D5D5F1] hover:bg-[#FC68B3]/30'
-                                }`}
-                              >
-                                {mood}
-                              </button>
-                            ))}
-                          </div>
-                          
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            <label htmlFor="feeling-file" className="cursor-pointer">
-                              <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
-                                <Image className="w-4 h-4" />
-                                <span>Add Photo</span>
-                              </div>
-                              <input
-                                id="feeling-file"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleFileChange(e, 'feeling')}
-                                className="hidden"
-                              />
-                            </label>
-                            
-                            {isRecordingFeeling ? (
-                              <button 
-                                onClick={() => stopRecording('feeling')}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
-                              >
-                                <MicOff className="w-4 h-4" />
-                                <span>Stop</span>
-                              </button>
-                            ) : (
-                              <button 
-                                onClick={() => startRecording('feeling')}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
-                              >
-                                <Mic className="w-4 h-4" />
-                                <span>Record Audio</span>
-                              </button>
-                            )}
-                            
-                            <button 
-                              onClick={() => openStickerDialog('feeling')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
-                            >
-                              <Smile className="w-4 h-4" />
-                              <span>Add Sticker</span>
-                            </button>
-                          </div>
-                          
-                          {renderFilePreview(feelingPreview, 'feeling')}
-                          {renderStickers(feelingStickers)}
+                        <label className="block text-sm font-medium text-gray-700">How did it make you feel?</label>
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <MoodSelector
+                            moods={MOODS}
+                            selectedMoodIndex={selectedMoodIndex}
+                            onMoodSelect={setSelectedMoodIndex}
+                            onChangeMood={changeMood}
+                            wheelRef={wheelRef}
+                            handleTouchStart={handleTouchStart}
+                            handleTouchMove={handleTouchMove}
+                            handleTouchEnd={handleTouchEnd}
+                            onMoodHover={setHoveredMoodIndex}
+                            onSelect={handleMoodSelect}
+                            selectedMood={feeling}
+                          />
                         </div>
+                        
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <label htmlFor="feeling-file" className="cursor-pointer">
+                            <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                              <Image className="w-4 h-4" />
+                              <span>Add Image</span>
+                            </div>
+                            <input
+                              id="feeling-file"
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleFileChange(e, 'feeling')}
+                              className="hidden"
+                            />
+                          </label>
+                          
+                          {isRecordingFeeling ? (
+                            <button 
+                              onClick={() => stopRecording('feeling')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                            >
+                              <MicOff className="w-4 h-4" />
+                              <span>Stop</span>
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => startRecording('feeling')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                            >
+                              <Mic className="w-4 h-4" />
+                              <span>Record Audio</span>
+                            </button>
+                          )}
+                          
+                          <button 
+                            onClick={() => openStickerDialog('feeling')}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                          >
+                            <Smile className="w-4 h-4" />
+                            <span>Add Sticker</span>
+                          </button>
+                        </div>
+                        
+                        {renderFilePreview(feelingPreview, 'feeling')}
+                        {renderStickers(feelingStickers)}
                       </div>
 
-                      <div className="mt-8 flex justify-center">
-                        <Button
-                          onClick={handleSubmit}
-                          disabled={isSubmitting || !who || !howItWent || !feeling}
-                          className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isSubmitting ? (
-                            "Saving..."
-                          ) : (
-                            <>
-                              Save My Progress
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </>
-                          )}
-                        </Button>
-                      </div>
+                      <Button
+                        onClick={handleSubmit}
+
+                        disabled={isSubmitting || !who || !howItWent || !feeling}
+                        className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
+                      >
+                        {isSubmitting ? (
+                          "Saving..."
+                        ) : (
+                          <>
+                            Save Progress
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </>
+                        )}
+                      </Button>
                     </motion.div>
                   )}
                 </>
               ) : (
                 <ReflectionSection 
-                  onSubmit={handleReflectionSubmit} 
+                  onSubmit={() => {
+                    handleReflectionSubmit;
+                    setShowFeedback(true);
+                  }}
                   isSubmitting={isSubmitting} 
                 />
               )}
@@ -941,23 +914,62 @@ const Journal = () => {
           )}
         </div>
       </Card>
+      <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
+          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                How was your experience?
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-3 gap-4 py-10 px-4">
+              <Button 
+                onClick={() => handleFeedback('positive')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👍</div>
+                <span>Helpful</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('neutral')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">😐</div>
+                <span>Neutral</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('negative')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👎</div>
+                <span>Not helpful</span>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
+      {/* Sticker Dialog */}
       <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Choose a Sticker</DialogTitle>
+            <DialogTitle>Select a Sticker</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-4 py-4">
-            {STICKERS.map((sticker) => (
+          <div className="grid grid-cols-3 gap-4 p-4">
+            {STICKERS.map(sticker => (
               <button
                 key={sticker.id}
                 onClick={() => addSticker(sticker.emoji || sticker.src)}
-                className="flex items-center justify-center h-16 w-16 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+                className="p-3 bg-gray-50 hover:bg-gray-100 rounded-lg flex items-center justify-center transition-colors"
               >
                 {sticker.emoji ? (
                   <span className="text-3xl">{sticker.emoji}</span>
                 ) : (
-                  <img src={sticker.src} alt={sticker.alt} className="h-12 w-12 object-contain" />
+                  <img src={sticker.src} alt={sticker.alt} className="h-10 w-10 object-contain" />
                 )}
               </button>
             ))}
