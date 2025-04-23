@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -55,34 +54,33 @@ const predefinedGoals = [
 ];
 
 const SetGoal: React.FC<SetGoalProps> = ({ onComplete }) => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [selectedLevel, setSelectedLevel] = useState<string>('');
   const [customGoal, setCustomGoal] = useState('');
   const [selectedGoal, setSelectedGoal] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSaveGoal = async () => {
+    if (!user?.id) {
+      toast.error('You must be logged in to set a goal.');
+      return;
+    }
     if (!selectedLevel) {
       toast.error('Please select a challenge level');
       return;
     }
-
     if (!selectedGoal && !customGoal) {
       toast.error('Please set a goal');
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       const { error } = await supabase.from('simple_hi_challenges').insert({
-        user_id: user?.id,
+        user_id: user.id,
         challenge_level: selectedLevel,
         goal: customGoal || selectedGoal,
       });
-
       if (error) throw error;
-
       toast.success('Goal saved successfully!');
       onComplete();
     } catch (error) {
@@ -92,6 +90,32 @@ const SetGoal: React.FC<SetGoalProps> = ({ onComplete }) => {
       setIsSubmitting(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[300px]">
+        <span className="text-gray-600">Loading...</span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center min-h-[250px]">
+        <Card className="p-8 bg-white/95 rounded-2xl text-center shadow-lg max-w-sm mx-auto">
+          <p className="text-red-500 text-lg font-semibold mb-4">
+            You must be logged in to set and save Power of Hi goals.
+          </p>
+          <Button
+            className="bg-gradient-to-r from-[#FC68B3] to-[#3DFDFF] text-white px-6 py-3 rounded-full font-medium"
+            onClick={() => window.location.href = "/login"}
+          >
+            Log In to Set Goal
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <motion.div
