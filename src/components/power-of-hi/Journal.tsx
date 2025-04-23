@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -97,20 +98,6 @@ const Journal = () => {
   const [weeklyCompletedGoals, setWeeklyCompletedGoals] = useState<any[]>([]);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [totalGoals, setTotalGoals] = useState(0);
-
-  // Update: Load selected goal's existing slider values when selected
-  useEffect(() => {
-    if (!selectedGoal || !incompleteGoals.length) return;
-    const goal = incompleteGoals.find((g) => g.id === selectedGoal);
-    if (goal) {
-      setWho(goal.who || "");
-      setHowItWent(goal.how_it_went || "");
-      setFeeling(goal.feeling || "");
-      setWhoDifficulty([goal.who_difficulty ?? 5]);
-      setHowItWentRating([goal.how_it_went_rating ?? 5]);
-      // Set stickers and other files if you want, or keep defaults for now
-    }
-  }, [selectedGoal, incompleteGoals]);
 
   // Update feeling when mood changes
   useEffect(() => {
