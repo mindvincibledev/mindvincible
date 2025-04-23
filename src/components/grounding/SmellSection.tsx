@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -115,38 +116,62 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
   // File upload helper function
   const uploadFile = async (blob: Blob, fileName: string, contentType: string, bucketName: string) => {
     try {
-      // Create the bucket if it doesn't exist
-      const { data: buckets } = await supabase.storage.listBuckets();
+      if (!user?.id) {
+        throw new Error("User not authenticated");
+      }
+
+      console.log("Uploading file with user ID:", user.id);
+      
+      // Check if the bucket exists before uploading
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      
+      if (bucketsError) {
+        console.error("Error listing buckets:", bucketsError);
+        throw bucketsError;
+      }
+      
       const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
       
       if (!bucketExists) {
+        console.log(`Bucket ${bucketName} does not exist, creating...`);
         const { error: bucketError } = await supabase.storage.createBucket(bucketName, { 
-          public: true 
+          public: false // Set to false for RLS protection
         });
         
         if (bucketError) {
           console.error(`Error creating bucket ${bucketName}:`, bucketError);
           throw bucketError;
         }
+        console.log(`Bucket ${bucketName} created successfully`);
       }
+
+      // Prepend user ID to filename to avoid collisions and enforce RLS
+      const secureFileName = `${user.id}/${fileName}`;
+      console.log(`Uploading file to ${bucketName}/${secureFileName}`);
 
       // Upload the file
       const { data, error } = await supabase
         .storage
         .from(bucketName)
-        .upload(fileName, blob, {
+        .upload(secureFileName, blob, {
           contentType,
           upsert: true
         });
         
-      if (error) throw error;
+      if (error) {
+        console.error(`Upload error for ${bucketName}/${secureFileName}:`, error);
+        throw error;
+      }
+      
+      console.log("Upload successful:", data);
       
       // Get public URL
       const { data: publicUrlData } = supabase
         .storage
         .from(bucketName)
-        .getPublicUrl(fileName);
+        .getPublicUrl(secureFileName);
         
+      console.log("Public URL:", publicUrlData.publicUrl);
       return publicUrlData.publicUrl;
     } catch (error) {
       console.error(`Error in uploadFile (${bucketName}):`, error);
@@ -186,7 +211,7 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
         case "draw":
           if (drawingBlob) {
             try {
-              const fileName = `smell_drawing_${user.id}_${Date.now()}.png`;
+              const fileName = `smell_drawing_${Date.now()}.png`;
               drawingUrl = await uploadFile(drawingBlob, fileName, 'image/png', 'grounding_drawings');
               console.log("Drawing uploaded:", drawingUrl);
             } catch (error) {
@@ -201,7 +226,7 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
         case "audio":
           if (audioBlob) {
             try {
-              const fileName = `smell_audio_${user.id}_${Date.now()}.webm`;
+              const fileName = `smell_audio_${Date.now()}.webm`;
               audioUrl = await uploadFile(audioBlob, fileName, 'audio/webm', 'grounding_audio');
               console.log("Audio uploaded:", audioUrl);
             } catch (error) {
