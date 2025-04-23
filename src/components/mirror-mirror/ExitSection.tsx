@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,7 +19,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -49,7 +47,7 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
     try {
       setIsSubmitting(true);
       
-      // Record activity completion in the database
+      // Always use user_id: user.id! RLS enforced on inserts.
       const { error } = await supabase
         .from('activity_completions')
         .insert({
@@ -95,6 +93,7 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
                 onClick={() => handleFeedback('positive')} 
                 variant="outline" 
                 className="flex flex-col items-center p-4 hover:bg-green-50 hover:border-green-200 transition-colors h-auto"
+                disabled={isSubmitting}
               >
                 <div className="text-3xl mb-2">👍</div>
                 <span>Helpful</span>
@@ -104,6 +103,7 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
                 onClick={() => handleFeedback('neutral')} 
                 variant="outline" 
                 className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+                disabled={isSubmitting}
               >
                 <div className="text-3xl mb-2">😐</div>
                 <span>Neutral</span>
@@ -113,6 +113,7 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
                 onClick={() => handleFeedback('negative')} 
                 variant="outline" 
                 className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+                disabled={isSubmitting}
               >
                 <div className="text-3xl mb-2">👎</div>
                 <span>Not helpful</span>

@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, ChevronDown, ChevronUp, Layers } from 'lucide-react'; // Changed Layer to Layers
+import { User, ChevronDown, ChevronUp, Layers } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -102,7 +101,7 @@ const ResourcesHub = () => {
     if (user?.id) {
       fetchWeeklyCompletions();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchWeeklyCompletions = async () => {
@@ -125,6 +124,7 @@ const ResourcesHub = () => {
       setWeekStartDate(startOfWeek);
       setWeekEndDate(endOfWeek);
 
+      // Using strict per-user access -- enforce RLS by always adding `eq('user_id', user.id)`
       const { data: completions, error } = await supabase
         .from('activity_completions')
         .select('*')
