@@ -1,4 +1,4 @@
-<lov-code>
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -15,7 +15,6 @@ import { ArrowLeft, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save,
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 import { ArrowLeft as ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useParams, Link, Navigate } from 'react-router-dom';
-
 import { motion } from 'framer-motion';
 import { useMoodWheel } from '@/hooks/useMoodWheel';
 import { v4 as uuidv4 } from 'uuid';
@@ -578,7 +577,7 @@ const Journal = () => {
   };
 
   // Add state for managing sections
-  const [activeSection, setActiveSection] = React.useState<'initial' | 'reflection'>('initial');
+  const [activeSection, setActiveSection] = useState<'initial' | 'reflection'>('initial');
 
   // Custom handler for selecting a mood directly with the simplified interface
   const handleMoodSelect = (mood: string) => {
@@ -625,6 +624,7 @@ const Journal = () => {
       </div>
     );
   }
+  
   if (!user) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -815,4 +815,157 @@ const Journal = () => {
                           {isRecordingHowItWent ? (
                             <button 
                               onClick={() => stopRecording('howItWent')}
-                              className="flex items-center gap-1 px-
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                            >
+                              <MicOff className="w-4 h-4" />
+                              <span>Stop</span>
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => startRecording('howItWent')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                            >
+                              <Mic className="w-4 h-4" />
+                              <span>Record Audio</span>
+                            </button>
+                          )}
+                          
+                          <button 
+                            onClick={() => openStickerDialog('howItWent')}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                          >
+                            <Smile className="w-4 h-4" />
+                            <span>Add Sticker</span>
+                          </button>
+                        </div>
+                        
+                        {renderFilePreview(howItWentPreview, 'howItWent')}
+                        {renderStickers(howItWentStickers)}
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">How are you feeling?</label>
+                        <div className="grid gap-4">
+                          <div className="flex flex-wrap gap-2 justify-center">
+                            {MOODS.map((mood, index) => (
+                              <button
+                                key={mood}
+                                type="button"
+                                onClick={() => handleMoodSelect(mood)}
+                                onMouseEnter={() => setHoveredMoodIndex(index)}
+                                onMouseLeave={() => setHoveredMoodIndex(null)}
+                                className={`px-4 py-2 rounded-full transition-all ${
+                                  feeling === mood
+                                    ? 'bg-[#FC68B3] text-white'
+                                    : 'bg-[#D5D5F1] hover:bg-[#FC68B3]/30'
+                                }`}
+                              >
+                                {mood}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <label htmlFor="feeling-file" className="cursor-pointer">
+                              <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                                <Image className="w-4 h-4" />
+                                <span>Add Photo</span>
+                              </div>
+                              <input
+                                id="feeling-file"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileChange(e, 'feeling')}
+                                className="hidden"
+                              />
+                            </label>
+                            
+                            {isRecordingFeeling ? (
+                              <button 
+                                onClick={() => stopRecording('feeling')}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                              >
+                                <MicOff className="w-4 h-4" />
+                                <span>Stop</span>
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={() => startRecording('feeling')}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                              >
+                                <Mic className="w-4 h-4" />
+                                <span>Record Audio</span>
+                              </button>
+                            )}
+                            
+                            <button 
+                              onClick={() => openStickerDialog('feeling')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                            >
+                              <Smile className="w-4 h-4" />
+                              <span>Add Sticker</span>
+                            </button>
+                          </div>
+                          
+                          {renderFilePreview(feelingPreview, 'feeling')}
+                          {renderStickers(feelingStickers)}
+                        </div>
+                      </div>
+
+                      <div className="mt-8 flex justify-center">
+                        <Button
+                          onClick={handleSubmit}
+                          disabled={isSubmitting || !who || !howItWent || !feeling}
+                          className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isSubmitting ? (
+                            "Saving..."
+                          ) : (
+                            <>
+                              Save My Progress
+                              <ArrowRight className="ml-2 h-4 w-4" />
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
+                </>
+              ) : (
+                <ReflectionSection 
+                  onSubmit={handleReflectionSubmit} 
+                  isSubmitting={isSubmitting} 
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </Card>
+
+      <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Choose a Sticker</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-3 md:grid-cols-5 gap-4 py-4">
+            {STICKERS.map((sticker) => (
+              <button
+                key={sticker.id}
+                onClick={() => addSticker(sticker.emoji || sticker.src)}
+                className="flex items-center justify-center h-16 w-16 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+              >
+                {sticker.emoji ? (
+                  <span className="text-3xl">{sticker.emoji}</span>
+                ) : (
+                  <img src={sticker.src} alt={sticker.alt} className="h-12 w-12 object-contain" />
+                )}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
+  );
+};
+
+export default Journal;
