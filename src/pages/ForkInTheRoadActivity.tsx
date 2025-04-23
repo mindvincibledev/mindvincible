@@ -59,12 +59,27 @@ const ForkInTheRoadActivity = () => {
   const [loadingPastDecisions, setLoadingPastDecisions] = useState(false);
 
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   
   const [editingDecision, setEditingDecision] = useState<any>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [decisionToDelete, setDecisionToDelete] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("make-decision");
+
+  // If still loading auth context, show a loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-lg text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+
+  // Redirect to login if no user
+  if (!user) {
+    navigate('/auth');
+    return null;
+  }
 
   // Fetch past decisions when component loads
   useEffect(() => {
@@ -166,15 +181,13 @@ const ForkInTheRoadActivity = () => {
     
     try {
       setIsSubmitting(true);
-      
-      console.log("Preparing to save decision with selection:", selection);
-      
-      // Include the most up-to-date decision data INCLUDING the selection
+
+      // Always attach user_id so RLS permits the action
       const fullDecisionData = { ...decisionData, selection };
-      console.log("Full decision data to save:", fullDecisionData);
-      
+
       const dataToSave = {
-        user_id: user.id,
+        ...fullDecisionData,
+        user_id: user.id, // Always set user_id
         choice: fullDecisionData.choice,
         consideration_path: fullDecisionData.consideration_path,
         other_path: fullDecisionData.other_path,
@@ -199,13 +212,13 @@ const ForkInTheRoadActivity = () => {
       
       let result;
       
-      // If we're editing, update the existing decision
+      // If we're editing, update existing decision owned by user
       if (editingDecision) {
-        console.log("Updating existing decision:", editingDecision.decision_id);
         const { data, error } = await supabase
           .from('fork_in_road_decisions')
           .update(dataToSave)
           .eq('decision_id', editingDecision.decision_id)
+          .eq('user_id', user.id) // Only update if user matches!
           .select();
           
         if (error) throw error;
@@ -213,8 +226,7 @@ const ForkInTheRoadActivity = () => {
         toast.success("Your decision has been updated!");
         setEditingDecision(null);
       } else {
-        // Otherwise insert a new decision
-        console.log("Creating new decision");
+        // Insert new decision owned by this user
         const { data, error } = await supabase
           .from('fork_in_road_decisions')
           .insert(dataToSave)
@@ -349,14 +361,16 @@ const ForkInTheRoadActivity = () => {
     setActiveTab("make-decision");
   };
 
+  // Only allow delete if the logged-in user owns the decision
   const handleDeleteDecision = async (decision: any) => {
     if (!user) return;
-    
+
     try {
       const { error } = await supabase
         .from('fork_in_road_decisions')
         .delete()
-        .eq('decision_id', decision.decision_id);
+        .eq('decision_id', decision.decision_id)
+        .eq('user_id', user.id); // Only delete if user matches!
 
       if (error) {
         console.error('Error deleting decision:', error);
@@ -368,8 +382,7 @@ const ForkInTheRoadActivity = () => {
       fetchPastDecisions();
       setDeleteConfirmOpen(false);
       setDecisionToDelete(null);
-      
-      // After successful deletion, redirect to resources hub
+
       navigate('/resources-hub');
     } catch (error: any) {
       console.error('Exception deleting decision:', error);
