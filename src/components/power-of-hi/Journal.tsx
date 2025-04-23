@@ -21,7 +21,19 @@ import { v4 as uuidv4 } from 'uuid';
 import ReflectionSection, { ReflectionData } from './ReflectionSection';
 import EmojiSlider from '@/components/ui/EmojiSlider';
 import { startOfWeek, endOfWeek } from 'date-fns';
-import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
+
+import {  GitFork, Edit, Trash2 } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 
 const MOODS = ["Happy", "Excited", "Proud", "Confident", "Nervous", "Awkward", "Uncomfortable", "Scared"];
 
@@ -939,7 +951,7 @@ const Journal = () => {
                 </>
               ) : (
                 <ReflectionSection 
-                  onSubmit={handleReflectionSubmit}
+                  onSubmit={() => {setShowFeedback(true);handleReflectionSubmit;}}
                   isSubmitting={isSubmitting} 
                 />
               )}
