@@ -15,7 +15,6 @@ import { ArrowLeft, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save,
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 import { ArrowLeft as ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useParams, Link, Navigate } from 'react-router-dom';
-
 import { motion } from 'framer-motion';
 import { useMoodWheel } from '@/hooks/useMoodWheel';
 import { v4 as uuidv4 } from 'uuid';
@@ -108,7 +107,11 @@ const Journal = () => {
   }, [selectedMoodIndex]);
 
   useEffect(() => {
-    fetchGoals();
+    if (user) {
+      fetchGoals();
+    } else {
+      setLoading(false);
+    }
   }, [user]);
 
   // Show sticker dialog
@@ -193,6 +196,7 @@ const Journal = () => {
     if (!user?.id) return;
 
     try {
+      setLoading(true);
       // Get the start and end of the current week
       const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }); // Start from Monday
       const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
@@ -461,8 +465,12 @@ const Journal = () => {
       setIsSubmitting(false);
     }
   };
+  
   const handleSubmit = async () => {
-    if (!user?.id || !selectedGoal) return;
+    if (!user?.id || !selectedGoal) {
+      toast.error("You need to be logged in and select a goal to proceed");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -483,7 +491,7 @@ const Journal = () => {
         feelingPath = await uploadFile(feelingFile, 'feeling');
       }
       
-      // Fix: Convert string arrays to either string or null
+      // Convert string arrays to either string or null
       const whoStickersValue = whoStickers.length > 0 ? JSON.stringify(whoStickers) : null;
       const howItWentStickersValue = howItWentStickers.length > 0 ? JSON.stringify(howItWentStickers) : null;
       const feelingStickersValue = feelingStickers.length > 0 ? JSON.stringify(feelingStickers) : null;
@@ -524,7 +532,10 @@ const Journal = () => {
   };
 
   const handleReflectionSubmit = async (reflectionData: ReflectionData) => {
-    if (!user?.id || !selectedGoal) return;
+    if (!user?.id || !selectedGoal) {
+      toast.error("You need to be logged in and select a goal to proceed");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -544,7 +555,9 @@ const Journal = () => {
         .eq('id', selectedGoal)
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       toast.success('Goal completed successfully! This goal is now marked as complete and cannot be updated further.');
       
@@ -564,7 +577,7 @@ const Journal = () => {
       setActiveSection('initial');
     } catch (error: any) {
       console.error('Error saving reflection:', error);
-      toast.error('Failed to save reflection');
+      toast.error('Failed to save reflection: ' + (error.message || "Unknown error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -616,6 +629,30 @@ const Journal = () => {
       <div className="flex justify-center items-center min-h-[400px]">
         <p className="text-lg text-gray-600">Loading your goals...</p>
       </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-4xl mx-auto px-4 space-y-8"
+      >
+        <Card className="p-8 bg-white/95 backdrop-blur-lg shadow-lg rounded-2xl">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold mb-4">Authentication Required</h2>
+            <p className="text-gray-600 mb-6">Please sign in to track your Power of Hi progress.</p>
+            <Button 
+              onClick={() => window.location.href = '/login'}
+              className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
+            >
+              Sign In
+            </Button>
+          </div>
+        </Card>
+      </motion.div>
     );
   }
 
@@ -885,7 +922,6 @@ const Journal = () => {
 
                       <Button
                         onClick={handleSubmit}
-
                         disabled={isSubmitting || !who || !howItWent || !feeling}
                         className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
                       >
@@ -903,10 +939,7 @@ const Journal = () => {
                 </>
               ) : (
                 <ReflectionSection 
-                  onSubmit={() => {
-                    handleReflectionSubmit;
-                    setShowFeedback(true);
-                  }}
+                  onSubmit={handleReflectionSubmit}
                   isSubmitting={isSubmitting} 
                 />
               )}
@@ -914,7 +947,7 @@ const Journal = () => {
           )}
         </div>
       </Card>
-      <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
+      <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
           <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
             <DialogHeader>
               <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">

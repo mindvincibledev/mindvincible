@@ -61,6 +61,31 @@ const SetGoal: React.FC<SetGoalProps> = ({ onComplete }) => {
   const [selectedGoal, setSelectedGoal] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Ensure user is authenticated before allowing goal setting
+  if (!user) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-4xl mx-auto px-4 space-y-8"
+      >
+        <Card className="p-8 bg-white/95 backdrop-blur-lg shadow-lg rounded-2xl">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold mb-4">Authentication Required</h2>
+            <p className="text-gray-600 mb-6">Please sign in to set your goals for the Power of Hi activity.</p>
+            <Button 
+              onClick={() => window.location.href = '/login'}
+              className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
+            >
+              Sign In
+            </Button>
+          </div>
+        </Card>
+      </motion.div>
+    );
+  }
+
   const handleSaveGoal = async () => {
     if (!selectedLevel) {
       toast.error('Please select a challenge level');
@@ -72,11 +97,16 @@ const SetGoal: React.FC<SetGoalProps> = ({ onComplete }) => {
       return;
     }
 
+    if (!user) {
+      toast.error('You must be logged in to save a goal');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const { error } = await supabase.from('simple_hi_challenges').insert({
-        user_id: user?.id,
+        user_id: user.id,
         challenge_level: selectedLevel,
         goal: customGoal || selectedGoal,
       });
