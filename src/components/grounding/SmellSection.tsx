@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -113,69 +112,75 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
     toast.info("Reset complete");
   };
 
-  // File upload helper function
-  const uploadFile = async (blob: Blob, fileName: string, contentType: string, bucketName: string) => {
-    try {
-      if (!user?.id) {
-        throw new Error("User not authenticated");
-      }
+  // File upload helper function - completely rewritten for better RLS handling
+  const uploadFile = async (blob: Blob, fileType: string, bucketName: string): Promise<string | null> => {
+    if (!user?.id) {
+      toast.error("You must be logged in to upload files");
+      throw new Error("Authentication required");
+    }
 
-      console.log("Uploading file with user ID:", user.id);
+    try {
+      // Create unique filename with user ID to enforce ownership
+      const timestamp = Date.now();
+      const fileExtension = fileType === 'image/png' ? 'png' : 'webm';
+      const fileName = `${user.id}/${timestamp}.${fileExtension}`;
       
-      // Check if the bucket exists before uploading
+      console.log(`Attempting to upload ${fileType} to ${bucketName}/${fileName}`);
+      
+      // Check if bucket exists before trying to upload
       const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
       
       if (bucketsError) {
-        console.error("Error listing buckets:", bucketsError);
+        console.error("Error checking buckets:", bucketsError);
+        toast.error("Storage system unavailable");
         throw bucketsError;
       }
       
       const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
       
       if (!bucketExists) {
-        console.log(`Bucket ${bucketName} does not exist, creating...`);
-        const { error: bucketError } = await supabase.storage.createBucket(bucketName, { 
-          public: false // Set to false for RLS protection
+        console.log(`Creating bucket: ${bucketName}`);
+        
+        // Create the bucket with RLS protections
+        const { error: createBucketError } = await supabase.storage.createBucket(bucketName, {
+          public: false,  // Private bucket requiring authentication
         });
         
-        if (bucketError) {
-          console.error(`Error creating bucket ${bucketName}:`, bucketError);
-          throw bucketError;
+        if (createBucketError) {
+          console.error(`Failed to create bucket ${bucketName}:`, createBucketError);
+          toast.error("Could not create storage area");
+          throw createBucketError;
         }
-        console.log(`Bucket ${bucketName} created successfully`);
       }
-
-      // Prepend user ID to filename to avoid collisions and enforce RLS
-      const secureFileName = `${user.id}/${fileName}`;
-      console.log(`Uploading file to ${bucketName}/${secureFileName}`);
-
-      // Upload the file
-      const { data, error } = await supabase
+      
+      // Perform the upload
+      const { error: uploadError } = await supabase
         .storage
         .from(bucketName)
-        .upload(secureFileName, blob, {
-          contentType,
+        .upload(fileName, blob, {
+          contentType: fileType,
           upsert: true
         });
-        
-      if (error) {
-        console.error(`Upload error for ${bucketName}/${secureFileName}:`, error);
-        throw error;
+      
+      if (uploadError) {
+        console.error("Upload failed:", uploadError);
+        toast.error("Could not upload file");
+        throw uploadError;
       }
       
-      console.log("Upload successful:", data);
-      
-      // Get public URL
-      const { data: publicUrlData } = supabase
+      // Get the public URL for the file
+      const { data: urlData } = supabase
         .storage
         .from(bucketName)
-        .getPublicUrl(secureFileName);
+        .getPublicUrl(fileName);
         
-      console.log("Public URL:", publicUrlData.publicUrl);
-      return publicUrlData.publicUrl;
-    } catch (error) {
-      console.error(`Error in uploadFile (${bucketName}):`, error);
-      throw error;
+      console.log("File uploaded successfully:", urlData.publicUrl);
+      return urlData.publicUrl;
+      
+    } catch (error: any) {
+      console.error(`Storage operation failed:`, error);
+      toast.error(error.message || "Upload failed");
+      return null;
     }
   };
   
@@ -210,13 +215,8 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
         
         case "draw":
           if (drawingBlob) {
-            try {
-              const fileName = `smell_drawing_${Date.now()}.png`;
-              drawingUrl = await uploadFile(drawingBlob, fileName, 'image/png', 'grounding_drawings');
-              console.log("Drawing uploaded:", drawingUrl);
-            } catch (error) {
-              console.error("Error uploading drawing:", error);
-              toast.error("Failed to upload drawing");
+            drawingUrl = await uploadFile(drawingBlob, 'image/png', 'grounding_drawings');
+            if (!drawingUrl) {
               setSaving(false);
               return;
             }
@@ -225,13 +225,8 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
           
         case "audio":
           if (audioBlob) {
-            try {
-              const fileName = `smell_audio_${Date.now()}.webm`;
-              audioUrl = await uploadFile(audioBlob, fileName, 'audio/webm', 'grounding_audio');
-              console.log("Audio uploaded:", audioUrl);
-            } catch (error) {
-              console.error("Error uploading audio:", error);
-              toast.error("Failed to upload audio");
+            audioUrl = await uploadFile(audioBlob, 'audio/webm', 'grounding_audio');
+            if (!audioUrl) {
               setSaving(false);
               return;
             }
@@ -239,22 +234,26 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
           break;
       }
       
+      console.log("Preparing database entry with:", {
+        userId: user.id,
+        responseText,
+        drawingUrl,
+        audioUrl,
+        selectedItems
+      });
+      
       // Save response to database
-      const responseData = {
-        user_id: user.id,
-        activity_id: 'grounding-technique',
-        section_name: 'smell',
-        response_text: responseText,
-        response_drawing_path: drawingUrl,
-        response_audio_path: audioUrl,
-        response_selected_items: selectedItems
-      };
-      
-      console.log("Saving to database:", responseData);
-      
       const { error } = await supabase
         .from('grounding_responses')
-        .insert(responseData);
+        .insert({
+          user_id: user.id,
+          activity_id: 'grounding-technique',
+          section_name: 'smell',
+          response_text: responseText,
+          response_drawing_path: drawingUrl,
+          response_audio_path: audioUrl,
+          response_selected_items: selectedItems
+        });
         
       if (error) {
         console.error("Database error:", error);
