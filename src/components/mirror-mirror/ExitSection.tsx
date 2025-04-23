@@ -92,7 +92,7 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
               <Button 
                 onClick={() => handleFeedback('positive')} 
                 variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-green-400 hover:border-yellow-500 transition-colors h-auto"
+                className="flex flex-col items-center p-4 hover:bg-emerald-50 hover:border-emerald-200 transition-colors h-auto"
                 disabled={isSubmitting}
               >
                 <div className="text-3xl mb-2">👍</div>
