@@ -202,7 +202,7 @@ const GroundingTechniqueActivity = () => {
               <Button 
                 onClick={() => handleFeedback('positive')} 
                 variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-green-50 hover:border-green-200 transition-colors h-auto"
+                className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
               >
                 <div className="text-3xl mb-2">👍</div>
                 <span>Helpful</span>
