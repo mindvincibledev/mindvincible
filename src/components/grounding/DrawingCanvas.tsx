@@ -1,10 +1,9 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Eraser, Pencil, Save, RotateCcw } from 'lucide-react';
+import { Eraser, Pencil, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCanvasInteraction } from '@/hooks/useCanvasInteraction';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface DrawingCanvasProps {
   onDrawingChange: (blob: Blob) => void;
@@ -22,7 +21,6 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   const [strokeColor, setStrokeColor] = useState(initialColor);
   const [strokeWidth, setStrokeWidth] = useState(5);
   const lastPosition = useRef({ x: 0, y: 0 });
-  const [activeTab, setActiveTab] = useState<"text" | "drawing">("drawing");
 
   // Available colors using the app's color scheme
   const colors = [
@@ -180,108 +178,80 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   
   return (
     <div className={`flex flex-col gap-4 ${className}`}>
-      <Tabs 
-        defaultValue="drawing" 
-        value={activeTab} 
-        onValueChange={(value) => setActiveTab(value as "text" | "drawing")}
-        className="w-full"
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="text" className="text-center">
-            <span className="flex items-center justify-center gap-2">
-              <span>Text</span>
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="drawing" className="text-center">
-            <span className="flex items-center justify-center gap-2">
-              <span>Drawing</span>
-            </span>
-          </TabsTrigger>
-        </TabsList>
+      <div className="border border-gray-200 rounded-lg p-4 bg-white">
+        {/* Color selector */}
+        <div className="flex flex-wrap gap-2 mb-4 justify-center">
+          {colors.map(({color, name}) => (
+            <button
+              key={color}
+              onClick={() => setStrokeColor(color)}
+              className={`w-8 h-8 rounded-full border-2 transition-all ${
+                strokeColor === color 
+                  ? 'border-black scale-110 shadow-glow' 
+                  : 'border-transparent opacity-80'
+              }`}
+              style={{ 
+                backgroundColor: color,
+                boxShadow: strokeColor === color ? `0 0 8px ${color}` : 'none'
+              }}
+              aria-label={`Select ${name} color`}
+              title={name}
+            />
+          ))}
+        </div>
         
-        <TabsContent value="text">
-          <div className="p-4 text-center text-gray-500">
-            Please switch to the Drawing tab to use the drawing features.
+        {/* Line Width selector */}
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 mb-2">Line Width: {getLineThicknessLabel(strokeWidth)}</p>
+          <div className="flex justify-between gap-2">
+            <button 
+              onClick={() => setStrokeWidth(2)}
+              className={`px-4 py-1 rounded ${strokeWidth === 2 ? 'bg-gray-200' : 'bg-gray-100'}`}
+            >
+              Thin
+            </button>
+            <button 
+              onClick={() => setStrokeWidth(5)}
+              className={`px-4 py-1 rounded ${strokeWidth === 5 ? 'bg-gray-200' : 'bg-gray-100'}`}
+            >
+              Medium
+            </button>
+            <button 
+              onClick={() => setStrokeWidth(10)}
+              className={`px-4 py-1 rounded ${strokeWidth === 10 ? 'bg-gray-200' : 'bg-gray-100'}`}
+            >
+              Thick
+            </button>
           </div>
-        </TabsContent>
+        </div>
         
-        <TabsContent value="drawing">
-          <div className="border border-gray-200 rounded-lg p-4 bg-white">
-            {/* Color selector */}
-            <div className="flex flex-wrap gap-2 mb-4 justify-center">
-              {colors.map(({color, name}) => (
-                <button
-                  key={color}
-                  onClick={() => setStrokeColor(color)}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    strokeColor === color 
-                      ? 'border-black scale-110 shadow-glow' 
-                      : 'border-transparent opacity-80'
-                  }`}
-                  style={{ 
-                    backgroundColor: color,
-                    boxShadow: strokeColor === color ? `0 0 8px ${color}` : 'none'
-                  }}
-                  aria-label={`Select ${name} color`}
-                  title={name}
-                />
-              ))}
-            </div>
-            
-            {/* Line Width selector */}
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 mb-2">Line Width: {getLineThicknessLabel(strokeWidth)}</p>
-              <div className="flex justify-between gap-2">
-                <button 
-                  onClick={() => setStrokeWidth(2)}
-                  className={`px-4 py-1 rounded ${strokeWidth === 2 ? 'bg-gray-200' : 'bg-gray-100'}`}
-                >
-                  Thin
-                </button>
-                <button 
-                  onClick={() => setStrokeWidth(5)}
-                  className={`px-4 py-1 rounded ${strokeWidth === 5 ? 'bg-gray-200' : 'bg-gray-100'}`}
-                >
-                  Medium
-                </button>
-                <button 
-                  onClick={() => setStrokeWidth(10)}
-                  className={`px-4 py-1 rounded ${strokeWidth === 10 ? 'bg-gray-200' : 'bg-gray-100'}`}
-                >
-                  Thick
-                </button>
-              </div>
-            </div>
-            
-            {/* Clear button */}
-            <div className="flex justify-start mb-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearCanvas}
-                className="flex items-center gap-1"
-              >
-                <Eraser className="h-4 w-4" />
-                Clear
-              </Button>
-            </div>
-            
-            {/* Canvas */}
-            <div className="relative border border-gray-200 rounded-lg overflow-hidden mb-1 bg-white">
-              <canvas 
-                ref={canvasRef}
-                width={600}
-                height={400}
-                className="w-full touch-none cursor-crosshair h-[300px]"
-              />
-            </div>
-            
-            <p className="text-gray-500 text-sm text-center">
-              Draw using your mouse or finger on touch screens
-            </p>
-          </div>
-        </TabsContent>
-      </Tabs>
+        {/* Clear button */}
+        <div className="flex justify-start mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearCanvas}
+            className="flex items-center gap-1"
+          >
+            <Eraser className="h-4 w-4" />
+            Clear
+          </Button>
+        </div>
+        
+        {/* Canvas */}
+        <div className="relative border border-gray-200 rounded-lg overflow-hidden mb-1 bg-white">
+          <canvas 
+            ref={canvasRef}
+            width={600}
+            height={400}
+            className="w-full touch-none cursor-crosshair h-[300px]"
+          />
+        </div>
+        
+        <p className="text-gray-500 text-sm text-center">
+          Draw using your mouse or finger on touch screens
+        </p>
+      </div>
     </div>
   );
 };

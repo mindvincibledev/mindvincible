@@ -1,17 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Wind, Pencil, Mic, ListFilter, Type, Flower } from 'lucide-react';
 import AudioJournal from '../journal/AudioJournal';
-import DrawingJournal from '../journal/DrawingJournal';
+import DrawingCanvas from './DrawingCanvas';
 import ObjectDragDrop from './ObjectDragDrop';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
+import { uploadGroundingFile } from '@/utils/groundingFileUtils';
 
 interface SmellSectionProps {
   onComplete: () => void;
@@ -113,45 +113,6 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
     toast.info("Reset complete");
   };
 
-  // Upload file to private bucket
-  const uploadFileToBucket = async (blob: Blob, fileType: string): Promise<string | null> => {
-    if (!user?.id) {
-      toast.error("You need to be logged in to upload files");
-      return null;
-    }
-    
-    try {
-      // Create unique file name with timestamp
-      const timestamp = Date.now();
-      const fileName = `${user.id}/${fileType}_${timestamp}.${fileType === 'audio' ? 'webm' : 'png'}`;
-      const bucketName = fileType === 'audio' ? 'grounding_audio' : 'grounding_drawings';
-      const contentType = fileType === 'audio' ? 'audio/webm' : 'image/png';
-      
-      console.log(`Uploading ${fileType} to ${bucketName}/${fileName}`);
-      
-      // Upload the file to the appropriate bucket
-      const { data, error } = await supabase
-        .storage
-        .from(bucketName)
-        .upload(fileName, blob, {
-          contentType,
-          upsert: true,
-        });
-        
-      if (error) {
-        console.error(`Error uploading ${fileType}:`, error);
-        throw error;
-      }
-      
-      console.log(`${fileType} uploaded successfully:`, data);
-      
-      return fileName; // Return the path, not the full URL
-    } catch (err: any) {
-      console.error(`Error in uploadFileToBucket (${fileType}):`, err);
-      throw new Error(`Failed to upload ${fileType}: ${err.message}`);
-    }
-  };
-
   // Handle form submission
   const handleSave = async () => {
     if (!user?.id) {
@@ -178,9 +139,15 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
       } else if (inputType === "select") {
         responseSelectedItems = selectedObjects;
       } else if (inputType === "audio" && audioBlob) {
-        audioPath = await uploadFileToBucket(audioBlob, 'audio');
+        const result = await uploadGroundingFile(user.id, 'smell', audioBlob, 'audio');
+        if (result) {
+          audioPath = result.path;
+        }
       } else if (inputType === "draw" && drawingBlob) {
-        drawingPath = await uploadFileToBucket(drawingBlob, 'drawing');
+        const result = await uploadGroundingFile(user.id, 'smell', drawingBlob, 'drawing');
+        if (result) {
+          drawingPath = result.path;
+        }
       }
       
       // Save response to database
@@ -210,6 +177,101 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
       toast.error(err.message || "Failed to save your response");
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Render the correct input method
+  const renderInputMethod = () => {
+    switch (inputType) {
+      case "text":
+        return (
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                value={currentText}
+                onChange={(e) => setCurrentText(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder="Type smells you sense..."
+                maxLength={50}
+                disabled={textItems.length >= 2}
+              />
+              <Button 
+                onClick={addTextItem} 
+                disabled={!currentText.trim() || textItems.length >= 2}
+              >
+                Add
+              </Button>
+            </div>
+            
+            <div className="space-y-2">
+              {textItems.map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex items-center justify-between p-3 bg-[#F5DF4D]/10 rounded-lg"
+                >
+                  <span>{index + 1}. {item}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => removeTextItem(index)}
+                    className="text-gray-500 hover:text-red-500"
+                  >
+                    ×
+                  </Button>
+                </motion.div>
+              ))}
+              
+              {textItems.length === 0 && (
+                <p className="text-center text-gray-400 py-6">
+                  Add two things you can smell or want to smell
+                </p>
+              )}
+            </div>
+          </div>
+        );
+
+      case "draw":
+        return (
+          <div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Drawing Title</label>
+              <Input
+                value={drawingTitle}
+                onChange={(e) => setDrawingTitle(e.target.value)}
+                placeholder="Enter a title for your drawing"
+                className="bg-white"
+              />
+            </div>
+            <DrawingCanvas 
+              onDrawingChange={setDrawingBlob}
+              initialColor="#F5DF4D"
+            />
+          </div>
+        );
+
+      case "audio":
+        return (
+          <AudioJournal 
+            onAudioChange={setAudioBlob}
+            onTitleChange={setAudioTitle}
+            title={audioTitle}
+          />
+        );
+
+      case "select":
+        return (
+          <ObjectDragDrop 
+            objects={SMELL_OBJECTS} 
+            selectedItems={selectedObjects}
+            onItemsChange={setSelectedObjects}
+            maxItems={2}
+          />
+        );
+
+      default:
+        return <div>Select an input method</div>;
     }
   };
 
@@ -290,80 +352,7 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
       
       {/* Input Area */}
       <div className="min-h-[300px] mb-6">
-        <Tabs value={inputType} onValueChange={setInputType} className="w-full">
-          <TabsContent value="text" className="mt-0">
-            <div className="space-y-4">
-              <div className="flex gap-2">
-                <Input
-                  value={currentText}
-                  onChange={(e) => setCurrentText(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Type smells you sense..."
-                  maxLength={50}
-                  disabled={textItems.length >= 2}
-                />
-                <Button 
-                  onClick={addTextItem} 
-                  disabled={!currentText.trim() || textItems.length >= 2}
-                >
-                  Add
-                </Button>
-              </div>
-              
-              <div className="space-y-2">
-                {textItems.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center justify-between p-3 bg-[#F5DF4D]/10 rounded-lg"
-                  >
-                    <span>{index + 1}. {item}</span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => removeTextItem(index)}
-                      className="text-gray-500 hover:text-red-500"
-                    >
-                      ×
-                    </Button>
-                  </motion.div>
-                ))}
-                
-                {textItems.length === 0 && (
-                  <p className="text-center text-gray-400 py-6">
-                    Add two things you can smell or want to smell
-                  </p>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="draw" className="mt-0">
-            <DrawingJournal 
-              onDrawingChange={(blob) => setDrawingBlob(blob)}
-              onTitleChange={(title) => setDrawingTitle(title)}
-              title={drawingTitle}
-            />
-          </TabsContent>
-
-          <TabsContent value="audio" className="mt-0">
-            <AudioJournal 
-              onAudioChange={(blob) => setAudioBlob(blob)}
-              onTitleChange={(title) => setAudioTitle(title)}
-              title={audioTitle}
-            />
-          </TabsContent>
-
-          <TabsContent value="select" className="mt-0">
-            <ObjectDragDrop 
-              objects={SMELL_OBJECTS} 
-              selectedItems={selectedObjects}
-              onItemsChange={setSelectedObjects}
-              maxItems={2}
-            />
-          </TabsContent>
-        </Tabs>
+        {renderInputMethod()}
       </div>
       
       {/* Action Buttons */}

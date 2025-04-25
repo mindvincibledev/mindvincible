@@ -82,7 +82,14 @@ export const uploadGroundingFile = async (
   type: 'drawing' | 'audio'
 ): Promise<{ path: string, url: string } | null> => {
   try {
-    const fileName = generateGroundingFilename(userId, section, type);
+    // Ensure we're using the correct section name
+    const sectionName = ['see', 'touch', 'hear', 'smell', 'taste'].includes(section) 
+      ? section 
+      : 'misc';
+    
+    console.log(`Uploading ${type} file for section: ${sectionName}`);
+    
+    const fileName = generateGroundingFilename(userId, sectionName, type);
     const bucket = type === 'drawing' ? 'grounding_drawings' : 'grounding_audio';
     const contentType = type === 'drawing' ? 'image/png' : 'audio/webm';
     

@@ -58,6 +58,9 @@ const AudioJournal: React.FC<AudioJournalProps> = ({
   
   const startRecording = async () => {
     try {
+      // Stop any existing stream first
+      stopMediaStream();
+      
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
       
