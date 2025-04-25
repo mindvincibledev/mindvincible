@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,11 +8,13 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { getSignedUrl } from '@/utils/jarUtils';
 
 interface MoodJar {
   id: string;
   image_path: string;
   created_at: string;
+  signed_url?: string;
 }
 
 const RecentMoodJars = () => {
@@ -31,7 +34,7 @@ const RecentMoodJars = () => {
       try {
         setLoading(true);
         
-        const { data, error } = await supabase
+        const { data: jars, error } = await supabase
           .from('mood_jar_table')
           .select('id, image_path, created_at')
           .order('created_at', { ascending: false })
@@ -42,8 +45,20 @@ const RecentMoodJars = () => {
           throw error;
         }
         
-        if (data) {
-          setMoodJars(data as MoodJar[]);
+        if (jars) {
+          // Get signed URLs for all images
+          const jarsWithUrls = await Promise.all(
+            jars.map(async (jar) => {
+              try {
+                const signedUrl = await getSignedUrl(jar.image_path);
+                return { ...jar, signed_url: signedUrl };
+              } catch (error) {
+                console.error(`Error getting signed URL for jar ${jar.id}:`, error);
+                return jar;
+              }
+            })
+          );
+          setMoodJars(jarsWithUrls);
         }
       } catch (err) {
         console.error('Error processing mood jar data:', err);
@@ -100,7 +115,7 @@ const RecentMoodJars = () => {
                 <div className="p-1">
                   <div className="bg-white rounded-lg overflow-hidden flex flex-col items-center p-2 shadow-md border border-gray-100">
                     <img 
-                      src={jar.image_path} 
+                      src={jar.signed_url || jar.image_path} 
                       alt="Mood Jar" 
                       className="w-full h-48 object-contain mb-2 rounded"
                     />

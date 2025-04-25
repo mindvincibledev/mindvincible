@@ -108,23 +108,11 @@ const MoodJar = () => {
         throw new Error("Could not get image data from canvas");
       }
       
-      // First, verify the user exists in the users table
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('id', userId)
-        .single();
-      
-      if (userError || !userData) {
-        console.error("User verification error:", userError);
-        throw new Error("Could not verify user in database");
-      }
-      
-      // Generate a unique filename
+      // Generate a unique filename in the user's folder
       const fileName = generateJarFilename(userId);
       
       // Upload the image to Supabase storage
-      const { data: uploadData, error: uploadError } = await supabase
+      const { error: uploadError } = await supabase
         .storage
         .from('mood_jars')
         .upload(fileName, blobImage, {
@@ -137,22 +125,12 @@ const MoodJar = () => {
         throw uploadError;
       }
 
-      // Get the public URL for the uploaded image
-      const { data: urlData } = supabase
-        .storage
-        .from('mood_jars')
-        .getPublicUrl(fileName);
-
-      if (!urlData.publicUrl) {
-        throw new Error("Failed to get public URL for uploaded image");
-      }
-
-      // Insert into mood_jar_table with the verified user ID
+      // Insert into mood_jar_table with the file path
       const { error: dbError } = await supabase
         .from('mood_jar_table')
         .insert({
           user_id: userId,
-          image_path: urlData.publicUrl
+          image_path: fileName
         });
 
       if (dbError) {
@@ -165,7 +143,6 @@ const MoodJar = () => {
         description: "Your mood jar has been saved successfully!",
       });
       
-      // Navigate to home page after successful save instead of dashboard
       navigate("/home");
     } catch (error) {
       console.error("Error saving mood jar:", error);

@@ -1,4 +1,6 @@
 
+import { supabase } from '@/integrations/supabase/client';
+
 /**
  * Converts canvas content to a base64-encoded PNG image
  * @param canvas The canvas element
@@ -17,7 +19,28 @@ export const getBase64FromCanvas = (canvas: HTMLCanvasElement | null): Promise<B
 
 /**
  * Helper function to generate a unique filename for jar images
+ * @param userId The user's ID for the folder path
  */
 export const generateJarFilename = (userId: string): string => {
-  return `jar_${userId}_${Date.now()}.png`;
+  return `${userId}/jar_${Date.now()}.png`;
+};
+
+/**
+ * Get a signed URL for a mood jar image
+ * @param path The storage path of the image
+ * @returns Promise that resolves to a signed URL
+ */
+export const getSignedUrl = async (path: string): Promise<string> => {
+  try {
+    const { data, error } = await supabase
+      .storage
+      .from('mood_jars')
+      .createSignedUrl(path, 3600); // 1 hour expiration
+
+    if (error) throw error;
+    return data.signedUrl;
+  } catch (error) {
+    console.error('Error getting signed URL:', error);
+    throw error;
+  }
 };
