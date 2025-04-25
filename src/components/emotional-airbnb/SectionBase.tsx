@@ -34,7 +34,7 @@ const SectionBase: React.FC<SectionBaseProps> = ({
   
   // Drawing state
   const [canvasContext, setCanvasContext] = useState<CanvasRenderingContext2D | null>(null);
-  const [lastPosition, setLastPosition<{x: number, y: number} | null>](null);
+  const [lastPosition, setLastPosition] = useState<{x: number, y: number} | null>(null);
 
   // Initialize canvas on mount
   useEffect(() => {
