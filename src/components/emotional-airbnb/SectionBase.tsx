@@ -60,9 +60,15 @@ const SectionBase: React.FC<SectionBaseProps> = ({
         const img = new Image();
         
         if (typeof drawingBlob === 'string') {
-          // If we have a path, get a signed URL
-          const signedUrl = await getSignedUrl(drawingBlob);
-          img.src = signedUrl;
+          try {
+            // If we have a path, get a signed URL
+            const signedUrl = await getSignedUrl(drawingBlob);
+            console.log("Got signed URL for drawing:", signedUrl.substring(0, 50) + "...");
+            img.src = signedUrl;
+          } catch (error) {
+            console.error("Error getting signed URL:", error);
+            img.src = '/placeholder.svg';
+          }
         } else {
           // If we have a blob, create an object URL
           const url = URL.createObjectURL(drawingBlob);
@@ -75,6 +81,10 @@ const SectionBase: React.FC<SectionBaseProps> = ({
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             setIsCanvasEmpty(false);
           }
+        };
+        
+        img.onerror = (e) => {
+          console.error("Error loading image:", e);
         };
       };
       

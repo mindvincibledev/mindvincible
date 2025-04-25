@@ -2,10 +2,13 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Generate a unique filename for emotional airbnb drawings
+ * Generate a unique filename for emotional airbnb drawings with the proper folder structure
+ * The folder structure must match our RLS policy: userId/section_timestamp.png
  */
 export const generateEmotionalAirbnbFilename = (userId: string, section: string): string => {
   const timestamp = Date.now();
+  // Create a path that follows the pattern: userId/section_timestamp.png
+  // This ensures the RLS policy will work correctly
   return `${userId}/${section}_${timestamp}.png`;
 };
 

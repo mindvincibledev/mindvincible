@@ -21,10 +21,8 @@ import { ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 
-
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { generateEmotionalAirbnbFilename } from '@/utils/emotionalAirbnbFileUtils';
-
 
 const EmotionalAirbnb = () => {
   const { user, loading } = useAuth(); // Add loading state
@@ -188,7 +186,7 @@ const EmotionalAirbnb = () => {
     setShowFeedback(true); // Show feedback dialog after celebration
   };
 
-  // Update handleSubmit to include correct user_id
+  // Update handleSubmit to include correct user_id and ensure proper folder structure
   const handleSubmit = async () => {
     if (!user) {
       toast.error("Not logged in", {
@@ -208,13 +206,15 @@ const EmotionalAirbnb = () => {
       let soundDrawingPath = null;
       let messageDrawingPath = null;
 
-      // Helper function for uploading drawings
+      // Helper function for uploading drawings with proper folder structure
       const uploadDrawing = async (blob: Blob | null, section: string) => {
         if (!blob || !user) return null;
         
+        // Ensure we have the correct folder structure that matches our RLS policy
         const fileName = generateEmotionalAirbnbFilename(user.id, section);
+        console.log(`Uploading file to path: ${fileName}`);
         
-        const { error: uploadError } = await supabase.storage
+        const { data, error: uploadError } = await supabase.storage
           .from('emotional_airbnb_drawings')
           .upload(fileName, blob, {
             contentType: 'image/png',
@@ -226,10 +226,11 @@ const EmotionalAirbnb = () => {
           throw new Error(`Failed to upload ${section} drawing: ${uploadError.message}`);
         }
         
+        // Return just the path for storage in the database
         return fileName;
       };
 
-      // Upload each drawing if it exists
+      // Upload each drawing if it exists - making sure to use the correct folder structure
       if (formData.emotionDrawing) {
         emotionDrawingPath = await uploadDrawing(formData.emotionDrawing, 'emotion');
       }
@@ -258,7 +259,7 @@ const EmotionalAirbnb = () => {
       const { error } = await supabase
         .from('emotional_airbnb')
         .insert({
-          user_id: user.id, // Always set user_id
+          user_id: user.id,
           emotion_text: formData.emotionText || null,
           location_in_body_text: formData.locationText || null,
           appearance_description_text: formData.appearanceText || null,
