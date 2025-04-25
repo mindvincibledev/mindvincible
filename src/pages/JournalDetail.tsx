@@ -19,6 +19,7 @@ import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { JournalEntry } from '@/types/journal';
+import { getSignedUrl, refreshSignedUrlIfNeeded } from '@/utils/journalFileUtils';
 
 const JournalDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -44,7 +45,6 @@ const JournalDetail = () => {
     try {
       setLoading(true);
       
-      // RLS is disabled, but we still filter by user to get their entries
       const { data, error } = await supabase
         .from('journal_entries')
         .select('*')
@@ -64,17 +64,18 @@ const JournalDetail = () => {
         return;
       }
       
-      // Use type assertion to tell TypeScript that data is a JournalEntry
       const journalEntry = data as JournalEntry;
       setEntry(journalEntry);
       
-      // Set audio or drawing URL if available
+      // Get signed URLs for audio and drawing files
       if (journalEntry.audio_path) {
-        setAudioUrl(journalEntry.audio_path);
+        const signedAudioUrl = await getSignedUrl(journalEntry.audio_path, 'audio_files');
+        setAudioUrl(signedAudioUrl);
       }
       
       if (journalEntry.drawing_path) {
-        setDrawingUrl(journalEntry.drawing_path);
+        const signedDrawingUrl = await getSignedUrl(journalEntry.drawing_path, 'drawing_files');
+        setDrawingUrl(signedDrawingUrl);
       }
     } catch (error: any) {
       console.error('Error fetching journal entry:', error);
