@@ -12,6 +12,7 @@ import DrawingJournal from '@/components/journal/DrawingJournal';
 import AudioJournal from '@/components/journal/AudioJournal';
 import ObjectDragDrop from './ObjectDragDrop';
 import { Progress } from '@/components/ui/progress';
+import { generateJournalFilename } from '@/utils/journalFileUtils';
 
 interface SeeSectionProps {
   onComplete: () => void;
@@ -102,7 +103,7 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
       
       // Upload drawing if any
       if (drawingBlob) {
-        const fileName = `see_section_${user.id}_${Date.now()}.png`;
+        const fileName = generateJournalFilename(user.id, 'drawing');
         const { data: drawingData, error: drawingError } = await supabase
           .storage
           .from('grounding_drawings')
@@ -117,7 +118,7 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
       
       // Upload audio if any
       if (audioBlob) {
-        const fileName = `see_section_${user.id}_${Date.now()}.webm`;
+        const fileName = generateJournalFilename(user.id, 'audio');
         const { data: audioData, error: audioError } = await supabase
           .storage
           .from('grounding_audio')
@@ -130,7 +131,7 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
         audioPath = audioData.path;
       }
       
-      // Save to database
+      // Save to database (ensure user_id is set)
       const { error } = await supabase
         .from('grounding_responses')
         .insert({
