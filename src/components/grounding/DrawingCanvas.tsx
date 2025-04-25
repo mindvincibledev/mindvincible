@@ -1,36 +1,64 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Eraser, Pencil } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Eraser, Pencil, Save, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCanvasInteraction } from '@/hooks/useCanvasInteraction';
 
 interface DrawingCanvasProps {
   onDrawingChange: (blob: Blob) => void;
+  initialColor?: string;
+  className?: string;
 }
 
-const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onDrawingChange }) => {
+const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ 
+  onDrawingChange, 
+  initialColor = '#000000',
+  className = '',
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [strokeColor, setStrokeColor] = useState('#000000');
-  const [strokeWidth, setStrokeWidth] = useState(3);
-  const [lastPosition, setLastPosition] = useState<{ x: number; y: number } | null>(null);
+  const [strokeColor, setStrokeColor] = useState(initialColor);
+  const [strokeWidth, setStrokeWidth] = useState(5);
+  const lastPosition = useRef({ x: 0, y: 0 });
 
+  // Available colors using the app's color scheme
+  const colors = [
+    { color: '#FF8A48', name: 'Orange' },
+    { color: '#D5D5F1', name: 'Lavender' },
+    { color: '#3DFDFF', name: 'Cyan' },
+    { color: '#F5DF4D', name: 'Yellow' },
+    { color: '#FC68B3', name: 'Pink' },
+    { color: '#2AC20E', name: 'Green' },
+    { color: '#FFFFFF', name: 'White' },
+    { color: '#000000', name: 'Black' }
+  ];
+
+  // Initialize canvas with white background
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas dimensions
+    
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    
+    // Set canvas dimensions to match container
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
-
-    // Configure context
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = strokeColor;
-    ctx.lineWidth = strokeWidth;
-
+    
+    // Set initial canvas background to white
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Set initial drawing style
+    context.strokeStyle = strokeColor;
+    context.lineWidth = strokeWidth;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    
+    // Initial save of the blank canvas
+    saveDrawing();
+    
     // Handle window resize
     const handleResize = () => {
       const tempCanvas = document.createElement('canvas');
@@ -44,61 +72,86 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onDrawingChange }) => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
 
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = strokeColor;
-      ctx.lineWidth = strokeWidth;
+      context.fillStyle = '#ffffff';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.strokeStyle = strokeColor;
+      context.lineWidth = strokeWidth;
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
 
-      ctx.drawImage(tempCanvas, 0, 0);
+      context.drawImage(tempCanvas, 0, 0);
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Update stroke style when color or width changes
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    
+    context.strokeStyle = strokeColor;
+    context.lineWidth = strokeWidth;
   }, [strokeColor, strokeWidth]);
 
   const startDrawing = (x: number, y: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    setIsDrawing(true);
-    setLastPosition({ x, y });
-    ctx.beginPath();
-    ctx.moveTo(x, y);
+    
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    
+    lastPosition.current = { x, y };
+    
+    // Draw initial dot
+    context.beginPath();
+    context.arc(x, y, strokeWidth / 2, 0, Math.PI * 2);
+    context.fillStyle = strokeColor;
+    context.fill();
   };
 
   const draw = (x: number, y: number) => {
     const canvas = canvasRef.current;
-    if (!canvas || !isDrawing || !lastPosition) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.beginPath();
-    ctx.moveTo(lastPosition.x, lastPosition.y);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-
-    setLastPosition({ x, y });
+    if (!canvas) return;
+    
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    
+    // Draw line
+    context.beginPath();
+    context.moveTo(lastPosition.current.x, lastPosition.current.y);
+    context.lineTo(x, y);
+    context.stroke();
+    
+    // Update last position
+    lastPosition.current = { x, y };
   };
 
-  const stopDrawing = () => {
-    if (isDrawing) {
-      setIsDrawing(false);
-      setLastPosition(null);
-      saveDrawing();
-    }
+  const endDrawing = () => {
+    saveDrawing();
   };
+
+  // Use the canvas interaction hook
+  useCanvasInteraction({
+    canvasRef,
+    onStartDrawing: startDrawing,
+    onMoveDrawing: draw,
+    onEndDrawing: endDrawing
+  });
 
   const saveDrawing = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
+    
     canvas.toBlob((blob) => {
       if (blob) {
         onDrawingChange(blob);
+      } else {
+        console.error("Failed to create blob from canvas");
       }
     }, 'image/png');
   };
@@ -106,140 +159,99 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onDrawingChange }) => {
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    
+    // Clear canvas and set white background
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Save the cleared canvas
     saveDrawing();
   };
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    startDrawing(x, y);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas || !isDrawing) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    draw(x, y);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    startDrawing(x, y);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    if (!canvas || !isDrawing) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    draw(x, y);
-  };
-
+  
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={clearCanvas}
-          className="flex items-center gap-1"
-        >
-          <Eraser className="h-4 w-4" />
-          Clear
-        </Button>
+    <div className={`flex flex-col gap-4 ${className}`}>
+      <div className="p-4 rounded-lg border border-[#3DFDFF]/30 bg-white">
+        {/* Color selector */}
+        <div className="flex flex-wrap gap-2 mb-4 justify-center">
+          {colors.map(({color, name}) => (
+            <button
+              key={color}
+              onClick={() => setStrokeColor(color)}
+              className={`w-8 h-8 rounded-full border-2 transition-all ${
+                strokeColor === color 
+                  ? 'border-black scale-110 shadow-glow' 
+                  : 'border-transparent opacity-80'
+              }`}
+              style={{ 
+                backgroundColor: color,
+                boxShadow: strokeColor === color ? `0 0 8px ${color}` : 'none'
+              }}
+              aria-label={`Select ${name} color`}
+              title={name}
+            />
+          ))}
+        </div>
         
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setStrokeColor('#000000');
-            const ctx = canvasRef.current?.getContext('2d');
-            if (ctx) ctx.strokeStyle = '#000000';
-          }}
-          className={`w-8 h-8 p-0 bg-black ${
-            strokeColor === '#000000' ? 'ring-2 ring-offset-2 ring-black' : ''
-          }`}
-        />
+        {/* Brush size selector */}
+        <div className="mb-4 flex items-center justify-center gap-4">
+          {[2, 5, 10].map((size) => (
+            <motion.button
+              key={size}
+              onClick={() => setStrokeWidth(size)}
+              className={`flex items-center justify-center rounded-full transition-all ${
+                strokeWidth === size ? 'bg-gray-100' : ''
+              }`}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <div 
+                className="rounded-full bg-black"
+                style={{ 
+                  width: size * 2, 
+                  height: size * 2,
+                  backgroundColor: strokeColor
+                }}
+              />
+            </motion.button>
+          ))}
+        </div>
         
-        {['#FC68B3', '#FF8A48', '#3DFDFF', '#F5DF4D', '#2AC20E'].map((color) => (
+        {/* Action buttons */}
+        <div className="flex flex-wrap justify-center gap-2 mb-4">
           <Button
-            key={color}
             variant="outline"
             size="sm"
-            onClick={() => {
-              setStrokeColor(color);
-              const ctx = canvasRef.current?.getContext('2d');
-              if (ctx) ctx.strokeStyle = color;
-            }}
-            className={`w-8 h-8 p-0`}
-            style={{
-              backgroundColor: color,
-              border: strokeColor === color ? '2px solid black' : '1px solid #e2e8f0'
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-500">Line Width:</span>
-        {[2, 5, 10].map((width) => (
-          <Button
-            key={width}
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setStrokeWidth(width);
-              const ctx = canvasRef.current?.getContext('2d');
-              if (ctx) ctx.lineWidth = width;
-            }}
-            className={`h-6 px-2 ${strokeWidth === width ? 'bg-gray-100' : ''}`}
+            onClick={clearCanvas}
+            className="flex items-center gap-1"
           >
-            {width === 2 ? 'Thin' : width === 5 ? 'Medium' : 'Thick'}
+            <Eraser className="h-4 w-4" />
+            Clear
           </Button>
-        ))}
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={saveDrawing}
+            className="flex items-center gap-1"
+          >
+            <Save className="h-4 w-4" />
+            Save
+          </Button>
+        </div>
+        
+        {/* Canvas */}
+        <div className="relative border border-gray-200 rounded-lg overflow-hidden mb-4 bg-white">
+          <canvas 
+            ref={canvasRef}
+            width={600}
+            height={400}
+            className="w-full touch-none cursor-crosshair h-[300px]"
+          />
+        </div>
       </div>
-
-      <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-        <canvas
-          ref={canvasRef}
-          className="w-full touch-none bg-white"
-          style={{ height: '300px' }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={stopDrawing}
-          onMouseLeave={stopDrawing}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={stopDrawing}
-        />
-      </div>
-      
-      <p className="text-xs text-gray-500 text-center">
-        Draw using your mouse or finger on touch screens
-      </p>
     </div>
   );
 };

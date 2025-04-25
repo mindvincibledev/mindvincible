@@ -1,17 +1,19 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { EarIcon, Pencil, Mic, ListFilter, Type } from 'lucide-react';
-import AudioJournal from '../journal/AudioJournal';
-import DrawingJournal from '../journal/DrawingJournal';
-import ObjectDragDrop from './ObjectDragDrop';
+import { EarIcon, Pencil, Mic, ListFilter, Type, Save, ArrowLeft } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
+import DrawingCanvas from './DrawingCanvas';
+import AudioJournal from '../journal/AudioJournal';
+import ObjectDragDrop from './ObjectDragDrop';
+import { generateGroundingFilename, uploadGroundingFile } from '@/utils/groundingFileUtils';
 
 interface HearSectionProps {
   onComplete: () => void;
@@ -37,7 +39,6 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioTitle, setAudioTitle] = useState<string>("Sounds I Can Hear");
   const [drawingBlob, setDrawingBlob] = useState<Blob | null>(null);
-  const [drawingTitle, setDrawingTitle] = useState<string>("Sounds I Can Hear");
   
   // UI state
   const [saving, setSaving] = useState(false);
@@ -98,69 +99,17 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
 
       // Upload drawing if any
       if (drawingBlob) {
-        try {
-          const fileName = `hear_section_${user.id}_${Date.now()}.png`;
-          // Check if the bucket exists first
-          const { data: buckets } = await supabase.storage.listBuckets();
-          const groudingDrawingsBucketExists = buckets?.some(bucket => bucket.name === 'grounding_drawings');
-
-          if (!groudingDrawingsBucketExists) {
-            const { data: newBucket, error: createBucketError } = await supabase.storage.createBucket('grounding_drawings', { 
-              public: true 
-            });
-
-            if (createBucketError) {
-              throw new Error(`Failed to create drawing bucket: ${createBucketError.message}`);
-            }
-          }
-
-          const { data: drawingData, error: drawingError } = await supabase
-            .storage
-            .from('grounding_drawings')
-            .upload(fileName, drawingBlob, {
-              contentType: 'image/png',
-              upsert: true
-            });
-
-          if (drawingError) throw drawingError;
-          drawingPath = drawingData.path;
-        } catch (error) {
-          console.error("Error uploading drawing:", error);
-          toast.error("Failed to upload drawing. Continuing with other data...");
+        const result = await uploadGroundingFile(user.id, 'hear', drawingBlob, 'drawing');
+        if (result) {
+          drawingPath = result.path;
         }
       }
 
       // Upload audio if any
       if (audioBlob) {
-        try {
-          const fileName = `hear_section_${user.id}_${Date.now()}.webm`;
-          // Check if the bucket exists first
-          const { data: buckets } = await supabase.storage.listBuckets();
-          const groundingAudioBucketExists = buckets?.some(bucket => bucket.name === 'grounding_audio');
-
-          if (!groundingAudioBucketExists) {
-            const { data: newBucket, error: createBucketError } = await supabase.storage.createBucket('grounding_audio', { 
-              public: true 
-            });
-
-            if (createBucketError) {
-              throw new Error(`Failed to create audio bucket: ${createBucketError.message}`);
-            }
-          }
-
-          const { data: audioData, error: audioError } = await supabase
-            .storage
-            .from('grounding_audio')
-            .upload(fileName, audioBlob, {
-              contentType: 'audio/webm',
-              upsert: true
-            });
-
-          if (audioError) throw audioError;
-          audioPath = audioData.path;
-        } catch (error) {
-          console.error("Error uploading audio:", error);
-          toast.error("Failed to upload audio. Continuing with other data...");
+        const result = await uploadGroundingFile(user.id, 'hear', audioBlob, 'audio');
+        if (result) {
+          audioPath = result.path;
         }
       }
 
@@ -192,16 +141,22 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
     }
   };
   
+  // Skip this section
+  const handleSkip = () => {
+    toast.info("Section skipped");
+    onComplete();
+  };
+  
   // Determine if the current section is "complete" based on the active input method
-  const isComplete = () => {
+  const isValid = () => {
     switch (inputType) {
       case "text":
-        return textItems.length >= 1;
+        return textItems.length > 0;
       case "select":
-        return selectedObjects.length >= 1;
+        return selectedObjects.length > 0;
       case "audio":
         return audioBlob !== null;
-      case "drawing":
+      case "draw":
         return drawingBlob !== null;
       default:
         return false;
@@ -215,7 +170,6 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
     setAudioBlob(null);
     setAudioTitle("Sounds I Can Hear");
     setDrawingBlob(null);
-    setDrawingTitle("Sounds I Can Hear");
     
     // Clear cached data
     localStorage.removeItem('groundingHearData');
@@ -341,7 +295,7 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
                 
                 {textItems.length === 0 && (
                   <p className="text-center text-gray-400 py-6">
-                    Add three things you can hear around you right now
+                    Add things you can hear around you right now
                   </p>
                 )}
               </div>
@@ -349,17 +303,16 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
           </TabsContent>
 
           <TabsContent value="draw" className="mt-0">
-            <DrawingJournal 
-              onDrawingChange={(blob) => setDrawingBlob(blob)}
-              onTitleChange={(title) => setDrawingTitle(title)}
-              title={drawingTitle}
+            <DrawingCanvas 
+              onDrawingChange={setDrawingBlob}
+              initialColor="#3DFDFF"
             />
           </TabsContent>
 
           <TabsContent value="audio" className="mt-0">
             <AudioJournal 
-              onAudioChange={(blob) => setAudioBlob(blob)}
-              onTitleChange={(title) => setAudioTitle(title)}
+              onAudioChange={setAudioBlob}
+              onTitleChange={setAudioTitle}
               title={audioTitle}
             />
           </TabsContent>
@@ -383,6 +336,7 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
             onClick={onBack}
             className="flex items-center gap-2"
           >
+            <ArrowLeft className="h-4 w-4" />
             Back
           </Button>
           <Button 
@@ -396,17 +350,22 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
         <div className="space-x-2">
           <Button 
             variant="outline"
-            onClick={onComplete}
+            onClick={handleSkip}
           >
             Skip
           </Button>
           
           <Button 
             onClick={handleSave}
-            disabled={!isComplete() || saving}
+            disabled={!isValid() || saving}
             className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] hover:opacity-90 text-black font-medium"
           >
-            {saving ? 'Saving...' : 'Save & Continue'}
+            {saving ? 'Saving...' : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save & Continue
+              </>
+            )}
           </Button>
         </div>
       </div>

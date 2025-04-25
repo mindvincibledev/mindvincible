@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Pencil, Mic, Hand, Type, Save, ArrowLeft } from 'lucide-react';
@@ -7,11 +8,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import DrawingJournal from '@/components/journal/DrawingJournal';
+import DrawingCanvas from './DrawingCanvas';
 import AudioJournal from '@/components/journal/AudioJournal';
 import ObjectDragDrop from './ObjectDragDrop';
 import { Progress } from '@/components/ui/progress';
-import { generateGroundingFilename, getSignedUrl } from '@/utils/groundingFileUtils';
+import { uploadGroundingFile } from '@/utils/groundingFileUtils';
 
 interface SeeSectionProps {
   onComplete: () => void;
@@ -31,12 +32,10 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
   
   // Drawing state
   const [drawingBlob, setDrawingBlob] = useState<Blob | null>(null);
-  const [drawingPreviewURL, setDrawingPreviewURL] = useState<string | null>(null);
   const [drawingTitle, setDrawingTitle] = useState('Things I Can See');
   
   // Audio state
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [audioPreviewURL, setAudioPreviewURL] = useState<string | null>(null);
   const [audioTitle, setAudioTitle] = useState('Things I Can See');
   
   // Selected items state
@@ -52,45 +51,6 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
     'floor', 'art', 'screen', 'keyboard', 'mouse', 'dog', 'cat', 'trees', 'clouds'
   ];
   
-  // Handlers for input methods
-  const handleDrawingChange = async (blob: Blob) => {
-    // Clean up old URL if exists to prevent memory leaks
-    if (drawingPreviewURL) {
-      URL.revokeObjectURL(drawingPreviewURL);
-    }
-    
-    setDrawingBlob(blob);
-    
-    // Create temporary preview URL
-    const newPreviewURL = URL.createObjectURL(blob);
-    setDrawingPreviewURL(newPreviewURL);
-  };
-  
-  const handleAudioChange = async (blob: Blob) => {
-    // Clean up old URL if exists
-    if (audioPreviewURL) {
-      URL.revokeObjectURL(audioPreviewURL);
-    }
-    
-    setAudioBlob(blob);
-    
-    // Create temporary preview URL
-    const newPreviewURL = URL.createObjectURL(blob);
-    setAudioPreviewURL(newPreviewURL);
-  };
-  
-  // Cleanup URLs when component unmounts
-  useEffect(() => {
-    return () => {
-      if (drawingPreviewURL) {
-        URL.revokeObjectURL(drawingPreviewURL);
-      }
-      if (audioPreviewURL) {
-        URL.revokeObjectURL(audioPreviewURL);
-      }
-    };
-  }, []);
-  
   const handleSave = async () => {
     if (!user?.id) {
       toast.error("You need to be logged in to save your response");
@@ -104,32 +64,18 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
       
       // Upload drawing if any
       if (drawingBlob) {
-        const fileName = generateGroundingFilename(user.id, 'see', 'drawing');
-        const { data: drawingData, error: drawingError } = await supabase
-          .storage
-          .from('grounding_drawings')
-          .upload(fileName, drawingBlob, {
-            contentType: 'image/png',
-            upsert: true
-          });
-          
-        if (drawingError) throw drawingError;
-        drawingPath = drawingData.path;
+        const result = await uploadGroundingFile(user.id, 'see', drawingBlob, 'drawing');
+        if (result) {
+          drawingPath = result.path;
+        }
       }
       
       // Upload audio if any
       if (audioBlob) {
-        const fileName = generateGroundingFilename(user.id, 'see', 'audio');
-        const { data: audioData, error: audioError } = await supabase
-          .storage
-          .from('grounding_audio')
-          .upload(fileName, audioBlob, {
-            contentType: 'audio/webm',
-            upsert: true
-          });
-          
-        if (audioError) throw audioError;
-        audioPath = audioData.path;
+        const result = await uploadGroundingFile(user.id, 'see', audioBlob, 'audio');
+        if (result) {
+          audioPath = result.path;
+        }
       }
       
       // Save to database
@@ -155,6 +101,12 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Skip this section
+  const handleSkip = () => {
+    toast.info("Section skipped");
+    onComplete();
   };
   
   const isValid = () => {
@@ -277,10 +229,9 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <DrawingJournal 
-                onDrawingChange={handleDrawingChange}
-                onTitleChange={setDrawingTitle}
-                title={drawingTitle}
+              <DrawingCanvas 
+                onDrawingChange={setDrawingBlob} 
+                initialColor="#F5DF4D"
               />
             </motion.div>
           )}
@@ -294,7 +245,7 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
               transition={{ duration: 0.3 }}
             >
               <AudioJournal
-                onAudioChange={handleAudioChange}
+                onAudioChange={setAudioBlob}
                 onTitleChange={setAudioTitle}
                 title={audioTitle}
               />
@@ -335,7 +286,7 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
         <div className="space-x-2">
           <Button 
             variant="outline"
-            onClick={onComplete}
+            onClick={handleSkip}
           >
             Skip
           </Button>
