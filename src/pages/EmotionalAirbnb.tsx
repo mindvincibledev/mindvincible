@@ -23,6 +23,7 @@ import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 
 
 import { useParams, Link, Navigate } from 'react-router-dom';
+import { generateEmotionalAirbnbFilename } from '@/utils/emotionalAirbnbFileUtils';
 
 
 const EmotionalAirbnb = () => {
@@ -208,11 +209,10 @@ const EmotionalAirbnb = () => {
       let messageDrawingPath = null;
 
       // Helper function for uploading drawings
-      const uploadDrawing = async (blob: Blob | null, prefix: string) => {
-        if (!blob) return null;
+      const uploadDrawing = async (blob: Blob | null, section: string) => {
+        if (!blob || !user) return null;
         
-        const timestamp = Date.now();
-        const fileName = `${prefix}_${timestamp}.png`;
+        const fileName = generateEmotionalAirbnbFilename(user.id, section);
         
         const { error: uploadError } = await supabase.storage
           .from('emotional_airbnb_drawings')
@@ -220,17 +220,13 @@ const EmotionalAirbnb = () => {
             contentType: 'image/png',
             upsert: true
           });
-          
+        
         if (uploadError) {
-          console.error(`Error uploading ${prefix} drawing:`, uploadError);
-          throw new Error(`Failed to upload ${prefix} drawing: ${uploadError.message}`);
+          console.error(`Error uploading ${section} drawing:`, uploadError);
+          throw new Error(`Failed to upload ${section} drawing: ${uploadError.message}`);
         }
         
-        const { data: drawingUrl } = supabase.storage
-          .from('emotional_airbnb_drawings')
-          .getPublicUrl(fileName);
-        
-        return drawingUrl.publicUrl;
+        return fileName;
       };
 
       // Upload each drawing if it exists
@@ -258,7 +254,7 @@ const EmotionalAirbnb = () => {
         messageDrawingPath = await uploadDrawing(formData.messageDrawing, 'message');
       }
 
-      // Insert data into the database - using the correct column names
+      // Insert data into the database
       const { error } = await supabase
         .from('emotional_airbnb')
         .insert({

@@ -1,5 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
+import { getSignedUrl } from '@/utils/emotionalAirbnbFileUtils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ const SectionBase: React.FC<SectionBaseProps> = ({
   
   // Drawing state
   const [canvasContext, setCanvasContext] = useState<CanvasRenderingContext2D | null>(null);
-  const [lastPosition, setLastPosition] = useState<{x: number, y: number} | null>(null);
+  const [lastPosition, setLastPosition<{x: number, y: number} | null>](null);
 
   // Initialize canvas on mount
   useEffect(() => {
@@ -56,16 +56,29 @@ const SectionBase: React.FC<SectionBaseProps> = ({
 
     // If there's an existing drawing blob, display it
     if (drawingBlob) {
-      const img = new Image();
-      const url = URL.createObjectURL(drawingBlob);
-      
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        URL.revokeObjectURL(url);
-        setIsCanvasEmpty(false);
+      const loadDrawing = async () => {
+        const img = new Image();
+        
+        if (typeof drawingBlob === 'string') {
+          // If we have a path, get a signed URL
+          const signedUrl = await getSignedUrl(drawingBlob);
+          img.src = signedUrl;
+        } else {
+          // If we have a blob, create an object URL
+          const url = URL.createObjectURL(drawingBlob);
+          img.src = url;
+          img.onload = () => URL.revokeObjectURL(url);
+        }
+        
+        img.onload = () => {
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            setIsCanvasEmpty(false);
+          }
+        };
       };
       
-      img.src = url;
+      loadDrawing();
     }
 
     // Handle window resize
