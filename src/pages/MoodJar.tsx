@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Paintbrush, Save, RotateCcw, Images, Link } from 'lucide-react';
@@ -122,12 +123,13 @@ const MoodJar = () => {
       
       // Generate a unique filename
       const fileName = generateJarFilename(userId);
+      const filePath = `${userId}/${fileName}`;
       
       // Upload the image to Supabase storage
       const { data: uploadData, error: uploadError } = await supabase
         .storage
         .from('mood_jars')
-        .upload(fileName, blobImage, {
+        .upload(filePath, blobImage, {
           contentType: 'image/png',
           cacheControl: '3600',
         });
@@ -137,14 +139,15 @@ const MoodJar = () => {
         throw uploadError;
       }
 
-      // Get the public URL for the uploaded image
-      const { data: urlData } = supabase
+      // Create a signed URL for this private image that will last for 24 hours
+      const { data: signedUrlData, error: signedUrlError } = await supabase
         .storage
         .from('mood_jars')
-        .getPublicUrl(fileName);
+        .createSignedUrl(filePath, 24 * 60 * 60); // 24 hours in seconds
 
-      if (!urlData.publicUrl) {
-        throw new Error("Failed to get public URL for uploaded image");
+      if (signedUrlError || !signedUrlData) {
+        console.error("Signed URL error:", signedUrlError);
+        throw signedUrlError || new Error("Failed to create signed URL");
       }
 
       // Insert into mood_jar_table with the verified user ID
@@ -152,7 +155,7 @@ const MoodJar = () => {
         .from('mood_jar_table')
         .insert({
           user_id: userId,
-          image_path: urlData.publicUrl
+          image_path: signedUrlData.signedUrl
         });
 
       if (dbError) {

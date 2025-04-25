@@ -19,5 +19,5 @@ export const getBase64FromCanvas = (canvas: HTMLCanvasElement | null): Promise<B
  * Helper function to generate a unique filename for jar images
  */
 export const generateJarFilename = (userId: string): string => {
-  return `jar_${userId}_${Date.now()}.png`;
+  return `jar_${Date.now()}.png`;
 };

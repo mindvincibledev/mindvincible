@@ -12,6 +12,7 @@ interface MoodJar {
   id: string;
   image_path: string;
   created_at: string;
+  file_path?: string;
 }
 
 const RecentMoodJars = () => {
@@ -34,6 +35,7 @@ const RecentMoodJars = () => {
         const { data, error } = await supabase
           .from('mood_jar_table')
           .select('id, image_path, created_at')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(5);
         
@@ -42,8 +44,38 @@ const RecentMoodJars = () => {
           throw error;
         }
         
-        if (data) {
-          setMoodJars(data as MoodJar[]);
+        if (data && data.length > 0) {
+          // Process each jar to ensure we have valid signed URLs
+          const processedJars = await Promise.all(data.map(async (jar) => {
+            // Check if the image_path is already a valid URL or has expired
+            const isExpiredUrl = jar.image_path.includes('token=') && new URL(jar.image_path).searchParams.get('token');
+            
+            // If it's not a valid URL or is expired, create a new signed URL
+            if (!jar.image_path.startsWith('http') || isExpiredUrl) {
+              const filePath = jar.image_path.includes('mood_jars/') 
+                ? jar.image_path.split('mood_jars/')[1] 
+                : `${user.id}/${jar.image_path.split('/').pop()}`;
+
+              // Create a signed URL for the image
+              const { data: signedUrlData, error: signedUrlError } = await supabase
+                .storage
+                .from('mood_jars')
+                .createSignedUrl(filePath, 24 * 60 * 60); // 24 hours in seconds
+
+              if (!signedUrlError && signedUrlData) {
+                return { ...jar, image_path: signedUrlData.signedUrl, file_path: filePath };
+              }
+              
+              // If we couldn't get a signed URL, keep the original
+              console.error(`Could not create signed URL for jar ${jar.id}:`, signedUrlError);
+            }
+            
+            return jar;
+          }));
+          
+          setMoodJars(processedJars as MoodJar[]);
+        } else {
+          setMoodJars([]);
         }
       } catch (err) {
         console.error('Error processing mood jar data:', err);
@@ -103,6 +135,11 @@ const RecentMoodJars = () => {
                       src={jar.image_path} 
                       alt="Mood Jar" 
                       className="w-full h-48 object-contain mb-2 rounded"
+                      onError={(e) => {
+                        console.error("Image failed to load:", jar.image_path);
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder.svg";
+                      }}
                     />
                     <p className="text-sm text-gray-600">
                       {new Date(jar.created_at).toLocaleDateString()}
