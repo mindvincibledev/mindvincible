@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Hand, Pencil, Mic, Type, Save, ArrowLeft } from 'lucide-react';
@@ -8,10 +9,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import DrawingJournal from '@/components/journal/DrawingJournal';
+import DrawingCanvas from '@/components/grounding/DrawingCanvas';
 import AudioJournal from '@/components/journal/AudioJournal';
 import ObjectDragDrop from './ObjectDragDrop';
 import { Progress } from '@/components/ui/progress';
+import { uploadGroundingFile } from '@/utils/groundingFileUtils';
 
 interface TouchSectionProps {
   onComplete: () => void;
@@ -99,36 +101,38 @@ const TouchSection: React.FC<TouchSectionProps> = ({ onComplete, onBack }) => {
     try {
       setSaving(true);
       let drawingPath = null;
+      let drawingUrl = null;
       let audioPath = null;
+      let audioUrl = null;
       
       // Upload drawing if any
       if (drawingBlob) {
-        const fileName = `touch_section_${user.id}_${Date.now()}.png`;
-        const { data: drawingData, error: drawingError } = await supabase
-          .storage
-          .from('grounding_drawings')
-          .upload(fileName, drawingBlob, {
-            contentType: 'image/png',
-            upsert: true
-          });
-          
-        if (drawingError) throw drawingError;
-        drawingPath = drawingData.path;
+        const drawingResult = await uploadGroundingFile(
+          user.id,
+          'touch',
+          drawingBlob,
+          'drawing'
+        );
+        
+        if (drawingResult) {
+          drawingPath = drawingResult.path;
+          drawingUrl = drawingResult.url;
+        }
       }
       
       // Upload audio if any
       if (audioBlob) {
-        const fileName = `touch_section_${user.id}_${Date.now()}.webm`;
-        const { data: audioData, error: audioError } = await supabase
-          .storage
-          .from('grounding_audio')
-          .upload(fileName, audioBlob, {
-            contentType: 'audio/webm',
-            upsert: true
-          });
-          
-        if (audioError) throw audioError;
-        audioPath = audioData.path;
+        const audioResult = await uploadGroundingFile(
+          user.id,
+          'touch',
+          audioBlob,
+          'audio'
+        );
+        
+        if (audioResult) {
+          audioPath = audioResult.path;
+          audioUrl = audioResult.url;
+        }
       }
       
       // Save to database (ensure user_id is set)
@@ -276,10 +280,8 @@ const TouchSection: React.FC<TouchSectionProps> = ({ onComplete, onBack }) => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <DrawingJournal 
+              <DrawingCanvas 
                 onDrawingChange={handleDrawingChange}
-                onTitleChange={setDrawingTitle}
-                title={drawingTitle}
               />
             </motion.div>
           )}
