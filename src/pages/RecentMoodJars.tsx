@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,11 +8,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
+import { getSignedUrl } from '@/utils/jarUtils';
 
 interface MoodJar {
   id: string;
   image_path: string;
   created_at: string;
+  signed_url?: string;
 }
 
 const RecentMoodJars = () => {
@@ -41,6 +44,7 @@ const RecentMoodJars = () => {
     
     try {
       setLoading(true);
+      console.log('Fetching mood jars for user:', user.id);
       
       const { data, error } = await supabase
         .from('mood_jar_table')
@@ -54,7 +58,23 @@ const RecentMoodJars = () => {
       }
       
       if (data) {
-        setMoodJars(data as MoodJar[]);
+        console.log(`Found ${data.length} mood jars`);
+        
+        // Get signed URLs for all images
+        const jarsWithUrls = await Promise.all(
+          data.map(async (jar) => {
+            try {
+              console.log(`Getting signed URL for jar image: ${jar.image_path}`);
+              const signedUrl = await getSignedUrl(jar.image_path);
+              return { ...jar, signed_url: signedUrl };
+            } catch (error) {
+              console.error(`Error getting signed URL for jar ${jar.id}:`, error);
+              return jar;
+            }
+          })
+        );
+        
+        setMoodJars(jarsWithUrls);
       }
     } catch (err) {
       console.error('Error processing mood jar data:', err);
@@ -129,11 +149,23 @@ const RecentMoodJars = () => {
                   {moodJars.map((jar) => (
                     <div key={jar.id} className="bg-white rounded-lg overflow-hidden shadow-md border border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                       <div className="p-2 h-52">
-                        <img 
-                          src={jar.image_path} 
-                          alt="Mood Jar" 
-                          className="w-full h-full object-contain rounded"
-                        />
+                        {jar.signed_url ? (
+                          <img 
+                            src={jar.signed_url} 
+                            alt="Mood Jar" 
+                            className="w-full h-full object-contain rounded"
+                            onError={(e) => {
+                              console.error("Error loading image");
+                              const target = e.target as HTMLImageElement;
+                              target.src = "/placeholder.svg";
+                              target.alt = "Failed to load mood jar image";
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded">
+                            <p className="text-gray-400">Image not available</p>
+                          </div>
+                        )}
                       </div>
                       <div className="p-4 border-t border-gray-100">
                         <p className="text-sm text-gray-600 mb-1">Created on:</p>

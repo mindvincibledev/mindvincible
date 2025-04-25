@@ -50,7 +50,9 @@ const RecentMoodJars = () => {
           const jarsWithUrls = await Promise.all(
             jars.map(async (jar) => {
               try {
+                console.log(`Getting signed URL for jar ${jar.id} with path: ${jar.image_path}`);
                 const signedUrl = await getSignedUrl(jar.image_path);
+                console.log(`Received signed URL: ${signedUrl.substring(0, 50)}...`);
                 return { ...jar, signed_url: signedUrl };
               } catch (error) {
                 console.error(`Error getting signed URL for jar ${jar.id}:`, error);
@@ -114,11 +116,23 @@ const RecentMoodJars = () => {
               <CarouselItem key={jar.id} className="md:basis-1/2 lg:basis-1/3">
                 <div className="p-1">
                   <div className="bg-white rounded-lg overflow-hidden flex flex-col items-center p-2 shadow-md border border-gray-100">
-                    <img 
-                      src={jar.signed_url || jar.image_path} 
-                      alt="Mood Jar" 
-                      className="w-full h-48 object-contain mb-2 rounded"
-                    />
+                    {jar.signed_url ? (
+                      <img 
+                        src={jar.signed_url} 
+                        alt="Mood Jar" 
+                        className="w-full h-48 object-contain mb-2 rounded"
+                        onError={(e) => {
+                          console.error("Error loading image");
+                          const target = e.target as HTMLImageElement;
+                          target.src = "placeholder.svg";
+                          target.alt = "Failed to load mood jar image";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-48 flex items-center justify-center bg-gray-100 mb-2 rounded">
+                        <p className="text-gray-400">Image not available</p>
+                      </div>
+                    )}
                     <p className="text-sm text-gray-600">
                       {new Date(jar.created_at).toLocaleDateString()}
                     </p>
