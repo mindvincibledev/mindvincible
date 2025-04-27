@@ -28,12 +28,20 @@ const Login = () => {
     const errorCode = query.get('error_code');
     const errorDescription = query.get('error_description');
     
-    if (urlError && errorCode === 'signup_disabled') {
-      setError('Account creation is not allowed. Please contact the administrator for access.');
+    if (urlError) {
+      let errorMessage = 'An error occurred during authentication.';
+      
+      if (errorCode === 'signup_disabled') {
+        errorMessage = 'Account creation is not allowed. Please contact the administrator for access.';
+      } else if (errorCode === 'unexpected_failure' && errorDescription?.includes('Database error')) {
+        errorMessage = 'Error creating user account. Please try again or contact support.';
+      }
+      
+      setError(errorMessage);
       toast({
         variant: "destructive",
-        title: "Access Denied",
-        description: "New account creation is not permitted. Please contact the system administrator.",
+        title: "Authentication Error",
+        description: errorMessage,
       });
     }
   }, [location]);
