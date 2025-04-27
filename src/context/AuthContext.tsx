@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -67,6 +68,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .single();
 
           if (!existingUser && !checkError) {
+            // Generate a random secure password for Google users
+            // They won't need this password since they'll sign in via Google
+            const randomPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).toUpperCase().slice(-12);
+            
             // Create new user entry for Google authenticated users
             const { error: insertError } = await supabase
               .from('users')
@@ -74,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 id: session.user.id,
                 email: session.user.email,
                 name: session.user.user_metadata.full_name || session.user.email?.split('@')[0],
+                password: randomPassword, // Add the required password field
                 user_type: UserType.Student // Default to Student type for Google auth
               });
 
