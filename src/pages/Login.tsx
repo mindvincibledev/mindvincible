@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Mail, Lock, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
@@ -19,6 +18,25 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Parse URL for error messages
+  useEffect(() => {
+    // Check for error in URL parameters
+    const query = new URLSearchParams(location.search);
+    const urlError = query.get('error');
+    const errorCode = query.get('error_code');
+    const errorDescription = query.get('error_description');
+    
+    if (urlError && errorCode === 'signup_disabled') {
+      setError('Account creation is not allowed. Please contact the administrator for access.');
+      toast({
+        variant: "destructive",
+        title: "Access Denied",
+        description: "New account creation is not permitted. Please contact the system administrator.",
+      });
+    }
+  }, [location]);
 
   // Helper to check mood entry for today
   const checkMoodEntryToday = async (userId: string) => {
@@ -44,10 +62,12 @@ const Login = () => {
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
+      setError(''); // Clear any previous errors
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin
+          redirectTo: window.location.origin + '/login' // Redirect back to login page to handle errors
         }
       });
 
