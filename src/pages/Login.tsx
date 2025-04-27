@@ -41,57 +41,6 @@ const Login = () => {
     return Array.isArray(data) && data.length > 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    
-    try {
-      const userData = await signIn(email, password);
-      
-      // Check user type and redirect accordingly
-      switch (userData?.user_type) {
-        case UserType.Admin:
-          toast({
-            title: "Welcome, Admin!",
-            description: "You have successfully logged in.",
-          });
-          navigate('/admin-dashboard');
-          break;
-        case UserType.Clinician:
-          toast({
-            title: "Welcome, Clinician!",
-            description: "You have successfully logged in.",
-          });
-          navigate('/clinician-dashboard');
-          break;
-        case UserType.Student:
-        default:
-          // Check if the student user has already done mood entry today
-          if (userData) {
-            const hasMoodEntry = await checkMoodEntryToday(userData.id);
-            toast({
-              title: "Welcome!",
-              description: "You have successfully logged in.",
-            });
-            if (hasMoodEntry) {
-              navigate('/home');
-            } else {
-              navigate('/mood-entry');
-            }
-          }
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Failed to log in. Please check your credentials.');
-      }
-      setLoading(false);
-    }
-  };
-
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
@@ -136,74 +85,24 @@ const Login = () => {
               </Link>
             </div>
             <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-              Welcome Back
+              Welcome to M(in)dvincible
             </h2>
             {error && (
               <div className="bg-red-500/20 border border-red-500/50 text-red-700 rounded-md p-3 mb-4">
                 {error}
               </div>
             )}
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <Label htmlFor="email" className="text-gray-700 mb-1.5 block">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="Enter your email" 
-                    className="pl-10 bg-white/50 border-gray-200 text-gray-800 placeholder:text-gray-400 focus:border-[#3DFDFF] focus:ring-[#3DFDFF]/30" 
-                    value={email} 
-                    onChange={e => setEmail(e.target.value)} 
-                    required 
-                  />
-                </div>
+            <div className="space-y-5">
+              <div className="text-center text-gray-600 mb-6">
+                <p>Sign in with your Google account to continue</p>
               </div>
               
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <Label htmlFor="password" className="text-gray-700">Password</Label>
-                  <Link to="/forgot-password" className="text-sm text-[#3DFDFF] hover:text-[#3DFDFF]/80 transition-colors hover:underline">
-                    Forgot Password?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    placeholder="Enter your password" 
-                    className="pl-10 bg-white/50 border-gray-200 text-gray-800 placeholder:text-gray-400 focus:border-[#3DFDFF] focus:ring-[#3DFDFF]/30" 
-                    value={password} 
-                    onChange={e => setPassword(e.target.value)} 
-                    required 
-                  />
-                </div>
-              </div>
-              
-              <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:from-[#FF8A48] hover:to-[#FC68B3] text-white transition-all duration-300 py-6" 
-                disabled={loading}
-              >
-                {loading ? 'Logging in...' : 'Login'}
-              </Button>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-300"></span>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white/70 text-gray-500">Or continue with</span>
-                </div>
-              </div>
-
               <Button
                 type="button"
-                variant="outline"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 border-gray-300 hover:bg-gray-50"
+                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 py-6"
+                variant="outline"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -223,18 +122,9 @@ const Login = () => {
                     fill="#EA4335"
                   />
                 </svg>
-                Continue with Google
+                <span className="ml-1">{loading ? 'Signing in...' : 'Sign in with Google'}</span>
               </Button>
-              
-              <div className="mt-4 text-center">
-                <p className="text-gray-600">
-                  Don't have an account?{' '}
-                  <Link to="/register" className="text-[#3DFDFF] hover:underline">
-                    Register now
-                  </Link>
-                </p>
-              </div>
-            </form>
+            </div>
           </div>
         </motion.div>
       </div>

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,7 +8,6 @@ import { useEffect } from "react";
 import Home from "./pages/Home";
 import HomePage from "./pages/HomePage";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import MoodEntry from "./pages/MoodEntry";
 import MoodJar from "./pages/MoodJar";
@@ -72,7 +72,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        {/* Removed Register route since we're only using Google SSO */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
