@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -56,9 +55,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Check for stored session on initial load
   useEffect(() => {
     // Set up auth state listener FIRST to prevent missed events
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session?.user?.id);
       if (session) {
+        // For Google Sign In, we need to ensure the user exists in our users table
+        if (event === 'SIGNED_IN') {
+          const { data: existingUser, error: checkError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (!existingUser && !checkError) {
+            // Create new user entry for Google authenticated users
+            const { error: insertError } = await supabase
+              .from('users')
+              .insert({
+                id: session.user.id,
+                email: session.user.email,
+                name: session.user.user_metadata.full_name || session.user.email?.split('@')[0],
+                user_type: UserType.Student // Default to Student type for Google auth
+              });
+
+            if (insertError) {
+              console.error('Error creating user after Google auth:', insertError);
+            }
+          }
+        }
         fetchUser(session.user.id);
         setSession(true);
       } else {
