@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogClose,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
 import { getSignedUrl } from '@/utils/powerOfHiFileUtils';
@@ -79,14 +80,25 @@ const PastGoals = () => {
       setCompletedGoals(goals);
       
       // Get signed URLs for all paths
-      const pathsToFetch = goals.reduce((paths: string[], goal) => {
-        if (goal.who_path) paths.push(goal.who_path);
-        if (goal.how_it_went_path) paths.push(goal.how_it_went_path);
-        if (goal.feeling_path) paths.push(goal.feeling_path);
-        return paths;
-      }, []);
+      const pathsToFetch: {path: string, type: 'audio' | 'drawing'}[] = [];
+      goals.forEach(goal => {
+        if (goal.who_path) {
+          const fileType = determineFileType(goal.who_path);
+          pathsToFetch.push({ path: goal.who_path, type: fileType });
+        }
+        if (goal.how_it_went_path) {
+          const fileType = determineFileType(goal.how_it_went_path);
+          pathsToFetch.push({ path: goal.how_it_went_path, type: fileType });
+        }
+        if (goal.feeling_path) {
+          const fileType = determineFileType(goal.feeling_path);
+          pathsToFetch.push({ path: goal.feeling_path, type: fileType });
+        }
+      });
       
-      await fetchSignedUrls(pathsToFetch);
+      if (pathsToFetch.length > 0) {
+        await fetchSignedUrls(pathsToFetch);
+      }
     } catch (error: any) {
       toast.error("Failed to load completed goals");
       console.error('Error:', error);
@@ -95,23 +107,29 @@ const PastGoals = () => {
     }
   };
   
-  const fetchSignedUrls = async (paths: string[]) => {
+  const determineFileType = (path: string): 'audio' | 'drawing' => {
+    // Check if the path contains 'audio' or ends with an audio extension
+    if (path.includes('audio') || path.endsWith('.webm') || path.endsWith('.mp3') || path.endsWith('.wav')) {
+      return 'audio';
+    }
+    // Default to drawing for all other files
+    return 'drawing';
+  };
+  
+  const fetchSignedUrls = async (paths: {path: string, type: 'audio' | 'drawing'}[]) => {
     const urls: FileUrls = {};
     const tempLoadingState: {[key: string]: boolean} = {};
     
-    for (const path of paths) {
+    for (const { path, type } of paths) {
       if (path) {
         try {
           tempLoadingState[path] = true;
           setLoadingFiles(prevState => ({...prevState, [path]: true}));
           
-          const isAudio = path.includes('audio');
-          const fileType = isAudio ? 'audio' : 'drawing';
+          console.log(`Fetching signed URL for ${path} (type: ${type})`);
           
-          console.log(`Fetching signed URL for ${path} (type: ${fileType})`);
-          
-          // Directly pass the file type, not the bucket name
-          const signedUrl = await getSignedUrl(path, fileType);
+          // Get signed URL with the appropriate file type
+          const signedUrl = await getSignedUrl(path, type);
           
           console.log(`Got signed URL for ${path} with length: ${signedUrl.length}`);
           urls[path] = signedUrl;
@@ -160,7 +178,10 @@ const PastGoals = () => {
         <Button 
           variant="outline" 
           size="sm" 
-          onClick={() => fetchSignedUrls([path])}
+          onClick={() => fetchSignedUrls([{ 
+            path, 
+            type: determineFileType(path)
+          }])}
           className="ml-2"
         >
           Retry
@@ -168,7 +189,7 @@ const PastGoals = () => {
       </div>;
     }
     
-    const isAudio = path.includes('audio');
+    const isAudio = determineFileType(path) === 'audio';
     const previewStyle = "mt-4 p-4 bg-gray-50 rounded-lg";
     
     if (isAudio) {
@@ -317,6 +338,7 @@ const PastGoals = () => {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Goal Details</DialogTitle>
+            <DialogDescription>View the details of your completed goal</DialogDescription>
           </DialogHeader>
           
           {selectedGoal && (

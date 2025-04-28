@@ -28,10 +28,13 @@ export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Pro
     
     console.log(`Using bucket: ${bucket}`);
     
+    // Handle paths that might already include the bucket name
+    const cleanPath = path.includes('/') ? path : `${path}`;
+    
     const { data, error } = await supabase
       .storage
       .from(bucket)
-      .createSignedUrl(path, 3600); // 1 hour expiration
+      .createSignedUrl(cleanPath, 3600); // 1 hour expiration
 
     if (error) {
       console.error('Supabase error getting signed URL:', error);
@@ -88,7 +91,7 @@ export const uploadPowerOfHiFile = async (
     const fileName = generatePowerOfHiFilename(userId, section, type);
     console.log(`Uploading ${type} file: ${fileName}`);
     
-    const bucket = type === 'drawing' ? 'power_of_hi_drawings' : 'power_of_hi_audio';
+    const bucket = type === 'audio' ? 'power_of_hi_audio' : 'power_of_hi_drawings';
     const contentType = type === 'drawing' ? 'image/png' : 'audio/webm';
     
     const { data, error } = await supabase
