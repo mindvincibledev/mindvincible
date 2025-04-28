@@ -17,16 +17,10 @@ export const generatePowerOfHiFilename = (userId: string, section: string, type:
  */
 export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Promise<string> => {
   try {
-    console.log(`Requesting signed URL for Power of Hi path: ${path}, type: ${type}`);
+    console.log(`Requesting signed URL for path: ${path}, type: ${type}`);
     
     if (!path || typeof path !== 'string') {
       throw new Error('Invalid storage path provided');
-    }
-    
-    // Check if path includes user ID structure
-    const pathSegments = path.split('/');
-    if (pathSegments.length === 1) {
-      console.warn('Path does not include user ID structure, this may cause permissions issues');
     }
     
     // Select the appropriate bucket based on the file type
@@ -34,7 +28,7 @@ export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Pro
     
     console.log(`Using bucket: ${bucket}`);
     
-    // Make sure we're using the correct path format
+    // Handle paths that might already include the bucket name
     const cleanPath = path.includes('/') ? path : `${path}`;
     
     const { data, error } = await supabase
@@ -68,24 +62,19 @@ export const refreshSignedUrlIfNeeded = async (path: string, currentUrl: string,
       return await getSignedUrl(path, type);
     }
     
-    try {
-      // Check if URL has token parameter which indicates it's a signed URL
-      const urlParams = new URLSearchParams(new URL(currentUrl).search);
-      const token = urlParams.get('token');
-      
-      // If no token or URL is close to expiring (within 5 minutes), refresh
-      if (!token || Date.now() > parseInt(token) - 300000) {
-        return await getSignedUrl(path, type);
-      }
-      
-      return currentUrl;
-    } catch (e) {
-      // If URL parsing fails, try to get a new signed URL
+    // Check if URL has token parameter which indicates it's a signed URL
+    const urlParams = new URLSearchParams(new URL(currentUrl).search);
+    const token = urlParams.get('token');
+    
+    // If no token or URL is close to expiring (within 5 minutes), refresh
+    if (!token || Date.now() > parseInt(token) - 300000) {
       return await getSignedUrl(path, type);
     }
+    
+    return currentUrl;
   } catch (error) {
     console.error('Error refreshing signed URL:', error);
-    throw error; // Re-throw to let component handle the error
+    return currentUrl || await getSignedUrl(path, type);
   }
 };
 

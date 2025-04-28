@@ -1,101 +1,131 @@
 
 import React, { useState, useEffect } from 'react';
-import { getSignedUrl as getJournalSignedUrl, refreshSignedUrlIfNeeded as refreshJournalSignedUrl } from '@/utils/journalFileUtils';
-import { getSignedUrl as getEmotionalAirbnbSignedUrl } from '@/utils/emotionalAirbnbFileUtils';
-import { getSignedUrl as getPowerOfHiSignedUrl } from '@/utils/powerOfHiFileUtils';
-import { getSignedUrl as getGroundingSignedUrl } from '@/utils/groundingFileUtils';
+import { getSignedUrl, refreshSignedUrlIfNeeded } from '@/utils/journalFileUtils';
 import { Button } from '@/components/ui/button';
 import { Play, Pause } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MediaDisplayProps {
   filePath: string | null;
   type: 'drawing' | 'audio';
-  userId?: string; // Optional user ID for accessing user-specific files
 }
 
-const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) => {
+const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type }) => {
   const [url, setUrl] = useState<string>('');
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
   const audioRef = React.useRef<HTMLAudioElement>(null);
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadMedia = async () => {
-      if (!filePath) {
-        setIsLoading(false);
-        return;
-      }
-      
-      setIsLoading(true);
-      setLoadError(false);
+      if (!filePath) return;
       
       try {
-        // Determine if this is a path from a specific activity based on path pattern
-        let signedUrl: string;
+        console.log(`Attempting to load ${type} from path: ${filePath}`);
+        const bucket = type === 'drawing' ? 'drawing_files' : 'audio_files';
         
-        if (filePath.includes('emotional_airbnb')) {
-          signedUrl = await getEmotionalAirbnbSignedUrl(filePath);
-        } else if (filePath.includes('power_of_hi')) {
-          signedUrl = await getPowerOfHiSignedUrl(filePath, type);
-        } else if (filePath.includes('grounding')) {
-          signedUrl = await getGroundingSignedUrl(filePath, type);
-        } else {
-          // Default to journal files
-          const bucket = type === 'drawing' ? 'drawing_files' : 'audio_files';
-          signedUrl = await getJournalSignedUrl(filePath, bucket);
+        // First try to get the URL from the specific bucket
+        try {
+          const signedUrl = await getSignedUrl(filePath, bucket);
+          console.log(`Successfully retrieved URL from ${bucket}`);
+          setUrl(signedUrl);
+          setError(null);
+          return;
+        } catch (initialError) {
+          console.warn(`Could not retrieve from ${bucket}, trying alternative buckets...`);
+          
+          // Try alternate buckets based on file path hints
+          let alternativeBucket = null;
+          
+          if (filePath.includes('emotional_airbnb')) {
+            alternativeBucket = 'emotional_airbnb_drawings';
+          } else if (filePath.includes('grounding')) {
+            alternativeBucket = type === 'drawing' ? 'grounding_drawings' : 'grounding_audio';
+          } else if (filePath.includes('power_of_hi') || filePath.includes('hi_challenge')) {
+            alternativeBucket = type === 'drawing' ? 'power_of_hi_drawings' : 'power_of_hi_audio';
+          }
+          
+          if (alternativeBucket) {
+            try {
+              // For these specialized buckets, we need to use their specific utility functions
+              let specializedUrl;
+              
+              if (alternativeBucket === 'emotional_airbnb_drawings') {
+                const { getSignedUrl: getEmotionalUrl } = await import('@/utils/emotionalAirbnbFileUtils');
+                specializedUrl = await getEmotionalUrl(filePath);
+              } else if (alternativeBucket.includes('grounding')) {
+                const { getSignedUrl: getGroundingUrl } = await import('@/utils/groundingFileUtils');
+                specializedUrl = await getGroundingUrl(filePath, type);
+              } else if (alternativeBucket.includes('power_of_hi')) {
+                const { getSignedUrl: getPowerOfHiUrl } = await import('@/utils/powerOfHiFileUtils');
+                specializedUrl = await getPowerOfHiUrl(filePath, type);
+              }
+              
+              if (specializedUrl) {
+                console.log(`Successfully retrieved URL from ${alternativeBucket}`);
+                setUrl(specializedUrl);
+                setError(null);
+                return;
+              }
+            } catch (specialError) {
+              console.error(`Error with specialized bucket ${alternativeBucket}:`, specialError);
+            }
+          }
+          
+          // As a last resort, try to directly fetch from storage URL
+          try {
+            const { data } = await supabase.storage.from(bucket).getPublicUrl(filePath);
+            if (data?.publicUrl) {
+              console.log('Using public URL as fallback');
+              setUrl(data.publicUrl);
+              setError(null);
+              return;
+            }
+          } catch (publicUrlError) {
+            console.error('Error getting public URL:', publicUrlError);
+          }
+          
+          setError(`Could not load media: ${initialError.message}`);
         }
-        
-        setUrl(signedUrl);
-        setIsLoading(false);
       } catch (error) {
         console.error('Error loading media:', error);
-        setLoadError(true);
-        setIsLoading(false);
-        toast({
-          variant: "destructive",
-          title: "Media Loading Error",
-          description: `Could not load ${type} file. Please try again later.`
-        });
+        setError('Failed to load media');
       }
     };
 
     loadMedia();
-  }, [filePath, type, userId, toast]);
+  }, [filePath, type]);
 
   const handlePlayPause = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play().catch(error => {
-          console.error('Error playing audio:', error);
-          toast({
-            variant: "destructive", 
-            title: "Playback Error",
-            description: "Could not play audio file."
-          });
+        audioRef.current.play().catch(err => {
+          console.error("Audio playback error:", err);
+          setError("Could not play audio. Format may not be supported.");
         });
       }
       setIsPlaying(!isPlaying);
     }
   };
 
-  // Show loading state
-  if (isLoading) {
-    return <div className="p-4 text-center text-gray-500">Loading {type}...</div>;
+  if (!filePath) return null;
+  
+  if (error) {
+    return (
+      <div className="mt-2 p-2 bg-red-50 text-red-600 rounded-md text-sm">
+        {error}
+      </div>
+    );
   }
 
-  // Show error state
-  if (loadError || !filePath) {
-    return null; // Hide component completely on error
-  }
-
-  // No URL available
   if (!url) {
-    return null;
+    return (
+      <div className="mt-2 p-2 bg-gray-100 rounded-md">
+        <p className="text-sm text-gray-500">Loading media...</p>
+      </div>
+    );
   }
 
   if (type === 'drawing') {
@@ -105,10 +135,7 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) =
           src={url} 
           alt="User drawing" 
           className="max-w-full h-auto rounded-lg border border-gray-200"
-          onError={() => {
-            setLoadError(true);
-            console.error('Failed to load image:', filePath);
-          }}
+          onError={() => setError("Image failed to load")}
         />
       </div>
     );
@@ -129,10 +156,7 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) =
           ref={audioRef} 
           src={url} 
           onEnded={() => setIsPlaying(false)} 
-          onError={() => {
-            setLoadError(true);
-            console.error('Failed to load audio:', filePath);
-          }}
+          onError={() => setError("Audio failed to load")}
           className="hidden" 
         />
         <span className="text-sm text-gray-500">Audio Recording</span>

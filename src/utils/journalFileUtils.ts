@@ -12,12 +12,6 @@ export const getSignedUrl = async (path: string, bucket: 'audio_files' | 'drawin
       throw new Error('Invalid storage path provided');
     }
     
-    // Check if path already includes user ID, if not prepend it
-    const pathSegments = path.split('/');
-    if (pathSegments.length === 1) {
-      console.warn('Path does not include user ID structure, this may cause permissions issues');
-    }
-    
     const { data, error } = await supabase
       .storage
       .from(bucket)
@@ -32,11 +26,11 @@ export const getSignedUrl = async (path: string, bucket: 'audio_files' | 'drawin
       throw new Error('Failed to generate signed URL');
     }
     
-    console.log(`Successfully generated signed URL for file in ${bucket}`);
+    console.log(`Successfully generated signed URL with length: ${data.signedUrl.length}`);
     return data.signedUrl;
   } catch (error) {
     console.error('Error getting signed URL:', error);
-    throw error; // Re-throw to let component handle the error
+    return '/placeholder.svg';
   }
 };
 
@@ -53,23 +47,17 @@ export const refreshSignedUrlIfNeeded = async (
       return await getSignedUrl(path, bucket);
     }
     
-    // Check if URL has parameters which indicate it's a signed URL
-    try {
-      const urlParams = new URLSearchParams(new URL(currentUrl).search);
-      const expiryString = urlParams.get('token');
-      
-      if (!expiryString || Date.now() > (parseInt(expiryString) - 300000)) { // Refresh if less than 5 mins left
-        return await getSignedUrl(path, bucket);
-      }
-      
-      return currentUrl;
-    } catch (e) {
-      // If URL parsing fails, try to get a new signed URL
+    const urlParams = new URLSearchParams(new URL(currentUrl).search);
+    const expiryString = urlParams.get('token');
+    
+    if (!expiryString || Date.now() > (parseInt(expiryString) - 300000)) { // Refresh if less than 5 mins left
       return await getSignedUrl(path, bucket);
     }
+    
+    return currentUrl;
   } catch (error) {
     console.error('Error refreshing signed URL:', error);
-    throw error; // Re-throw to let component handle the error
+    return currentUrl || await getSignedUrl(path, bucket);
   }
 };
 
@@ -81,3 +69,4 @@ export const generateJournalFilename = (userId: string, type: 'audio' | 'drawing
   const extension = type === 'audio' ? 'webm' : 'png';
   return `${userId}/${type}_${timestamp}.${extension}`;
 };
+
