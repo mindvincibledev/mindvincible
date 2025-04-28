@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,6 +17,7 @@ import { generateGroundingFilename, uploadGroundingFile } from '@/utils/groundin
 interface HearSectionProps {
   onComplete: () => void;
   onBack: () => void;
+  activityId: string;
 }
 
 const HEARING_OBJECTS = [
@@ -28,7 +28,7 @@ const HEARING_OBJECTS = [
   "Knock", "Clock", "Fan", "Stream", "Ocean", "Breathing"
 ];
 
-const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
+const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack, activityId }) => {
   const { user } = useAuth();
   const [inputType, setInputType] = useState<string>("text");
   const [textItems, setTextItems] = useState<string[]>([]);
@@ -113,12 +113,12 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
         }
       }
 
-      // Save to database
+      // Save to database with activityId
       const { error } = await supabase
         .from('grounding_responses')
         .insert({
           user_id: user.id,
-          activity_id: 'grounding-technique',
+          activity_id: activityId,
           section_name: 'hear',
           response_text: inputType === 'text' ? textItems.join(', ') : null,
           response_drawing_path: drawingPath,
@@ -126,10 +126,7 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack }) => {
           response_selected_items: inputType === 'select' ? selectedObjects : null
         });
 
-      if (error) {
-        console.error("Database error:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       toast.success("Response saved successfully!");
       onComplete();
