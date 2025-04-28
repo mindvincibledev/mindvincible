@@ -52,7 +52,7 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
   const navigate = useNavigate();
 
   const { user } = useAuth();
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   const handleFeedback = async (feedback: string) => {
     if (!user?.id) {
