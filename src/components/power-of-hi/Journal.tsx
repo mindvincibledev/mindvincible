@@ -561,6 +561,7 @@ const Journal = () => {
           what_felt_hard_rating: reflectionData.whatFeltHardRating,
           other_people_rating: reflectionData.otherPeopleRating,
           try_next_time_confidence: reflectionData.tryNextTimeConfidence,
+          visibility: reflectionData.visibility,
           updated_at: new Date().toISOString()
         })
         .eq('id', selectedGoal)
