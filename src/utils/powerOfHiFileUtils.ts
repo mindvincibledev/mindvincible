@@ -16,12 +16,12 @@ export const generatePowerOfHiFilename = (userId: string, section: string, type:
  * Determine the correct bucket based on section and file type
  */
 const getBucketName = (section: string, type: 'drawing' | 'audio'): string => {
-  // For "how_it_went" section, always use the audio bucket
+  // For "how_it_went" section, always use the audio bucket regardless of file type
   if (section === 'how_it_went') {
     return 'power_of_hi_audio';
   }
   
-  // For "who" and "feeling" sections, always use the drawings bucket
+  // For "who" and "feeling" sections, always use the drawings bucket regardless of file type
   return 'power_of_hi_drawings';
 };
 

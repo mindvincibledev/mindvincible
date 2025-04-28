@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -8,7 +9,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
-import MoodSelector from '@/components/mood/MoodSelector';
 import { Star, Trophy, Target, ArrowRight, Mic, MicOff, Upload, Image, Camera, Smile, X } from 'lucide-react';
 import { ArrowLeft, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
@@ -20,6 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 import ReflectionSection, { ReflectionData } from './ReflectionSection';
 import EmojiSlider from '@/components/ui/EmojiSlider';
 import { startOfWeek, endOfWeek } from 'date-fns';
+import PowerOfHiMoodSelector from './PowerOfHiMoodSelector';
 
 import { GitFork, Edit, Trash2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -805,3 +806,167 @@ const Journal = () => {
                             </div>
                             <input
                               id="howItWent-file"
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleFileChange(e, 'howItWent')}
+                              className="hidden"
+                            />
+                          </label>
+                          
+                          {isRecordingHowItWent ? (
+                            <button 
+                              onClick={() => stopRecording('howItWent')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                            >
+                              <MicOff className="w-4 h-4" />
+                              <span>Stop</span>
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => startRecording('howItWent')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                            >
+                              <Mic className="w-4 h-4" />
+                              <span>Record Audio</span>
+                            </button>
+                          )}
+                          
+                          <button 
+                            onClick={() => openStickerDialog('howItWent')}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                          >
+                            <Smile className="w-4 h-4" />
+                            <span>Add Sticker</span>
+                          </button>
+                        </div>
+                        
+                        {renderFilePreview(howItWentPreview, 'howItWent')}
+                        {renderStickers(howItWentStickers)}
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">How did you feel?</label>
+                        
+                        {/* Scrollable Mood Meter Section */}
+                        <div className="rounded-lg border border-gray-200 p-4 bg-white/50">
+                          <h4 className="text-sm font-semibold mb-2">Select your mood:</h4>
+                          <PowerOfHiMoodSelector 
+                            moods={MOODS}
+                            selectedMoodIndex={selectedMoodIndex}
+                            onMoodSelect={setSelectedMoodIndex}
+                          />
+                          <input 
+                            type="text"
+                            value={feeling}
+                            onChange={(e) => setFeeling(e.target.value)}
+                            placeholder="Or type your own feeling..."
+                            className="mt-3 w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          />
+                        </div>
+                        
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <label htmlFor="feeling-file" className="cursor-pointer">
+                            <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
+                              <Image className="w-4 h-4" />
+                              <span>Add Photo</span>
+                            </div>
+                            <input
+                              id="feeling-file"
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleFileChange(e, 'feeling')}
+                              className="hidden"
+                            />
+                          </label>
+                          
+                          {isRecordingFeeling ? (
+                            <button 
+                              onClick={() => stopRecording('feeling')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
+                            >
+                              <MicOff className="w-4 h-4" />
+                              <span>Stop</span>
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => startRecording('feeling')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
+                            >
+                              <Mic className="w-4 h-4" />
+                              <span>Record Audio</span>
+                            </button>
+                          )}
+                          
+                          <button 
+                            onClick={() => openStickerDialog('feeling')}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
+                          >
+                            <Smile className="w-4 h-4" />
+                            <span>Add Sticker</span>
+                          </button>
+                        </div>
+                        
+                        {renderFilePreview(feelingPreview, 'feeling')}
+                        {renderStickers(feelingStickers)}
+                      </div>
+
+                      <div className="flex justify-end">
+                        <Button
+                          onClick={handleSubmit}
+                          disabled={isSubmitting || !who || !howItWent || !feeling}
+                          className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] text-white hover:opacity-90"
+                        >
+                          {isSubmitting ? "Saving..." : (
+                            <>
+                              Save Progress
+                              <ArrowRight className="w-4 h-4 ml-2" />
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
+                </>
+              ) : (
+                <ReflectionSection 
+                  onSubmit={handleReflectionSubmit} 
+                  isSubmitting={isSubmitting} 
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Stickers Dialog */}
+      <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Choose a sticker</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 p-4">
+            {STICKERS.map((sticker) => (
+              <div 
+                key={sticker.id}
+                className="p-2 border border-gray-100 rounded-md hover:bg-gray-50 cursor-pointer flex items-center justify-center transition-colors"
+                onClick={() => addSticker(sticker.emoji || sticker.src)}
+              >
+                {sticker.emoji ? (
+                  <span className="text-3xl">{sticker.emoji}</span>
+                ) : (
+                  <img 
+                    src={sticker.src} 
+                    alt={sticker.alt}
+                    className="w-12 h-12 object-contain" 
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
+  );
+};
+
+export default Journal;
