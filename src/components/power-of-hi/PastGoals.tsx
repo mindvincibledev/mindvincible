@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { format } from 'date-fns';
 import { Mic, Image, Smile, ArrowLeft, Trash2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,7 @@ type CompletedGoal = {
   what_felt_hard_rating: number | null;
   other_people_rating: number | null;
   try_next_time_confidence: number | null;
+  visibility: boolean;
 };
 
 type FileUrls = {
@@ -60,6 +61,30 @@ const PastGoals = () => {
   useEffect(() => {
     fetchCompletedGoals();
   }, [user]);
+
+  const handleVisibilityChange = async (goalId: string, newVisibility: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('simple_hi_challenges')
+        .update({ visibility: newVisibility })
+        .eq('id', goalId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      // Update the local state
+      setCompletedGoals(goals =>
+        goals.map(goal =>
+          goal.id === goalId ? { ...goal, visibility: newVisibility } : goal
+        )
+      );
+
+      toast.success('Visibility updated successfully');
+    } catch (error: any) {
+      console.error('Error updating visibility:', error);
+      toast.error('Failed to update visibility');
+    }
+  };
 
   const fetchCompletedGoals = async () => {
     if (!user?.id) return;
@@ -337,7 +362,9 @@ const PastGoals = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Goal Details</DialogTitle>
+            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+              Goal Details
+            </DialogTitle>
             <DialogDescription>View the details of your completed goal</DialogDescription>
           </DialogHeader>
           
@@ -389,18 +416,26 @@ const PastGoals = () => {
                 {renderReflectionSection(selectedGoal)}
               </div>
 
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button
-                  variant="destructive"
-                  onClick={() => handleDelete(selectedGoal.id)}
-                  className="bg-red-500 hover:bg-red-600"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Goal
-                </Button>
-                <DialogClose asChild>
-                  <Button variant="secondary">Close</Button>
-                </DialogClose>
+              <div className="flex justify-between items-center space-x-2 pt-4">
+                <VisibilityToggle
+                  isVisible={selectedGoal.visibility}
+                  onToggle={(newVisibility) => handleVisibilityChange(selectedGoal.id, newVisibility)}
+                  description="Make visible to clinicians"
+                />
+                
+                <div className="flex space-x-2">
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleDelete(selectedGoal.id)}
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Goal
+                  </Button>
+                  <DialogClose asChild>
+                    <Button variant="secondary">Close</Button>
+                  </DialogClose>
+                </div>
               </div>
             </div>
           )}
