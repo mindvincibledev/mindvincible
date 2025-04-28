@@ -462,19 +462,43 @@ const Journal = () => {
       let whoPath = null;
       let howItWentPath = null;
       let feelingPath = null;
+      let temp = null;
+
+
       
       if (whoFile) {
-        const { path } = await uploadPowerOfHiFile(user.id, 'who', whoFile, 'drawing');
+        if (whoFile.type.startsWith('image/')) {
+          temp =  "drawing";
+        }
+
+        if (whoFile.type.startsWith('audio/')) {
+          temp =  "audio";
+        }
+        const { path } = await uploadPowerOfHiFile(user.id, 'who', whoFile, temp);
         whoPath = path;
       }
       
       if (howItWentFile) {
-        const { path } = await uploadPowerOfHiFile(user.id, 'how_it_went', howItWentFile, 'audio');
+        if (whoFile.type.startsWith('image/')) {
+          temp =  "drawing";
+        }
+
+        if (whoFile.type.startsWith('audio/')) {
+          temp =  "audio";
+        }
+        const { path } = await uploadPowerOfHiFile(user.id, 'how_it_went', howItWentFile, temp);
         howItWentPath = path;
       }
       
       if (feelingFile) {
-        const { path } = await uploadPowerOfHiFile(user.id, 'feeling', feelingFile, 'drawing');
+        if (whoFile.type.startsWith('image/')) {
+          temp =  "drawing";
+        }
+
+        if (whoFile.type.startsWith('audio/')) {
+          temp =  "audio";
+        }
+        const { path } = await uploadPowerOfHiFile(user.id, 'feeling', feelingFile, temp);
         feelingPath = path;
       }
       
