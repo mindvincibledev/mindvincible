@@ -146,18 +146,44 @@ const ForkInTheRoadActivity = () => {
     try {
       setIsSubmitting(true);
       
-      // Save visibility preference if decision exists
+      console.log("Visibility value in handleFeedback:", isVisible);
+      
+      // Save visibility preference to the decision that was just created or edited
+      const decisionQuery = supabase
+        .from('fork_in_road_decisions')
+        .update({ visibility: isVisible });
+      
       if (editingDecision) {
-        const { error: visibilityError } = await supabase
-          .from('fork_in_road_decisions')
-          .update({ visibility: isVisible })
+        // If editing existing decision, update by decision_id
+        const { error: visibilityError } = await decisionQuery
           .eq('decision_id', editingDecision.decision_id)
           .eq('user_id', user.id);
           
         if (visibilityError) {
-          console.error("Error updating visibility:", visibilityError);
+          console.error("Error updating visibility for existing decision:", visibilityError);
           toast.error("Failed to update visibility setting");
-          return;
+        }
+      } else {
+        // For newly created decision, find the most recent one by this user
+        const { data: latestDecisions, error: fetchError } = await supabase
+          .from('fork_in_road_decisions')
+          .select('decision_id')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        if (fetchError) {
+          console.error("Error fetching latest decision:", fetchError);
+        } else if (latestDecisions && latestDecisions.length > 0) {
+          const { error: updateError } = await supabase
+            .from('fork_in_road_decisions')
+            .update({ visibility: isVisible })
+            .eq('decision_id', latestDecisions[0].decision_id)
+            .eq('user_id', user.id);
+            
+          if (updateError) {
+            console.error("Error updating visibility for new decision:", updateError);
+          }
         }
       }
       
@@ -197,7 +223,9 @@ const ForkInTheRoadActivity = () => {
     }
     
     if (isSubmitting) return;
-    console.log(isVisible);
+    
+    console.log("Saving decision with visibility:", isVisible);
+    
     try {
       setIsSubmitting(true);
 
@@ -226,7 +254,7 @@ const ForkInTheRoadActivity = () => {
         gain_b: fullDecisionData.gain_b,
         future_a: fullDecisionData.future_a,
         future_b: fullDecisionData.future_b,
-        visibility: isVisible,
+        visibility: isVisible, // Explicitly include visibility
         selection: selection
       };
       
@@ -585,7 +613,11 @@ const ForkInTheRoadActivity = () => {
               <div className="px-4">
                 <VisibilityToggle
                   isVisible={isVisible}
-                  onToggle={setIsVisible}
+                  onToggle={(value) => {
+                    console.log("Visibility toggle changed to:", value);
+                    setIsVisible(value);
+                  }}
+                  description="Make this decision visible to clinicians"
                 />
               </div>
             </div>
