@@ -72,3 +72,36 @@ export const uploadFile = async (
     return null;
   }
 };
+
+// Upload a file for Power of Hi component with additional section parameter
+export const uploadPowerOfHiFile = async (
+  userId: string,
+  section: string,
+  file: File | Blob,
+  fileType: 'drawing' | 'audio'
+): Promise<{ path: string }> => {
+  try {
+    const bucketName = fileType === 'audio' ? 'audio_files' : 'drawing_files';
+    const extension = fileType === 'audio' ? '.webm' : '.png';
+    const fileName = `${userId}/${section}_${Date.now()}${extension}`;
+    
+    console.log(`Uploading Power of Hi file to ${bucketName}/${fileName}`);
+    
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .upload(fileName, file, {
+        contentType: fileType === 'audio' ? 'audio/webm' : 'image/png',
+        upsert: true
+      });
+    
+    if (error) {
+      console.error(`Error uploading Power of Hi ${section} file:`, error);
+      throw error;
+    }
+    
+    return { path: data?.path || fileName };
+  } catch (error) {
+    console.error(`Error in uploadPowerOfHiFile (${section}):`, error);
+    throw new Error(`Failed to upload ${fileType} file for ${section}`);
+  }
+};

@@ -67,3 +67,12 @@ export const uploadFile = async (
     return null;
   }
 };
+
+// Generate a standardized filename for emotional airbnb files
+export const generateEmotionalAirbnbFilename = (
+  userId: string,
+  section: string
+): string => {
+  // Create a structured filename with userId, section type, and timestamp
+  return `${userId}/${section}_${Date.now()}.png`;
+};
