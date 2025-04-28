@@ -61,6 +61,15 @@ const StudentSharedResponses = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Helper function to format dates consistently - moved to top level of component
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'MMM d, yyyy');
+    } catch (e) {
+      return 'Invalid date';
+    }
+  };
+
   useEffect(() => {
     checkClinicianAccess();
     if (user && studentId) {
@@ -198,13 +207,6 @@ const StudentSharedResponses = () => {
     }
   };
   
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'MMM d, yyyy');
-    } catch (e) {
-      return 'Invalid date';
-    }
-  };
 
   const renderEmotionalAirbnbEntries = () => {
     if (emotionalAirbnbEntries.length === 0) {
@@ -667,15 +669,6 @@ const StudentSharedResponses = () => {
         ))}
       </div>
     );
-  };
-
-  // Helper function to format dates consistently
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'MMM d, yyyy');
-    } catch (e) {
-      return 'Invalid date';
-    }
   };
 
   // Rest of the component rendering
