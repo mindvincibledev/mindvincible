@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -6,9 +7,10 @@ import JournalTypeSelector from '@/components/journal/JournalTypeSelector';
 import TextJournal from '@/components/journal/TextJournal';
 import AudioJournal from '@/components/journal/AudioJournal';
 import DrawingJournal from '@/components/journal/DrawingJournal';
-import JournalHeader from '@/components/journal/JournalHeader';
 import { useJournalSave } from '@/hooks/useJournalSave';
 import VisibilityToggle from '@/components/ui/VisibilityToggle';
+import { Button } from '@/components/ui/button';
+import { Save } from 'lucide-react';
 
 type JournalType = 'text' | 'audio' | 'drawing';
 
@@ -84,6 +86,18 @@ const JournalEntry = () => {
                     title={title}
                   />
                 )}
+              </div>
+              
+              {/* Add save button back */}
+              <div className="flex justify-center mt-8">
+                <Button 
+                  onClick={handleSaveJournal}
+                  disabled={isSaving}
+                  className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-black px-8 py-6 text-lg flex items-center gap-3 transition-transform hover:scale-105"
+                >
+                  <Save className="h-5 w-5" />
+                  {isSaving ? 'Saving...' : 'Save Journal Entry'}
+                </Button>
               </div>
             </div>
           </div>
