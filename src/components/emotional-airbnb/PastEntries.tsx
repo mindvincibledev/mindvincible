@@ -184,7 +184,7 @@ const PastEntries = () => {
 
   if (entries.length === 0) {
     return (
-      <div className="text-center p-8">
+      <div className="text-center p-8 bg-white/80 rounded-lg shadow-sm backdrop-blur-sm">
         <p className="text-lg text-gray-600">No emotional entries yet. Start your first emotional journey!</p>
       </div>
     );
@@ -201,7 +201,7 @@ const PastEntries = () => {
             transition={{ duration: 0.3 }}
           >
             <Card 
-              className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+              className="p-5 cursor-pointer hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm border border-[#D5D5F1]/30"
               onClick={() => {
                 setSelectedEntry(entry);
                 setIsDialogOpen(true);
@@ -223,7 +223,9 @@ const PastEntries = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Emotional Journey Details</DialogTitle>
+            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+              Emotional Journey Details
+            </DialogTitle>
           </DialogHeader>
           
           {selectedEntry && (
