@@ -91,8 +91,7 @@ const Register = () => {
         return;
       }
 
-      // First, create the auth user with display name
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -109,8 +108,9 @@ const Register = () => {
         }
       });
 
-      if (authError) {
-        throw new Error(authError.message);
+      if (signUpError) {
+        console.error('Signup error:', signUpError);
+        throw new Error(signUpError.message);
       }
 
       // Show success message
@@ -122,10 +122,11 @@ const Register = () => {
       // Redirect to login page
       navigate('/login');
     } catch (err) {
+      console.error('Registration error:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('An unexpected error occurred');
+        setError('An unexpected error occurred during registration');
       }
     } finally {
       setLoading(false);
