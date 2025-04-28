@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -9,6 +8,7 @@ import AudioJournal from '@/components/journal/AudioJournal';
 import DrawingJournal from '@/components/journal/DrawingJournal';
 import JournalHeader from '@/components/journal/JournalHeader';
 import { useJournalSave } from '@/hooks/useJournalSave';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 type JournalType = 'text' | 'audio' | 'drawing';
 
@@ -18,6 +18,7 @@ const JournalEntry = () => {
   const [content, setContent] = useState('');
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [drawingBlob, setDrawingBlob] = useState<Blob | null>(null);
+  const [visibility, setVisibility] = useState(true);
   const navigate = useNavigate();
   
   const { saveJournal, isSaving } = useJournalSave();
@@ -28,7 +29,8 @@ const JournalEntry = () => {
       title,
       content,
       audioBlob,
-      drawingBlob
+      drawingBlob,
+      visibility
     });
   };
 
@@ -40,12 +42,15 @@ const JournalEntry = () => {
         <div className="relative z-10 container mx-auto px-4 py-24 w-[101%]">
           <div className="max-w-[calc(3xl+10%)] mx-auto">
             <div className="bg-white/90 backdrop-blur-md rounded-xl border border-gray-100 p-8 shadow-lg">
-              <JournalHeader 
-                title="Create New Journal Entry"
-                isSaving={isSaving}
-                onSave={handleSaveJournal}
-              />
-              
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-3xl font-bold">Create New Journal Entry</h2>
+                <VisibilityToggle
+                  isVisible={visibility}
+                  onToggle={setVisibility}
+                  description="Make visible to clinicians"
+                />
+              </div>
+
               {/* Added mt-16 to create more space between the save button and type selector */}
               <div className="mt-16">
                 <JournalTypeSelector 

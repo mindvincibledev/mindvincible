@@ -15,6 +15,7 @@ interface UseJournalSaveProps {
   content: string;
   audioBlob: Blob | null;
   drawingBlob: Blob | null;
+  visibility: boolean;
 }
 
 export function useJournalSave() {
@@ -86,6 +87,7 @@ export function useJournalSave() {
     content,
     audioBlob,
     drawingBlob,
+    visibility,
   }: UseJournalSaveProps) => {
     if (!validateJournalEntry(journalType, title, content, audioBlob, drawingBlob)) {
       return;
@@ -133,6 +135,7 @@ export function useJournalSave() {
           audio_path: audioPath,
           drawing_path: drawingPath,
           entry_type: journalType,
+          visibility: visibility,
         } as JournalEntry)
         .select();
         
