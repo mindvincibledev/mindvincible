@@ -53,6 +53,7 @@ export type Database = {
           sound_drawing_path: string | null
           sound_text: string | null
           user_id: string
+          visibility: boolean
         }
         Insert: {
           appearance_description_text?: string | null
@@ -70,6 +71,7 @@ export type Database = {
           sound_drawing_path?: string | null
           sound_text?: string | null
           user_id: string
+          visibility?: boolean
         }
         Update: {
           appearance_description_text?: string | null
@@ -87,6 +89,7 @@ export type Database = {
           sound_drawing_path?: string | null
           sound_text?: string | null
           user_id?: string
+          visibility?: boolean
         }
         Relationships: []
       }
@@ -116,6 +119,7 @@ export type Database = {
           user_id: string
           values_a: string | null
           values_b: string | null
+          visibility: boolean
         }
         Insert: {
           challenges_a?: string | null
@@ -142,6 +146,7 @@ export type Database = {
           user_id: string
           values_a?: string | null
           values_b?: string | null
+          visibility?: boolean
         }
         Update: {
           challenges_a?: string | null
@@ -168,6 +173,7 @@ export type Database = {
           user_id?: string
           values_a?: string | null
           values_b?: string | null
+          visibility?: boolean
         }
         Relationships: []
       }
@@ -182,6 +188,7 @@ export type Database = {
           response_text: string | null
           section_name: string
           user_id: string
+          visibility: boolean
         }
         Insert: {
           activity_id: string
@@ -193,6 +200,7 @@ export type Database = {
           response_text?: string | null
           section_name: string
           user_id: string
+          visibility?: boolean
         }
         Update: {
           activity_id?: string
@@ -204,6 +212,7 @@ export type Database = {
           response_text?: string | null
           section_name?: string
           user_id?: string
+          visibility?: boolean
         }
         Relationships: []
       }
@@ -219,6 +228,7 @@ export type Database = {
           title: string
           updated_at: string
           user_id: string
+          visibility: boolean
         }
         Insert: {
           audio_path?: string | null
@@ -231,6 +241,7 @@ export type Database = {
           title: string
           updated_at?: string
           user_id?: string
+          visibility?: boolean
         }
         Update: {
           audio_path?: string | null
@@ -243,6 +254,7 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+          visibility?: boolean
         }
         Relationships: []
       }
@@ -282,18 +294,21 @@ export type Database = {
           id: string
           image_path: string
           user_id: string
+          visibility: boolean
         }
         Insert: {
           created_at?: string
           id?: string
           image_path: string
           user_id?: string
+          visibility?: boolean
         }
         Update: {
           created_at?: string
           id?: string
           image_path?: string
           user_id?: string
+          visibility?: boolean
         }
         Relationships: []
       }
@@ -316,6 +331,7 @@ export type Database = {
           try_next_time_confidence: number | null
           updated_at: string
           user_id: string
+          visibility: boolean
           what_felt_easy: string | null
           what_felt_easy_rating: number | null
           what_felt_hard: string | null
@@ -343,6 +359,7 @@ export type Database = {
           try_next_time_confidence?: number | null
           updated_at?: string
           user_id: string
+          visibility?: boolean
           what_felt_easy?: string | null
           what_felt_easy_rating?: number | null
           what_felt_hard?: string | null
@@ -370,6 +387,7 @@ export type Database = {
           try_next_time_confidence?: number | null
           updated_at?: string
           user_id?: string
+          visibility?: boolean
           what_felt_easy?: string | null
           what_felt_easy_rating?: number | null
           what_felt_hard?: string | null
@@ -466,6 +484,18 @@ export type Database = {
     Functions: {
       is_admin: {
         Args: { user_id: string }
+        Returns: boolean
+      }
+      is_admin_or_clinician: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
+      is_clinician: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
+      is_visible_to_clinician: {
+        Args: { visibility: boolean; owner_id: string }
         Returns: boolean
       }
     }

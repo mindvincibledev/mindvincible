@@ -25,6 +25,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from "sonner";
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 interface ExitSectionProps {
   onAnotherPrompt: () => void;
@@ -38,6 +39,7 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
   const navigate = useNavigate();
   const [showCelebration, setShowCelebration] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const handleFeedback = async (feedback: string) => {
     if (!user?.id) {
       toast.error("You need to be logged in to complete this activity");
@@ -54,7 +56,8 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
           user_id: user.id,
           activity_id: 'mirror-mirror',
           activity_name: 'Mirror Mirror on the Wall',
-          feedback: feedback
+          feedback: feedback,
+          visibility: isVisible
         });
       
       if (error) {
@@ -88,36 +91,45 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
               </DialogTitle>
             </DialogHeader>
             
-            <div className="grid grid-cols-3 gap-4 py-10 px-4">
-              <Button 
-                onClick={() => handleFeedback('positive')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
-                disabled={isSubmitting}
-              >
-                <div className="text-3xl mb-2">👍</div>
-                <span>Helpful</span>
-              </Button>
-              
-              <Button 
-                onClick={() => handleFeedback('neutral')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
-                disabled={isSubmitting}
-              >
-                <div className="text-3xl mb-2">😐</div>
-                <span>Neutral</span>
-              </Button>
-              
-              <Button 
-                onClick={() => handleFeedback('negative')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
-                disabled={isSubmitting}
-              >
-                <div className="text-3xl mb-2">👎</div>
-                <span>Not helpful</span>
-              </Button>
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-4 py-6 px-4">
+                <Button 
+                  onClick={() => handleFeedback('positive')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👍</div>
+                  <span>Helpful</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('neutral')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">😐</div>
+                  <span>Neutral</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('negative')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👎</div>
+                  <span>Not helpful</span>
+                </Button>
+              </div>
+
+              <div className="px-4">
+                <VisibilityToggle
+                  isVisible={isVisible}
+                  onToggle={setIsVisible}
+                />
+              </div>
             </div>
           </DialogContent>
         </Dialog>
