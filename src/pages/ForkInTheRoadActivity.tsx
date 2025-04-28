@@ -207,7 +207,7 @@ const ForkInTheRoadActivity = () => {
       setShowFeedback(false);
       
       // Navigate to resources hub after completion
-      navigate('/resources');
+      
     } catch (error) {
       console.error("Error completing activity:", error);
       toast.error("Failed to record activity completion");
@@ -338,7 +338,7 @@ const ForkInTheRoadActivity = () => {
         <div className="flex flex-col md:flex-row gap-4 justify-center mt-8">
           <Button 
             onClick={() => 
-            {setShowFeedback(true);
+            {navigate('/resources');
               }  } 
             variant="outline"
             className="px-6"
