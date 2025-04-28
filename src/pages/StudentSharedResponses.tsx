@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +16,35 @@ interface Activity {
   id: string;
   created_at: string;
   // Additional fields will vary by activity type
+  [key: string]: any;
+}
+
+interface ForkInRoadDecision {
+  decision_id: string;
+  created_at: string;
+  challenges_a?: string | null;
+  challenges_b?: string | null;
+  change_a?: string | null;
+  change_b?: string | null;
+  choice?: string | null;
+  consideration_path?: string | null;
+  feel_a?: string | null;
+  feel_b?: string | null;
+  future_a?: string | null;
+  future_b?: string | null;
+  gain_a?: string | null;
+  gain_b?: string | null;
+  other_path?: string | null;
+  selection?: string | null;
+  strengths_a?: string[] | null;
+  strengths_b?: string[] | null;
+  tag_a?: string[] | null;
+  tag_b?: string[] | null;
+  updated_at: string;
+  user_id: string;
+  values_a?: string | null;
+  values_b?: string | null;
+  visibility: boolean;
   [key: string]: any;
 }
 
@@ -147,7 +175,14 @@ const StudentSharedResponses = () => {
       if (hiChallengesError) throw hiChallengesError;
       
       setEmotionalAirbnbEntries(airbnbData || []);
-      setForkInRoadEntries(decisionsData || []);
+      
+      // Map decision_id to id for fork in road entries to make them compatible with Activity type
+      const formattedDecisionsData = decisionsData ? decisionsData.map((decision: ForkInRoadDecision) => ({
+        ...decision,
+        id: decision.decision_id
+      })) : [];
+      
+      setForkInRoadEntries(formattedDecisionsData);
       setGroundingEntries(groundingData || []);
       setHiChallengeEntries(hiChallengesData || []);
       
