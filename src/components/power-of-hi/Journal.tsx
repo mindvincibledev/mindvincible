@@ -32,7 +32,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { uploadFile as uploadPowerOfHiFile } from '@/utils/powerOfHiFileUtils';
+import { uploadPowerOfHiFile } from '@/utils/powerOfHiFileUtils';
 
 
 const MOODS = ["Happy", "Excited", "Proud", "Confident", "Nervous", "Awkward", "Uncomfortable", "Scared"];
@@ -110,6 +110,9 @@ const Journal = () => {
   const [weeklyCompletedGoals, setWeeklyCompletedGoals] = useState<any[]>([]);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [totalGoals, setTotalGoals] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [activeSection, setActiveSection] = React.useState<'initial' | 'reflection'>('initial');
 
   // Update feeling when mood changes
   useEffect(() => {
@@ -200,7 +203,7 @@ const Journal = () => {
       const total = goals.length;
       const completed = goals.length - incompleteGoals.length;
       setTotalGoals(total);
-      setCompletionPercentage((completed / total) * 100);
+      setCompletionPercentage((completed / total) * 100);\
     }
   }, [goals, incompleteGoals]);
 
@@ -409,8 +412,6 @@ const Journal = () => {
     toast.success('Recording stopped');
   };
 
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
   const handleFeedback = async (feedback: string) => {
     if (!user?.id) {
       toast.error("You need to be logged in to complete this activity");
@@ -462,16 +463,14 @@ const Journal = () => {
       let howItWentPath = null;
       let feelingPath = null;
       let temp = null;
-
-      
       
       if (whoFile) {
         if (whoFile.type.startsWith('image/')) {
-          temp =  "drawing";
+          temp = "drawing";
         }
 
         if (whoFile.type.startsWith('audio/')) {
-          temp =  "audio";
+          temp = "audio";
         }
         const { path } = await uploadPowerOfHiFile(user.id, 'who', whoFile, temp);
         whoPath = path;
@@ -479,11 +478,11 @@ const Journal = () => {
       temp = null;
       if (howItWentFile) {
         if (howItWentFile.type.startsWith('image/')) {
-          temp =  "drawing";
+          temp = "drawing";
         }
 
         if (howItWentFile.type.startsWith('audio/')) {
-          temp =  "audio";
+          temp = "audio";
         }
         const { path } = await uploadPowerOfHiFile(user.id, 'how_it_went', howItWentFile, temp);
         howItWentPath = path;
@@ -491,11 +490,11 @@ const Journal = () => {
       temp = null;
       if (feelingFile) {
         if (feelingFile.type.startsWith('image/')) {
-          temp =  "drawing";
+          temp = "drawing";
         }
 
         if (feelingFile.type.startsWith('audio/')) {
-          temp =  "audio";
+          temp = "audio";
         }
         const { path } = await uploadPowerOfHiFile(user.id, 'feeling', feelingFile, temp);
         feelingPath = path;
@@ -593,9 +592,6 @@ const Journal = () => {
       setIsSubmitting(false);
     }
   };
-
-  // Add state for managing sections
-  const [activeSection, setActiveSection] = React.useState<'initial' | 'reflection'>('initial');
 
   // Custom handler for selecting a mood directly with the simplified interface
   const handleMoodSelect = (mood: string) => {
@@ -822,4 +818,5 @@ const Journal = () => {
                         />
                         
                         <div className="mt-2 flex flex-wrap gap-2">
-                          <label htmlFor="how
+                          <label htmlFor="how-it-went-file" className="cursor-pointer">
+                            <div className="
