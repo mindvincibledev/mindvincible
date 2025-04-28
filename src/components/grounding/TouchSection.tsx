@@ -183,15 +183,6 @@ const TouchSection: React.FC<TouchSectionProps> = ({ onComplete, onBack, activit
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Progress Indicator */}
-      <div className="mb-6">
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>Beginning</span>
-          <span>40% Complete</span>
-        </div>
-        <Progress value={40} className="h-2" />
-      </div>
-      
       {/* Section Header */}
       <div className="flex items-center justify-center mb-6">
         <div className="p-3 bg-[#FC68B3]/20 rounded-full">

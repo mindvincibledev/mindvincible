@@ -182,13 +182,7 @@ const HearSection: React.FC<HearSectionProps> = ({ onComplete, onBack, activityI
       transition={{ duration: 0.5 }}
     >
       {/* Progress Indicator */}
-      <div className="mb-6">
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>Beginning</span>
-          <span>60% Complete</span>
-        </div>
-        <Progress value={60} className="h-2" />
-      </div>
+      
       
       {/* Section Header */}
       <div className="flex items-center justify-center mb-6">

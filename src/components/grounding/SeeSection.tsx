@@ -132,15 +132,6 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack, activityId 
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Progress Indicator */}
-      <div className="mb-6">
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>Beginning</span>
-          <span>20% Complete</span>
-        </div>
-        <Progress value={20} className="h-2" />
-      </div>
-      
       {/* Section Header */}
       <div className="flex items-center justify-center mb-6">
         <div className="p-3 bg-[#F5DF4D]/20 rounded-full">
