@@ -182,7 +182,7 @@ const ForkInTheRoadActivity = () => {
     }
     
     if (isSubmitting) return;
-    
+    console.log(isVisible);
     try {
       setIsSubmitting(true);
 
