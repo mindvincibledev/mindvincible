@@ -13,7 +13,7 @@ interface VisibilityToggleProps {
 const VisibilityToggle = ({ 
   isVisible, 
   onToggle, 
-  description = "Make this entry visible to clinicians" 
+  description = "Make visible to clinicians" 
 }: VisibilityToggleProps) => {
   return (
     <div className="flex items-center space-x-2 relative">
@@ -26,7 +26,6 @@ const VisibilityToggle = ({
       <Label htmlFor="visibility" className="text-sm text-gray-600">
         {description}
       </Label>
-      {/* Visual feedback indicator */}
       {isVisible && (
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
