@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -70,6 +71,14 @@ const PastEntries = () => {
       setEntries(entries.map(entry => 
         entry.id === entryId ? { ...entry, visibility: newVisibility } : entry
       ));
+      
+      // Also update the selectedEntry if it's currently being viewed
+      if (selectedEntry && selectedEntry.id === entryId) {
+        setSelectedEntry({
+          ...selectedEntry,
+          visibility: newVisibility
+        });
+      }
       
       toast.success('Visibility updated successfully');
     } catch (error: any) {
