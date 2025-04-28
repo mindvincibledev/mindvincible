@@ -391,7 +391,7 @@ export type Database = {
           guardian2_name: string | null
           guardian2_phone: string | null
           id: string
-          name: string
+          name: string | null
           password: string
           updated_at: string
           user_phone: string | null
@@ -406,7 +406,7 @@ export type Database = {
           guardian2_name?: string | null
           guardian2_phone?: string | null
           id?: string
-          name: string
+          name?: string | null
           password: string
           updated_at?: string
           user_phone?: string | null
@@ -421,7 +421,7 @@ export type Database = {
           guardian2_name?: string | null
           guardian2_phone?: string | null
           id?: string
-          name?: string
+          name?: string | null
           password?: string
           updated_at?: string
           user_phone?: string | null

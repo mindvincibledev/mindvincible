@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+
+import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, FileText, Mic, Brush, Trash } from 'lucide-react';
@@ -69,13 +70,31 @@ const JournalDetail = () => {
       
       // Get signed URLs for audio and drawing files
       if (journalEntry.audio_path) {
-        const signedAudioUrl = await getSignedUrl(journalEntry.audio_path, 'audio_files');
-        setAudioUrl(signedAudioUrl);
+        try {
+          const signedUrl = await getSignedUrl(journalEntry.audio_path, 'audio');
+          setAudioUrl(signedUrl);
+        } catch (error) {
+          console.error('Error getting signed audio URL:', error);
+          toast({
+            variant: "destructive",
+            title: "Error loading audio",
+            description: "Could not load the audio file",
+          });
+        }
       }
       
       if (journalEntry.drawing_path) {
-        const signedDrawingUrl = await getSignedUrl(journalEntry.drawing_path, 'drawing_files');
-        setDrawingUrl(signedDrawingUrl);
+        try {
+          const signedUrl = await getSignedUrl(journalEntry.drawing_path, 'drawing');
+          setDrawingUrl(signedUrl);
+        } catch (error) {
+          console.error('Error getting signed drawing URL:', error);
+          toast({
+            variant: "destructive",
+            title: "Error loading drawing",
+            description: "Could not load the drawing",
+          });
+        }
       }
     } catch (error: any) {
       console.error('Error fetching journal entry:', error);

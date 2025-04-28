@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { JournalEntry } from '@/types/journal';
 import { generateJournalFilename } from '@/utils/journalFileUtils';
+import { uploadPowerOfHiFile } from '@/utils/powerOfHiFileUtils';
 
 type JournalType = 'text' | 'audio' | 'drawing';
 
@@ -102,42 +103,24 @@ export function useJournalSave() {
       
       // Handle audio file upload
       if (journalType === 'audio' && audioBlob) {
-        const fileName = generateJournalFilename(user.id, 'audio');
-        console.log(`Uploading audio file: ${fileName}`);
-        
-        const { error: uploadError } = await supabase.storage
-          .from('audio_files')
-          .upload(fileName, audioBlob, {
-            contentType: 'audio/webm',
-            upsert: true
-          });
-          
-        if (uploadError) {
-          console.error('Error uploading audio:', uploadError);
-          throw new Error(`Failed to upload audio: ${uploadError.message}`);
+        try {
+          const { path: filePath } = await uploadPowerOfHiFile(user.id, 'audio', audioBlob, 'audio');
+          audioPath = filePath;
+        } catch (error) {
+          console.error('Error uploading audio:', error);
+          throw new Error('Failed to upload audio file');
         }
-        
-        audioPath = fileName;
       }
       
       // Handle drawing file upload
       if (journalType === 'drawing' && drawingBlob) {
-        const fileName = generateJournalFilename(user.id, 'drawing');
-        console.log(`Uploading drawing file: ${fileName}`);
-        
-        const { error: uploadError } = await supabase.storage
-          .from('drawing_files')
-          .upload(fileName, drawingBlob, {
-            contentType: 'image/png',
-            upsert: true
-          });
-          
-        if (uploadError) {
-          console.error('Error uploading drawing:', uploadError);
-          throw new Error(`Failed to upload drawing: ${uploadError.message}`);
+        try {
+          const { path: filePath } = await uploadPowerOfHiFile(user.id, 'drawing', drawingBlob, 'drawing');
+          drawingPath = filePath;
+        } catch (error) {
+          console.error('Error uploading drawing:', error);
+          throw new Error('Failed to upload drawing file');
         }
-        
-        drawingPath = fileName;
       }
 
       // Insert journal entry to database
