@@ -511,7 +511,7 @@ const EmotionalAirbnb = () => {
 
           <div className="max-w-3xl mx-auto">
             <Tabs defaultValue="journey" className="w-full">
-              <TabsList className="w-full grid grid-cols-2 mb-6">
+              <TabsList className="w-full grid grid-cols-2 gap-2 p-1.5 mb-8">
                 <TabsTrigger value="journey" className="text-lg">
                   New Journey
                 </TabsTrigger>
