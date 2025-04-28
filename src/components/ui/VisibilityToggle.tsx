@@ -6,14 +6,9 @@ import { Switch } from "@/components/ui/switch";
 interface VisibilityToggleProps {
   isVisible: boolean;
   onToggle: (value: boolean) => void;
-  description?: string;
 }
 
-const VisibilityToggle = ({ 
-  isVisible, 
-  onToggle, 
-  description = "Make this entry visible to clinicians"
-}: VisibilityToggleProps) => {
+const VisibilityToggle = ({ isVisible, onToggle }: VisibilityToggleProps) => {
   return (
     <div className="flex items-center space-x-2">
       <Switch
@@ -22,7 +17,7 @@ const VisibilityToggle = ({
         onCheckedChange={onToggle}
       />
       <Label htmlFor="visibility" className="text-sm text-gray-600">
-        {description}
+        Make this entry visible to clinicians
       </Label>
     </div>
   );

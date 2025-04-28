@@ -40,7 +40,6 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
   const [showCelebration, setShowCelebration] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  
   const handleFeedback = async (feedback: string) => {
     if (!user?.id) {
       toast.error("You need to be logged in to complete this activity");
@@ -51,14 +50,14 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
       setIsSubmitting(true);
       
       // Always use user_id: user.id! RLS enforced on inserts.
-      // Removed visibility field since activity_completions table doesn't have it
       const { error } = await supabase
         .from('activity_completions')
         .insert({
           user_id: user.id,
           activity_id: 'mirror-mirror',
           activity_name: 'Mirror Mirror on the Wall',
-          feedback: feedback
+          feedback: feedback,
+          visibility: isVisible
         });
       
       if (error) {
@@ -125,15 +124,11 @@ const ExitSection: React.FC<ExitSectionProps> = ({ onAnotherPrompt, onComplete, 
                 </Button>
               </div>
 
-              {/* We keep the visibility toggle visually but it won't affect activity_completions */}
               <div className="px-4">
                 <VisibilityToggle
                   isVisible={isVisible}
                   onToggle={setIsVisible}
                 />
-                <p className="text-xs text-gray-500 mt-1 italic">
-                  Note: This activity doesn't support visibility settings
-                </p>
               </div>
             </div>
           </DialogContent>
