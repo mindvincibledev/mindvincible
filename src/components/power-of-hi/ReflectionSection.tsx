@@ -266,12 +266,11 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
   type="submit"
   // Button is enabled ONLY if isSubmitting is true AND all fields are filled
   disabled={!isSubmitting || !whatFeltEasy || !whatFeltHard || !otherPeopleResponses || !tryNextTime}
-  onClick={handleActivityComplete}
   className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
 >
   {isSubmitting ? (
     "Saving..."
-  ) : (
+) : (
     <>
       Complete Reflection
       <ArrowRight className="ml-2 h-4 w-4" />
