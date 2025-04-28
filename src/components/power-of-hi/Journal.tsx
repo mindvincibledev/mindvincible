@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
+import MoodSelector from '@/components/mood/MoodSelector';
 import { Star, Trophy, Target, ArrowRight, Mic, MicOff, Upload, Image, Camera, Smile, X } from 'lucide-react';
 import { ArrowLeft, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
@@ -20,7 +21,6 @@ import { v4 as uuidv4 } from 'uuid';
 import ReflectionSection, { ReflectionData } from './ReflectionSection';
 import EmojiSlider from '@/components/ui/EmojiSlider';
 import { startOfWeek, endOfWeek } from 'date-fns';
-import PowerOfHiMoodSelector from './PowerOfHiMoodSelector';
 
 import { GitFork, Edit, Trash2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -450,10 +450,6 @@ const Journal = () => {
     }
   };
   
-  const [whoPath, setWhoPath] = useState<string | null>(null);
-  const [howItWentPath, setHowItWentPath] = useState<string | null>(null);
-  const [feelingPath, setFeelingPath] = useState<string | null>(null);
-
   const handleSubmit = async () => {
     if (!user?.id || !selectedGoal) {
       toast.error("You need to be logged in and select a goal to proceed");
@@ -463,20 +459,23 @@ const Journal = () => {
     setIsSubmitting(true);
     try {
       // Upload files if they exist
+      let whoPath = null;
+      let howItWentPath = null;
+      let feelingPath = null;
       
       if (whoFile) {
-        const { path } = await uploadPowerOfHiFile(user.id, 'who', whoFile, whoFile.type.startsWith('image/') ? 'drawing' : 'audio');
-        setWhoPath(path);
+        const { path } = await uploadPowerOfHiFile(user.id, 'who', whoFile, 'drawing');
+        whoPath = path;
       }
       
       if (howItWentFile) {
-        const { path } = await uploadPowerOfHiFile(user.id, 'how_it_went', howItWentFile, howItWentFile.type.startsWith('image/') ? 'drawing' : 'audio');
-        setHowItWentPath(path);
+        const { path } = await uploadPowerOfHiFile(user.id, 'how_it_went', howItWentFile, 'audio');
+        howItWentPath = path;
       }
       
       if (feelingFile) {
-        const { path } = await uploadPowerOfHiFile(user.id, 'feeling', feelingFile, feelingFile.type.startsWith('image/') ? 'drawing' : 'audio');
-        setFeelingPath(path);
+        const { path } = await uploadPowerOfHiFile(user.id, 'feeling', feelingFile, 'drawing');
+        feelingPath = path;
       }
       
       // Convert string arrays to either string or null
@@ -845,23 +844,21 @@ const Journal = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">How did you feel?</label>
-                        
-                        {/* Scrollable Mood Meter Section */}
-                        <div className="rounded-lg border border-gray-200 p-4 bg-white/50">
-                          <h4 className="text-sm font-semibold mb-2">Select your mood:</h4>
-                          <PowerOfHiMoodSelector 
-                            moods={MOODS}
-                            selectedMoodIndex={selectedMoodIndex}
-                            onMoodSelect={setSelectedMoodIndex}
-                          />
-                          <input 
-                            type="text"
-                            value={feeling}
-                            onChange={(e) => setFeeling(e.target.value)}
-                            placeholder="Or type your own feeling..."
-                            className="mt-3 w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                          />
+                        <label className="block text-sm font-medium text-gray-700">How are you feeling now?</label>
+                        <div className="grid grid-cols-4 gap-2">
+                          {MOODS.map((mood) => (
+                            <button
+                              key={mood}
+                              className={`p-2 rounded-md ${
+                                feeling === mood
+                                  ? 'bg-[#3DFDFF] text-black'
+                                  : 'bg-gray-100 hover:bg-gray-200'
+                              }`}
+                              onClick={() => handleMoodSelect(mood)}
+                            >
+                              {mood}
+                            </button>
+                          ))}
                         </div>
                         
                         <div className="mt-2 flex flex-wrap gap-2">
@@ -909,56 +906,45 @@ const Journal = () => {
                         {renderFilePreview(feelingPreview, 'feeling')}
                         {renderStickers(feelingStickers)}
                       </div>
-
-                      <div className="flex justify-end">
-                        <Button
-                          onClick={handleSubmit}
-                          disabled={isSubmitting || !who || !howItWent || !feeling}
-                          className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] text-white hover:opacity-90"
-                        >
-                          {isSubmitting ? "Saving..." : (
-                            <>
-                              Save Progress
-                              <ArrowRight className="w-4 h-4 ml-2" />
-                            </>
-                          )}
-                        </Button>
-                      </div>
+                      
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={isSubmitting || !who || !howItWent || !feeling}
+                        className="w-full mt-6 bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
+                      >
+                        {isSubmitting ? "Saving..." : "Save Progress"}
+                      </Button>
                     </motion.div>
                   )}
                 </>
               ) : (
-                <ReflectionSection 
-                  onSubmit={handleReflectionSubmit} 
-                  isSubmitting={isSubmitting} 
+                <ReflectionSection
+                  onSubmit={handleReflectionSubmit}
+                  isSubmitting={isSubmitting}
                 />
               )}
             </div>
           )}
         </div>
       </Card>
-
-      {/* Stickers Dialog */}
+      
+      {/* Sticker Dialog */}
       <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Choose a sticker</DialogTitle>
+            <DialogTitle>Choose a Sticker</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 p-4">
+          <div className="grid grid-cols-3 gap-4 max-h-[300px] overflow-y-auto p-2">
             {STICKERS.map((sticker) => (
-              <div 
+              <div
                 key={sticker.id}
-                className="p-2 border border-gray-100 rounded-md hover:bg-gray-50 cursor-pointer flex items-center justify-center transition-colors"
+                className="aspect-square flex items-center justify-center border rounded-lg cursor-pointer hover:bg-gray-50"
                 onClick={() => addSticker(sticker.emoji || sticker.src)}
               >
                 {sticker.emoji ? (
-                  <span className="text-3xl">{sticker.emoji}</span>
+                  <span className="text-4xl">{sticker.emoji}</span>
                 ) : (
-                  <img 
-                    src={sticker.src} 
-                    alt={sticker.alt}
-                    className="w-12 h-12 object-contain" 
-                  />
+                  <img src={sticker.src} alt={sticker.alt} className="w-16 h-16 object-contain" />
                 )}
               </div>
             ))}
