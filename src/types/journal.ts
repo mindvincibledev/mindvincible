@@ -10,4 +10,5 @@ export interface JournalEntry {
   updated_at: string;
   user_id: string;
   journal_area?: string | null;
+  visibility: boolean;  // Added this field
 }
