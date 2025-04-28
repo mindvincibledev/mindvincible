@@ -13,7 +13,7 @@ interface VisibilityToggleProps {
 const VisibilityToggle = ({ 
   isVisible, 
   onToggle, 
-  description = "Make visible to clinicians" 
+  description = "Make this entry visible to clinicians" 
 }: VisibilityToggleProps) => {
   return (
     <div className="flex items-center space-x-2 relative">
@@ -21,7 +21,7 @@ const VisibilityToggle = ({
         id="visibility"
         checked={isVisible}
         onCheckedChange={onToggle}
-        className="data-[state=checked]:bg-[#2AC20E] h-6 w-11"
+        className="data-[state=checked]:bg-[#2AC20E]"
       />
       <Label htmlFor="visibility" className="text-sm text-gray-600">
         {description}
