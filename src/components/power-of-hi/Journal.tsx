@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -446,6 +447,109 @@ const Journal = () => {
     setFeeling(mood);
   };
 
+  // Add file change handler
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'who' | 'howItWent' | 'feeling') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (type === 'who') {
+      setWhoFile(file);
+      setWhoPreview(URL.createObjectURL(file));
+    } else if (type === 'howItWent') {
+      setHowItWentFile(file);
+      setHowItWentPreview(URL.createObjectURL(file));
+    } else {
+      setFeelingFile(file);
+      setFeelingPreview(URL.createObjectURL(file));
+    }
+  };
+  
+  // Add recording handlers
+  const startRecording = async (type: 'who' | 'howItWent' | 'feeling') => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      
+      if (type === 'who') {
+        whoAudioRef.current = mediaRecorder;
+        whoChunksRef.current = [];
+        setIsRecordingWho(true);
+        
+        mediaRecorder.ondataavailable = (e) => {
+          whoChunksRef.current.push(e.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(whoChunksRef.current, { type: 'audio/webm' });
+          setWhoFile(new File([blob], `who-recording-${Date.now()}.webm`, { type: 'audio/webm' }));
+          setWhoPreview('audio');
+          setIsRecordingWho(false);
+        };
+      } else if (type === 'howItWent') {
+        howItWentAudioRef.current = mediaRecorder;
+        howItWentChunksRef.current = [];
+        setIsRecordingHowItWent(true);
+        
+        mediaRecorder.ondataavailable = (e) => {
+          howItWentChunksRef.current.push(e.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(howItWentChunksRef.current, { type: 'audio/webm' });
+          setHowItWentFile(new File([blob], `how-it-went-recording-${Date.now()}.webm`, { type: 'audio/webm' }));
+          setHowItWentPreview('audio');
+          setIsRecordingHowItWent(false);
+        };
+      } else {
+        feelingAudioRef.current = mediaRecorder;
+        feelingChunksRef.current = [];
+        setIsRecordingFeeling(true);
+        
+        mediaRecorder.ondataavailable = (e) => {
+          feelingChunksRef.current.push(e.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(feelingChunksRef.current, { type: 'audio/webm' });
+          setFeelingFile(new File([blob], `feeling-recording-${Date.now()}.webm`, { type: 'audio/webm' }));
+          setFeelingPreview('audio');
+          setIsRecordingFeeling(false);
+        };
+      }
+      
+      mediaRecorder.start();
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      toast.error('Could not access microphone');
+    }
+  };
+  
+  const stopRecording = (type: 'who' | 'howItWent' | 'feeling') => {
+    if (type === 'who' && whoAudioRef.current) {
+      whoAudioRef.current.stop();
+      setIsRecordingWho(false);
+    } else if (type === 'howItWent' && howItWentAudioRef.current) {
+      howItWentAudioRef.current.stop();
+      setIsRecordingHowItWent(false);
+    } else if (type === 'feeling' && feelingAudioRef.current) {
+      feelingAudioRef.current.stop();
+      setIsRecordingFeeling(false);
+    }
+  };
+  
+  const clearFile = (type: 'who' | 'howItWent' | 'feeling') => {
+    if (type === 'who') {
+      setWhoFile(null);
+      setWhoPreview(null);
+    } else if (type === 'howItWent') {
+      setHowItWentFile(null);
+      setHowItWentPreview(null);
+    } else {
+      setFeelingFile(null);
+      setFeelingPreview(null);
+    }
+  };
+
   const renderFilePreview = async (preview: string | null, type: 'who' | 'howItWent' | 'feeling') => {
     if (!preview) return null;
     
@@ -642,7 +746,7 @@ const Journal = () => {
                           </button>
                         </div>
                         
-                        {await renderFilePreview(whoPreview, 'who')}
+                        {/* File preview will be rendered here */}
                         {renderStickers(whoStickers)}
                       </div>
 
@@ -705,7 +809,7 @@ const Journal = () => {
                           </button>
                         </div>
                         
-                        {await renderFilePreview(howItWentPreview, 'howItWent')}
+                        {/* File preview will be rendered here */}
                         {renderStickers(howItWentStickers)}
                       </div>
 
@@ -769,7 +873,7 @@ const Journal = () => {
                           </button>
                         </div>
                         
-                        {await renderFilePreview(feelingPreview, 'feeling')}
+                        {/* File preview will be rendered here */}
                         {renderStickers(feelingStickers)}
                       </div>
 
@@ -792,7 +896,7 @@ const Journal = () => {
                 </>
               ) : (
                 <ReflectionSection 
-                  onSubmit={() => {setShowFeedback(true);handleReflectionSubmit;}}
+                  onSubmit={handleReflectionSubmit}
                   isSubmitting={isSubmitting} 
                 />
               )}
@@ -800,12 +904,48 @@ const Journal = () => {
           )}
         </div>
       </Card>
+      
       <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
-          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
-            <DialogHeader>
-              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-                How was your experience?
-              </DialogTitle>
-            </DialogHeader>
+        <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+              How was your experience?
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-3 gap-4 py-4">
+            <Button
+              onClick={() => handleFeedback("loved_it")}
+              className="flex flex-col items-center gap-2 p-4 hover:bg-[#FC68B3]/10 rounded-lg transition-colors"
+              variant="ghost"
+            >
+              <ThumbsUp className="h-8 w-8 text-[#FC68B3]" />
+              <span>Loved it!</span>
+            </Button>
             
-            <div className="grid grid-cols-3 gap
+            <Button
+              onClick={() => handleFeedback("it_was_ok")}
+              className="flex flex-col items-center gap-2 p-4 hover:bg-[#F5DF4D]/10 rounded-lg transition-colors"
+              variant="ghost"
+            >
+              <Heart className="h-8 w-8 text-[#F5DF4D]" />
+              <span>It was OK</span>
+            </Button>
+            
+            <Button
+              onClick={() => handleFeedback("needs_work")}
+              className="flex flex-col items-center gap-2 p-4 hover:bg-[#3DFDFF]/10 rounded-lg transition-colors"
+              variant="ghost"
+            >
+              <ThumbsDown className="h-8 w-8 text-[#3DFDFF]" />
+              <span>Needs Work</span>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
+  );
+};
+
+export default Journal;
+
