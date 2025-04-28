@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ import { uploadGroundingFile } from '@/utils/groundingFileUtils';
 interface SmellSectionProps {
   onComplete: () => void;
   onBack: () => void;
+  activityId: string;
 }
 
 const SMELL_OBJECTS = [
@@ -25,7 +25,7 @@ const SMELL_OBJECTS = [
   "Fire", "Essential Oil"
 ];
 
-const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
+const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack, activityId }) => {
   const { user } = useAuth();
   const [inputType, setInputType] = useState<string>("text");
   const [textItems, setTextItems] = useState<string[]>([]);
@@ -155,7 +155,7 @@ const SmellSection: React.FC<SmellSectionProps> = ({ onComplete, onBack }) => {
         .from('grounding_responses')
         .insert({
           user_id: user.id,
-          activity_id: 'grounding-technique',
+          activity_id: activityId,
           section_name: 'smell',
           response_text: responseText,
           response_audio_path: audioPath,

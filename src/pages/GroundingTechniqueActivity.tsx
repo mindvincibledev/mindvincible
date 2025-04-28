@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid'; // We already have uuid installed
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,7 @@ const GroundingTechniqueActivity = () => {
   const [activityCompleted, setActivityCompleted] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [activityId] = useState(() => uuidv4()); // Generate activity ID once when component mounts
   
   const handleBegin = () => {
     setCurrentStep(GroundingStep.See);
@@ -107,15 +109,15 @@ const GroundingTechniqueActivity = () => {
       case GroundingStep.Welcome:
         return <AnimatedWelcome onBegin={handleBegin} />;
       case GroundingStep.See:
-        return <SeeSection onComplete={handleContinue} onBack={handleBack} />;
+        return <SeeSection onComplete={handleContinue} onBack={handleBack} activityId={activityId} />;
       case GroundingStep.Touch:
-        return <TouchSection onComplete={handleContinue} onBack={handleBack} />;
+        return <TouchSection onComplete={handleContinue} onBack={handleBack} activityId={activityId} />;
       case GroundingStep.Hear:
-        return <HearSection onComplete={handleContinue} onBack={handleBack} />;
+        return <HearSection onComplete={handleContinue} onBack={handleBack} activityId={activityId} />;
       case GroundingStep.Smell:
-        return <SmellSection onComplete={handleContinue} onBack={handleBack} />;
+        return <SmellSection onComplete={handleContinue} onBack={handleBack} activityId={activityId} />;
       case GroundingStep.Taste:
-        return <TasteSection onComplete={handleContinue} onBack={handleBack} />;
+        return <TasteSection onComplete={handleContinue} onBack={handleBack} activityId={activityId} />;
       case GroundingStep.Complete:
         return (
           <motion.div 

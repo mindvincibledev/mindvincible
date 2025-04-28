@@ -20,9 +20,10 @@ const tasteObjects = [
 interface TasteSectionProps {
   onComplete: () => void;
   onBack: () => void;
+  activityId: string;
 }
 
-const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
+const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack, activityId }) => {
   const { user } = useAuth();
   // State for different input types
   const [textInput, setTextInput] = useState<string>('');
@@ -75,16 +76,10 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
     setIsSaving(true);
     
     try {
-      console.log('Starting save process for taste section');
-      console.log('Current tab:', currentTab);
-      console.log('Text input:', textInput);
-      console.log('Selected object:', selectedObject);
-      console.log('Selected taste type:', selectedTasteType);
-
-      // Create base response data
+      // Create base response data with activityId
       const responseData = {
         user_id: user.id,
-        activity_id: 'grounding-technique',
+        activity_id: activityId, // Use the passed activityId
         section_name: 'taste',
         created_at: new Date().toISOString(),
         response_text: null,
@@ -95,40 +90,20 @@ const TasteSection: React.FC<TasteSectionProps> = ({ onComplete, onBack }) => {
 
       // Determine what data to save based on the active tab
       if (currentTab === 'text' && textInput) {
-        console.log('Saving text input:', textInput);
         responseData.response_text = textInput;
       } else if (currentTab === 'objects' && selectedObject) {
-        console.log('Saving selected object:', selectedObject);
         responseData.response_selected_items = [selectedObject];
       } else if (currentTab === 'tastes' && selectedTasteType) {
-        console.log('Saving selected taste type:', selectedTasteType);
         responseData.response_selected_items = [selectedTasteType];
-      } else {
-        // Fallback to save whatever data is available if tab doesn't match
-        if (textInput) {
-          responseData.response_text = textInput;
-        } else if (selectedObject) {
-          responseData.response_selected_items = [selectedObject];
-        } else if (selectedTasteType) {
-          responseData.response_selected_items = [selectedTasteType];
-        }
       }
-
-      console.log('Saving response data:', responseData);
       
       const { error } = await supabase
         .from('grounding_responses')
         .insert(responseData);
 
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
-      }
-
-      // Clear localStorage after successful save
-      localStorage.removeItem('tasteSection');
+      if (error) throw error;
       
-      console.log('Save successful');
+      localStorage.removeItem('tasteSection');
       toast.success("Your taste response was saved successfully!");
       
       onComplete();

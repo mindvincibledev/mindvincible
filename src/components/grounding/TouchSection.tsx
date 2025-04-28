@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Hand, Pencil, Mic, Type, Save, ArrowLeft } from 'lucide-react';
@@ -18,11 +17,12 @@ import { uploadGroundingFile } from '@/utils/groundingFileUtils';
 interface TouchSectionProps {
   onComplete: () => void;
   onBack: () => void;
+  activityId: string;
 }
 
 type InputMethod = 'type' | 'draw' | 'speak' | 'select';
 
-const TouchSection: React.FC<TouchSectionProps> = ({ onComplete, onBack }) => {
+const TouchSection: React.FC<TouchSectionProps> = ({ onComplete, onBack, activityId }) => {
   const { user } = useAuth();
   
   // State for input method
@@ -140,7 +140,7 @@ const TouchSection: React.FC<TouchSectionProps> = ({ onComplete, onBack }) => {
         .from('grounding_responses')
         .insert({
           user_id: user.id,
-          activity_id: 'grounding-technique',
+          activity_id: activityId,
           section_name: 'touch',
           response_text: inputMethod === 'type' ? textInput : null,
           response_drawing_path: drawingPath,

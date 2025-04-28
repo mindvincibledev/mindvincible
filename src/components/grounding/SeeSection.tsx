@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Pencil, Mic, Hand, Type, Save, ArrowLeft } from 'lucide-react';
@@ -17,11 +16,12 @@ import { uploadGroundingFile } from '@/utils/groundingFileUtils';
 interface SeeSectionProps {
   onComplete: () => void;
   onBack: () => void;
+  activityId: string;
 }
 
 type InputMethod = 'type' | 'draw' | 'speak' | 'select';
 
-const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
+const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack, activityId }) => {
   const { user } = useAuth();
   
   // State for input method
@@ -78,12 +78,12 @@ const SeeSection: React.FC<SeeSectionProps> = ({ onComplete, onBack }) => {
         }
       }
       
-      // Save to database
+      // Save to database with activityId
       const { error } = await supabase
         .from('grounding_responses')
         .insert({
           user_id: user.id,
-          activity_id: 'grounding-technique',
+          activity_id: activityId, // Use the passed activityId
           section_name: 'see',
           response_text: inputMethod === 'type' ? textInput : null,
           response_drawing_path: drawingPath,
