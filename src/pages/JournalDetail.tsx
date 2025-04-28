@@ -20,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { JournalEntry } from '@/types/journal';
 import { getSignedUrl, refreshSignedUrlIfNeeded } from '@/utils/journalFileUtils';
+import { getPowerOfHiFileUrl } from '@/utils/powerOfHiFileUtils';
 
 const JournalDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +30,9 @@ const JournalDetail = () => {
   const [drawingUrl, setDrawingUrl] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [whoPreview, setWhoPreview] = useState<string | null>(null);
+  const [howItWentPreview, setHowItWentPreview] = useState<string | null>(null);
+  const [feelingPreview, setFeelingPreview] = useState<string | null>(null);
   
   useEffect(() => {
     if (!user) {
@@ -46,7 +50,7 @@ const JournalDetail = () => {
       setLoading(true);
       
       const { data, error } = await supabase
-        .from('journal_entries')
+        .from('simple_hi_challenges')
         .select('*')
         .eq('id', entryId)
         .eq('user_id', user?.id)
@@ -67,15 +71,26 @@ const JournalDetail = () => {
       const journalEntry = data as JournalEntry;
       setEntry(journalEntry);
       
-      // Get signed URLs for audio and drawing files
-      if (journalEntry.audio_path) {
-        const signedAudioUrl = await getSignedUrl(journalEntry.audio_path, 'audio_files');
-        setAudioUrl(signedAudioUrl);
+      // Get signed URLs for files
+      if (journalEntry.who_path) {
+        const signedUrl = await getPowerOfHiFileUrl(journalEntry.who_path);
+        if (signedUrl) {
+          setWhoPreview(signedUrl);
+        }
       }
       
-      if (journalEntry.drawing_path) {
-        const signedDrawingUrl = await getSignedUrl(journalEntry.drawing_path, 'drawing_files');
-        setDrawingUrl(signedDrawingUrl);
+      if (journalEntry.how_it_went_path) {
+        const signedUrl = await getPowerOfHiFileUrl(journalEntry.how_it_went_path);
+        if (signedUrl) {
+          setHowItWentPreview(signedUrl);
+        }
+      }
+      
+      if (journalEntry.feeling_path) {
+        const signedUrl = await getPowerOfHiFileUrl(journalEntry.feeling_path);
+        if (signedUrl) {
+          setFeelingPreview(signedUrl);
+        }
       }
     } catch (error: any) {
       console.error('Error fetching journal entry:', error);
@@ -256,6 +271,36 @@ const JournalDetail = () => {
                   <img 
                     src={drawingUrl} 
                     alt={entry.title} 
+                    className="max-w-full rounded-lg shadow-lg border border-gray-100" 
+                  />
+                </div>
+              )}
+              
+              {whoPreview && (
+                <div className="bg-white/60 backdrop-blur-sm border border-[#3DFDFF]/20 rounded-lg p-6 mb-6 flex justify-center">
+                  <img 
+                    src={whoPreview} 
+                    alt="Who" 
+                    className="max-w-full rounded-lg shadow-lg border border-gray-100" 
+                  />
+                </div>
+              )}
+
+              {howItWentPreview && (
+                <div className="bg-white/60 backdrop-blur-sm border border-[#3DFDFF]/20 rounded-lg p-6 mb-6 flex justify-center">
+                  <img 
+                    src={howItWentPreview} 
+                    alt="How It Went" 
+                    className="max-w-full rounded-lg shadow-lg border border-gray-100" 
+                  />
+                </div>
+              )}
+
+              {feelingPreview && (
+                <div className="bg-white/60 backdrop-blur-sm border border-[#3DFDFF]/20 rounded-lg p-6 mb-6 flex justify-center">
+                  <img 
+                    src={feelingPreview} 
+                    alt="Feeling" 
                     className="max-w-full rounded-lg shadow-lg border border-gray-100" 
                   />
                 </div>
