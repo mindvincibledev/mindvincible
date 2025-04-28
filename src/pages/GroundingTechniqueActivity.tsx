@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -10,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import AnimatedWelcome from '@/components/grounding/AnimatedWelcome';
 import SeeSection from '@/components/grounding/SeeSection';
@@ -18,6 +18,7 @@ import HearSection from '@/components/grounding/HearSection';
 import SmellSection from '@/components/grounding/SmellSection';
 import TasteSection from '@/components/grounding/TasteSection';
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
+import PastGroundingEntries from '@/components/grounding/PastGroundingEntries';
 
 enum GroundingStep {
   Welcome,
@@ -169,7 +170,42 @@ const GroundingTechniqueActivity = () => {
           </Link>
           
           <div className="max-w-4xl mx-auto">
-            {renderContent()}
+            <Tabs defaultValue="journey" className="w-full">
+              <TabsList className="w-full grid grid-cols-2 gap-2 p-1.5 mb-8">
+                <TabsTrigger value="journey" className="text-lg">
+                  New Quest
+                </TabsTrigger>
+                <TabsTrigger value="past" className="text-lg">
+                  Past Quests
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="journey" className="space-y-6">
+                {/* Progress indicator */}
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <h1 className="text-xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                      The Grounding Quest
+                    </h1>
+                    <span className="text-sm text-gray-500">
+                      Step {currentStep}/7
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2.5">
+                    <div 
+                      className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] h-2.5 rounded-full transition-all duration-300"
+                      style={{ width: `${(currentStep / 7) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                {renderContent()}
+              </TabsContent>
+
+              <TabsContent value="past">
+                <PastGroundingEntries />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
 
