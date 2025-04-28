@@ -20,6 +20,7 @@ import SmellSection from '@/components/grounding/SmellSection';
 import TasteSection from '@/components/grounding/TasteSection';
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 import PastGroundingEntries from '@/components/grounding/PastGroundingEntries';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 enum GroundingStep {
   Welcome,
@@ -39,6 +40,7 @@ const GroundingTechniqueActivity = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [activityId] = useState(() => uuidv4()); // Generate activity ID once when component mounts
+  const [isVisible, setIsVisible] = useState(true);
   
   const handleBegin = () => {
     setCurrentStep(GroundingStep.See);
@@ -73,7 +75,8 @@ const GroundingTechniqueActivity = () => {
           user_id: user.id,
           activity_id: 'grounding-technique',
           activity_name: '5-4-3-2-1: The Grounding Quest',
-          feedback: feedback
+          feedback: feedback,
+          visibility: isVisible
         });
       
       if (error) {
@@ -235,8 +238,15 @@ const GroundingTechniqueActivity = () => {
                 How was your experience?
               </DialogTitle>
             </DialogHeader>
-            
-            <div className="grid grid-cols-3 gap-4 py-10 px-4">
+          
+          <div className="space-y-4">
+            <VisibilityToggle 
+              isVisible={isVisible}
+              onToggle={setIsVisible}
+              description="Make this grounding session visible to clinicians"
+            />
+
+            <div className="grid grid-cols-3 gap-4 py-6 px-4">
               <Button 
                 onClick={() => handleFeedback('positive')} 
                 variant="outline" 
@@ -264,8 +274,9 @@ const GroundingTechniqueActivity = () => {
                 <span>Not helpful</span>
               </Button>
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
     </BackgroundWithEmojis>
   );
