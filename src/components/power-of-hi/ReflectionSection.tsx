@@ -17,6 +17,7 @@ import EmojiSlider from '@/components/ui/EmojiSlider';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from "sonner";
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 interface ReflectionSectionProps {
   onSubmit: (data: ReflectionData) => void;
@@ -32,6 +33,7 @@ export interface ReflectionData {
   whatFeltHardRating: number;
   otherPeopleRating: number;
   tryNextTimeConfidence: number;
+  visibility: boolean;
 }
 
 const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) => {
@@ -50,6 +52,7 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
   const navigate = useNavigate();
 
   const { user } = useAuth();
+  const [isVisible, setIsVisible] = useState(true);
 
   const handleFeedback = async (feedback: string) => {
     if (!user?.id) {
@@ -83,7 +86,8 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
         whatFeltEasyRating: whatFeltEasyRating[0],
         whatFeltHardRating: whatFeltHardRating[0],
         otherPeopleRating: otherPeopleRating[0],
-        tryNextTimeConfidence: tryNextTimeConfidence[0]
+        tryNextTimeConfidence: tryNextTimeConfidence[0],
+        visibility: isVisible
       });
   
       toast.success("Activity completed successfully!");
@@ -220,33 +224,45 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
               </DialogTitle>
             </DialogHeader>
             
-            <div className="grid grid-cols-3 gap-4 py-10 px-4">
-              <Button 
-                onClick={() => handleFeedback('positive')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">👍</div>
-                <span>Helpful</span>
-              </Button>
-              
-              <Button 
-                onClick={() => handleFeedback('neutral')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">😐</div>
-                <span>Neutral</span>
-              </Button>
-              
-              <Button 
-                onClick={() => handleFeedback('negative')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">👎</div>
-                <span>Not helpful</span>
-              </Button>
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-4 py-6 px-4">
+                <Button 
+                  onClick={() => handleFeedback('positive')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👍</div>
+                  <span>Helpful</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('neutral')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">😐</div>
+                  <span>Neutral</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('negative')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👎</div>
+                  <span>Not helpful</span>
+                </Button>
+              </div>
+
+              <div className="px-4">
+                <VisibilityToggle
+                  isVisible={isVisible}
+                  onToggle={setIsVisible}
+                />
+              </div>
             </div>
           </DialogContent>
         </Dialog>
