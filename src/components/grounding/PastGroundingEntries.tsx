@@ -1,20 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Mic, Image, Trash2 } from 'lucide-react';
+import { Mic, Image, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogClose,
-} from '@/components/ui/dialog';
-import { motion } from 'framer-motion';
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { motion, AnimatePresence } from 'framer-motion';
 import { getSignedUrl } from '@/utils/groundingFileUtils';
 
 type GroundingResponse = {
@@ -28,18 +25,23 @@ type GroundingResponse = {
   created_at: string;
 };
 
+type GroupedResponses = {
+  activity_id: string;
+  created_at: string;
+  responses: GroundingResponse[];
+};
+
 type FileUrls = {
   [path: string]: string;
 };
 
 const PastGroundingEntries = () => {
   const { user } = useAuth();
-  const [entries, setEntries] = useState<GroundingResponse[]>([]);
-  const [selectedEntry, setSelectedEntry] = useState<GroundingResponse | null>(null);
+  const [groupedEntries, setGroupedEntries] = useState<GroupedResponses[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [fileUrls, setFileUrls] = useState<FileUrls>({});
   const [loadingFiles, setLoadingFiles] = useState<{[key: string]: boolean}>({});
+  const [expandedActivityId, setExpandedActivityId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEntries();
@@ -58,11 +60,30 @@ const PastGroundingEntries = () => {
 
       if (error) throw error;
       
-      const responsesData = data || [];
-      setEntries(responsesData);
+      // Group responses by activity_id
+      const grouped = data.reduce((acc: { [key: string]: GroundingResponse[] }, response) => {
+        if (!acc[response.activity_id]) {
+          acc[response.activity_id] = [];
+        }
+        acc[response.activity_id].push(response);
+        return acc;
+      }, {});
+
+      const groupedArray = Object.entries(grouped).map(([activity_id, responses]) => ({
+        activity_id,
+        created_at: responses[0].created_at,
+        responses: responses.sort((a, b) => 
+          ['see', 'touch', 'hear', 'smell', 'taste']
+            .indexOf(a.section_name)
+          - ['see', 'touch', 'hear', 'smell', 'taste']
+            .indexOf(b.section_name)
+        )
+      }));
+
+      setGroupedEntries(groupedArray);
       
       // Get signed URLs for all paths
-      const pathsToFetch = responsesData.reduce((acc: {path: string, type: 'audio' | 'drawing'}[], entry) => {
+      const pathsToFetch = data.reduce((acc: {path: string, type: 'audio' | 'drawing'}[], entry) => {
         if (entry.response_drawing_path) {
           acc.push({ path: entry.response_drawing_path, type: 'drawing' });
         }
@@ -107,21 +128,20 @@ const PastGroundingEntries = () => {
     setLoadingFiles(tempLoadingState);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (activityId: string) => {
     try {
       const { error } = await supabase
         .from('grounding_responses')
         .delete()
-        .eq('id', id)
+        .eq('activity_id', activityId)
         .eq('user_id', user?.id);
 
       if (error) throw error;
 
-      setEntries(prev => prev.filter(entry => entry.id !== id));
-      setIsDialogOpen(false);
-      toast.success('Entry deleted successfully');
+      setGroupedEntries(prev => prev.filter(group => group.activity_id !== activityId));
+      toast.success('Quest entries deleted successfully');
     } catch (error: any) {
-      toast.error('Failed to delete entry');
+      toast.error('Failed to delete quest entries');
       console.error('Error:', error);
     }
   };
@@ -192,7 +212,7 @@ const PastGroundingEntries = () => {
     );
   }
 
-  if (entries.length === 0) {
+  if (groupedEntries.length === 0) {
     return (
       <div className="text-center p-8 bg-white/80 rounded-lg shadow-sm backdrop-blur-sm">
         <p className="text-lg text-gray-600">No grounding entries yet. Start your first grounding quest!</p>
@@ -200,113 +220,78 @@ const PastGroundingEntries = () => {
     );
   }
 
-  const groupEntriesByTimestamp = (entries: GroundingResponse[]) => {
-    const grouped = entries.reduce((acc: { [key: string]: GroundingResponse[] }, entry) => {
-      const timestamp = entry.created_at;
-      if (!acc[timestamp]) {
-        acc[timestamp] = [];
-      }
-      acc[timestamp].push(entry);
-      return acc;
-    }, {});
-
-    return Object.entries(grouped).map(([timestamp, entries]) => ({
-      timestamp,
-      entries: entries.sort((a, b) => 
-        ['see', 'touch', 'hear', 'smell', 'taste']
-          .indexOf(a.section_name)
-        - ['see', 'touch', 'hear', 'smell', 'taste']
-          .indexOf(b.section_name)
-      )
-    }));
-  };
-
-  const groupedEntries = groupEntriesByTimestamp(entries);
-
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {groupedEntries.map(({ timestamp, entries: groupEntries }) => (
-          <motion.div
-            key={timestamp}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card 
-              className="p-5 cursor-pointer hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm border border-[#D5D5F1]/30"
-              onClick={() => {
-                setSelectedEntry(groupEntries[0]);
-                setIsDialogOpen(true);
-              }}
-            >
-              <div className="space-y-2">
-                <h3 className="font-medium text-[#FC68B3]">
-                  Grounding Quest
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Completed {format(new Date(timestamp), 'MMM d, yyyy')}
-                </p>
-              </div>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-              Grounding Quest Details
-            </DialogTitle>
-          </DialogHeader>
-          
-          {selectedEntry && (
-            <div className="space-y-6">
-              <div className="space-y-4">
-                {entries
-                  .filter(entry => entry.created_at === selectedEntry.created_at)
-                  .map(entry => (
-                    <div key={entry.id} className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-medium mb-2 capitalize">{entry.section_name}</h4>
-                      {entry.response_text && (
-                        <p className="mb-2">{entry.response_text}</p>
+    <div className="space-y-4">
+      {groupedEntries.map((group) => (
+        <motion.div
+          key={group.activity_id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="p-4">
+            <Collapsible>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-lg font-medium text-[#FC68B3]">
+                    Grounding Quest
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Completed {format(new Date(group.created_at), 'MMM d, yyyy')}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(group.activity_id);
+                    }}
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      {expandedActivityId === group.activity_id ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
                       )}
-                      {entry.response_selected_items && (
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {entry.response_selected_items.map((item, index) => (
-                            <span 
-                              key={index}
-                              className="px-3 py-1 bg-white rounded-full text-sm text-gray-700"
-                            >
-                              {item}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      {renderFileIndicator(entry.response_drawing_path, 'drawing')}
-                      {renderFileIndicator(entry.response_audio_path, 'audio')}
-                    </div>
-                  ))}
+                    </Button>
+                  </CollapsibleTrigger>
+                </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button
-                  variant="destructive"
-                  onClick={() => handleDelete(selectedEntry.id)}
-                  className="bg-red-500 hover:bg-red-600"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Entry
-                </Button>
-                <DialogClose asChild>
-                  <Button variant="secondary">Close</Button>
-                </DialogClose>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+              <CollapsibleContent className="mt-4 space-y-4">
+                {group.responses.map((response) => (
+                  <div key={response.id} className="p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-medium mb-2 capitalize">{response.section_name}</h4>
+                    {response.response_text && (
+                      <p className="mb-2">{response.response_text}</p>
+                    )}
+                    {response.response_selected_items && (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {response.response_selected_items.map((item, index) => (
+                          <span 
+                            key={index}
+                            className="px-3 py-1 bg-white rounded-full text-sm text-gray-700"
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {renderFileIndicator(response.response_drawing_path, 'drawing')}
+                    {renderFileIndicator(response.response_audio_path, 'audio')}
+                  </div>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          </Card>
+        </motion.div>
+      ))}
     </div>
   );
 };
