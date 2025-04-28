@@ -101,8 +101,14 @@ const PastGoals = () => {
       if (path) {
         try {
           const isAudio = path.includes('audio');
+          // Use the correct bucket name based on file type
+          const bucket = isAudio ? 'power_of_hi_audio' : 'power_of_hi_drawings';
           const fileType = isAudio ? 'audio' : 'drawing';
+          
+          console.log(`Fetching signed URL for ${path} from bucket ${bucket}`);
           const signedUrl = await getSignedUrl(path, fileType);
+          console.log(`Got signed URL with length: ${signedUrl.length}`);
+          
           urls[path] = signedUrl;
         } catch (error) {
           console.error(`Failed to get signed URL for ${path}:`, error);
