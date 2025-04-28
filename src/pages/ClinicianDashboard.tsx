@@ -125,6 +125,11 @@ const ClinicianDashboard = () => {
       
       // Get weekly date range
       const now = new Date();
+      const twoWeeksAgo = new Date(now);
+      twoWeeksAgo.setDate(now.getDate() - 14);
+      twoWeeksAgo.setHours(0, 0, 0, 0);
+      
+      // Get weekly date range for mood data
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - now.getDay());
       weekStart.setHours(0, 0, 0, 0);
@@ -141,12 +146,13 @@ const ClinicianDashboard = () => {
       
       if (moodError) throw moodError;
 
-      // Get journal entries for the week
+      // Get journal entries for the past two weeks where visibility is true
       const { data: journalData, error: journalError } = await supabase
         .from('journal_entries')
         .select('*')
-        .gte('created_at', weekStart.toISOString())
-        .lte('created_at', weekEnd.toISOString());
+        .gte('created_at', twoWeeksAgo.toISOString())
+        .lte('created_at', now.toISOString())
+        .eq('visibility', true);
       
       if (journalError) throw journalError;
       
@@ -218,7 +224,7 @@ const ClinicianDashboard = () => {
       setStats({
         averageMood: overallMostCommonMood,
         activitiesCompleted: activityData?.length || 0,
-        sharedJournals: journalData?.length || 0, // Now showing actual journal count
+        sharedJournals: journalData?.length || 0, // Now showing only visible journals from last 14 days
         moodAlerts: processedStudents.filter(s => 
           ['Angry', 'Overwhelmed', 'Sad', 'Anxious'].includes(s.latestMood)
         ).length
