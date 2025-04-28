@@ -463,8 +463,11 @@ const Journal = () => {
       let howItWentPath = null;
       let feelingPath = null;
       let temp = null;
-
-
+      console.console.log(whoFile);
+      const fileName = whoFile; // e.g., "document.pdf"
+      const extension = fileName.split('.').pop();
+      console.console.log(extension);
+      
       
       if (whoFile) {
         if (whoFile.type.startsWith('image/')) {
@@ -477,25 +480,25 @@ const Journal = () => {
         const { path } = await uploadPowerOfHiFile(user.id, 'who', whoFile, temp);
         whoPath = path;
       }
-      
+      temp = null;
       if (howItWentFile) {
-        if (whoFile.type.startsWith('image/')) {
+        if (howItWentFile.type.startsWith('image/')) {
           temp =  "drawing";
         }
 
-        if (whoFile.type.startsWith('audio/')) {
+        if (howItWentFile.type.startsWith('audio/')) {
           temp =  "audio";
         }
         const { path } = await uploadPowerOfHiFile(user.id, 'how_it_went', howItWentFile, temp);
         howItWentPath = path;
       }
-      
+      temp = null;
       if (feelingFile) {
-        if (whoFile.type.startsWith('image/')) {
+        if (feelingFile.type.startsWith('image/')) {
           temp =  "drawing";
         }
 
-        if (whoFile.type.startsWith('audio/')) {
+        if (feelingFile.type.startsWith('audio/')) {
           temp =  "audio";
         }
         const { path } = await uploadPowerOfHiFile(user.id, 'feeling', feelingFile, temp);
