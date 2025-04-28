@@ -11,6 +11,7 @@ import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import Navbar from '@/components/Navbar';
 import { ArrowLeft, Calendar, FileText, User } from 'lucide-react';
 import { format } from 'date-fns';
+import MediaDisplay from '@/components/shared/MediaDisplay';
 
 interface Activity {
   id: string;
@@ -37,7 +38,6 @@ interface ForkInRoadDecision {
   other_path?: string | null;
   selection?: string | null;
   strengths_a?: string[] | null;
-  strengths_b?: string[] | null;
   tag_a?: string[] | null;
   tag_b?: string[] | null;
   updated_at: string;
@@ -206,7 +206,6 @@ const StudentSharedResponses = () => {
     }
   };
 
-  // Render Emotional Airbnb entries
   const renderEmotionalAirbnbEntries = () => {
     if (emotionalAirbnbEntries.length === 0) {
       return (
@@ -235,6 +234,9 @@ const StudentSharedResponses = () => {
                     <div>
                       <h4 className="font-medium text-[#FC68B3]">Emotion</h4>
                       <p>{entry.emotion_text}</p>
+                      {entry.emotion_drawing_path && (
+                        <MediaDisplay filePath={entry.emotion_drawing_path} type="drawing" />
+                      )}
                     </div>
                   )}
                   
@@ -242,6 +244,9 @@ const StudentSharedResponses = () => {
                     <div>
                       <h4 className="font-medium text-[#FC68B3]">Location in Body</h4>
                       <p>{entry.location_in_body_text}</p>
+                      {entry.location_in_body_drawing_path && (
+                        <MediaDisplay filePath={entry.location_in_body_drawing_path} type="drawing" />
+                      )}
                     </div>
                   )}
                   
@@ -417,7 +422,6 @@ const StudentSharedResponses = () => {
     );
   };
   
-  // Render Grounding responses
   const renderGroundingResponses = () => {
     if (groundingEntries.length === 0) {
       return (
@@ -450,6 +454,20 @@ const StudentSharedResponses = () => {
                     </div>
                   )}
                   
+                  {entry.response_drawing_path && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Drawing</h4>
+                      <MediaDisplay filePath={entry.response_drawing_path} type="drawing" />
+                    </div>
+                  )}
+                  
+                  {entry.response_audio_path && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Audio Response</h4>
+                      <MediaDisplay filePath={entry.response_audio_path} type="audio" />
+                    </div>
+                  )}
+
                   {entry.response_selected_items && entry.response_selected_items.length > 0 && (
                     <div>
                       <h4 className="font-medium text-[#FC68B3]">Selected Items</h4>
@@ -469,7 +487,6 @@ const StudentSharedResponses = () => {
     );
   };
   
-  // Render Power of Hi challenges
   const renderHiChallenges = () => {
     if (hiChallengeEntries.length === 0) {
       return (
@@ -592,6 +609,27 @@ const StudentSharedResponses = () => {
                           </span>
                         </div>
                       )}
+                    </div>
+                  )}
+                  
+                  {entry.who_path && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Who - Drawing</h4>
+                      <MediaDisplay filePath={entry.who_path} type="drawing" />
+                    </div>
+                  )}
+                  
+                  {entry.how_it_went_path && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">How It Went - Drawing</h4>
+                      <MediaDisplay filePath={entry.how_it_went_path} type="drawing" />
+                    </div>
+                  )}
+                  
+                  {entry.feeling_path && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Feeling - Drawing</h4>
+                      <MediaDisplay filePath={entry.feeling_path} type="drawing" />
                     </div>
                   )}
                 </div>
