@@ -57,9 +57,11 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) =
 
         // Determine which type of file we're dealing with based on filename patterns
         if (fileName.includes('emotion_') || 
-            fileName.includes('location_in_body_') || 
+            fileName.includes('location_') || 
             fileName.includes('appearance_') || 
-            fileName.includes('emotional_airbnb')) {
+            fileName.includes('intensity_') ||
+            fileName.includes('sound_') ||  
+            fileName.includes('message_')) {
           console.log('Using emotional airbnb utils for file');
           signedUrl = await getEmotionalAirbnbSignedUrl(fullPath);
         } 
