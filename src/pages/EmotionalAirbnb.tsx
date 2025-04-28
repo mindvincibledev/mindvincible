@@ -259,6 +259,7 @@ const EmotionalAirbnb = () => {
       if (formData.messageDrawing) {
         messageDrawingPath = await uploadDrawing(formData.messageDrawing, 'message');
       }
+      setShowFeedback(true);
 
       // Insert data into the database
       const { error } = await supabase
@@ -285,7 +286,7 @@ const EmotionalAirbnb = () => {
       }
 
       // Show celebration instead of navigating immediately
-      setShowFeedback(true);
+      
     } catch (error: any) {
       console.error('Error saving emotional airbnb:', error);
       toast.error("Error saving", {
