@@ -470,19 +470,24 @@ const ForkInTheRoadActivity = () => {
                           : decision.selection === 'B'
                             ? "bg-gradient-to-r from-[#3DFDFF] to-[#F5DF4D]"
                             : "bg-gradient-to-r from-[#FC68B3] to-[#FF8A48]"
-                      }>
-                        {decision.selection === 'A' 
-                          ? `Chose ${decision.consideration_path}` 
-                          : decision.selection === 'B'
-                            ? `Chose ${decision.other_path}`
-                            : "Still deciding"}
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline">No selection made</Badge>
-                    )}
-                  </div>
+                    }>
+                      {decision.selection === 'A' 
+                        ? `Chose ${decision.consideration_path}` 
+                        : decision.selection === 'B'
+                          ? `Chose ${decision.other_path}`
+                          : "Still deciding"}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline">No selection made</Badge>
+                  )}
                 </div>
-                <div className="flex gap-2 mt-4 md:mt-0">
+              </div>
+              <div className="flex flex-col md:flex-row items-center gap-4 mt-4 md:mt-0">
+                <VisibilityToggle
+                  isVisible={decision.visibility}
+                  onToggle={(newVisibility) => handleVisibilityChange(decision.decision_id, newVisibility)}
+                />
+                <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -506,36 +511,37 @@ const ForkInTheRoadActivity = () => {
                   </Button>
                 </div>
               </div>
-            </Card>
-          ))}
-        </div>
-      )}
+            </div>
+          </Card>
+        ))}
+      </div>
+    )}
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Decision</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this decision? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
-              variant="default"
-              className="bg-red-500 hover:bg-red-600 text-white"
-              onClick={() => decisionToDelete && handleDeleteDecision(decisionToDelete)}
-            >
-              Delete
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
+    {/* Delete Confirmation Dialog */}
+    <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Decision</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this decision? This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="default"
+            className="bg-red-500 hover:bg-red-600 text-white"
+            onClick={() => decisionToDelete && handleDeleteDecision(decisionToDelete)}
+          >
+            Delete
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </div>
+);
 
   const screens = [
     <WelcomeScreen onNext={() => setCurrentStep(1)} key="welcome" />,
