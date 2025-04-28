@@ -199,7 +199,7 @@ const EmotionalAirbnb = () => {
       });
       return;
     }
-
+    setShowFeedback(true);
     setIsSubmitting(true);
 
     try {
@@ -259,7 +259,7 @@ const EmotionalAirbnb = () => {
       if (formData.messageDrawing) {
         messageDrawingPath = await uploadDrawing(formData.messageDrawing, 'message');
       }
-      setShowFeedback(true);
+      
 
       // Insert data into the database
       const { error } = await supabase
