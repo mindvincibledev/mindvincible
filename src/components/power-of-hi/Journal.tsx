@@ -844,21 +844,21 @@ const Journal = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">How are you feeling now?</label>
-                        <div className="grid grid-cols-4 gap-2">
-                          {MOODS.map((mood) => (
-                            <button
-                              key={mood}
-                              className={`p-2 rounded-md ${
-                                feeling === mood
-                                  ? 'bg-[#3DFDFF] text-black'
-                                  : 'bg-gray-100 hover:bg-gray-200'
-                              }`}
-                              onClick={() => handleMoodSelect(mood)}
-                            >
-                              {mood}
-                            </button>
-                          ))}
+                      <label className="block text-sm font-medium text-gray-700">How did it make you feel?</label>
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <MoodSelector
+                            moods={MOODS}
+                            selectedMoodIndex={selectedMoodIndex}
+                            onMoodSelect={setSelectedMoodIndex}
+                            onChangeMood={changeMood}
+                            wheelRef={wheelRef}
+                            handleTouchStart={handleTouchStart}
+                            handleTouchMove={handleTouchMove}
+                            handleTouchEnd={handleTouchEnd}
+                            onMoodHover={setHoveredMoodIndex}
+                            onSelect={handleMoodSelect}
+                            selectedMood={feeling}
+                          />
                         </div>
                         
                         <div className="mt-2 flex flex-wrap gap-2">
