@@ -111,9 +111,6 @@ const Journal = () => {
   const [weeklyCompletedGoals, setWeeklyCompletedGoals] = useState<any[]>([]);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [totalGoals, setTotalGoals] = useState(0);
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [activeSection, setActiveSection] = React.useState<'initial' | 'reflection'>('initial');
 
   // Update feeling when mood changes
   useEffect(() => {
@@ -413,6 +410,8 @@ const Journal = () => {
     toast.success('Recording stopped');
   };
 
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const handleFeedback = async (feedback: string) => {
     if (!user?.id) {
       toast.error("You need to be logged in to complete this activity");
@@ -464,14 +463,16 @@ const Journal = () => {
       let howItWentPath = null;
       let feelingPath = null;
       let temp = null;
+
+      
       
       if (whoFile) {
         if (whoFile.type.startsWith('image/')) {
-          temp = "drawing";
+          temp =  "drawing";
         }
 
         if (whoFile.type.startsWith('audio/')) {
-          temp = "audio";
+          temp =  "audio";
         }
         const { path } = await uploadPowerOfHiFile(user.id, 'who', whoFile, temp);
         whoPath = path;
@@ -479,11 +480,11 @@ const Journal = () => {
       temp = null;
       if (howItWentFile) {
         if (howItWentFile.type.startsWith('image/')) {
-          temp = "drawing";
+          temp =  "drawing";
         }
 
         if (howItWentFile.type.startsWith('audio/')) {
-          temp = "audio";
+          temp =  "audio";
         }
         const { path } = await uploadPowerOfHiFile(user.id, 'how_it_went', howItWentFile, temp);
         howItWentPath = path;
@@ -491,11 +492,11 @@ const Journal = () => {
       temp = null;
       if (feelingFile) {
         if (feelingFile.type.startsWith('image/')) {
-          temp = "drawing";
+          temp =  "drawing";
         }
 
         if (feelingFile.type.startsWith('audio/')) {
-          temp = "audio";
+          temp =  "audio";
         }
         const { path } = await uploadPowerOfHiFile(user.id, 'feeling', feelingFile, temp);
         feelingPath = path;
@@ -581,7 +582,6 @@ const Journal = () => {
       setFeeling('');
       setWhoFile(null);
       setHowItWentFile(null);
-      setFeelingFile(null);
       setWhoPreview(null);
       setHowItWentPreview(null);
       setFeelingPreview(null);
@@ -594,6 +594,9 @@ const Journal = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Add state for managing sections
+  const [activeSection, setActiveSection] = React.useState<'initial' | 'reflection'>('initial');
 
   // Custom handler for selecting a mood directly with the simplified interface
   const handleMoodSelect = (mood: string) => {
@@ -820,13 +823,13 @@ const Journal = () => {
                         />
                         
                         <div className="mt-2 flex flex-wrap gap-2">
-                          <label htmlFor="how-it-went-file" className="cursor-pointer">
+                          <label htmlFor="howItWent-file" className="cursor-pointer">
                             <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
                               <Image className="w-4 h-4" />
                               <span>Add Photo</span>
                             </div>
                             <input
-                              id="how-it-went-file"
+                              id="howItWent-file"
                               type="file"
                               accept="image/*"
                               onChange={(e) => handleFileChange(e, 'howItWent')}
@@ -864,24 +867,23 @@ const Journal = () => {
                         {renderFilePreview(howItWentPreview, 'howItWent')}
                         {renderStickers(howItWentStickers)}
                       </div>
-                      
+
                       <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">How did you feel?</label>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 my-3">
-                          {MOODS.map((mood, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              onClick={() => handleMoodSelect(mood)}
-                              className={`p-2 rounded-lg border hover:bg-gray-50 transition-colors ${
-                                feeling === mood 
-                                  ? 'bg-[#D5D5F1]/30 border-[#FC68B3]' 
-                                  : 'border-gray-200'
-                              }`}
-                            >
-                              {mood}
-                            </button>
-                          ))}
+                      <label className="block text-sm font-medium text-gray-700">How did it make you feel?</label>
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <MoodSelector
+                            moods={MOODS}
+                            selectedMoodIndex={selectedMoodIndex}
+                            onMoodSelect={setSelectedMoodIndex}
+                            onChangeMood={changeMood}
+                            wheelRef={wheelRef}
+                            handleTouchStart={handleTouchStart}
+                            handleTouchMove={handleTouchMove}
+                            handleTouchEnd={handleTouchEnd}
+                            onMoodHover={setHoveredMoodIndex}
+                            onSelect={handleMoodSelect}
+                            selectedMood={feeling}
+                          />
                         </div>
                         
                         <div className="mt-2 flex flex-wrap gap-2">
@@ -929,46 +931,47 @@ const Journal = () => {
                         {renderFilePreview(feelingPreview, 'feeling')}
                         {renderStickers(feelingStickers)}
                       </div>
-
-                      <div className="flex justify-end mt-8">
-                        <Button 
-                          onClick={handleSubmit}
-                          disabled={isSubmitting || !selectedGoal || !who || !howItWent || !feeling}
-                          className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] text-white"
-                        >
-                          {isSubmitting ? "Saving..." : "Save Progress"}
-                        </Button>
-                      </div>
+                      
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={isSubmitting || !who || !howItWent || !feeling}
+                        className="w-full mt-6 bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
+                      >
+                        {isSubmitting ? "Saving..." : "Save Progress"}
+                      </Button>
                     </motion.div>
                   )}
                 </>
               ) : (
-                <ReflectionSection onSubmit={handleReflectionSubmit} isSubmitting={isSubmitting} />
+                <ReflectionSection
+                  onSubmit={handleReflectionSubmit}
+                  isSubmitting={isSubmitting}
+                />
               )}
             </div>
           )}
         </div>
       </Card>
-
+      
       {/* Sticker Dialog */}
       <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
-        <DialogContent className="bg-white/95 backdrop-blur-lg">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Choose a Sticker</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 p-4">
+          <div className="grid grid-cols-3 gap-4 max-h-[300px] overflow-y-auto p-2">
             {STICKERS.map((sticker) => (
-              <button
+              <div
                 key={sticker.id}
+                className="aspect-square flex items-center justify-center border rounded-lg cursor-pointer hover:bg-gray-50"
                 onClick={() => addSticker(sticker.emoji || sticker.src)}
-                className="p-3 bg-white rounded-lg border hover:bg-gray-50 transition-colors flex items-center justify-center h-16 w-16"
               >
                 {sticker.emoji ? (
-                  <span className="text-3xl">{sticker.emoji}</span>
+                  <span className="text-4xl">{sticker.emoji}</span>
                 ) : (
-                  <img src={sticker.src} alt={sticker.alt} className="max-h-full max-w-full object-contain" />
+                  <img src={sticker.src} alt={sticker.alt} className="w-16 h-16 object-contain" />
                 )}
-              </button>
+              </div>
             ))}
           </div>
         </DialogContent>

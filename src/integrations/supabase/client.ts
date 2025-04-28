@@ -14,43 +14,5 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     autoRefreshToken: true,
     storage: localStorage
-  },
-  // Add storage options to prevent bucket errors
-  global: {
-    headers: {
-      'x-application-name': 'M(in)dvincible'
-    }
   }
 });
-
-// Initialize storage buckets on first load if they don't exist
-const initStorageBuckets = async () => {
-  try {
-    // Check if audio_files bucket exists, create if it doesn't
-    const { data: audioBuckets, error: audioError } = await supabase
-      .storage
-      .listBuckets();
-    
-    const bucketNames = audioBuckets?.map(bucket => bucket.name) || [];
-    
-    if (!bucketNames.includes('audio_files')) {
-      console.info('Creating audio_files bucket');
-      await supabase.storage.createBucket('audio_files', { public: false });
-    }
-    
-    if (!bucketNames.includes('drawing_files')) {
-      console.info('Creating drawing_files bucket');
-      await supabase.storage.createBucket('drawing_files', { public: false });
-    }
-    
-    if (!bucketNames.includes('mood_jars')) {
-      console.info('Creating mood_jars bucket');
-      await supabase.storage.createBucket('mood_jars', { public: false });
-    }
-  } catch (error) {
-    console.error('Error initializing storage buckets:', error);
-  }
-};
-
-// Call the initialization function
-initStorageBuckets();

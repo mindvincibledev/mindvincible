@@ -143,8 +143,6 @@ const StudentSharedResponses = () => {
     setLoading(true);
     
     try {
-      console.log('Fetching emotional airbnb entries for student:', studentId);
-      
       // Fetch emotional airbnb entries
       const { data: airbnbData, error: airbnbError } = await supabase
         .from('emotional_airbnb')
@@ -153,12 +151,7 @@ const StudentSharedResponses = () => {
         .eq('visibility', true)
         .order('created_at', { ascending: false });
       
-      if (airbnbError) {
-        console.error('Error fetching emotional airbnb entries:', airbnbError);
-        throw airbnbError;
-      }
-      
-      console.log('Emotional airbnb entries:', airbnbData?.length || 0);
+      if (airbnbError) throw airbnbError;
       
       // Fetch fork in road decisions
       const { data: decisionsData, error: decisionsError } = await supabase
@@ -190,7 +183,6 @@ const StudentSharedResponses = () => {
       
       if (hiChallengesError) throw hiChallengesError;
       
-      // Update state with fetched data
       setEmotionalAirbnbEntries(airbnbData || []);
       
       // Map decision_id to id for fork in road entries to make them compatible with Activity type
@@ -202,6 +194,8 @@ const StudentSharedResponses = () => {
       setForkInRoadEntries(formattedDecisionsData);
       setGroundingEntries(groundingData || []);
       setHiChallengeEntries(hiChallengesData || []);
+      
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching shared responses:", error);
       toast({
@@ -209,10 +203,10 @@ const StudentSharedResponses = () => {
         title: "Data Loading Error",
         description: "Failed to load shared responses. Please try again.",
       });
-    } finally {
       setLoading(false);
     }
   };
+  
 
   const renderEmotionalAirbnbEntries = () => {
     if (emotionalAirbnbEntries.length === 0) {
@@ -246,7 +240,7 @@ const StudentSharedResponses = () => {
                         <MediaDisplay 
                           filePath={entry.emotion_drawing_path} 
                           type="drawing" 
-                          userId={studentId || ''} 
+                          userId={studentId} 
                         />
                       )}
                     </div>
@@ -260,21 +254,7 @@ const StudentSharedResponses = () => {
                         <MediaDisplay 
                           filePath={entry.location_in_body_drawing_path} 
                           type="drawing" 
-                          userId={studentId || ''}
-                        />
-                      )}
-                    </div>
-                  )}
-                  
-                  {entry.appearance_description_text && (
-                    <div>
-                      <h4 className="font-medium text-[#FC68B3]">Appearance</h4>
-                      <p>{entry.appearance_description_text}</p>
-                      {entry.appearance_drawing_path && (
-                        <MediaDisplay 
-                          filePath={entry.appearance_drawing_path} 
-                          type="drawing" 
-                          userId={studentId || ''}
+                          userId={studentId}
                         />
                       )}
                     </div>
@@ -284,13 +264,13 @@ const StudentSharedResponses = () => {
                     <div>
                       <h4 className="font-medium text-[#FC68B3]">Intensity</h4>
                       <p>{entry.intensity_description_text}</p>
-                      {entry.intensity_drawing_path && (
-                        <MediaDisplay 
-                          filePath={entry.intensity_drawing_path} 
-                          type="drawing" 
-                          userId={studentId || ''}
-                        />
-                      )}
+                    </div>
+                  )}
+                  
+                  {entry.appearance_description_text && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Appearance</h4>
+                      <p>{entry.appearance_description_text}</p>
                     </div>
                   )}
                   
@@ -298,13 +278,6 @@ const StudentSharedResponses = () => {
                     <div>
                       <h4 className="font-medium text-[#FC68B3]">Sound</h4>
                       <p>{entry.sound_text}</p>
-                      {entry.sound_drawing_path && (
-                        <MediaDisplay 
-                          filePath={entry.sound_drawing_path} 
-                          type="drawing" 
-                          userId={studentId || ''}
-                        />
-                      )}
                     </div>
                   )}
                   
@@ -312,13 +285,6 @@ const StudentSharedResponses = () => {
                     <div>
                       <h4 className="font-medium text-[#FC68B3]">Message</h4>
                       <p>{entry.message_description_text}</p>
-                      {entry.message_drawing_path && (
-                        <MediaDisplay 
-                          filePath={entry.message_drawing_path} 
-                          type="drawing" 
-                          userId={studentId || ''}
-                        />
-                      )}
                     </div>
                   )}
                 </div>
@@ -716,7 +682,7 @@ const StudentSharedResponses = () => {
             <Button 
               variant="ghost" 
               className="text-[#FC68B3] mr-4"
-              onClick={() => navigate('/clinician-dashboard')}
+              onClick={() => navigate('/shared-responses')}
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back
