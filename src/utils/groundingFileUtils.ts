@@ -17,10 +17,16 @@ export const generateGroundingFilename = (userId: string, section: string, type:
  */
 export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Promise<string> => {
   try {
-    console.log(`Requesting signed URL for path: ${path}`);
+    console.log(`Requesting signed URL for grounding path: ${path}`);
     
     if (!path || typeof path !== 'string') {
       throw new Error('Invalid storage path provided');
+    }
+    
+    // Check if path includes user ID structure
+    const pathSegments = path.split('/');
+    if (pathSegments.length === 1) {
+      console.warn('Path does not include user ID structure, this may cause permissions issues');
     }
     
     const bucket = type === 'drawing' ? 'grounding_drawings' : 'grounding_audio';
@@ -39,11 +45,11 @@ export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Pro
       throw new Error('Failed to generate signed URL');
     }
     
-    console.log(`Successfully generated signed URL with length: ${data.signedUrl.length}`);
+    console.log(`Successfully generated signed URL for grounding ${type}`);
     return data.signedUrl;
   } catch (error) {
     console.error('Error getting signed URL:', error);
-    return '/placeholder.svg';
+    throw error; // Re-throw to let component handle the error
   }
 };
 
@@ -56,19 +62,24 @@ export const refreshSignedUrlIfNeeded = async (path: string, currentUrl: string,
       return await getSignedUrl(path, type);
     }
     
-    // Check if URL has a token parameter which indicates it's a signed URL
-    const urlParams = new URLSearchParams(new URL(currentUrl).search);
-    const expiryString = urlParams.get('token');
-    
-    // If no token or expiry time is less than 5 minutes away, refresh the URL
-    if (!expiryString || Date.now() > (parseInt(expiryString) - 300000)) { // Refresh if less than 5 mins left
+    try {
+      // Check if URL has a token parameter which indicates it's a signed URL
+      const urlParams = new URLSearchParams(new URL(currentUrl).search);
+      const expiryString = urlParams.get('token');
+      
+      // If no token or expiry time is less than 5 minutes away, refresh the URL
+      if (!expiryString || Date.now() > (parseInt(expiryString) - 300000)) { // Refresh if less than 5 mins left
+        return await getSignedUrl(path, type);
+      }
+      
+      return currentUrl;
+    } catch (e) {
+      // If URL parsing fails, try to get a new signed URL
       return await getSignedUrl(path, type);
     }
-    
-    return currentUrl;
   } catch (error) {
     console.error('Error refreshing signed URL:', error);
-    return currentUrl || await getSignedUrl(path, type);
+    throw error; // Re-throw to let component handle the error
   }
 };
 
