@@ -1,34 +1,18 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import EmojiSlider from '@/components/ui/EmojiSlider';
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
-import { RefreshCw } from 'lucide-react';
-import { Star, Trophy, Target, Mic, MicOff, Upload, Image, Camera, Smile, X } from 'lucide-react';
-import { ArrowLeft, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
-import CompletionAnimation from '@/components/grounding/CompletionAnimation';
-import { ArrowLeft as ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { useParams, Link, Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import {  useNavigate } from 'react-router-dom';
-import {  GitFork, Edit, Trash2 } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ArrowRight } from "lucide-react";
+import EmojiSlider from '@/components/ui/EmojiSlider';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from "sonner";
