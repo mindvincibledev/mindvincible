@@ -20,7 +20,7 @@ import SmellSection from '@/components/grounding/SmellSection';
 import TasteSection from '@/components/grounding/TasteSection';
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 import PastGroundingEntries from '@/components/grounding/PastGroundingEntries';
-
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 enum GroundingStep {
   Welcome,
   See,
@@ -39,6 +39,8 @@ const GroundingTechniqueActivity = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [activityId] = useState(() => uuidv4()); // Generate activity ID once when component mounts
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   
   const handleBegin = () => {
     setCurrentStep(GroundingStep.See);
@@ -84,6 +86,12 @@ const GroundingTechniqueActivity = () => {
       
       toast.success("Activity completed successfully!");
       setShowFeedback(false);
+
+      const { error: updateError } = await supabase
+            .from('grounding_responses')
+            .update({ visibility: isVisible })
+            .eq('activity_id', activityId)
+            .eq('user_id', user.id);
       
       // Navigate to resources hub after completion
       navigate('/emotional-hacking');
@@ -236,33 +244,46 @@ const GroundingTechniqueActivity = () => {
               </DialogTitle>
             </DialogHeader>
             
-            <div className="grid grid-cols-3 gap-4 py-10 px-4">
-              <Button 
-                onClick={() => handleFeedback('positive')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">👍</div>
-                <span>Helpful</span>
-              </Button>
-              
-              <Button 
-                onClick={() => handleFeedback('neutral')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">😐</div>
-                <span>Neutral</span>
-              </Button>
-              
-              <Button 
-                onClick={() => handleFeedback('negative')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">👎</div>
-                <span>Not helpful</span>
-              </Button>
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-4 py-6 px-4">
+                <Button 
+                  onClick={() => handleFeedback('positive')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👍</div>
+                  <span>Helpful</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('neutral')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">😐</div>
+                  <span>Neutral</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('negative')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👎</div>
+                  <span>Not helpful</span>
+                </Button>
+              </div>
+
+              <div className="px-4">
+                <VisibilityToggle
+                  isVisible={isVisible}
+                  onToggle={setIsVisible}
+                  
+                />
+              </div>
             </div>
           </DialogContent>
         </Dialog>
