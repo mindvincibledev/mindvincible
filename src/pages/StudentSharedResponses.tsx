@@ -235,7 +235,11 @@ const StudentSharedResponses = () => {
                       <h4 className="font-medium text-[#FC68B3]">Emotion</h4>
                       <p>{entry.emotion_text}</p>
                       {entry.emotion_drawing_path && (
-                        <MediaDisplay filePath={entry.emotion_drawing_path} type="drawing" userId={studentId} />
+                        <MediaDisplay 
+                          filePath={entry.emotion_drawing_path} 
+                          type="drawing" 
+                          userId={studentId} 
+                        />
                       )}
                     </div>
                   )}
@@ -245,7 +249,11 @@ const StudentSharedResponses = () => {
                       <h4 className="font-medium text-[#FC68B3]">Location in Body</h4>
                       <p>{entry.location_in_body_text}</p>
                       {entry.location_in_body_drawing_path && (
-                        <MediaDisplay filePath={entry.location_in_body_drawing_path} type="drawing" userId={studentId} />
+                        <MediaDisplay 
+                          filePath={entry.location_in_body_drawing_path} 
+                          type="drawing" 
+                          userId={studentId}
+                        />
                       )}
                     </div>
                   )}
@@ -457,14 +465,22 @@ const StudentSharedResponses = () => {
                   {entry.response_drawing_path && (
                     <div>
                       <h4 className="font-medium text-[#FC68B3]">Drawing</h4>
-                      <MediaDisplay filePath={entry.response_drawing_path} type="drawing" userId={studentId} />
+                      <MediaDisplay 
+                        filePath={entry.response_drawing_path} 
+                        type="drawing" 
+                        userId={studentId}
+                      />
                     </div>
                   )}
                   
                   {entry.response_audio_path && (
                     <div>
                       <h4 className="font-medium text-[#FC68B3]">Audio Response</h4>
-                      <MediaDisplay filePath={entry.response_audio_path} type="audio" userId={studentId} />
+                      <MediaDisplay 
+                        filePath={entry.response_audio_path} 
+                        type="audio" 
+                        userId={studentId}
+                      />
                     </div>
                   )}
 
@@ -615,21 +631,33 @@ const StudentSharedResponses = () => {
                   {entry.who_path && (
                     <div>
                       <h4 className="font-medium text-[#FC68B3]">Who - Drawing</h4>
-                      <MediaDisplay filePath={entry.who_path} type="drawing" userId={studentId} />
+                      <MediaDisplay 
+                        filePath={entry.who_path} 
+                        type="drawing" 
+                        userId={studentId}
+                      />
                     </div>
                   )}
                   
                   {entry.how_it_went_path && (
                     <div>
                       <h4 className="font-medium text-[#FC68B3]">How It Went - Drawing</h4>
-                      <MediaDisplay filePath={entry.how_it_went_path} type="drawing" userId={studentId} />
+                      <MediaDisplay 
+                        filePath={entry.how_it_went_path} 
+                        type="drawing" 
+                        userId={studentId}
+                      />
                     </div>
                   )}
                   
                   {entry.feeling_path && (
                     <div>
                       <h4 className="font-medium text-[#FC68B3]">Feeling - Drawing</h4>
-                      <MediaDisplay filePath={entry.feeling_path} type="drawing" userId={studentId} />
+                      <MediaDisplay 
+                        filePath={entry.feeling_path} 
+                        type="drawing" 
+                        userId={studentId}
+                      />
                     </div>
                   )}
                 </div>
@@ -641,6 +669,16 @@ const StudentSharedResponses = () => {
     );
   };
 
+  // Helper function to format dates consistently
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'MMM d, yyyy');
+    } catch (e) {
+      return 'Invalid date';
+    }
+  };
+
+  // Rest of the component rendering
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen relative">

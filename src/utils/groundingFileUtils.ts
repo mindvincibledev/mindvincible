@@ -23,25 +23,23 @@ export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Pro
       throw new Error('Invalid storage path provided');
     }
     
-    // Check if path includes full URL and extract just the filename if needed
-    let cleanPath = path;
-    if (path.includes('http') && path.includes('/object/')) {
-      cleanPath = path.split('/').pop() || path;
-      console.log(`Extracted filename from URL: ${cleanPath}`);
-    }
+    // Make sure the path has the correct structure (userId/filename.ext)
+    let finalPath = path;
     
-    // Check if path includes user ID structure
-    const pathSegments = cleanPath.split('/');
-    if (pathSegments.length === 1) {
-      console.warn('Path does not include user ID structure, this may cause permissions issues');
+    // If path doesn't have a slash but we know it should, log an error
+    if (!finalPath.includes('/')) {
+      console.error('Path does not include user ID structure:', finalPath);
+      throw new Error('Invalid path format: missing user ID structure');
     }
     
     const bucket = type === 'drawing' ? 'grounding_drawings' : 'grounding_audio';
     
+    console.log(`Using bucket: ${bucket} for path: ${finalPath}`);
+    
     const { data, error } = await supabase
       .storage
       .from(bucket)
-      .createSignedUrl(cleanPath, 3600); // 1 hour expiration
+      .createSignedUrl(finalPath, 3600); // 1 hour expiration
 
     if (error) {
       console.error('Supabase error getting signed URL:', error);
@@ -56,7 +54,7 @@ export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Pro
     return data.signedUrl;
   } catch (error) {
     console.error('Error getting signed URL:', error);
-    throw error; // Re-throw to let component handle the error
+    throw error;
   }
 };
 
@@ -86,7 +84,7 @@ export const refreshSignedUrlIfNeeded = async (path: string, currentUrl: string,
     }
   } catch (error) {
     console.error('Error refreshing signed URL:', error);
-    throw error; // Re-throw to let component handle the error
+    throw error;
   }
 };
 

@@ -8,7 +8,6 @@ import { supabase } from '@/integrations/supabase/client';
 export const generateEmotionalAirbnbFilename = (userId: string, section: string): string => {
   const timestamp = Date.now();
   // Create a path that follows the pattern: userId/section_timestamp.png
-  // This ensures the RLS policy will work correctly
   return `${userId}/${section}_${timestamp}.png`;
 };
 
@@ -23,24 +22,22 @@ export const getSignedUrl = async (path: string): Promise<string> => {
       throw new Error('Invalid storage path provided');
     }
     
-    // Check if path includes full URL and extract just the filename if needed
-    let cleanPath = path;
-    if (path.includes('http') && path.includes('/object/')) {
-      cleanPath = path.split('/').pop() || path;
-      console.log(`Extracted filename from URL: ${cleanPath}`);
-    }
+    // Make sure the path has the correct structure (userId/filename.ext)
+    let finalPath = path;
     
-    // Check if path already includes user ID, if not we have a problem
-    const pathSegments = cleanPath.split('/');
-    if (pathSegments.length === 1) {
-      console.warn('Path does not include user ID structure, this may cause permissions issues');
+    // If path doesn't have a slash but we know it should, log an error
+    if (!finalPath.includes('/')) {
+      console.error('Path does not include user ID structure:', finalPath);
+      throw new Error('Invalid path format: missing user ID structure');
     }
     
     // Try to get the signed URL
+    console.log(`Getting signed URL for path: ${finalPath}`);
+    
     const { data, error } = await supabase
       .storage
       .from('emotional_airbnb_drawings')
-      .createSignedUrl(cleanPath, 3600); // 1 hour expiration
+      .createSignedUrl(finalPath, 3600); // 1 hour expiration
 
     if (error) {
       console.error('Supabase error getting signed URL:', error);
@@ -55,7 +52,7 @@ export const getSignedUrl = async (path: string): Promise<string> => {
     return data.signedUrl;
   } catch (error) {
     console.error('Error getting signed URL:', error);
-    throw error; // Re-throw to let component handle the error
+    throw error;
   }
 };
 
@@ -83,7 +80,7 @@ export const refreshSignedUrlIfNeeded = async (path: string, currentUrl: string)
     }
   } catch (error) {
     console.error('Error refreshing signed URL:', error);
-    throw error; // Re-throw to let component handle the error
+    throw error;
   }
 };
 

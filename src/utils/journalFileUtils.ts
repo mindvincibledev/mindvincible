@@ -6,32 +6,31 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export const getSignedUrl = async (path: string, bucket: 'audio_files' | 'drawing_files'): Promise<string> => {
   try {
-    console.log(`Requesting signed URL for path: ${path} in bucket: ${bucket}`);
+    console.log(`Requesting signed URL for journal path: ${path} in bucket: ${bucket}`);
     
     if (!path || typeof path !== 'string') {
       throw new Error('Invalid storage path provided');
     }
     
-    // Check if path includes full URL and extract just the filename if needed
-    let cleanPath = path;
-    if (path.includes('http') && path.includes('/object/')) {
-      cleanPath = path.split('/').pop() || path;
-      console.log(`Extracted filename from URL: ${cleanPath}`);
+    // Make sure the path has the correct structure (userId/filename.ext)
+    let finalPath = path;
+    
+    // If path doesn't have a slash but we know it should, log an error
+    if (!finalPath.includes('/')) {
+      console.error('Path does not include user ID structure:', finalPath);
+      throw new Error('Invalid path format: missing user ID structure');
     }
     
-    // Check if path already includes user ID, if not prepend it
-    const pathSegments = cleanPath.split('/');
-    if (pathSegments.length === 1) {
-      console.warn('Path does not include user ID structure, this may cause permissions issues');
-    }
+    // Try to get the signed URL
+    console.log(`Getting signed URL for path: ${finalPath} in bucket: ${bucket}`);
     
     const { data, error } = await supabase
       .storage
       .from(bucket)
-      .createSignedUrl(cleanPath, 3600); // 1 hour expiration
+      .createSignedUrl(finalPath, 3600); // 1 hour expiration
 
     if (error) {
-      console.error('Supabase error getting signed URL:', error);
+      console.error(`Supabase error getting signed URL from ${bucket}:`, error);
       throw error;
     }
     
@@ -43,7 +42,7 @@ export const getSignedUrl = async (path: string, bucket: 'audio_files' | 'drawin
     return data.signedUrl;
   } catch (error) {
     console.error('Error getting signed URL:', error);
-    throw error; // Re-throw to let component handle the error
+    throw error;
   }
 };
 
@@ -76,7 +75,7 @@ export const refreshSignedUrlIfNeeded = async (
     }
   } catch (error) {
     console.error('Error refreshing signed URL:', error);
-    throw error; // Re-throw to let component handle the error
+    throw error;
   }
 };
 

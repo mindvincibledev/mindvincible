@@ -25,7 +25,9 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) =
   useEffect(() => {
     const loadMedia = async () => {
       if (!filePath) {
+        console.log("No file path provided");
         setIsLoading(false);
+        setLoadError(true);
         return;
       }
       
@@ -33,47 +35,58 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) =
       setLoadError(false);
       
       try {
-        console.log(`Attempting to load media: ${filePath}, type: ${type}, userID: ${userId || 'not provided'}`);
+        console.log(`Loading media: filePath=${filePath}, type=${type}, userId=${userId || 'not provided'}`);
         
-        // Extract just the filename if the path is a full URL
-        const pathToUse = filePath.includes('http') 
-          ? filePath.split('/').pop() || filePath
-          : filePath;
+        // Extract the filename from the path, regardless of format
+        let fileName = filePath;
+        if (filePath.includes('/')) {
+          fileName = filePath.split('/').pop() || filePath;
+        }
+        
+        // Ensure we have a user ID to work with
+        if (!userId) {
+          console.error('No user ID provided for media access');
+          throw new Error('No user ID provided for media access');
+        }
+        
+        // Construct the full path with user ID prefix if needed
+        const fullPath = `${userId}/${fileName}`;
+        console.log(`Constructed full path: ${fullPath}`);
         
         let signedUrl: string;
 
-        // Check if this is a file from emotional airbnb
-        if (pathToUse.includes('emotion_') || pathToUse.includes('location_in_body_') || 
-            pathToUse.includes('appearance_') || pathToUse.includes('emotional_airbnb')) {
-          console.log('Detected emotional airbnb media');
-          // If userId is provided and not already in path, prepend it
-          const fullPath = userId && !pathToUse.includes('/') ? `${userId}/${pathToUse}` : pathToUse;
+        // Determine which type of file we're dealing with based on filename patterns
+        if (fileName.includes('emotion_') || 
+            fileName.includes('location_in_body_') || 
+            fileName.includes('appearance_') || 
+            fileName.includes('emotional_airbnb')) {
+          console.log('Using emotional airbnb utils for file');
           signedUrl = await getEmotionalAirbnbSignedUrl(fullPath);
         } 
-        // Check if this is a file from power of hi
-        else if (pathToUse.includes('who_') || pathToUse.includes('feeling_') || 
-                pathToUse.includes('how_it_went_') || pathToUse.includes('power_of_hi')) {
-          console.log('Detected power of hi media');
-          const fullPath = userId && !pathToUse.includes('/') ? `${userId}/${pathToUse}` : pathToUse;
+        else if (fileName.includes('who_') || 
+                fileName.includes('feeling_') || 
+                fileName.includes('how_it_went_') || 
+                fileName.includes('power_of_hi')) {
+          console.log('Using power of hi utils for file');
           signedUrl = await getPowerOfHiSignedUrl(fullPath, type);
         } 
-        // Check if this is a file from grounding
-        else if (pathToUse.includes('see_') || pathToUse.includes('touch_') || 
-                pathToUse.includes('hear_') || pathToUse.includes('smell_') || 
-                pathToUse.includes('taste_') || pathToUse.includes('grounding')) {
-          console.log('Detected grounding media');
-          const fullPath = userId && !pathToUse.includes('/') ? `${userId}/${pathToUse}` : pathToUse;
+        else if (fileName.includes('see_') || 
+                fileName.includes('touch_') || 
+                fileName.includes('hear_') || 
+                fileName.includes('smell_') || 
+                fileName.includes('taste_') || 
+                fileName.includes('grounding')) {
+          console.log('Using grounding utils for file');
           signedUrl = await getGroundingSignedUrl(fullPath, type);
         } 
-        // Default to journal files
         else {
-          console.log('Detected journal media');
+          // Default to journal files
+          console.log('Using journal utils for file');
           const bucket = type === 'drawing' ? 'drawing_files' : 'audio_files';
-          const fullPath = userId && !pathToUse.includes('/') ? `${userId}/${pathToUse}` : pathToUse;
           signedUrl = await getJournalSignedUrl(fullPath, bucket);
         }
         
-        console.log('Successfully retrieved signed URL:', signedUrl);
+        console.log('Successfully retrieved signed URL');
         setUrl(signedUrl);
         setIsLoading(false);
       } catch (error) {
@@ -83,7 +96,7 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) =
         toast({
           variant: "destructive",
           title: "Media Loading Error",
-          description: `Could not load ${type} file. Please try again later.`
+          description: `Could not load ${type} file.`
         });
       }
     };
@@ -131,9 +144,9 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) =
           src={url} 
           alt="User drawing" 
           className="max-w-full h-auto rounded-lg border border-gray-200"
-          onError={() => {
+          onError={(e) => {
+            console.error('Image failed to load:', url);
             setLoadError(true);
-            console.error('Failed to load image:', filePath);
           }}
         />
       </div>
@@ -156,8 +169,8 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) =
           src={url} 
           onEnded={() => setIsPlaying(false)} 
           onError={() => {
+            console.error('Audio failed to load:', url);
             setLoadError(true);
-            console.error('Failed to load audio:', filePath);
           }}
           className="hidden" 
         />
