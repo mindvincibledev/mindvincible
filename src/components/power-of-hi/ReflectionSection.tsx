@@ -52,7 +52,7 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
   const navigate = useNavigate();
 
   const { user } = useAuth();
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   const handleFeedback = async (feedback: string) => {
     if (!user?.id) {
@@ -76,6 +76,7 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
         toast.error("Failed to record activity completion");
         return;
       }
+      console.log("Submitting with visibility:", isVisible);
   
       // Call onSubmit here, after feedback!
       onSubmit({
@@ -258,10 +259,14 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
               </div>
 
               <div className="px-4">
-                <VisibilityToggle
-                  isVisible={isVisible}
-                  onToggle={setIsVisible}
-                />
+              <VisibilityToggle
+  isVisible={isVisible}
+  onToggle={(val) => {
+    console.log('Toggling visibility:', val);
+    setIsVisible(val);
+  }}
+/>
+
               </div>
             </div>
           </DialogContent>
