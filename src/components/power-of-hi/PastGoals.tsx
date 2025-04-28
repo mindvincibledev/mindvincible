@@ -15,6 +15,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
+import { getSignedUrl } from '@/utils/powerOfHiFileUtils';
 
 type CompletedGoal = {
   id: string;
@@ -42,12 +43,17 @@ type CompletedGoal = {
   try_next_time_confidence: number | null;
 };
 
+type FileUrls = {
+  [path: string]: string;
+};
+
 const PastGoals = () => {
   const { user } = useAuth();
   const [completedGoals, setCompletedGoals] = useState<CompletedGoal[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<CompletedGoal | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [fileUrls, setFileUrls] = useState<FileUrls>({});
 
   useEffect(() => {
     fetchCompletedGoals();
@@ -57,6 +63,7 @@ const PastGoals = () => {
     if (!user?.id) return;
 
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('simple_hi_challenges')
         .select('*')
@@ -66,13 +73,44 @@ const PastGoals = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setCompletedGoals(data || []);
+      
+      const goals = data || [];
+      setCompletedGoals(goals);
+      
+      // Get signed URLs for all paths
+      const pathsToFetch = goals.reduce((paths: string[], goal) => {
+        if (goal.who_path) paths.push(goal.who_path);
+        if (goal.how_it_went_path) paths.push(goal.how_it_went_path);
+        if (goal.feeling_path) paths.push(goal.feeling_path);
+        return paths;
+      }, []);
+      
+      await fetchSignedUrls(pathsToFetch);
     } catch (error: any) {
       toast.error("Failed to load completed goals");
       console.error('Error:', error);
     } finally {
       setLoading(false);
     }
+  };
+  
+  const fetchSignedUrls = async (paths: string[]) => {
+    const urls: FileUrls = {};
+    
+    for (const path of paths) {
+      if (path) {
+        try {
+          const isAudio = path.includes('audio');
+          const fileType = isAudio ? 'audio' : 'drawing';
+          const signedUrl = await getSignedUrl(path, fileType);
+          urls[path] = signedUrl;
+        } catch (error) {
+          console.error(`Failed to get signed URL for ${path}:`, error);
+        }
+      }
+    }
+    
+    setFileUrls(urls);
   };
 
   const handleDelete = async (id: string) => {
@@ -97,6 +135,11 @@ const PastGoals = () => {
   const renderFileIndicator = (path: string | null, type: string) => {
     if (!path) return null;
 
+    const signedUrl = fileUrls[path];
+    if (!signedUrl) {
+      return <div className="mt-4 p-4 bg-gray-50 rounded-lg">Loading {type} attachment...</div>;
+    }
+    
     const isAudio = path.includes('audio');
     const previewStyle = "mt-4 p-4 bg-gray-50 rounded-lg";
     
@@ -108,7 +151,7 @@ const PastGoals = () => {
             <span className="text-sm text-gray-600">Audio Recording</span>
           </div>
           <audio controls className="w-full">
-            <source src={`https://mbuegumluulltutadsyr.supabase.co/storage/v1/object/public/${path}`} type="audio/webm" />
+            <source src={signedUrl} type="audio/webm" />
             Your browser does not support the audio element.
           </audio>
         </div>
@@ -122,7 +165,7 @@ const PastGoals = () => {
           <span className="text-sm text-gray-600">Image</span>
         </div>
         <img 
-          src={`https://mbuegumluulltutadsyr.supabase.co/storage/v1/object/public/${path}`}
+          src={signedUrl}
           alt={`${type} attachment`}
           className="w-full rounded-lg object-cover"
         />
