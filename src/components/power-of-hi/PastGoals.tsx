@@ -32,6 +32,14 @@ type CompletedGoal = {
   challenge_level: string;
   who_difficulty: number;
   how_it_went_rating: number;
+  what_felt_easy: string | null;
+  what_felt_hard: string | null;
+  other_people_responses: string | null;
+  try_next_time: string | null;
+  what_felt_easy_rating: number | null;
+  what_felt_hard_rating: number | null;
+  other_people_rating: number | null;
+  try_next_time_confidence: number | null;
 };
 
 const PastGoals = () => {
@@ -90,10 +98,34 @@ const PastGoals = () => {
     if (!path) return null;
 
     const isAudio = path.includes('audio');
+    const previewStyle = "mt-4 p-4 bg-gray-50 rounded-lg";
+    
+    if (isAudio) {
+      return (
+        <div className={previewStyle}>
+          <div className="flex items-center gap-2 mb-2">
+            <Mic className="w-4 h-4 text-gray-600" />
+            <span className="text-sm text-gray-600">Audio Recording</span>
+          </div>
+          <audio controls className="w-full">
+            <source src={`https://mbuegumluulltutadsyr.supabase.co/storage/v1/object/public/${path}`} type="audio/webm" />
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+      );
+    }
+
     return (
-      <div className="inline-flex items-center gap-1 text-sm text-gray-600">
-        {isAudio ? <Mic className="w-4 h-4" /> : <Image className="w-4 h-4" />}
-        <span>{type}</span>
+      <div className={previewStyle}>
+        <div className="flex items-center gap-2 mb-2">
+          <Image className="w-4 h-4 text-gray-600" />
+          <span className="text-sm text-gray-600">Image</span>
+        </div>
+        <img 
+          src={`https://mbuegumluulltutadsyr.supabase.co/storage/v1/object/public/${path}`}
+          alt={`${type} attachment`}
+          className="w-full rounded-lg object-cover"
+        />
       </div>
     );
   };
@@ -105,7 +137,7 @@ const PastGoals = () => {
       return (
         <div className="flex flex-wrap gap-2 mt-2">
           {stickers.map((sticker: string, index: number) => (
-            <div key={index} className="text-2xl">{sticker}</div>
+            <span key={index} className="text-2xl">{sticker}</span>
           ))}
         </div>
       );
@@ -114,13 +146,65 @@ const PastGoals = () => {
     }
   };
 
-  if (loading) {
+  const renderReflectionSection = (goal: CompletedGoal) => {
+    if (!goal.what_felt_easy && !goal.what_felt_hard && !goal.other_people_responses && !goal.try_next_time) {
+      return null;
+    }
+
     return (
-      <div className="flex justify-center items-center min-h-[200px]">
-        <p className="text-gray-600">Loading your past goals...</p>
+      <div className="mt-6 space-y-4 border-t pt-4">
+        <h4 className="font-medium text-lg">Reflection</h4>
+        
+        {goal.what_felt_easy && (
+          <div className="space-y-2">
+            <h5 className="font-medium">What felt easy?</h5>
+            <p>{goal.what_felt_easy}</p>
+            {goal.what_felt_easy_rating && (
+              <div className="text-sm text-gray-600">
+                Rating: {goal.what_felt_easy_rating}/10
+              </div>
+            )}
+          </div>
+        )}
+
+        {goal.what_felt_hard && (
+          <div className="space-y-2">
+            <h5 className="font-medium">What felt hard?</h5>
+            <p>{goal.what_felt_hard}</p>
+            {goal.what_felt_hard_rating && (
+              <div className="text-sm text-gray-600">
+                Rating: {goal.what_felt_hard_rating}/10
+              </div>
+            )}
+          </div>
+        )}
+
+        {goal.other_people_responses && (
+          <div className="space-y-2">
+            <h5 className="font-medium">What surprised you about other people's responses?</h5>
+            <p>{goal.other_people_responses}</p>
+            {goal.other_people_rating && (
+              <div className="text-sm text-gray-600">
+                Rating: {goal.other_people_rating}/10
+              </div>
+            )}
+          </div>
+        )}
+
+        {goal.try_next_time && (
+          <div className="space-y-2">
+            <h5 className="font-medium">What will you try next time?</h5>
+            <p>{goal.try_next_time}</p>
+            {goal.try_next_time_confidence && (
+              <div className="text-sm text-gray-600">
+                Confidence Level: {goal.try_next_time_confidence}/10
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -185,7 +269,7 @@ const PastGoals = () => {
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <h4 className="font-medium mb-2">Who did you interact with?</h4>
                   <p>{selectedGoal.who}</p>
-                  {renderFileIndicator(selectedGoal.who_path, 'Attachment')}
+                  {renderFileIndicator(selectedGoal.who_path, 'Who')}
                   {renderStickers(selectedGoal.who_stickers)}
                   <div className="mt-2 text-sm text-gray-600">
                     Difficulty Level: {selectedGoal.who_difficulty}/10
@@ -195,7 +279,7 @@ const PastGoals = () => {
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <h4 className="font-medium mb-2">How did it go?</h4>
                   <p>{selectedGoal.how_it_went}</p>
-                  {renderFileIndicator(selectedGoal.how_it_went_path, 'Attachment')}
+                  {renderFileIndicator(selectedGoal.how_it_went_path, 'How it went')}
                   {renderStickers(selectedGoal.how_it_went_stickers)}
                   <div className="mt-2 text-sm text-gray-600">
                     Experience Rating: {selectedGoal.how_it_went_rating}/10
@@ -205,9 +289,11 @@ const PastGoals = () => {
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <h4 className="font-medium mb-2">How did you feel?</h4>
                   <p>{selectedGoal.feeling}</p>
-                  {renderFileIndicator(selectedGoal.feeling_path, 'Attachment')}
+                  {renderFileIndicator(selectedGoal.feeling_path, 'Feeling')}
                   {renderStickers(selectedGoal.feeling_stickers)}
                 </div>
+
+                {renderReflectionSection(selectedGoal)}
               </div>
 
               <div className="flex justify-end space-x-2 pt-4">
