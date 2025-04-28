@@ -174,8 +174,8 @@ const EmotionalAirbnb = () => {
       
       toast.success("Activity completed successfully!");
       setShowFeedback(false);
-      console.log("after feedback", isVisible)
-      
+      console.log("after feedback", isVisible);
+      handleSubmit();
       // Navigate to resources hub after completion
       navigate('/resources');
     } catch (error) {
@@ -481,7 +481,7 @@ const EmotionalAirbnb = () => {
               transition={{ delay: 1.7, duration: 0.5 }}
             >
               <Button
-                onClick={() => {setShowFeedback(true);handleSubmit();}}
+                onClick={() => {setShowFeedback(true);}}
                 disabled={isSubmitting}
                 className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] text-white hover:shadow-lg transition-all"
               >
