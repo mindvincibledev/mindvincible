@@ -463,7 +463,6 @@ const Journal = () => {
       let howItWentPath = null;
       let feelingPath = null;
       let temp = null;
-      console.console.log(whoFile);
       const fileName = whoFile; // e.g., "document.pdf"
       const extension = fileName.split('.').pop();
       console.console.log(extension);
