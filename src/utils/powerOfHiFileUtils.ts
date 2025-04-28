@@ -48,31 +48,6 @@ export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Pro
 };
 
 /**
- * Refreshes a signed URL if it's expired or about to expire
- */
-export const refreshSignedUrlIfNeeded = async (path: string, currentUrl: string, type: 'drawing' | 'audio'): Promise<string> => {
-  try {
-    if (!currentUrl) {
-      return await getSignedUrl(path, type);
-    }
-    
-    // Check if URL has token parameter which indicates it's a signed URL
-    const urlParams = new URLSearchParams(new URL(currentUrl).search);
-    const token = urlParams.get('token');
-    
-    // If no token or URL is close to expiring (within 5 minutes), refresh
-    if (!token || Date.now() > parseInt(token) - 300000) {
-      return await getSignedUrl(path, type);
-    }
-    
-    return currentUrl;
-  } catch (error) {
-    console.error('Error refreshing signed URL:', error);
-    return currentUrl || await getSignedUrl(path, type);
-  }
-};
-
-/**
  * Upload a file to Supabase storage with signed URL
  */
 export const uploadPowerOfHiFile = async (
@@ -80,7 +55,7 @@ export const uploadPowerOfHiFile = async (
   section: string, 
   fileBlob: Blob,
   type: 'drawing' | 'audio'
-): Promise<{ path: string, url: string }> => {
+): Promise<{ path: string }> => {
   try {
     const fileName = generatePowerOfHiFilename(userId, section, type);
     console.log(`Uploading ${type} file: ${fileName}`);
@@ -105,12 +80,8 @@ export const uploadPowerOfHiFile = async (
       throw new Error(`Failed to get path after uploading ${type} file`);
     }
     
-    // Generate a signed URL for the uploaded file
-    const signedUrl = await getSignedUrl(data.path, type);
-    
     return {
-      path: data.path,
-      url: signedUrl
+      path: data.path
     };
   } catch (error) {
     console.error(`Error in uploadPowerOfHiFile (${type}):`, error);

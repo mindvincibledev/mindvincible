@@ -1,169 +1,77 @@
-
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import EmojiSlider from '@/components/ui/EmojiSlider';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DrawingCanvas } from '@/components/DrawingCanvas';
+import { AudioRecorder } from '@/components/AudioRecorder';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { getSignedUrl } from '@/utils/powerOfHiFileUtils';
+import { toast } from 'sonner';
 
 interface ReflectionSectionProps {
-  onSubmit: (data: ReflectionData) => void;
-  isSubmitting: boolean;
+  entry: any;
 }
 
-export interface ReflectionData {
-  whatFeltEasy: string;
-  whatFeltHard: string;
-  otherPeopleResponses: string;
-  tryNextTime: string;
-  whatFeltEasyRating: number;
-  whatFeltHardRating: number;
-  otherPeopleRating: number;
-  tryNextTimeConfidence: number;
-}
+const ReflectionSection = ({ entry }: ReflectionSectionProps) => {
+  const [drawingUrl, setDrawingUrl] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
-const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) => {
-  const [whatFeltEasy, setWhatFeltEasy] = React.useState("");
-  const [whatFeltHard, setWhatFeltHard] = React.useState("");
-  const [otherPeopleResponses, setOtherPeopleResponses] = React.useState("");
-  const [tryNextTime, setTryNextTime] = React.useState("");
-  const [whatFeltEasyRating, setWhatFeltEasyRating] = React.useState([5]);
-  const [whatFeltHardRating, setWhatFeltHardRating] = React.useState([5]);
-  const [otherPeopleRating, setOtherPeopleRating] = React.useState([5]);
-  const [tryNextTimeConfidence, setTryNextTimeConfidence] = React.useState([5]);
-  const [isConfident, setIsConfident] = React.useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({
-      whatFeltEasy,
-      whatFeltHard,
-      otherPeopleResponses,
-      tryNextTime,
-      whatFeltEasyRating: whatFeltEasyRating[0],
-      whatFeltHardRating: whatFeltHardRating[0],
-      otherPeopleRating: otherPeopleRating[0],
-      tryNextTimeConfidence: tryNextTimeConfidence[0]
-    });
-  };
+  useEffect(() => {
+    const loadFiles = async () => {
+      if (!entry) return;
+      
+      try {
+        // Load drawing file if exists
+        if (entry.who_path) {
+          const signedUrl = await getSignedUrl(entry.who_path, 'drawing');
+          setDrawingUrl(signedUrl);
+        }
+        
+        // Load audio file if exists
+        if (entry.how_it_went_path) {
+          const signedUrl = await getSignedUrl(entry.how_it_went_path, 'audio');
+          setAudioUrl(signedUrl);
+        }
+      } catch (error) {
+        console.error('Error loading files:', error);
+        toast.error('Failed to load some files');
+      }
+    };
+    
+    loadFiles();
+  }, [entry]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
-    >
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="space-y-4">
-          <div className="space-y-4">
-            <Label htmlFor="what-felt-easy">What felt easy? 🌟</Label>
-            <Textarea
-              id="what-felt-easy"
-              value={whatFeltEasy}
-              onChange={(e) => setWhatFeltEasy(e.target.value)}
-              placeholder="Share the moments that flowed naturally..."
-              className="min-h-[100px]"
-            />
-            <EmojiSlider
-              value={whatFeltEasyRating}
-              onValueChange={setWhatFeltEasyRating}
-              label="How easy was it? 😊"
-              minEmoji="😓"
-              middleEmoji="🙂"
-              maxEmoji="🌟"
-            />
+    <Card className="w-full bg-white/95 backdrop-blur-lg shadow-lg rounded-2xl">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-bold">Your Reflection</CardTitle>
+        <CardDescription>Let's reflect on how it went</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="drawing">How did you feel before saying Hi?</Label>
+            {drawingUrl ? (
+              <img src={drawingUrl} alt="Before Saying Hi" className="w-full rounded-md shadow-sm" />
+            ) : (
+              <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center text-gray-500">
+                No drawing available
+              </div>
+            )}
           </div>
-
-          <div className="space-y-4">
-            <Label htmlFor="what-felt-hard">What felt hard? 💪</Label>
-            <Textarea
-              id="what-felt-hard"
-              value={whatFeltHard}
-              onChange={(e) => setWhatFeltHard(e.target.value)}
-              placeholder="What were your challenges?"
-              className="min-h-[100px]"
-            />
-            <EmojiSlider
-              value={whatFeltHardRating}
-              onValueChange={setWhatFeltHardRating}
-              label="How challenging was it? 🤔"
-              minEmoji="😌"
-              middleEmoji="😅"
-              maxEmoji="😰"
-            />
-          </div>
-
-          <div className="space-y-4">
-            <Label htmlFor="other-responses">What surprised you about other people's responses? 🎉</Label>
-            <Textarea
-              id="other-responses"
-              value={otherPeopleResponses}
-              onChange={(e) => setOtherPeopleResponses(e.target.value)}
-              placeholder="Tell us what unexpected things you discovered..."
-              className="min-h-[100px]"
-            />
-            <EmojiSlider
-              value={otherPeopleRating}
-              onValueChange={setOtherPeopleRating}
-              label="How surprising were their responses? 🤔"
-              minEmoji="😐"
-              middleEmoji="😲"
-              maxEmoji="🤯"
-            />
-          </div>
-
-          <div className="space-y-4">
-            <Label htmlFor="try-next-time">What's one thing you'll try next time? 🎯</Label>
-            <Textarea
-              id="try-next-time"
-              value={tryNextTime}
-              onChange={(e) => setTryNextTime(e.target.value)}
-              placeholder="Share your next adventure..."
-              className="min-h-[100px]"
-            />
-            <EmojiSlider
-              value={tryNextTimeConfidence}
-              onValueChange={setTryNextTimeConfidence}
-              label="How confident are you about trying this? 💪"
-              minEmoji="😟"
-              middleEmoji="🤔"
-              maxEmoji="💪"
-            />
-          </div>
-
-          <div className="flex items-center space-x-2 mt-6">
-            <Checkbox 
-              id="confident"
-              checked={isConfident}
-              onCheckedChange={(checked) => setIsConfident(checked as boolean)}
-            />
-            <Label 
-              htmlFor="confident"
-              className="text-sm font-normal"
-            >
-              I feel more confident about talking to new people! 🌟
-            </Label>
+          <div>
+            <Label htmlFor="audio">How did it go?</Label>
+            {audioUrl ? (
+              <audio src={audioUrl} controls className="w-full" />
+            ) : (
+              <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center text-gray-500">
+                No audio available
+              </div>
+            )}
           </div>
         </div>
-
-        <Button
-          type="submit"
-          disabled={isSubmitting || !whatFeltEasy || !whatFeltHard || !otherPeopleResponses || !tryNextTime}
-          className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
-        >
-          {isSubmitting ? (
-            "Saving..."
-          ) : (
-            <>
-              Complete Reflection
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </>
-          )}
-        </Button>
-      </form>
-    </motion.div>
+      </CardContent>
+    </Card>
   );
 };
 
