@@ -33,7 +33,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { uploadPowerOfHiFile, getPowerOfHiFileUrl } from '@/utils/powerOfHiFileUtils';
 
 
 const MOODS = ["Happy", "Excited", "Proud", "Confident", "Nervous", "Awkward", "Uncomfortable", "Scared"];
@@ -265,17 +264,178 @@ const Journal = () => {
     }
   }, [weeklyGoals, weeklyCompletedGoals]);
 
+  // File Upload handlers
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'who' | 'howItWent' | 'feeling') => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Check file type and size
+      if (!file.type.startsWith('image/') && !file.type.startsWith('audio/')) {
+        toast.error('Please upload an image or audio file');
+        return;
+      }
+      
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error('File size should be less than 10MB');
+        return;
+      }
+      
+      // Set file and preview
+      if (type === 'who') {
+        setWhoFile(file);
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (e) => setWhoPreview(e.target?.result as string);
+          reader.readAsDataURL(file);
+        } else {
+          setWhoPreview('audio');
+        }
+      } else if (type === 'howItWent') {
+        setHowItWentFile(file);
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (e) => setHowItWentPreview(e.target?.result as string);
+          reader.readAsDataURL(file);
+        } else {
+          setHowItWentPreview('audio');
+        }
+      } else {
+        setFeelingFile(file);
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (e) => setFeelingPreview(e.target?.result as string);
+          reader.readAsDataURL(file);
+        } else {
+          setFeelingPreview('audio');
+        }
+      }
+    }
+  };
+
+  const clearFile = (type: 'who' | 'howItWent' | 'feeling') => {
+    if (type === 'who') {
+      setWhoFile(null);
+      setWhoPreview(null);
+    } else if (type === 'howItWent') {
+      setHowItWentFile(null);
+      setHowItWentPreview(null);
+    } else {
+      setFeelingFile(null);
+      setFeelingPreview(null);
+    }
+  };
+
+  // Audio recording handlers
+  const startRecording = async (type: 'who' | 'howItWent' | 'feeling') => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      
+      if (type === 'who') {
+        whoChunksRef.current = [];
+        whoAudioRef.current = mediaRecorder;
+        setIsRecordingWho(true);
+        
+        mediaRecorder.ondataavailable = (e) => {
+          whoChunksRef.current.push(e.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(whoChunksRef.current, { type: 'audio/webm' });
+          const file = new File([audioBlob], `who-audio-${Date.now()}.webm`, { type: 'audio/webm' });
+          setWhoFile(file);
+          setWhoPreview('audio');
+          setIsRecordingWho(false);
+          
+          // Stop tracks
+          stream.getTracks().forEach(track => track.stop());
+        };
+      } else if (type === 'howItWent') {
+        howItWentChunksRef.current = [];
+        howItWentAudioRef.current = mediaRecorder;
+        setIsRecordingHowItWent(true);
+        
+        mediaRecorder.ondataavailable = (e) => {
+          howItWentChunksRef.current.push(e.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(howItWentChunksRef.current, { type: 'audio/webm' });
+          const file = new File([audioBlob], `how-it-went-audio-${Date.now()}.webm`, { type: 'audio/webm' });
+          setHowItWentFile(file);
+          setHowItWentPreview('audio');
+          setIsRecordingHowItWent(false);
+          
+          // Stop tracks
+          stream.getTracks().forEach(track => track.stop());
+        };
+      } else {
+        feelingChunksRef.current = [];
+        feelingAudioRef.current = mediaRecorder;
+        setIsRecordingFeeling(true);
+        
+        mediaRecorder.ondataavailable = (e) => {
+          feelingChunksRef.current.push(e.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(feelingChunksRef.current, { type: 'audio/webm' });
+          const file = new File([audioBlob], `feeling-audio-${Date.now()}.webm`, { type: 'audio/webm' });
+          setFeelingFile(file);
+          setFeelingPreview('audio');
+          setIsRecordingFeeling(false);
+          
+          // Stop tracks
+          stream.getTracks().forEach(track => track.stop());
+        };
+      }
+      
+      mediaRecorder.start();
+      toast.success('Recording started');
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      toast.error('Failed to access microphone');
+    }
+  };
+
+  const stopRecording = (type: 'who' | 'howItWent' | 'feeling') => {
+    if (type === 'who' && whoAudioRef.current) {
+      whoAudioRef.current.stop();
+    } else if (type === 'howItWent' && howItWentAudioRef.current) {
+      howItWentAudioRef.current.stop();
+    } else if (type === 'feeling' && feelingAudioRef.current) {
+      feelingAudioRef.current.stop();
+    }
+    toast.success('Recording stopped');
+  };
+
+  // File upload handler with specific bucket selection
   const uploadFile = async (file: File, type: 'who' | 'howItWent' | 'feeling') => {
     if (!file || !user?.id) return null;
     
-    try {
-      const filePath = await uploadPowerOfHiFile(user.id, file, type);
-      return filePath;
-    } catch (error) {
+    const bucketName = 'simple_hi_images';
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/${type}-${uuidv4()}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .upload(fileName, file, {
+        contentType: file.type,
+        upsert: true
+      });
+      
+    if (error) {
       console.error(`Error uploading ${type} file:`, error);
       toast.error(`Failed to upload ${type} file`);
       return null;
     }
+    
+    // Get public URL
+    const { data: publicUrlData } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(fileName);
+      
+    return publicUrlData.publicUrl;
   };
 
   const [showCelebration, setShowCelebration] = useState(false);
@@ -447,129 +607,24 @@ const Journal = () => {
     setFeeling(mood);
   };
 
-  // Add file change handler
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'who' | 'howItWent' | 'feeling') => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    if (type === 'who') {
-      setWhoFile(file);
-      setWhoPreview(URL.createObjectURL(file));
-    } else if (type === 'howItWent') {
-      setHowItWentFile(file);
-      setHowItWentPreview(URL.createObjectURL(file));
-    } else {
-      setFeelingFile(file);
-      setFeelingPreview(URL.createObjectURL(file));
-    }
-  };
-  
-  // Add recording handlers
-  const startRecording = async (type: 'who' | 'howItWent' | 'feeling') => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      
-      if (type === 'who') {
-        whoAudioRef.current = mediaRecorder;
-        whoChunksRef.current = [];
-        setIsRecordingWho(true);
-        
-        mediaRecorder.ondataavailable = (e) => {
-          whoChunksRef.current.push(e.data);
-        };
-        
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(whoChunksRef.current, { type: 'audio/webm' });
-          setWhoFile(new File([blob], `who-recording-${Date.now()}.webm`, { type: 'audio/webm' }));
-          setWhoPreview('audio');
-          setIsRecordingWho(false);
-        };
-      } else if (type === 'howItWent') {
-        howItWentAudioRef.current = mediaRecorder;
-        howItWentChunksRef.current = [];
-        setIsRecordingHowItWent(true);
-        
-        mediaRecorder.ondataavailable = (e) => {
-          howItWentChunksRef.current.push(e.data);
-        };
-        
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(howItWentChunksRef.current, { type: 'audio/webm' });
-          setHowItWentFile(new File([blob], `how-it-went-recording-${Date.now()}.webm`, { type: 'audio/webm' }));
-          setHowItWentPreview('audio');
-          setIsRecordingHowItWent(false);
-        };
-      } else {
-        feelingAudioRef.current = mediaRecorder;
-        feelingChunksRef.current = [];
-        setIsRecordingFeeling(true);
-        
-        mediaRecorder.ondataavailable = (e) => {
-          feelingChunksRef.current.push(e.data);
-        };
-        
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(feelingChunksRef.current, { type: 'audio/webm' });
-          setFeelingFile(new File([blob], `feeling-recording-${Date.now()}.webm`, { type: 'audio/webm' }));
-          setFeelingPreview('audio');
-          setIsRecordingFeeling(false);
-        };
-      }
-      
-      mediaRecorder.start();
-    } catch (error) {
-      console.error('Error starting recording:', error);
-      toast.error('Could not access microphone');
-    }
-  };
-  
-  const stopRecording = (type: 'who' | 'howItWent' | 'feeling') => {
-    if (type === 'who' && whoAudioRef.current) {
-      whoAudioRef.current.stop();
-      setIsRecordingWho(false);
-    } else if (type === 'howItWent' && howItWentAudioRef.current) {
-      howItWentAudioRef.current.stop();
-      setIsRecordingHowItWent(false);
-    } else if (type === 'feeling' && feelingAudioRef.current) {
-      feelingAudioRef.current.stop();
-      setIsRecordingFeeling(false);
-    }
-  };
-  
-  const clearFile = (type: 'who' | 'howItWent' | 'feeling') => {
-    if (type === 'who') {
-      setWhoFile(null);
-      setWhoPreview(null);
-    } else if (type === 'howItWent') {
-      setHowItWentFile(null);
-      setHowItWentPreview(null);
-    } else {
-      setFeelingFile(null);
-      setFeelingPreview(null);
-    }
-  };
-
-  const renderFilePreview = async (preview: string | null, type: 'who' | 'howItWent' | 'feeling') => {
+  // Render file preview
+  const renderFilePreview = (preview: string | null, type: 'who' | 'howItWent' | 'feeling') => {
     if (!preview) return null;
     
-    if (preview === 'audio') {
-      return (
-        <div className="p-3 bg-[#F5DF4D]/20 rounded-lg flex items-center">
-          <div className="w-10 h-10 bg-[#F5DF4D] rounded-full flex items-center justify-center mr-3">
-            <Mic className="w-5 h-5 text-black" />
-          </div>
-          <span className="text-sm">Audio recording ready for upload</span>
-        </div>
-      );
-    }
-
-    // For images, use signed URLs
-    const signedUrl = await getPowerOfHiFileUrl(preview);
-    
     return (
-      <div className="relative">
-        <img src={signedUrl || ''} alt="Preview" className="w-full h-40 object-cover rounded-lg" />
+      <div className="mt-2 relative">
+        {preview === 'audio' ? (
+          <div className="p-3 bg-[#F5DF4D]/20 rounded-lg flex items-center">
+            <div className="w-10 h-10 bg-[#F5DF4D] rounded-full flex items-center justify-center mr-3">
+              <Mic className="w-5 h-5 text-black" />
+            </div>
+            <span className="text-sm">Audio recording ready for upload</span>
+          </div>
+        ) : (
+          <div className="relative">
+            <img src={preview} alt="Preview" className="w-full h-40 object-cover rounded-lg" />
+          </div>
+        )}
         <button 
           onClick={() => clearFile(type)} 
           className="absolute top-2 right-2 bg-black/60 p-1 rounded-full hover:bg-black/80 transition-colors"
@@ -746,7 +801,7 @@ const Journal = () => {
                           </button>
                         </div>
                         
-                        {/* File preview will be rendered here */}
+                        {renderFilePreview(whoPreview, 'who')}
                         {renderStickers(whoStickers)}
                       </div>
 
@@ -809,7 +864,7 @@ const Journal = () => {
                           </button>
                         </div>
                         
-                        {/* File preview will be rendered here */}
+                        {renderFilePreview(howItWentPreview, 'howItWent')}
                         {renderStickers(howItWentStickers)}
                       </div>
 
@@ -873,7 +928,7 @@ const Journal = () => {
                           </button>
                         </div>
                         
-                        {/* File preview will be rendered here */}
+                        {renderFilePreview(feelingPreview, 'feeling')}
                         {renderStickers(feelingStickers)}
                       </div>
 
@@ -896,7 +951,7 @@ const Journal = () => {
                 </>
               ) : (
                 <ReflectionSection 
-                  onSubmit={handleReflectionSubmit}
+                  onSubmit={() => {setShowFeedback(true);handleReflectionSubmit;}}
                   isSubmitting={isSubmitting} 
                 />
               )}
@@ -904,42 +959,65 @@ const Journal = () => {
           )}
         </div>
       </Card>
-      
       <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
-        <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                How was your experience?
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-3 gap-4 py-10 px-4">
+              <Button 
+                onClick={() => handleFeedback('positive')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👍</div>
+                <span>Helpful</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('neutral')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">😐</div>
+                <span>Neutral</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('negative')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👎</div>
+                <span>Not helpful</span>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+      {/* Sticker Dialog */}
+      <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-              How was your experience?
-            </DialogTitle>
+            <DialogTitle>Select a Sticker</DialogTitle>
           </DialogHeader>
-          
-          <div className="grid grid-cols-3 gap-4 py-4">
-            <Button
-              onClick={() => handleFeedback("loved_it")}
-              className="flex flex-col items-center gap-2 p-4 hover:bg-[#FC68B3]/10 rounded-lg transition-colors"
-              variant="ghost"
-            >
-              <ThumbsUp className="h-8 w-8 text-[#FC68B3]" />
-              <span>Loved it!</span>
-            </Button>
-            
-            <Button
-              onClick={() => handleFeedback("it_was_ok")}
-              className="flex flex-col items-center gap-2 p-4 hover:bg-[#F5DF4D]/10 rounded-lg transition-colors"
-              variant="ghost"
-            >
-              <Heart className="h-8 w-8 text-[#F5DF4D]" />
-              <span>It was OK</span>
-            </Button>
-            
-            <Button
-              onClick={() => handleFeedback("needs_work")}
-              className="flex flex-col items-center gap-2 p-4 hover:bg-[#3DFDFF]/10 rounded-lg transition-colors"
-              variant="ghost"
-            >
-              <ThumbsDown className="h-8 w-8 text-[#3DFDFF]" />
-              <span>Needs Work</span>
-            </Button>
+          <div className="grid grid-cols-3 gap-4 p-4">
+            {STICKERS.map(sticker => (
+              <button
+                key={sticker.id}
+                onClick={() => addSticker(sticker.emoji || sticker.src)}
+                className="p-3 bg-gray-50 hover:bg-gray-100 rounded-lg flex items-center justify-center transition-colors"
+              >
+                {sticker.emoji ? (
+                  <span className="text-3xl">{sticker.emoji}</span>
+                ) : (
+                  <img src={sticker.src} alt={sticker.alt} className="h-10 w-10 object-contain" />
+                )}
+              </button>
+            ))}
           </div>
         </DialogContent>
       </Dialog>
@@ -948,4 +1026,3 @@ const Journal = () => {
 };
 
 export default Journal;
-
