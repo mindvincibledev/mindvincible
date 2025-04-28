@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
 import { getSignedUrl } from '@/utils/emotionalAirbnbFileUtils';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 type EmotionalEntry = {
   id: string;
@@ -32,6 +32,7 @@ type EmotionalEntry = {
   intensity_drawing_path: string | null;
   sound_drawing_path: string | null;
   message_drawing_path: string | null;
+  visibility: boolean;
 };
 
 type FileUrls = {
@@ -50,6 +51,32 @@ const PastEntries = () => {
   useEffect(() => {
     fetchEntries();
   }, [user]);
+
+  const handleVisibilityChange = async (entryId: string, newVisibility: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('emotional_airbnb')
+        .update({ visibility: newVisibility })
+        .eq('id', entryId)
+        .eq('user_id', user?.id);
+
+      if (error) {
+        console.error('Error updating visibility:', error);
+        toast.error('Failed to update visibility setting');
+        return;
+      }
+
+      // Update entries list after successful update
+      setEntries(entries.map(entry => 
+        entry.id === entryId ? { ...entry, visibility: newVisibility } : entry
+      ));
+      
+      toast.success('Visibility updated successfully');
+    } catch (error: any) {
+      console.error('Error:', error);
+      toast.error('Failed to update visibility');
+    }
+  };
 
   const fetchEntries = async () => {
     if (!user?.id) return;
@@ -268,18 +295,26 @@ const PastEntries = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button
-                  variant="destructive"
-                  onClick={() => handleDelete(selectedEntry.id)}
-                  className="bg-red-500 hover:bg-red-600"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Entry
-                </Button>
-                <DialogClose asChild>
-                  <Button variant="secondary">Close</Button>
-                </DialogClose>
+              <div className="flex justify-between items-center space-x-2 pt-4">
+                <VisibilityToggle
+                  isVisible={selectedEntry.visibility}
+                  onToggle={(value) => handleVisibilityChange(selectedEntry.id, value)}
+                  description="Make visible to clinicians"
+                />
+                
+                <div className="flex space-x-2">
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleDelete(selectedEntry.id)}
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Entry
+                  </Button>
+                  <DialogClose asChild>
+                    <Button variant="secondary">Close</Button>
+                  </DialogClose>
+                </div>
               </div>
             </div>
           )}
