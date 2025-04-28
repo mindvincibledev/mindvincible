@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -450,6 +449,10 @@ const Journal = () => {
     }
   };
   
+  const [whoPath, setWhoPath] = useState<string | null>(null);
+  const [howItWentPath, setHowItWentPath] = useState<string | null>(null);
+  const [feelingPath, setFeelingPath] = useState<string | null>(null);
+
   const handleSubmit = async () => {
     if (!user?.id || !selectedGoal) {
       toast.error("You need to be logged in and select a goal to proceed");
@@ -459,23 +462,20 @@ const Journal = () => {
     setIsSubmitting(true);
     try {
       // Upload files if they exist
-      let whoPath = null;
-      let howItWentPath = null;
-      let feelingPath = null;
       
       if (whoFile) {
-        const { path } = await uploadPowerOfHiFile(user.id, 'who', whoFile, 'drawing');
-        whoPath = path;
+        const { path } = await uploadPowerOfHiFile(user.id, 'who', whoFile, whoFile.type.startsWith('image/') ? 'drawing' : 'audio');
+        setWhoPath(path);
       }
       
       if (howItWentFile) {
-        const { path } = await uploadPowerOfHiFile(user.id, 'how_it_went', howItWentFile, 'audio');
-        howItWentPath = path;
+        const { path } = await uploadPowerOfHiFile(user.id, 'how_it_went', howItWentFile, howItWentFile.type.startsWith('image/') ? 'drawing' : 'audio');
+        setHowItWentPath(path);
       }
       
       if (feelingFile) {
-        const { path } = await uploadPowerOfHiFile(user.id, 'feeling', feelingFile, 'drawing');
-        feelingPath = path;
+        const { path } = await uploadPowerOfHiFile(user.id, 'feeling', feelingFile, feelingFile.type.startsWith('image/') ? 'drawing' : 'audio');
+        setFeelingPath(path);
       }
       
       // Convert string arrays to either string or null
@@ -805,154 +805,3 @@ const Journal = () => {
                             </div>
                             <input
                               id="howItWent-file"
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleFileChange(e, 'howItWent')}
-                              className="hidden"
-                            />
-                          </label>
-                          
-                          {isRecordingHowItWent ? (
-                            <button 
-                              onClick={() => stopRecording('howItWent')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
-                            >
-                              <MicOff className="w-4 h-4" />
-                              <span>Stop</span>
-                            </button>
-                          ) : (
-                            <button 
-                              onClick={() => startRecording('howItWent')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
-                            >
-                              <Mic className="w-4 h-4" />
-                              <span>Record Audio</span>
-                            </button>
-                          )}
-                          
-                          <button 
-                            onClick={() => openStickerDialog('howItWent')}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
-                          >
-                            <Smile className="w-4 h-4" />
-                            <span>Add Sticker</span>
-                          </button>
-                        </div>
-                        
-                        {renderFilePreview(howItWentPreview, 'howItWent')}
-                        {renderStickers(howItWentStickers)}
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">How are you feeling now?</label>
-                        <div className="grid grid-cols-4 gap-2">
-                          {MOODS.map((mood) => (
-                            <button
-                              key={mood}
-                              className={`p-2 rounded-md ${
-                                feeling === mood
-                                  ? 'bg-[#3DFDFF] text-black'
-                                  : 'bg-gray-100 hover:bg-gray-200'
-                              }`}
-                              onClick={() => handleMoodSelect(mood)}
-                            >
-                              {mood}
-                            </button>
-                          ))}
-                        </div>
-                        
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <label htmlFor="feeling-file" className="cursor-pointer">
-                            <div className="flex items-center gap-1 px-3 py-1.5 bg-[#D5D5F1] rounded-full text-sm hover:bg-[#D5D5F1]/80 transition-colors">
-                              <Image className="w-4 h-4" />
-                              <span>Add Photo</span>
-                            </div>
-                            <input
-                              id="feeling-file"
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleFileChange(e, 'feeling')}
-                              className="hidden"
-                            />
-                          </label>
-                          
-                          {isRecordingFeeling ? (
-                            <button 
-                              onClick={() => stopRecording('feeling')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-full text-sm hover:bg-red-600 transition-colors"
-                            >
-                              <MicOff className="w-4 h-4" />
-                              <span>Stop</span>
-                            </button>
-                          ) : (
-                            <button 
-                              onClick={() => startRecording('feeling')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-[#FF8A48] rounded-full text-sm hover:bg-[#FF8A48]/80 transition-colors"
-                            >
-                              <Mic className="w-4 h-4" />
-                              <span>Record Audio</span>
-                            </button>
-                          )}
-                          
-                          <button 
-                            onClick={() => openStickerDialog('feeling')}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3DFDFF] rounded-full text-sm hover:bg-[#3DFDFF]/80 transition-colors"
-                          >
-                            <Smile className="w-4 h-4" />
-                            <span>Add Sticker</span>
-                          </button>
-                        </div>
-                        
-                        {renderFilePreview(feelingPreview, 'feeling')}
-                        {renderStickers(feelingStickers)}
-                      </div>
-                      
-                      <Button
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || !who || !howItWent || !feeling}
-                        className="w-full mt-6 bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
-                      >
-                        {isSubmitting ? "Saving..." : "Save Progress"}
-                      </Button>
-                    </motion.div>
-                  )}
-                </>
-              ) : (
-                <ReflectionSection
-                  onSubmit={handleReflectionSubmit}
-                  isSubmitting={isSubmitting}
-                />
-              )}
-            </div>
-          )}
-        </div>
-      </Card>
-      
-      {/* Sticker Dialog */}
-      <Dialog open={isStickerDialogOpen} onOpenChange={setIsStickerDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Choose a Sticker</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-3 gap-4 max-h-[300px] overflow-y-auto p-2">
-            {STICKERS.map((sticker) => (
-              <div
-                key={sticker.id}
-                className="aspect-square flex items-center justify-center border rounded-lg cursor-pointer hover:bg-gray-50"
-                onClick={() => addSticker(sticker.emoji || sticker.src)}
-              >
-                {sticker.emoji ? (
-                  <span className="text-4xl">{sticker.emoji}</span>
-                ) : (
-                  <img src={sticker.src} alt={sticker.alt} className="w-16 h-16 object-contain" />
-                )}
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </motion.div>
-  );
-};
-
-export default Journal;

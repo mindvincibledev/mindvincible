@@ -13,9 +13,22 @@ export const generatePowerOfHiFilename = (userId: string, section: string, type:
 };
 
 /**
+ * Determine the correct bucket based on section and file type
+ */
+const getBucketName = (section: string, type: 'drawing' | 'audio'): string => {
+  // For "how_it_went" section, always use the audio bucket
+  if (section === 'how_it_went') {
+    return 'power_of_hi_audio';
+  }
+  
+  // For "who" and "feeling" sections, always use the drawings bucket
+  return 'power_of_hi_drawings';
+};
+
+/**
  * Get a signed URL for accessing Power of Hi files
  */
-export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Promise<string> => {
+export const getSignedUrl = async (path: string, section: string, type: 'drawing' | 'audio'): Promise<string> => {
   try {
     console.log(`Requesting signed URL for path: ${path}`);
     
@@ -23,7 +36,7 @@ export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Pro
       throw new Error('Invalid storage path provided');
     }
     
-    const bucket = type === 'drawing' ? 'power_of_hi_drawings' : 'power_of_hi_audio';
+    const bucket = getBucketName(section, type);
     
     const { data, error } = await supabase
       .storage
@@ -48,31 +61,6 @@ export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Pro
 };
 
 /**
- * Refreshes a signed URL if it's expired or about to expire
- */
-export const refreshSignedUrlIfNeeded = async (path: string, currentUrl: string, type: 'drawing' | 'audio'): Promise<string> => {
-  try {
-    if (!currentUrl) {
-      return await getSignedUrl(path, type);
-    }
-    
-    // Check if URL has token parameter which indicates it's a signed URL
-    const urlParams = new URLSearchParams(new URL(currentUrl).search);
-    const token = urlParams.get('token');
-    
-    // If no token or URL is close to expiring (within 5 minutes), refresh
-    if (!token || Date.now() > parseInt(token) - 300000) {
-      return await getSignedUrl(path, type);
-    }
-    
-    return currentUrl;
-  } catch (error) {
-    console.error('Error refreshing signed URL:', error);
-    return currentUrl || await getSignedUrl(path, type);
-  }
-};
-
-/**
  * Upload a file to Supabase storage with signed URL
  */
 export const uploadPowerOfHiFile = async (
@@ -83,9 +71,9 @@ export const uploadPowerOfHiFile = async (
 ): Promise<{ path: string, url: string }> => {
   try {
     const fileName = generatePowerOfHiFilename(userId, section, type);
-    console.log(`Uploading ${type} file: ${fileName}`);
+    console.log(`Uploading ${type} file to section ${section}: ${fileName}`);
     
-    const bucket = type === 'drawing' ? 'power_of_hi_drawings' : 'power_of_hi_audio';
+    const bucket = getBucketName(section, type);
     const contentType = type === 'drawing' ? 'image/png' : 'audio/webm';
     
     const { data, error } = await supabase
@@ -106,7 +94,7 @@ export const uploadPowerOfHiFile = async (
     }
     
     // Generate a signed URL for the uploaded file
-    const signedUrl = await getSignedUrl(data.path, type);
+    const signedUrl = await getSignedUrl(data.path, section, type);
     
     return {
       path: data.path,
@@ -118,3 +106,32 @@ export const uploadPowerOfHiFile = async (
   }
 };
 
+/**
+ * Refreshes a signed URL if it's expired or about to expire
+ */
+export const refreshSignedUrlIfNeeded = async (
+  path: string, 
+  section: string,
+  currentUrl: string, 
+  type: 'drawing' | 'audio'
+): Promise<string> => {
+  try {
+    if (!currentUrl) {
+      return await getSignedUrl(path, section, type);
+    }
+    
+    // Check if URL has token parameter which indicates it's a signed URL
+    const urlParams = new URLSearchParams(new URL(currentUrl).search);
+    const token = urlParams.get('token');
+    
+    // If no token or URL is close to expiring (within 5 minutes), refresh
+    if (!token || Date.now() > parseInt(token) - 300000) {
+      return await getSignedUrl(path, section, type);
+    }
+    
+    return currentUrl;
+  } catch (error) {
+    console.error('Error refreshing signed URL:', error);
+    return currentUrl || await getSignedUrl(path, section, type);
+  }
+};
