@@ -7,6 +7,31 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import EmojiSlider from '@/components/ui/EmojiSlider';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Card, CardContent } from '@/components/ui/card';
+import { RefreshCw } from 'lucide-react';
+import { Star, Trophy, Target, Mic, MicOff, Upload, Image, Camera, Smile, X } from 'lucide-react';
+import { ArrowLeft, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save, Home } from 'lucide-react';
+import CompletionAnimation from '@/components/grounding/CompletionAnimation';
+import { ArrowLeft as ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useParams, Link, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import {  useNavigate } from 'react-router-dom';
+import {  GitFork, Edit, Trash2 } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from "sonner";
 
 interface ReflectionSectionProps {
   onSubmit: (data: ReflectionData) => void;
@@ -34,6 +59,57 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
   const [otherPeopleRating, setOtherPeopleRating] = React.useState([5]);
   const [tryNextTimeConfidence, setTryNextTimeConfidence] = React.useState([5]);
   const [isConfident, setIsConfident] = React.useState(false);
+  const [activityCompleted, setActivityCompleted] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const navigate = useNavigate();
+
+  const { user } = useAuth();
+
+  const handleFeedback = async (feedback: string) => {
+    if (!user?.id) {
+      toast.error("You need to be logged in to complete this activity");
+      return;
+    }
+    
+    try {
+      // Record activity completion in the database
+      const { error } = await supabase
+        .from('activity_completions')
+        .insert({
+          user_id: user.id,
+          activity_id: 'power-of-hi',
+          activity_name: 'Power of Hi',
+          feedback: feedback
+        });
+      
+      if (error) {
+        console.error("Error completing activity:", error);
+        toast.error("Failed to record activity completion");
+        return;
+      }
+      
+      toast.success("Activity completed successfully!");
+      setShowFeedback(false);
+      
+      // Navigate to resources hub after completion
+      navigate('/emotional-hacking');
+    } catch (error) {
+      console.error("Error completing activity:", error);
+      toast.error("Failed to record activity completion");
+    }
+  };
+  
+  const handleActivityComplete = () => {
+    setActivityCompleted(true);
+    setShowFeedback(true);
+  };
+
+  // Handle closing the celebration dialog
+  const handleCelebrationClose = () => {
+    setShowCelebration(false);
+    setShowFeedback(true); // Show feedback dialog after celebration
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,21 +223,62 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
             </Label>
           </div>
         </div>
+        <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
+          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                How was your experience?
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-3 gap-4 py-10 px-4">
+              <Button 
+                onClick={() => handleFeedback('positive')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👍</div>
+                <span>Helpful</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('neutral')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">😐</div>
+                <span>Neutral</span>
+              </Button>
+              
+              <Button 
+                onClick={() => handleFeedback('negative')} 
+                variant="outline" 
+                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+              >
+                <div className="text-3xl mb-2">👎</div>
+                <span>Not helpful</span>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <Button
-          type="submit"
-          disabled={isSubmitting || !whatFeltEasy || !whatFeltHard || !otherPeopleResponses || !tryNextTime}
-          className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
-        >
-          {isSubmitting ? (
-            "Saving..."
-          ) : (
-            <>
-              Complete Reflection
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </>
-          )}
-        </Button>
+  type="submit"
+  // Button is enabled ONLY if isSubmitting is true AND all fields are filled
+  disabled={!isSubmitting || !whatFeltEasy || !whatFeltHard || !otherPeopleResponses || !tryNextTime}
+  onClick={handleActivityComplete}
+  className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
+>
+  {isSubmitting ? (
+    "Saving..."
+  ) : (
+    <>
+      Complete Reflection
+      <ArrowRight className="ml-2 h-4 w-4" />
+    </>
+  )}
+</Button>
+
       </form>
     </motion.div>
   );
