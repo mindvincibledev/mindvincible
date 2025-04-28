@@ -146,7 +146,22 @@ const ForkInTheRoadActivity = () => {
     try {
       setIsSubmitting(true);
       
-      // Record activity completion in the database
+      // Save visibility preference if decision exists
+      if (editingDecision) {
+        const { error: visibilityError } = await supabase
+          .from('fork_in_road_decisions')
+          .update({ visibility: isVisible })
+          .eq('decision_id', editingDecision.decision_id)
+          .eq('user_id', user.id);
+          
+        if (visibilityError) {
+          console.error("Error updating visibility:", visibilityError);
+          toast.error("Failed to update visibility setting");
+          return;
+        }
+      }
+      
+      // Record activity completion
       const { error } = await supabase
         .from('activity_completions')
         .insert({
@@ -247,7 +262,8 @@ const ForkInTheRoadActivity = () => {
       // Refresh past decisions list
       fetchPastDecisions();
       
-      setShowCompletionMessage(true);
+      // Show feedback dialog after successful save
+      setShowFeedback(true);
       setCurrentStep(prev => prev + 1);
       
     } catch (error: any) {
@@ -525,7 +541,7 @@ const ForkInTheRoadActivity = () => {
     <BackgroundWithEmojis>
       <div className="min-h-screen relative">
         <Navbar />
-        <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
+        <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
           <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
             <DialogHeader>
               <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
@@ -570,7 +586,6 @@ const ForkInTheRoadActivity = () => {
                 <VisibilityToggle
                   isVisible={isVisible}
                   onToggle={setIsVisible}
-                  
                 />
               </div>
             </div>
