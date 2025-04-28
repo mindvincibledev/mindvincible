@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/collapsible";
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSignedUrl } from '@/utils/groundingFileUtils';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 type GroundingResponse = {
   id: string;
@@ -23,6 +24,7 @@ type GroundingResponse = {
   response_audio_path: string | null;
   response_selected_items: string[] | null;
   created_at: string;
+  visibility: boolean;
 };
 
 type GroupedResponses = {
@@ -46,6 +48,43 @@ const PastGroundingEntries = () => {
   useEffect(() => {
     fetchEntries();
   }, [user]);
+
+  const handleVisibilityChange = async (activityId: string, newVisibility: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('grounding_responses')
+        .update({ visibility: newVisibility })
+        .eq('activity_id', activityId)
+        .eq('user_id', user?.id);
+
+      if (error) {
+        console.error('Error updating visibility:', error);
+        toast.error('Failed to update visibility setting');
+        return;
+      }
+
+      // Update the visibility in the local state for all responses with this activity_id
+      setGroupedEntries(prevEntries => prevEntries.map(group => {
+        if (group.activity_id === activityId) {
+          // Update all responses within this group
+          const updatedResponses = group.responses.map(response => ({
+            ...response,
+            visibility: newVisibility
+          }));
+          return {
+            ...group,
+            responses: updatedResponses
+          };
+        }
+        return group;
+      }));
+
+      toast.success('Visibility updated successfully');
+    } catch (error: any) {
+      console.error('Error:', error);
+      toast.error('Failed to update visibility');
+    }
+  };
 
   const fetchEntries = async () => {
     if (!user?.id) return;
@@ -77,7 +116,7 @@ const PastGroundingEntries = () => {
             .indexOf(a.section_name)
           - ['see', 'touch', 'hear', 'smell', 'taste']
             .indexOf(b.section_name)
-        )
+        ),
       }));
 
       setGroupedEntries(groupedArray);
@@ -241,6 +280,11 @@ const PastGroundingEntries = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  <VisibilityToggle
+                    isVisible={group.responses[0]?.visibility ?? true}
+                    onToggle={(value) => handleVisibilityChange(group.activity_id, value)}
+                    description="Make visible to clinicians"
+                  />
                   <Button
                     variant="destructive"
                     size="sm"
