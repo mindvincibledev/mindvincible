@@ -112,7 +112,6 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
     });
     
     // Show feedback dialog after submission
-    handleActivityComplete();
   };
 
   return (
