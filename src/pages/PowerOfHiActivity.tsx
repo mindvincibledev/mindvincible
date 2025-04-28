@@ -13,6 +13,7 @@ import Journal from '@/components/power-of-hi/Journal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import PastGoals from '@/components/power-of-hi/PastGoals';
 
 
 
@@ -55,10 +56,11 @@ const PowerOfHiActivity = () => {
           </Link>
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-            <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto">
+            <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto">
               <TabsTrigger value="welcome">Welcome</TabsTrigger>
               <TabsTrigger value="goal">Goals</TabsTrigger>
               <TabsTrigger value="journal">Journal</TabsTrigger>
+              <TabsTrigger value="past-goals">Past Goals</TabsTrigger>
             </TabsList>
 
             <TabsContent value="welcome">
@@ -125,6 +127,10 @@ const PowerOfHiActivity = () => {
 
             <TabsContent value="journal">
               <Journal />
+            </TabsContent>
+
+            <TabsContent value="past-goals">
+              <PastGoals />
             </TabsContent>
           </Tabs>
         </div>
