@@ -21,6 +21,7 @@ import { useAuth } from '@/context/AuthContext';
 import { JournalEntry } from '@/types/journal';
 import { getSignedUrl as getJournalSignedUrl } from '@/utils/journalFileUtils';
 import { getSignedUrl as getPowerOfHiSignedUrl } from '@/utils/powerOfHiFileUtils';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 const JournalDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -182,6 +183,33 @@ const JournalDetail = () => {
     return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
   };
   
+  const handleVisibilityChange = async (newVisibility: boolean) => {
+    if (!entry || !user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('journal_entries')
+        .update({ visibility: newVisibility })
+        .eq('id', entry.id)
+        .eq('user_id', user.id);
+        
+      if (error) throw error;
+      
+      setEntry(prev => prev ? { ...prev, visibility: newVisibility } : null);
+      toast({
+        title: "Visibility updated",
+        description: `Entry is now ${newVisibility ? 'visible' : 'hidden'} to clinicians`,
+      });
+    } catch (error: any) {
+      console.error('Error updating visibility:', error);
+      toast({
+        variant: "destructive",
+        title: "Error updating visibility",
+        description: error.message || "Could not update entry visibility",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <BackgroundWithEmojis>
@@ -215,29 +243,37 @@ const JournalDetail = () => {
                 </Button>
               </Link>
               
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="flex items-center gap-2">
-                    <Trash className="h-5 w-5" />
-                    <span className="hidden sm:inline">Delete Entry</span>
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your
-                      journal entry and any associated files.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDeleteEntry}>
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <div className="flex items-center gap-4">
+                <VisibilityToggle
+                  isVisible={entry.visibility}
+                  onToggle={handleVisibilityChange}
+                  description="Make this entry visible to clinicians"
+                />
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="flex items-center gap-2">
+                      <Trash className="h-5 w-5" />
+                      <span className="hidden sm:inline">Delete Entry</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your
+                        journal entry and any associated files.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteEntry}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
             
             <div className="bg-white/80 backdrop-blur-md rounded-xl border border-gray-100 p-6 shadow-lg">
