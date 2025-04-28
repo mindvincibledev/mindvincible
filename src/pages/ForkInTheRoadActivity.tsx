@@ -442,6 +442,30 @@ const ForkInTheRoadActivity = () => {
   };
 
   // Component to display past decisions
+  const handleVisibilityChange = async (decisionId: string, newValue: boolean) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('fork_in_road_decisions')
+        .update({ visibility: newValue })
+        .eq('decision_id', decisionId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error updating visibility:', error);
+        toast.error('Failed to update visibility setting');
+        return;
+      }
+
+      toast.success('Visibility updated successfully');
+      fetchPastDecisions(); // Refresh the list
+    } catch (error: any) {
+      console.error('Exception updating visibility:', error);
+      toast.error(`An error occurred: ${error.message}`);
+    }
+  };
+
   const PastDecisionsView = () => (
     <div className="py-4">
       <h3 className="text-xl font-medium mb-4">Your Past Decisions</h3>
@@ -482,7 +506,12 @@ const ForkInTheRoadActivity = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2 mt-4 md:mt-0">
+                <div className="flex items-center gap-2 mt-4 md:mt-0">
+                  <VisibilityToggle
+                    isVisible={decision.visibility}
+                    onToggle={(value) => handleVisibilityChange(decision.decision_id, value)}
+                    description="Make visible to clinicians"
+                  />
                   <Button
                     variant="outline"
                     size="sm"
