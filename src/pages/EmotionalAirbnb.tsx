@@ -23,6 +23,8 @@ import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { generateEmotionalAirbnbFilename } from '@/utils/emotionalAirbnbFileUtils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PastEntries from '@/components/emotional-airbnb/PastEntries';
 
 const EmotionalAirbnb = () => {
   const { user, loading } = useAuth(); // Add loading state
@@ -499,79 +501,96 @@ const EmotionalAirbnb = () => {
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen">
-      
         <Navbar />
         
         <div className="container mx-auto px-4 pt-24 pb-12">
-        <Link to="/resources" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
+          <Link to="/resources" className="inline-flex items-center text-gray-700 hover:text-primary mb-6">
             <ArrowLeftIcon className="mr-2 h-4 w-4" />
             Back to Resources Hub
           </Link>
+
           <div className="max-w-3xl mx-auto">
-            {/* Progress indicator */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-                  M(in)dvincible
-                </h1>
-                <span className="text-sm text-gray-500">
-                  Step {currentStep}/7
-                </span>
-              </div>
-              <div className="w-full bg-gray-100 rounded-full h-2.5">
-                <div 
-                  className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${(currentStep / 7) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-            
-            {/* Main content card with wavy background */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="relative mb-6 overflow-hidden"
-            >
-              <Card className="p-6 relative overflow-hidden bg-white/95 backdrop-blur-sm border border-[#D5D5F1]/50 shadow-lg">
-                <div className="absolute inset-0 z-0 overflow-hidden">
-                  <WavyBackground 
-                    colors={['#FF8A4820', '#D5D5F120', '#3DFDFF20', '#F5DF4D20', '#FC68B320']}
-                    blur={5}
-                    speed="fast"
-                    backgroundFill="#FFFFFF"
-                    className="w-full h-full"
-                  />
+            <Tabs defaultValue="journey" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="journey" className="text-lg">
+                  New Journey
+                </TabsTrigger>
+                <TabsTrigger value="past" className="text-lg">
+                  Past Entries
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="journey">
+                {/* Progress indicator */}
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <h1 className="text-xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                      M(in)dvincible
+                    </h1>
+                    <span className="text-sm text-gray-500">
+                      Step {currentStep}/7
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2.5">
+                    <div 
+                      className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] h-2.5 rounded-full transition-all duration-300"
+                      style={{ width: `${(currentStep / 7) * 100}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="relative z-10">
-                  {renderCurrentSection()}
-                </div>
-              </Card>
-            </motion.div>
-            
-            {/* Navigation buttons */}
-            <div className="flex justify-between">
-              <Button
-                onClick={handlePrevious}
-                disabled={currentStep === 0}
-                variant="outline"
-                className="gap-2"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Previous
-              </Button>
-              
-              {currentStep < 7 ? (
-                <Button
-                  onClick={handleNext}
-                  className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] gap-2"
+
+                {/* Main content card with wavy background */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative mb-6 overflow-hidden"
                 >
-                  {currentStep === 0 ? 'Start' : 'Next'}
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              ) : null}
-            </div>
+                  <Card className="p-6 relative overflow-hidden bg-white/95 backdrop-blur-sm border border-[#D5D5F1]/50 shadow-lg">
+                    <div className="absolute inset-0 z-0 overflow-hidden">
+                      <WavyBackground 
+                        colors={['#FF8A4820', '#D5D5F120', '#3DFDFF20', '#F5DF4D20', '#FC68B320']}
+                        blur={5}
+                        speed="fast"
+                        backgroundFill="#FFFFFF"
+                        className="w-full h-full"
+                      />
+                    </div>
+                    <div className="relative z-10">
+                      {renderCurrentSection()}
+                    </div>
+                  </Card>
+                </motion.div>
+
+                {/* Navigation buttons */}
+                <div className="flex justify-between">
+                  <Button
+                    onClick={handlePrevious}
+                    disabled={currentStep === 0}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+                  
+                  {currentStep < 7 ? (
+                    <Button
+                      onClick={handleNext}
+                      className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] gap-2"
+                    >
+                      {currentStep === 0 ? 'Start' : 'Next'}
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  ) : null}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="past">
+                <PastEntries />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
 
@@ -633,4 +652,5 @@ const EmotionalAirbnb = () => {
     </BackgroundWithEmojis>
   );
 };
+
 export default EmotionalAirbnb;
