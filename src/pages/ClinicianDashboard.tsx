@@ -19,6 +19,7 @@ interface StudentData {
   latestMood: string;
   weeklyAverageMood: string;
   completedActivities: string[];
+  consecutiveConcerningMoods: number;
 }
 
 interface StatData {
@@ -136,13 +137,12 @@ const ClinicianDashboard = () => {
       const weekEnd = new Date(now);
       weekEnd.setDate(weekStart.getDate() + 6);
       weekEnd.setHours(23, 59, 59, 999);
-      
-      // Get mood data for the week
+
+      // Get all mood data for better analysis of continuous patterns
       const { data: moodData, error: moodError } = await supabase
         .from('mood_data')
         .select('*')
-        .gte('created_at', weekStart.toISOString())
-        .lte('created_at', weekEnd.toISOString());
+        .order('created_at', { ascending: false });
       
       if (moodError) throw moodError;
 
@@ -164,20 +164,37 @@ const ClinicianDashboard = () => {
         .lte('completed_at', weekEnd.toISOString());
       
       if (activityError) throw activityError;
-
-      // Process student data with weekly averages and completed activities
+      
+      // Process student data with weekly averages and check for concerning mood patterns
       const processedStudents = studentsData?.map(student => {
-        // Get all moods for this student this week
-        const studentMoods = moodData?.filter(m => m.user_id === student.id) || [];
+        // Get all moods for this student ordered by date
+        const studentMoods = moodData
+          ?.filter(m => m.user_id === student.id)
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
         const moodCounts: Record<string, number> = {};
-        let mostCommonMood = "-"; // Defined here to fix the error
+        let mostCommonMood = "-";
         let maxCount = 0;
         
-        studentMoods.forEach(entry => {
+        studentMoods?.forEach(entry => {
           moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
           if (moodCounts[entry.mood] > maxCount) {
             maxCount = moodCounts[entry.mood];
             mostCommonMood = entry.mood;
+          }
+        });
+
+        // Check for 5 or more consecutive concerning moods
+        const concerningMoods = ['Sad', 'Overwhelmed', 'Anxious', 'Angry'];
+        let maxConsecutiveConcerningMoods = 0;
+        let currentConsecutiveMoods = 0;
+
+        studentMoods?.forEach(entry => {
+          if (concerningMoods.includes(entry.mood)) {
+            currentConsecutiveMoods++;
+            maxConsecutiveConcerningMoods = Math.max(maxConsecutiveConcerningMoods, currentConsecutiveMoods);
+          } else {
+            currentConsecutiveMoods = 0;
           }
         });
 
@@ -191,26 +208,25 @@ const ClinicianDashboard = () => {
         ];
 
         // Get latest mood
-        const latestMood = studentMoods
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.mood || "-";
+        const latestMood = studentMoods?.[0]?.mood || "-";
 
         return {
           id: student.id,
           name: student.name,
           latestMood,
-          weeklyAverageMood: mostCommonMood, // Using the defined variable
-          completedActivities
+          weeklyAverageMood: mostCommonMood,
+          completedActivities,
+          consecutiveConcerningMoods: maxConsecutiveConcerningMoods
         };
       }) || [];
 
       setStudents(processedStudents);
 
-      // Calculate overall stats - fix reference to mostCommonMood by calculating it separately
+      // Calculate overall stats
       let allMoodCounts: Record<string, number> = {};
       let overallMostCommonMood = "-";
       let overallMaxCount = 0;
       
-      // Calculate the most common mood across all students
       if (moodData && moodData.length > 0) {
         moodData.forEach(entry => {
           allMoodCounts[entry.mood] = (allMoodCounts[entry.mood] || 0) + 1;
@@ -224,10 +240,8 @@ const ClinicianDashboard = () => {
       setStats({
         averageMood: overallMostCommonMood,
         activitiesCompleted: activityData?.length || 0,
-        sharedJournals: journalData?.length || 0, // Now showing only visible journals from last 14 days
-        moodAlerts: processedStudents.filter(s => 
-          ['Angry', 'Overwhelmed', 'Sad', 'Anxious'].includes(s.latestMood)
-        ).length
+        sharedJournals: journalData?.length || 0,
+        moodAlerts: processedStudents.filter(s => s.consecutiveConcerningMoods >= 5).length
       });
 
     } catch (error) {
