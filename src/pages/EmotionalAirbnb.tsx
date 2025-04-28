@@ -48,7 +48,7 @@ const EmotionalAirbnb = () => {
     intensityDrawing: null as Blob | null,
     soundDrawing: null as Blob | null,
     messageDrawing: null as Blob | null,
-    visibility: true
+    visibility: isVisible
   });
   const [showCelebration, setShowCelebration] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -174,6 +174,7 @@ const EmotionalAirbnb = () => {
       
       toast.success("Activity completed successfully!");
       setShowFeedback(false);
+      console.log("after feedback", isVisible)
       
       // Navigate to resources hub after completion
       navigate('/resources');
@@ -660,6 +661,7 @@ const EmotionalAirbnb = () => {
                 <VisibilityToggle
                   isVisible={isVisible}
                   onToggle={setIsVisible}
+                  
                 />
               </div>
             </div>
