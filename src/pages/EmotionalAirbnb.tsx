@@ -260,7 +260,7 @@ const EmotionalAirbnb = () => {
         messageDrawingPath = await uploadDrawing(formData.messageDrawing, 'message');
       }
       
-
+      console.log(isVisible)
       // Insert data into the database
       const { error } = await supabase
         .from('emotional_airbnb')
