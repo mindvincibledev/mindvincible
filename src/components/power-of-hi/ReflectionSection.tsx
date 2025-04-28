@@ -256,7 +256,7 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
           type="submit"
           // Fixed the button logic - it should be disabled when submissions are in progress or fields are empty
           disabled={isSubmitting || !whatFeltEasy || !whatFeltHard || !otherPeopleResponses || !tryNextTime}
-          onClick={handleActivityComplete}
+          onClick={() => {setShowFeedback(true)}}
           className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
         >
           {isSubmitting ? (
