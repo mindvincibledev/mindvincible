@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { JournalEntry } from '@/types/journal';
-import { uploadFile as uploadPowerOfHiFile } from '@/utils/powerOfHiFileUtils';
+import { uploadFile } from '@/utils/powerOfHiFileUtils';
 
 type JournalType = 'text' | 'audio' | 'drawing';
 
@@ -106,7 +106,7 @@ export function useJournalSave() {
       // Handle audio file upload
       if (journalType === 'audio' && audioBlob) {
         try {
-          const filePath = await uploadPowerOfHiFile(audioBlob, user.id, 'audio');
+          const filePath = await uploadFile(audioBlob, user.id, 'audio');
           audioPath = filePath;
         } catch (error) {
           console.error('Error uploading audio:', error);
@@ -117,7 +117,7 @@ export function useJournalSave() {
       // Handle drawing file upload
       if (journalType === 'drawing' && drawingBlob) {
         try {
-          const filePath = await uploadPowerOfHiFile(drawingBlob, user.id, 'drawing');
+          const filePath = await uploadFile(drawingBlob, user.id, 'drawing');
           drawingPath = filePath;
         } catch (error) {
           console.error('Error uploading drawing:', error);
