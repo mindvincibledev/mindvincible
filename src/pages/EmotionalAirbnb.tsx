@@ -480,7 +480,7 @@ const EmotionalAirbnb = () => {
               transition={{ delay: 1.7, duration: 0.5 }}
             >
               <Button
-                onClick={() => {handleSubmit;setShowFeedback(true);}}
+                onClick={() => {setShowFeedback(true);handleSubmit();}}
                 disabled={isSubmitting}
                 className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] text-white hover:shadow-lg transition-all"
               >
