@@ -23,16 +23,24 @@ export const getSignedUrl = async (path: string): Promise<string> => {
       throw new Error('Invalid storage path provided');
     }
     
+    // Check if path includes full URL and extract just the filename if needed
+    let cleanPath = path;
+    if (path.includes('http') && path.includes('/object/')) {
+      cleanPath = path.split('/').pop() || path;
+      console.log(`Extracted filename from URL: ${cleanPath}`);
+    }
+    
     // Check if path already includes user ID, if not we have a problem
-    const pathSegments = path.split('/');
+    const pathSegments = cleanPath.split('/');
     if (pathSegments.length === 1) {
       console.warn('Path does not include user ID structure, this may cause permissions issues');
     }
     
+    // Try to get the signed URL
     const { data, error } = await supabase
       .storage
       .from('emotional_airbnb_drawings')
-      .createSignedUrl(path, 3600); // 1 hour expiration
+      .createSignedUrl(cleanPath, 3600); // 1 hour expiration
 
     if (error) {
       console.error('Supabase error getting signed URL:', error);
@@ -76,5 +84,47 @@ export const refreshSignedUrlIfNeeded = async (path: string, currentUrl: string)
   } catch (error) {
     console.error('Error refreshing signed URL:', error);
     throw error; // Re-throw to let component handle the error
+  }
+};
+
+/**
+ * Upload a file to Supabase storage with signed URL
+ */
+export const uploadEmotionalAirbnbDrawing = async (
+  userId: string, 
+  section: string, 
+  fileBlob: Blob
+): Promise<{ path: string, url: string }> => {
+  try {
+    const fileName = generateEmotionalAirbnbFilename(userId, section);
+    console.log(`Uploading emotional airbnb drawing: ${fileName}`);
+    
+    const { data, error } = await supabase
+      .storage
+      .from('emotional_airbnb_drawings')
+      .upload(fileName, fileBlob, {
+        contentType: 'image/png',
+        upsert: true
+      });
+      
+    if (error) {
+      console.error('Error uploading drawing:', error);
+      throw error;
+    }
+    
+    if (!data?.path) {
+      throw new Error('Failed to get path after uploading drawing');
+    }
+    
+    // Generate a signed URL for the uploaded file
+    const signedUrl = await getSignedUrl(data.path);
+    
+    return {
+      path: data.path,
+      url: signedUrl
+    };
+  } catch (error) {
+    console.error('Error in uploadEmotionalAirbnbDrawing:', error);
+    throw error;
   }
 };

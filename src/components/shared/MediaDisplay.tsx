@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { getSignedUrl as getJournalSignedUrl, refreshSignedUrlIfNeeded as refreshJournalSignedUrl } from '@/utils/journalFileUtils';
+import { getSignedUrl as getJournalSignedUrl } from '@/utils/journalFileUtils';
 import { getSignedUrl as getEmotionalAirbnbSignedUrl } from '@/utils/emotionalAirbnbFileUtils';
 import { getSignedUrl as getPowerOfHiSignedUrl } from '@/utils/powerOfHiFileUtils';
 import { getSignedUrl as getGroundingSignedUrl } from '@/utils/groundingFileUtils';
@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 interface MediaDisplayProps {
   filePath: string | null;
   type: 'drawing' | 'audio';
-  userId?: string; // Optional user ID for accessing user-specific files
+  userId?: string; // Student's user ID for accessing their files
 }
 
 const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) => {
@@ -33,21 +33,47 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) =
       setLoadError(false);
       
       try {
-        // Determine if this is a path from a specific activity based on path pattern
-        let signedUrl: string;
+        console.log(`Attempting to load media: ${filePath}, type: ${type}, userID: ${userId || 'not provided'}`);
         
-        if (filePath.includes('emotional_airbnb')) {
-          signedUrl = await getEmotionalAirbnbSignedUrl(filePath);
-        } else if (filePath.includes('power_of_hi')) {
-          signedUrl = await getPowerOfHiSignedUrl(filePath, type);
-        } else if (filePath.includes('grounding')) {
-          signedUrl = await getGroundingSignedUrl(filePath, type);
-        } else {
-          // Default to journal files
+        // Extract just the filename if the path is a full URL
+        const pathToUse = filePath.includes('http') 
+          ? filePath.split('/').pop() || filePath
+          : filePath;
+        
+        let signedUrl: string;
+
+        // Check if this is a file from emotional airbnb
+        if (pathToUse.includes('emotion_') || pathToUse.includes('location_in_body_') || 
+            pathToUse.includes('appearance_') || pathToUse.includes('emotional_airbnb')) {
+          console.log('Detected emotional airbnb media');
+          // If userId is provided and not already in path, prepend it
+          const fullPath = userId && !pathToUse.includes('/') ? `${userId}/${pathToUse}` : pathToUse;
+          signedUrl = await getEmotionalAirbnbSignedUrl(fullPath);
+        } 
+        // Check if this is a file from power of hi
+        else if (pathToUse.includes('who_') || pathToUse.includes('feeling_') || 
+                pathToUse.includes('how_it_went_') || pathToUse.includes('power_of_hi')) {
+          console.log('Detected power of hi media');
+          const fullPath = userId && !pathToUse.includes('/') ? `${userId}/${pathToUse}` : pathToUse;
+          signedUrl = await getPowerOfHiSignedUrl(fullPath, type);
+        } 
+        // Check if this is a file from grounding
+        else if (pathToUse.includes('see_') || pathToUse.includes('touch_') || 
+                pathToUse.includes('hear_') || pathToUse.includes('smell_') || 
+                pathToUse.includes('taste_') || pathToUse.includes('grounding')) {
+          console.log('Detected grounding media');
+          const fullPath = userId && !pathToUse.includes('/') ? `${userId}/${pathToUse}` : pathToUse;
+          signedUrl = await getGroundingSignedUrl(fullPath, type);
+        } 
+        // Default to journal files
+        else {
+          console.log('Detected journal media');
           const bucket = type === 'drawing' ? 'drawing_files' : 'audio_files';
-          signedUrl = await getJournalSignedUrl(filePath, bucket);
+          const fullPath = userId && !pathToUse.includes('/') ? `${userId}/${pathToUse}` : pathToUse;
+          signedUrl = await getJournalSignedUrl(fullPath, bucket);
         }
         
+        console.log('Successfully retrieved signed URL:', signedUrl);
         setUrl(signedUrl);
         setIsLoading(false);
       } catch (error) {
@@ -90,12 +116,12 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ filePath, type, userId }) =
 
   // Show error state
   if (loadError || !filePath) {
-    return null; // Hide component completely on error
+    return <div className="p-2 text-center text-red-500 text-sm">Unable to load {type}</div>;
   }
 
   // No URL available
   if (!url) {
-    return null;
+    return <div className="p-2 text-center text-gray-500 text-sm">No {type} available</div>;
   }
 
   if (type === 'drawing') {

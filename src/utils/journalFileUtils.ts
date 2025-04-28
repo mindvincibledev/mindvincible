@@ -12,8 +12,15 @@ export const getSignedUrl = async (path: string, bucket: 'audio_files' | 'drawin
       throw new Error('Invalid storage path provided');
     }
     
+    // Check if path includes full URL and extract just the filename if needed
+    let cleanPath = path;
+    if (path.includes('http') && path.includes('/object/')) {
+      cleanPath = path.split('/').pop() || path;
+      console.log(`Extracted filename from URL: ${cleanPath}`);
+    }
+    
     // Check if path already includes user ID, if not prepend it
-    const pathSegments = path.split('/');
+    const pathSegments = cleanPath.split('/');
     if (pathSegments.length === 1) {
       console.warn('Path does not include user ID structure, this may cause permissions issues');
     }
@@ -21,7 +28,7 @@ export const getSignedUrl = async (path: string, bucket: 'audio_files' | 'drawin
     const { data, error } = await supabase
       .storage
       .from(bucket)
-      .createSignedUrl(path, 3600); // 1 hour expiration
+      .createSignedUrl(cleanPath, 3600); // 1 hour expiration
 
     if (error) {
       console.error('Supabase error getting signed URL:', error);
@@ -80,4 +87,49 @@ export const generateJournalFilename = (userId: string, type: 'audio' | 'drawing
   const timestamp = Date.now();
   const extension = type === 'audio' ? 'webm' : 'png';
   return `${userId}/${type}_${timestamp}.${extension}`;
+};
+
+/**
+ * Upload a journal file to Supabase storage
+ */
+export const uploadJournalFile = async (
+  userId: string, 
+  fileBlob: Blob,
+  type: 'audio' | 'drawing'
+): Promise<{ path: string, url: string }> => {
+  try {
+    const fileName = generateJournalFilename(userId, type);
+    const bucket = type === 'audio' ? 'audio_files' : 'drawing_files';
+    const contentType = type === 'audio' ? 'audio/webm' : 'image/png';
+    
+    console.log(`Uploading ${type} journal file: ${fileName} to ${bucket}`);
+    
+    const { data, error } = await supabase
+      .storage
+      .from(bucket)
+      .upload(fileName, fileBlob, {
+        contentType,
+        upsert: true
+      });
+      
+    if (error) {
+      console.error(`Error uploading ${type} file:`, error);
+      throw error;
+    }
+    
+    if (!data?.path) {
+      throw new Error(`Failed to get path after uploading ${type} file`);
+    }
+    
+    // Generate a signed URL for the uploaded file
+    const signedUrl = await getSignedUrl(data.path, bucket);
+    
+    return {
+      path: data.path,
+      url: signedUrl
+    };
+  } catch (error) {
+    console.error(`Error in uploadJournalFile (${type}):`, error);
+    throw error;
+  }
 };

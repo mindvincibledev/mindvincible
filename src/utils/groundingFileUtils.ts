@@ -23,8 +23,15 @@ export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Pro
       throw new Error('Invalid storage path provided');
     }
     
+    // Check if path includes full URL and extract just the filename if needed
+    let cleanPath = path;
+    if (path.includes('http') && path.includes('/object/')) {
+      cleanPath = path.split('/').pop() || path;
+      console.log(`Extracted filename from URL: ${cleanPath}`);
+    }
+    
     // Check if path includes user ID structure
-    const pathSegments = path.split('/');
+    const pathSegments = cleanPath.split('/');
     if (pathSegments.length === 1) {
       console.warn('Path does not include user ID structure, this may cause permissions issues');
     }
@@ -34,7 +41,7 @@ export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Pro
     const { data, error } = await supabase
       .storage
       .from(bucket)
-      .createSignedUrl(path, 3600); // 1 hour expiration
+      .createSignedUrl(cleanPath, 3600); // 1 hour expiration
 
     if (error) {
       console.error('Supabase error getting signed URL:', error);
