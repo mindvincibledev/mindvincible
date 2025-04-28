@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -407,9 +408,9 @@ const ClinicianDashboard = () => {
                               <Button 
                                 variant="outline" 
                                 className="border-[#FC68B3] text-[#FC68B3] hover:bg-[#FC68B3]/10"
-                                disabled
+                                onClick={() => navigate(`/shared-responses/${student.id}`)}
                               >
-                                Coming Soon
+                                View Responses
                               </Button>
                             </TableCell>
                           </TableRow>

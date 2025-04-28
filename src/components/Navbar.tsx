@@ -114,6 +114,9 @@ const Navbar = () => {
             <Link to="/clinician-dashboard" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
               Dashboard
             </Link>
+            <Link to="/shared-responses" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
+              Shared Responses
+            </Link>
             <Button 
               className="ml-4 flex items-center gap-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-white transition-transform hover:scale-105" 
               onClick={handleLogout}
@@ -200,6 +203,14 @@ const Navbar = () => {
             >
               <Users className="h-4 w-4 mr-2 inline-block" />
               Dashboard
+            </Link>
+            <Link 
+              to="/shared-responses" 
+              className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Book className="h-4 w-4 mr-2 inline-block" />
+              Shared Responses
             </Link>
             <button 
               className="px-4 py-2 text-left text-white bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 rounded-md transition-all hover:scale-105 flex items-center"

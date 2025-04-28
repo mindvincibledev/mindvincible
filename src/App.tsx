@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -35,6 +36,8 @@ import ResourcesHub from "./pages/ResourcesHub";
 import ClinicianDashboard from "./pages/ClinicianDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserProfile from "./components/UserProfile";
+import SharedResponses from "./pages/SharedResponses";
+import StudentSharedResponses from "./pages/StudentSharedResponses";
 
 // Update document title to correct app name
 document.title = "M(in)dvincible";
@@ -51,6 +54,58 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Clinician route component - ensures only clinicians can access certain pages
+const ClinicianRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  const [isClinician, setIsClinician] = useState(false);
+  const [checkingRole, setCheckingRole] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkClinicianStatus = async () => {
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('user_type')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) throw error;
+        
+        if (data?.user_type === 1) { // 1 = Clinician
+          setIsClinician(true);
+        } else {
+          navigate('/home');
+        }
+      } catch (error) {
+        console.error('Error checking clinician status:', error);
+        navigate('/home');
+      } finally {
+        setCheckingRole(false);
+      }
+    };
+    
+    if (!loading) {
+      checkClinicianStatus();
+    }
+  }, [user, loading, navigate]);
+  
+  if (loading || checkingRole) {
+    return <div>Loading...</div>;
+  }
+  
+  if (!isClinician) {
+    return null;
   }
   
   return <>{children}</>;
@@ -82,6 +137,16 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <ClinicianDashboard />
           </ProtectedRoute>
+        } />
+        <Route path="/shared-responses" element={
+          <ClinicianRoute>
+            <SharedResponses />
+          </ClinicianRoute>
+        } />
+        <Route path="/shared-responses/:studentId" element={
+          <ClinicianRoute>
+            <StudentSharedResponses />
+          </ClinicianRoute>
         } />
         <Route path="/admin-dashboard" element={
           <ProtectedRoute>
