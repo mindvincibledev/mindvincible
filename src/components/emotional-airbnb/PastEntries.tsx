@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -127,7 +126,7 @@ const PastEntries = () => {
       setLoading(false);
     }
   };
-
+  
   const fetchSignedUrls = async (paths: string[]) => {
     const urls: FileUrls = {};
     const tempLoadingState: {[key: string]: boolean} = {};
@@ -139,6 +138,7 @@ const PastEntries = () => {
           setLoadingFiles(prevState => ({...prevState, [path]: true}));
           
           console.log(`Fetching signed URL for ${path}`);
+          // Use the improved getSignedUrl function
           const signedUrl = await getSignedUrl(path);
           console.log(`Got signed URL for ${path}`);
           
