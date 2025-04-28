@@ -72,12 +72,20 @@ const PastGoals = () => {
 
       if (error) throw error;
 
-      // Update the local state
+      // Update the local state immediately
       setCompletedGoals(goals =>
         goals.map(goal =>
           goal.id === goalId ? { ...goal, visibility: newVisibility } : goal
         )
       );
+      
+      // Also update the selected goal if it's currently displayed
+      if (selectedGoal && selectedGoal.id === goalId) {
+        setSelectedGoal({
+          ...selectedGoal,
+          visibility: newVisibility
+        });
+      }
 
       toast.success('Visibility updated successfully');
     } catch (error: any) {
