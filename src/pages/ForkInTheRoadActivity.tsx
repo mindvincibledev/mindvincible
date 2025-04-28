@@ -28,9 +28,11 @@ import { ArrowLeft, Hand, MessageSquare, Award, ChevronLeft, ChevronRight, Save,
 import CompletionAnimation from '@/components/grounding/CompletionAnimation';
 import { ArrowLeft as ArrowLeftIcon, Clock, Play, RotateCcw, Moon, Sun, Smartphone, Coffee, Check, Heart, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useParams, Link, Navigate } from 'react-router-dom';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 const ForkInTheRoadActivity = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
   const [decisionData, setDecisionData] = useState({
     choice: '',
     consideration_path: '',
@@ -51,7 +53,8 @@ const ForkInTheRoadActivity = () => {
     gain_b: '',
     future_a: '',
     future_b: '',
-    selection: ''
+    selection: '',
+    visibility: isVisible
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
@@ -126,6 +129,7 @@ const ForkInTheRoadActivity = () => {
     // Check if we're receiving data from GutCheckScreen (it will have a selection property)
     if (data.selection !== undefined) {
       console.log("GutCheck selection received:", data.selection);
+      setShowFeedback(true);
       handleSubmitDecision(data.selection);
     } else {
       setCurrentStep(prev => prev + 1);
@@ -207,6 +211,7 @@ const ForkInTheRoadActivity = () => {
         gain_b: fullDecisionData.gain_b,
         future_a: fullDecisionData.future_a,
         future_b: fullDecisionData.future_b,
+        visibility: isVisible,
         selection: selection
       };
       
@@ -318,7 +323,8 @@ const ForkInTheRoadActivity = () => {
                 gain_b: '',
                 future_a: '',
                 future_b: '',
-                selection: ''
+                selection: '',
+                visibility: isVisible
               });
               setCurrentStep(0);
               setShowCompletionMessage(false);
@@ -355,7 +361,8 @@ const ForkInTheRoadActivity = () => {
       gain_b: decision.gain_b || '',
       future_a: decision.future_a || '',
       future_b: decision.future_b || '',
-      selection: decision.selection || ''
+      selection: decision.selection || '',
+      visibility: decision.visibility 
     });
     setCurrentStep(0);
     setActiveTab("make-decision");
@@ -526,33 +533,46 @@ const ForkInTheRoadActivity = () => {
               </DialogTitle>
             </DialogHeader>
             
-            <div className="grid grid-cols-3 gap-4 py-10 px-4">
-              <Button 
-                onClick={() => {handleFeedback('positive');navigate("/resources");}} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">👍</div>
-                <span>Helpful</span>
-              </Button>
-              
-              <Button 
-                onClick={() => {handleFeedback('neutral');navigate("/resources");}} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">😐</div>
-                <span>Neutral</span>
-              </Button>
-              
-              <Button 
-                onClick={() => {handleFeedback('negative');navigate("/resources");}} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">👎</div>
-                <span>Not helpful</span>
-              </Button>
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-4 py-6 px-4">
+                <Button 
+                  onClick={() => handleFeedback('positive')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👍</div>
+                  <span>Helpful</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('neutral')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">😐</div>
+                  <span>Neutral</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('negative')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👎</div>
+                  <span>Not helpful</span>
+                </Button>
+              </div>
+
+              <div className="px-4">
+                <VisibilityToggle
+                  isVisible={isVisible}
+                  onToggle={setIsVisible}
+                  
+                />
+              </div>
             </div>
           </DialogContent>
         </Dialog>
