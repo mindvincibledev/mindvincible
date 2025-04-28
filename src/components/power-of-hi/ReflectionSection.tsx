@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -97,6 +98,8 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Call the onSubmit function passed as prop with all the reflection data
     onSubmit({
       whatFeltEasy,
       whatFeltHard,
@@ -107,6 +110,9 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
       otherPeopleRating: otherPeopleRating[0],
       tryNextTimeConfidence: tryNextTimeConfidence[0]
     });
+    
+    // Show feedback dialog after submission
+    handleActivityComplete();
   };
 
   return (
@@ -247,21 +253,20 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
         </Dialog>
 
         <Button
-  type="submit"
-  // Button is enabled ONLY if isSubmitting is true AND all fields are filled
-  disabled={!isSubmitting || !whatFeltEasy || !whatFeltHard || !otherPeopleResponses || !tryNextTime}
-  className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
->
-  {isSubmitting ? (
-    "Saving..."
-) : (
-    <>
-      Complete Reflection
-      <ArrowRight className="ml-2 h-4 w-4" />
-    </>
-  )}
-</Button>
-
+          type="submit"
+          // Fixed the button logic - it should be disabled when submissions are in progress or fields are empty
+          disabled={isSubmitting || !whatFeltEasy || !whatFeltHard || !otherPeopleResponses || !tryNextTime}
+          className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
+        >
+          {isSubmitting ? (
+            "Saving..."
+          ) : (
+            <>
+              Complete Reflection
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </>
+          )}
+        </Button>
       </form>
     </motion.div>
   );
