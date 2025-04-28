@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import AudioRecorder from '@/components/AudioRecorder';
 import { uploadPowerOfHiFile } from '@/utils/powerOfHiFileUtils';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const Journal = () => {
   const { user } = useAuth();
@@ -53,12 +55,12 @@ const Journal = () => {
 
     try {
       const { data, error } = await supabase
-        .from('power_of_hi_entries')
+        .from('simple_hi_challenges')
         .insert([
           {
             user_id: user.id,
-            who_text: whoText,
-            how_it_went_text: howItWentText,
+            who: whoText,
+            how_it_went: howItWentText,
             who_path: whoPath,
             how_it_went_path: howItWentPath,
           },

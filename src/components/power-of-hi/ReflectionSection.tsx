@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DrawingCanvas } from '@/components/DrawingCanvas';
-import { AudioRecorder } from '@/components/AudioRecorder';
+import { DrawingCanvas } from '@/components/grounding/DrawingCanvas';
+import AudioRecorder from '@/components/AudioRecorder';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
