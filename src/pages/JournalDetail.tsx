@@ -20,7 +20,8 @@ import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { JournalEntry } from '@/types/journal';
-import { getSignedUrl, refreshSignedUrlIfNeeded } from '@/utils/journalFileUtils';
+import { getSignedUrl as getJournalSignedUrl } from '@/utils/journalFileUtils';
+import { getSignedUrl as getPowerOfHiSignedUrl } from '@/utils/powerOfHiFileUtils';
 
 const JournalDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -71,7 +72,8 @@ const JournalDetail = () => {
       // Get signed URLs for audio and drawing files
       if (journalEntry.audio_path) {
         try {
-          const signedUrl = await getSignedUrl(journalEntry.audio_path, 'audio');
+          // Use journal file utils for regular journal entries
+          const signedUrl = await getJournalSignedUrl(journalEntry.audio_path, 'audio_files');
           setAudioUrl(signedUrl);
         } catch (error) {
           console.error('Error getting signed audio URL:', error);
@@ -85,7 +87,8 @@ const JournalDetail = () => {
       
       if (journalEntry.drawing_path) {
         try {
-          const signedUrl = await getSignedUrl(journalEntry.drawing_path, 'drawing');
+          // Use journal file utils for regular journal entries
+          const signedUrl = await getJournalSignedUrl(journalEntry.drawing_path, 'drawing_files');
           setDrawingUrl(signedUrl);
         } catch (error) {
           console.error('Error getting signed drawing URL:', error);
