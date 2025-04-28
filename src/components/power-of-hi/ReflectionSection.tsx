@@ -56,7 +56,7 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
       toast.error("You need to be logged in to complete this activity");
       return;
     }
-    
+  
     try {
       // Record activity completion in the database
       const { error } = await supabase
@@ -67,16 +67,28 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
           activity_name: 'Power of Hi',
           feedback: feedback
         });
-      
+  
       if (error) {
         console.error("Error completing activity:", error);
         toast.error("Failed to record activity completion");
         return;
       }
-      
+  
+      // Call onSubmit here, after feedback!
+      onSubmit({
+        whatFeltEasy,
+        whatFeltHard,
+        otherPeopleResponses,
+        tryNextTime,
+        whatFeltEasyRating: whatFeltEasyRating[0],
+        whatFeltHardRating: whatFeltHardRating[0],
+        otherPeopleRating: otherPeopleRating[0],
+        tryNextTimeConfidence: tryNextTimeConfidence[0]
+      });
+  
       toast.success("Activity completed successfully!");
       setShowFeedback(false);
-      
+  
       // Navigate to resources hub after completion
       navigate('/emotional-hacking');
     } catch (error) {
@@ -84,6 +96,7 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
       toast.error("Failed to record activity completion");
     }
   };
+  
   
   const handleActivityComplete = () => {
     setActivityCompleted(true);
@@ -95,24 +108,11 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
     setShowCelebration(false);
     setShowFeedback(true); // Show feedback dialog after celebration
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Call the onSubmit function passed as prop with all the reflection data
-    onSubmit({
-      whatFeltEasy,
-      whatFeltHard,
-      otherPeopleResponses,
-      tryNextTime,
-      whatFeltEasyRating: whatFeltEasyRating[0],
-      whatFeltHardRating: whatFeltHardRating[0],
-      otherPeopleRating: otherPeopleRating[0],
-      tryNextTimeConfidence: tryNextTimeConfidence[0]
-    });
-    
-    // Show feedback dialog after submission
+    handleActivityComplete();
   };
+  
 
   return (
     <motion.div
@@ -255,7 +255,6 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
           type="submit"
           // Fixed the button logic - it should be disabled when submissions are in progress or fields are empty
           disabled={isSubmitting || !whatFeltEasy || !whatFeltHard || !otherPeopleResponses || !tryNextTime}
-          onClick={() => {setShowFeedback(true)}}
           className="w-full md:w-auto bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90"
         >
           {isSubmitting ? (
