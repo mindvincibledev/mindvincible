@@ -1,10 +1,10 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { JournalEntry } from '@/types/journal';
-import { generateJournalFilename } from '@/utils/journalFileUtils';
 import { uploadPowerOfHiFile } from '@/utils/powerOfHiFileUtils';
 
 type JournalType = 'text' | 'audio' | 'drawing';
