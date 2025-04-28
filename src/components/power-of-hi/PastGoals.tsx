@@ -54,6 +54,7 @@ const PastGoals = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [fileUrls, setFileUrls] = useState<FileUrls>({});
+  const [loadingFiles, setLoadingFiles] = useState<{[key: string]: boolean}>({});
 
   useEffect(() => {
     fetchCompletedGoals();
@@ -96,27 +97,34 @@ const PastGoals = () => {
   
   const fetchSignedUrls = async (paths: string[]) => {
     const urls: FileUrls = {};
+    const tempLoadingState: {[key: string]: boolean} = {};
     
     for (const path of paths) {
       if (path) {
         try {
+          tempLoadingState[path] = true;
+          setLoadingFiles(prevState => ({...prevState, [path]: true}));
+          
           const isAudio = path.includes('audio');
-          // Use the correct bucket name based on file type
-          const bucket = isAudio ? 'power_of_hi_audio' : 'power_of_hi_drawings';
           const fileType = isAudio ? 'audio' : 'drawing';
           
-          console.log(`Fetching signed URL for ${path} from bucket ${bucket}`);
-          const signedUrl = await getSignedUrl(path, fileType);
-          console.log(`Got signed URL with length: ${signedUrl.length}`);
+          console.log(`Fetching signed URL for ${path} (type: ${fileType})`);
           
+          // Directly pass the file type, not the bucket name
+          const signedUrl = await getSignedUrl(path, fileType);
+          
+          console.log(`Got signed URL for ${path} with length: ${signedUrl.length}`);
           urls[path] = signedUrl;
         } catch (error) {
           console.error(`Failed to get signed URL for ${path}:`, error);
+        } finally {
+          tempLoadingState[path] = false;
         }
       }
     }
     
     setFileUrls(urls);
+    setLoadingFiles(tempLoadingState);
   };
 
   const handleDelete = async (id: string) => {
@@ -141,9 +149,23 @@ const PastGoals = () => {
   const renderFileIndicator = (path: string | null, type: string) => {
     if (!path) return null;
 
+    if (loadingFiles[path]) {
+      return <div className="mt-4 p-4 bg-gray-50 rounded-lg">Loading {type} attachment...</div>;
+    }
+
     const signedUrl = fileUrls[path];
     if (!signedUrl) {
-      return <div className="mt-4 p-4 bg-gray-50 rounded-lg">Loading {type} attachment...</div>;
+      return <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+        Failed to load {type} attachment
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => fetchSignedUrls([path])}
+          className="ml-2"
+        >
+          Retry
+        </Button>
+      </div>;
     }
     
     const isAudio = path.includes('audio');

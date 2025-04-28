@@ -17,13 +17,16 @@ export const generatePowerOfHiFilename = (userId: string, section: string, type:
  */
 export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Promise<string> => {
   try {
-    console.log(`Requesting signed URL for path: ${path}`);
+    console.log(`Requesting signed URL for path: ${path}, type: ${type}`);
     
     if (!path || typeof path !== 'string') {
       throw new Error('Invalid storage path provided');
     }
     
-    const bucket = type === 'drawing' ? 'power_of_hi_drawings' : 'power_of_hi_audio';
+    // Select the appropriate bucket based on the file type
+    const bucket = type === 'audio' ? 'power_of_hi_audio' : 'power_of_hi_drawings';
+    
+    console.log(`Using bucket: ${bucket}`);
     
     const { data, error } = await supabase
       .storage
@@ -39,7 +42,7 @@ export const getSignedUrl = async (path: string, type: 'drawing' | 'audio'): Pro
       throw new Error('Failed to generate signed URL');
     }
     
-    console.log(`Successfully generated signed URL with length: ${data.signedUrl.length}`);
+    console.log(`Successfully generated signed URL for ${path}`);
     return data.signedUrl;
   } catch (error) {
     console.error('Error getting signed URL:', error);
@@ -117,4 +120,3 @@ export const uploadPowerOfHiFile = async (
     throw error;
   }
 };
-
