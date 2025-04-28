@@ -25,12 +25,14 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 import { generateEmotionalAirbnbFilename } from '@/utils/emotionalAirbnbFileUtils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PastEntries from '@/components/emotional-airbnb/PastEntries';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 const EmotionalAirbnb = () => {
   const { user, loading } = useAuth(); // Add loading state
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   
   // State for storing emotional airbnb data
   const [formData, setFormData] = useState({
@@ -45,7 +47,8 @@ const EmotionalAirbnb = () => {
     appearanceDrawing: null as Blob | null,
     intensityDrawing: null as Blob | null,
     soundDrawing: null as Blob | null,
-    messageDrawing: null as Blob | null
+    messageDrawing: null as Blob | null,
+    visibility: true
   });
   const [showCelebration, setShowCelebration] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -273,7 +276,8 @@ const EmotionalAirbnb = () => {
           appearance_drawing_path: appearanceDrawingPath,
           intensity_drawing_path: intensityDrawingPath,
           sound_drawing_path: soundDrawingPath,
-          message_drawing_path: messageDrawingPath
+          message_drawing_path: messageDrawingPath,
+          visibility: isVisible
         });
 
       if (error) {
@@ -618,33 +622,45 @@ const EmotionalAirbnb = () => {
               </DialogTitle>
             </DialogHeader>
             
-            <div className="grid grid-cols-3 gap-4 py-10 px-4">
-              <Button 
-                onClick={() => handleFeedback('positive')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">👍</div>
-                <span>Helpful</span>
-              </Button>
-              
-              <Button 
-                onClick={() => handleFeedback('neutral')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">😐</div>
-                <span>Neutral</span>
-              </Button>
-              
-              <Button 
-                onClick={() => handleFeedback('negative')} 
-                variant="outline" 
-                className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
-              >
-                <div className="text-3xl mb-2">👎</div>
-                <span>Not helpful</span>
-              </Button>
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-4 py-6 px-4">
+                <Button 
+                  onClick={() => handleFeedback('positive')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👍</div>
+                  <span>Helpful</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('neutral')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">😐</div>
+                  <span>Neutral</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('negative')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👎</div>
+                  <span>Not helpful</span>
+                </Button>
+              </div>
+
+              <div className="px-4">
+                <VisibilityToggle
+                  isVisible={isVisible}
+                  onToggle={setIsVisible}
+                />
+              </div>
             </div>
           </DialogContent>
         </Dialog>

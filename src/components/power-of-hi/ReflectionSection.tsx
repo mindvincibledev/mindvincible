@@ -76,7 +76,6 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
         toast.error("Failed to record activity completion");
         return;
       }
-      console.log("Submitting with visibility:", isVisible);
   
       // Call onSubmit here, after feedback!
       onSubmit({
@@ -262,7 +261,6 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
               <VisibilityToggle
   isVisible={isVisible}
   onToggle={(val) => {
-    console.log('Toggling visibility:', val);
     setIsVisible(val);
   }}
 />
