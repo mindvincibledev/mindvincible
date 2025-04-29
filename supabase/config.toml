@@ -1,5 +1,5 @@
 
 mbuegumluulltutadsyr = "development"
 
-[check-in-request]
-verify_jwt = true
+[functions.check-in-request]
+verify_jwt = false

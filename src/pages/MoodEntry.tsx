@@ -117,23 +117,17 @@ const MoodEntry = () => {
       
       console.log('Requesting check-in for user:', user.id);
       
-      const response = await fetch('https://mbuegumluulltutadsyr.supabase.co/functions/v1/check-in-request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({
+      // Use the supabase.functions.invoke method instead of direct fetch
+      const { data, error } = await supabase.functions.invoke('check-in-request', {
+        body: {
           userId: user.id,
           userName: user.name,
           userEmail: user.email
-        }),
+        },
       });
 
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to request check-in');
+      if (error) {
+        throw new Error(error.message || 'Failed to request check-in');
       }
       
       toast({
