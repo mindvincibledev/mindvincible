@@ -36,6 +36,36 @@ export type Database = {
         }
         Relationships: []
       }
+      check_in_requests: {
+        Row: {
+          alert_sent: boolean
+          created_at: string
+          id: string
+          notes: string | null
+          resolved: boolean
+          resolved_at: string | null
+          user_id: string
+        }
+        Insert: {
+          alert_sent?: boolean
+          created_at?: string
+          id?: string
+          notes?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          user_id: string
+        }
+        Update: {
+          alert_sent?: boolean
+          created_at?: string
+          id?: string
+          notes?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       emotional_airbnb: {
         Row: {
           appearance_description_text: string | null

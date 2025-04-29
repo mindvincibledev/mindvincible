@@ -1,1 +1,5 @@
-project_id = "mbuegumluulltutadsyr"
+
+mbuegumluulltutadsyr = "development"
+
+[check-in-request]
+verify_jwt = true

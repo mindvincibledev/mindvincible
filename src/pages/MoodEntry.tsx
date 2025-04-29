@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/Navbar';
@@ -23,6 +24,7 @@ const MoodEntry = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isRequestingCheckIn, setIsRequestingCheckIn] = useState(false);
   
   const { user, session } = useAuth();
   const navigate = useNavigate();
@@ -103,6 +105,53 @@ const MoodEntry = () => {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Handle the check-in request
+  const handleCheckInRequest = async () => {
+    if (!user) return;
+    
+    try {
+      setIsRequestingCheckIn(true);
+      
+      console.log('Requesting check-in for user:', user.id);
+      
+      const response = await fetch('https://mbuegumluulltutadsyr.supabase.co/functions/v1/check-in-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          userName: user.name,
+          userEmail: user.email
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to request check-in');
+      }
+      
+      toast({
+        title: "Check-in requested",
+        description: "A notification has been sent to our team. Someone will reach out to you soon.",
+        duration: 6000,
+      });
+      
+    } catch (err) {
+      console.error('Error requesting check-in:', err);
+      toast({
+        variant: "destructive",
+        title: "Failed to request check-in",
+        description: "There was an error sending your check-in request. Please try again or contact support.",
+        duration: 6000,
+      });
+    } finally {
+      setIsRequestingCheckIn(false);
     }
   };
 
@@ -277,8 +326,21 @@ const MoodEntry = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="mt-10"
+                        className="mt-6"
                       >
+                        {/* Check-in request button */}
+                        <Button
+                          variant="outline"
+                          className="w-full mb-4 py-3 text-red-600 border-red-200 hover:bg-red-50 flex items-center justify-center gap-2"
+                          onClick={handleCheckInRequest}
+                          disabled={isRequestingCheckIn}
+                        >
+                          <AlertCircle className="h-5 w-5" />
+                          <span>
+                            {isRequestingCheckIn ? "Sending request..." : "I'd like to be checked in on"}
+                          </span>
+                        </Button>
+
                         <Button 
                           className="w-full py-6 transition-all duration-300 relative overflow-hidden group"
                           style={{
