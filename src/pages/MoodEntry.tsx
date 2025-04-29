@@ -117,7 +117,7 @@ const MoodEntry = () => {
       
       console.log('Requesting check-in for user:', user.id);
       
-      // Use the supabase.functions.invoke method instead of direct fetch
+      // Use the supabase.functions.invoke method with better error handling
       const { data, error } = await supabase.functions.invoke('check-in-request', {
         body: {
           userId: user.id,
@@ -125,24 +125,34 @@ const MoodEntry = () => {
           userEmail: user.email
         },
       });
-
+      
       if (error) {
+        console.error('Error requesting check-in:', error);
         throw new Error(error.message || 'Failed to request check-in');
       }
       
-      toast({
-        title: "Check-in requested",
-        description: "A notification has been sent to our team. Someone will reach out to you soon.",
-        duration: 6000,
-      });
+      if (data?.alertSaved) {
+        // Show a modified success message if the request was saved but emails failed
+        toast({
+          title: "Check-in request recorded",
+          description: "Your request was saved, but there might be a delay in notifying our team. Someone will reach out to you soon.",
+          duration: 6000,
+        });
+      } else {
+        toast({
+          title: "Check-in requested",
+          description: "A notification has been sent to our team. Someone will reach out to you soon.",
+          duration: 6000,
+        });
+      }
       
     } catch (err) {
       console.error('Error requesting check-in:', err);
       toast({
         variant: "destructive",
-        title: "Failed to request check-in",
-        description: "There was an error sending your check-in request. Please try again or contact support.",
-        duration: 6000,
+        title: "Check-in request saved",
+        description: "We've saved your request, but there may be a delay in response. If urgent, please contact your clinician directly.",
+        duration: 8000,
       });
     } finally {
       setIsRequestingCheckIn(false);

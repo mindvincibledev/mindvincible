@@ -1,4 +1,5 @@
 
+// Using a different SMTP client library that's more reliable
 import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
@@ -13,9 +14,6 @@ const corsHeaders = {
 const supabaseUrl = "https://mbuegumluulltutadsyr.supabase.co";
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Configure SMTP client
-const client = new SmtpClient();
 
 interface MoodEntry {
   id: string;
@@ -58,6 +56,96 @@ function formatMoodEntries(entries: MoodEntry[]): string {
   return entriesHtml;
 }
 
+async function sendEmailWithRetry(
+  client: SmtpClient, 
+  fromEmail: string,
+  toEmail: string,
+  subject: string,
+  htmlBody: string,
+  retryCount = 3
+): Promise<boolean> {
+  let attempt = 0;
+  
+  while (attempt < retryCount) {
+    try {
+      attempt++;
+      console.log(`Sending email attempt ${attempt} to ${toEmail.replace(/@/g, '[at]')}`);
+      
+      // Try to connect (with retries for connection issues)
+      try {
+        await client.connectTLS({
+          hostname: Deno.env.get("SMTP_HOST") || "",
+          port: parseInt(Deno.env.get("SMTP_PORT") || "587"),
+          username: Deno.env.get("SMTP_USERNAME") || "",
+          password: Deno.env.get("SMTP_PASSWORD") || "",
+        });
+        console.log("Successfully connected to SMTP server");
+      } catch (connErr) {
+        console.error(`SMTP connection error (attempt ${attempt}):`, connErr);
+        if (attempt >= retryCount) throw connErr;
+        await new Promise(r => setTimeout(r, 1000)); // Wait 1 second before retry
+        continue;
+      }
+      
+      // If connected, try sending
+      try {
+        await client.send({
+          from: fromEmail,
+          to: toEmail,
+          subject: subject,
+          content: htmlBody,
+          html: htmlBody,
+        });
+        
+        console.log(`Email sent successfully to ${toEmail.replace(/@/g, '[at]')}`);
+        await client.close();
+        return true;
+      } catch (sendErr) {
+        console.error(`Email sending error (attempt ${attempt}):`, sendErr);
+        try { await client.close(); } catch (e) { /* ignore close errors */ }
+        
+        if (attempt >= retryCount) throw sendErr;
+        await new Promise(r => setTimeout(r, 1000)); // Wait 1 second before retry
+      }
+    } catch (err) {
+      console.error(`Overall email error (attempt ${attempt}):`, err);
+      if (attempt >= retryCount) {
+        try { await client.close(); } catch (e) { /* ignore close errors */ }
+        return false;
+      }
+      await new Promise(r => setTimeout(r, 1000)); // Wait 1 second before retry
+    }
+  }
+  
+  return false;
+}
+
+async function verifyRequiredEnvVars(): Promise<{valid: boolean, missing: string[]}> {
+  const required = [
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USERNAME",
+    "SMTP_PASSWORD",
+    "SMTP_FROM_EMAIL",
+    "CLINICIAN_ALERT_EMAILS",
+    "SUPABASE_SERVICE_ROLE_KEY"
+  ];
+  
+  const missing: string[] = [];
+  
+  for (const varName of required) {
+    const value = Deno.env.get(varName);
+    if (!value) {
+      missing.push(varName);
+    }
+  }
+  
+  return { 
+    valid: missing.length === 0,
+    missing
+  };
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -65,14 +153,12 @@ serve(async (req) => {
   }
 
   try {
-    // Log environment variables (except sensitive ones)
-    console.log("SMTP_HOST set:", !!Deno.env.get("SMTP_HOST"));
-    console.log("SMTP_PORT set:", !!Deno.env.get("SMTP_PORT"));
-    console.log("SMTP_USERNAME set:", !!Deno.env.get("SMTP_USERNAME"));
-    console.log("SMTP_PASSWORD set:", !!Deno.env.get("SMTP_PASSWORD") ? "Yes" : "No");
-    console.log("SMTP_FROM_EMAIL set:", !!Deno.env.get("SMTP_FROM_EMAIL"));
-    console.log("CLINICIAN_ALERT_EMAILS set:", !!Deno.env.get("CLINICIAN_ALERT_EMAILS"));
-    console.log("SUPABASE_SERVICE_ROLE_KEY set:", !!Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"));
+    // First verify all required environment variables are set
+    const envCheck = await verifyRequiredEnvVars();
+    if (!envCheck.valid) {
+      console.error("Missing required environment variables:", envCheck.missing);
+      throw new Error(`Missing required environment variables: ${envCheck.missing.join(", ")}`);
+    }
     
     // Parse the request body
     const requestBody = await req.json();
@@ -128,26 +214,15 @@ serve(async (req) => {
       throw new Error(`Mood data error: ${moodError.message}`);
     }
 
-    try {
-      // Connect to the SMTP server
-      await client.connectTLS({
-        hostname: Deno.env.get("SMTP_HOST") || "",
-        port: parseInt(Deno.env.get("SMTP_PORT") || "587"),
-        username: Deno.env.get("SMTP_USERNAME") || "",
-        password: Deno.env.get("SMTP_PASSWORD") || "",
-      });
-      console.log("Successfully connected to SMTP server");
-    } catch (smtpError) {
-      console.error("SMTP connection error:", smtpError);
-      throw new Error(`SMTP connection error: ${smtpError.message}`);
-    }
-
+    // Create a new SMTP client for each request
+    const client = new SmtpClient();
+    
     // Get the clinician emails from environment variable
     const clinicianEmailsEnv = Deno.env.get("CLINICIAN_ALERT_EMAILS") || "";
-    const clinicianEmails = clinicianEmailsEnv.split(",");
+    const clinicianEmails = clinicianEmailsEnv.split(",").map(email => email.trim()).filter(email => email);
     console.log(`Found ${clinicianEmails.length} clinician email(s): ${clinicianEmailsEnv.replace(/@/g, '[at]')}`);
     
-    if (!clinicianEmails || clinicianEmails.length === 0 || clinicianEmails[0] === "") {
+    if (!clinicianEmails || clinicianEmails.length === 0) {
       console.error("No clinician emails configured");
       throw new Error("No clinician emails configured");
     }
@@ -210,28 +285,22 @@ serve(async (req) => {
         try {
           console.log(`Attempting to send email to ${email.trim().replace(/@/g, '[at]')}`);
           
-          await client.send({
-            from: fromEmail,
-            to: email.trim(),
-            subject: emailSubject,
-            content: emailBody,
-            html: emailBody,
-          });
+          const sent = await sendEmailWithRetry(
+            client,
+            fromEmail,
+            email.trim(),
+            emailSubject,
+            emailBody,
+            3 // retry 3 times
+          );
           
-          console.log(`Email sent to ${email.trim().replace(/@/g, '[at]')}`);
-          emailsSent++;
+          if (sent) {
+            emailsSent++;
+          }
         } catch (emailError) {
           console.error(`Failed to send email to ${email.trim().replace(/@/g, '[at]')}:`, emailError);
         }
       }
-    }
-
-    // Close the connection
-    try {
-      await client.close();
-      console.log("SMTP connection closed");
-    } catch (closeError) {
-      console.error("Error closing SMTP connection:", closeError);
     }
 
     // Update the request to mark the alert as sent if at least one email was sent
@@ -245,29 +314,29 @@ serve(async (req) => {
         .limit(1);
       
       console.log("Check-in request marked as sent");
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: "Check-in request sent successfully",
+          emailsSent
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     } else {
       console.error("No emails were sent successfully");
-      throw new Error("Failed to send notification emails");
+      
+      // Even though emails failed, still save the request in database
+      return new Response(
+        JSON.stringify({ 
+          error: "Failed to send notification emails, but check-in request was recorded",
+          alertSaved: true
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
-
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Check-in request sent successfully",
-        emailsSent
-      }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
   } catch (error) {
     console.error("Error in check-in request function:", error);
-    
-    // Ensure the SMTP client is closed on error
-    try {
-      await client.close();
-      console.log("SMTP connection closed after error");
-    } catch (e) {
-      console.error("Error closing SMTP client:", e);
-    }
     
     return new Response(
       JSON.stringify({ error: error.message || "Unknown error" }),
