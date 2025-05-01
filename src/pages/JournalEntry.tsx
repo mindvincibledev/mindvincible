@@ -20,7 +20,7 @@ const JournalEntry = () => {
   const [content, setContent] = useState('');
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [drawingBlob, setDrawingBlob] = useState<Blob | null>(null);
-  const [visibility, setVisibility] = useState(true);
+  const [visibility, setVisibility] = useState(false); // Changed default to false
   const navigate = useNavigate();
   
   const { saveJournal, isSaving } = useJournalSave();
