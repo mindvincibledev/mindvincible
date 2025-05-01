@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { SMTPClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,7 +20,7 @@ serve(async (req) => {
     const timestamp = new Date().toLocaleString();
     
     // Create SMTP client with the credentials
-    const client = new SMTPClient({
+    const client = new SmtpClient({
       connection: {
         hostname: Deno.env.get("SMTP_HOST") || "",
         port: Number(Deno.env.get("SMTP_PORT")) || 465,
