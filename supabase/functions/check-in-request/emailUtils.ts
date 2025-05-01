@@ -19,18 +19,10 @@ export function generateEmailContent(
   
   // Simplified email body with just the essential information
   const emailBody = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; }
-        </style>
-      </head>
-      <body>
-        <p><strong>${studentName}</strong> (${studentEmail}) has requested to be checked in on.</p>
-        <p>Current mood: ${studentMood}</p>
-      </body>
-    </html>
+ Hi a student likes to be checked in on...
+
+
+ This is an automated mail from Mindvincible. Please do not reply to this email.
   `;
 
   return { subject: emailSubject, emailBody };
