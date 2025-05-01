@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -32,7 +33,7 @@ const EmotionalAirbnb = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false); // Changed default to false
   
   // State for storing emotional airbnb data
   const [formData, setFormData] = useState({
@@ -48,7 +49,7 @@ const EmotionalAirbnb = () => {
     intensityDrawing: null as Blob | null,
     soundDrawing: null as Blob | null,
     messageDrawing: null as Blob | null,
-    visibility: isVisible
+    visibility: false // Changed default to false to match isVisible state
   });
   const [showCelebration, setShowCelebration] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
