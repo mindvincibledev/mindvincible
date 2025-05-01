@@ -19,7 +19,6 @@ type MoodType = Database['public']['Enums']['mood_type'];
 
 const MoodEntry = () => {
   const [currentMood, setCurrentMood] = useState<string | null>(null);
-  const [moodReason, setMoodReason] = useState('');
   const [moodFeeling, setMoodFeeling] = useState('');
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -108,7 +107,7 @@ const MoodEntry = () => {
     }
   };
 
-  // Handle the check-in request
+  // Simplified check-in request handler
   const handleCheckInRequest = async () => {
     if (!user) return;
     
@@ -117,7 +116,6 @@ const MoodEntry = () => {
       
       console.log('Requesting check-in for user:', user.id);
       
-      // Use the supabase.functions.invoke method instead of direct fetch
       const { data, error } = await supabase.functions.invoke('check-in-request', {
         body: {
           userId: user.id,
@@ -125,8 +123,11 @@ const MoodEntry = () => {
           userEmail: user.email
         },
       });
+      
+      console.log('Check-in response:', data);
 
       if (error) {
+        console.error('Check-in error:', error);
         throw new Error(error.message || 'Failed to request check-in');
       }
       
@@ -136,12 +137,12 @@ const MoodEntry = () => {
         duration: 6000,
       });
       
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error requesting check-in:', err);
       toast({
         variant: "destructive",
         title: "Failed to request check-in",
-        description: "There was an error sending your check-in request. Please try again or contact support.",
+        description: err.message || "There was an error sending your check-in request. Please try again or contact support.",
         duration: 6000,
       });
     } finally {

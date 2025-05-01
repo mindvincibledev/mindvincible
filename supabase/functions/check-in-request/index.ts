@@ -1,7 +1,7 @@
 
-import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 // Set up CORS headers
 const corsHeaders = {
@@ -13,9 +13,6 @@ const corsHeaders = {
 const supabaseUrl = "https://mbuegumluulltutadsyr.supabase.co";
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Configure SMTP client
-const client = new SmtpClient();
 
 interface MoodEntry {
   id: string;
@@ -65,14 +62,7 @@ serve(async (req) => {
   }
 
   try {
-    // Log environment variables (except sensitive ones)
-    console.log("SMTP_HOST set:", !!Deno.env.get("SMTP_HOST"));
-    console.log("SMTP_PORT set:", !!Deno.env.get("SMTP_PORT"));
-    console.log("SMTP_USERNAME set:", !!Deno.env.get("SMTP_USERNAME"));
-    console.log("SMTP_PASSWORD set:", !!Deno.env.get("SMTP_PASSWORD") ? "Yes" : "No");
-    console.log("SMTP_FROM_EMAIL set:", !!Deno.env.get("SMTP_FROM_EMAIL"));
-    console.log("CLINICIAN_ALERT_EMAILS set:", !!Deno.env.get("CLINICIAN_ALERT_EMAILS"));
-    console.log("SUPABASE_SERVICE_ROLE_KEY set:", !!Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"));
+    console.log("Starting check-in request function...");
     
     // Parse the request body
     const requestBody = await req.json();
@@ -128,18 +118,20 @@ serve(async (req) => {
       throw new Error(`Mood data error: ${moodError.message}`);
     }
 
-    try {
-      // Connect to the SMTP server
-      await client.connectTLS({
-        hostname: Deno.env.get("SMTP_HOST") || "",
-        port: parseInt(Deno.env.get("SMTP_PORT") || "587"),
-        username: Deno.env.get("SMTP_USERNAME") || "",
-        password: Deno.env.get("SMTP_PASSWORD") || "",
-      });
-      console.log("Successfully connected to SMTP server");
-    } catch (smtpError) {
-      console.error("SMTP connection error:", smtpError);
-      throw new Error(`SMTP connection error: ${smtpError.message}`);
+    // Get SMTP configuration from environment variables
+    const smtpHost = Deno.env.get("SMTP_HOST");
+    const smtpPort = parseInt(Deno.env.get("SMTP_PORT") || "587");
+    const smtpUsername = Deno.env.get("SMTP_USERNAME");
+    const smtpPassword = Deno.env.get("SMTP_PASSWORD");
+    const fromEmail = Deno.env.get("SMTP_FROM_EMAIL");
+    
+    // Validate SMTP configuration
+    if (!smtpHost || !smtpUsername || !smtpPassword || !fromEmail) {
+      console.error("Missing SMTP configuration");
+      return new Response(
+        JSON.stringify({ error: "Server mail configuration is incomplete" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Get the clinician emails from environment variable
@@ -153,12 +145,7 @@ serve(async (req) => {
     }
 
     const studentName = userData?.name || userEmail || userName || "Unknown student";
-    const fromEmail = Deno.env.get("SMTP_FROM_EMAIL") || "";
-    if (!fromEmail) {
-      console.error("SMTP_FROM_EMAIL not configured");
-      throw new Error("SMTP_FROM_EMAIL not configured");
-    }
-
+    
     // Format the email
     const emailSubject = `URGENT: Check-in Request from ${studentName}`;
     const moodEntriesHtml = formatMoodEntries(moodEntries || []);
@@ -203,71 +190,78 @@ serve(async (req) => {
       </html>
     `;
 
-    // Send the email to all clinicians
-    let emailsSent = 0;
-    for (const email of clinicianEmails) {
-      if (email.trim()) {
-        try {
-          console.log(`Attempting to send email to ${email.trim().replace(/@/g, '[at]')}`);
-          
-          await client.send({
-            from: fromEmail,
-            to: email.trim(),
-            subject: emailSubject,
-            content: emailBody,
-            html: emailBody,
-          });
-          
-          console.log(`Email sent to ${email.trim().replace(/@/g, '[at]')}`);
-          emailsSent++;
-        } catch (emailError) {
-          console.error(`Failed to send email to ${email.trim().replace(/@/g, '[at]')}:`, emailError);
+    try {
+      // Create a new SMTP client using denomailer
+      const client = new SMTPClient({
+        connection: {
+          hostname: smtpHost,
+          port: smtpPort,
+          tls: true,
+          auth: {
+            username: smtpUsername,
+            password: smtpPassword,
+          }
+        }
+      });
+
+      console.log("SMTP client configured successfully");
+      
+      // Send the email to all clinicians
+      let emailsSent = 0;
+      for (const email of clinicianEmails) {
+        if (email.trim()) {
+          try {
+            console.log(`Attempting to send email to ${email.trim().replace(/@/g, '[at]')}`);
+            
+            await client.send({
+              from: fromEmail,
+              to: email.trim(),
+              subject: emailSubject,
+              html: emailBody,
+            });
+            
+            console.log(`Email sent to ${email.trim().replace(/@/g, '[at]')}`);
+            emailsSent++;
+          } catch (emailError) {
+            console.error(`Failed to send email to ${email.trim().replace(/@/g, '[at]')}:`, emailError);
+          }
         }
       }
-    }
-
-    // Close the connection
-    try {
+      
+      // Close the client connection
       await client.close();
       console.log("SMTP connection closed");
-    } catch (closeError) {
-      console.error("Error closing SMTP connection:", closeError);
-    }
 
-    // Update the request to mark the alert as sent if at least one email was sent
-    if (emailsSent > 0) {
-      await supabase
-        .from("check_in_requests")
-        .update({ alert_sent: true })
-        .eq("user_id", userId)
-        .is("resolved", false)
-        .order("created_at", { ascending: false })
-        .limit(1);
-      
-      console.log("Check-in request marked as sent");
-    } else {
-      console.error("No emails were sent successfully");
-      throw new Error("Failed to send notification emails");
-    }
+      // Update the request to mark the alert as sent if at least one email was sent
+      if (emailsSent > 0) {
+        await supabase
+          .from("check_in_requests")
+          .update({ alert_sent: true })
+          .eq("user_id", userId)
+          .is("resolved", false)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        
+        console.log("Check-in request marked as sent");
+      } else {
+        console.error("No emails were sent successfully");
+        throw new Error("Failed to send notification emails");
+      }
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Check-in request sent successfully",
-        emailsSent
-      }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: "Check-in request sent successfully",
+          emailsSent
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    } catch (smtpError) {
+      console.error("SMTP error:", smtpError);
+      throw new Error(`Email sending error: ${smtpError.message}`);
+    }
   } catch (error) {
     console.error("Error in check-in request function:", error);
-    
-    // Ensure the SMTP client is closed on error
-    try {
-      await client.close();
-      console.log("SMTP connection closed after error");
-    } catch (e) {
-      console.error("Error closing SMTP client:", e);
-    }
     
     return new Response(
       JSON.stringify({ error: error.message || "Unknown error" }),
