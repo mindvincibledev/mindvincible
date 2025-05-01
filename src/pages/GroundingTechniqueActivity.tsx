@@ -40,7 +40,7 @@ const GroundingTechniqueActivity = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [activityId] = useState(() => uuidv4()); // Generate activity ID once when component mounts
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false); // Changed default to false
   
   const handleBegin = () => {
     setCurrentStep(GroundingStep.See);
