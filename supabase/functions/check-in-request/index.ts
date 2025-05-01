@@ -25,8 +25,15 @@ serve(async (req) => {
     const user = Deno.env.get("SMTP_USER");
     const pass = Deno.env.get("SMTP_PASSWORD");
     
-    // Log SMTP configuration (without password)
+    // Get email recipients from environment variable or use default values
+    const recipientsEnv = Deno.env.get("EMAIL_RECIPIENTS");
+    const recipients = recipientsEnv 
+      ? recipientsEnv.split(',').map(email => email.trim()) 
+      : ["kirthicvishnu@gmail.com", "vishnukirthic@gmail.com"];
+    
+    // Log SMTP configuration (without password) and recipients
     console.log(`Attempting to connect to SMTP server: ${host}:${port} with user: ${user}`);
+    console.log(`Email will be sent to: ${recipients.join(", ")}`);
     
     // Create a transporter with improved configuration
     const transporter = nodemailer.createTransport({
@@ -45,7 +52,6 @@ serve(async (req) => {
     });
     
     // Configure email data
-    const recipients = ["kirthicvishnu@gmail.com", "vishnukirthic@gmail.com"];
     const subject = "M(in)dvincible: Student Check-in Request";
     const messageBody = `Hey, the student ${userName}, with the email ${userEmail} has requested to be checked in on at ${timestamp}. Their current mood is ${currentMood}. This is an auto-generated email from M(in)dvincible. Please do not reply to it.`;
     
