@@ -53,11 +53,174 @@ serve(async (req) => {
     
     // Configure email data
     const subject = "M(in)dvincible: Student Check-in Request";
-    const messageBody = `Hey, the student ${userName}, with the email ${userEmail} has requested to be checked in on at ${timestamp}. Their current mood is ${currentMood}. This is an auto-generated email from M(in)dvincible. Please do not reply to it.`;
+    
+    // Get mood color for styling
+    const moodColors = {
+      "Happy": "#F5DF4D",
+      "Excited": "#FF8A48",
+      "Surprised": "#FC68B3",
+      "Calm": "#3DFDFF",
+      "Sad": "#6E7582",
+      "Worried": "#D5D5F1",
+      "Angry": "#FF6B6B",
+      "Anxious": "#A78BFA",
+      "Neutral": "#94A3B8"
+    };
+    
+    const moodColor = moodColors[currentMood as keyof typeof moodColors] || "#94A3B8";
+    
+    // Create HTML email content
+    const htmlMessage = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Student Check-in Request</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+          }
+          .header {
+            background-color: #FF8A48;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+          }
+          .content {
+            padding: 20px;
+            border-left: 1px solid #e1e1e1;
+            border-right: 1px solid #e1e1e1;
+            background-color: #fafafa;
+          }
+          .footer {
+            border-radius: 0 0 8px 8px;
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #666666;
+            border: 1px solid #e1e1e1;
+            border-top: none;
+          }
+          .mood-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 5px;
+            background-color: ${moodColor};
+          }
+          .info-row {
+            padding: 10px 0;
+            border-bottom: 1px solid #eeeeee;
+          }
+          .info-row:last-child {
+            border-bottom: none;
+          }
+          .label {
+            font-weight: bold;
+            width: 120px;
+            display: inline-block;
+          }
+          .value {
+            display: inline-block;
+          }
+          .alert {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+          }
+          .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3D59FF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+          }
+          .wavy-border {
+            height: 10px;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='10' viewBox='0 0 100 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 5 Q 10 0, 20 5 T 40 5 T 60 5 T 80 5 T 100 5' stroke='%23FF8A48' fill='none' stroke-width='2'/%3E%3C/svg%3E");
+            background-repeat: repeat-x;
+            margin: 0;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>M(in)dvincible</h1>
+            <p>Student Check-in Request</p>
+          </div>
+          <div class="wavy-border"></div>
+          <div class="content">
+            <p>A student has requested to be checked in on.</p>
+            
+            <div class="info-row">
+              <span class="label">Student Name:</span>
+              <span class="value">${userName}</span>
+            </div>
+            
+            <div class="info-row">
+              <span class="label">Email:</span>
+              <span class="value">${userEmail}</span>
+            </div>
+            
+            <div class="info-row">
+              <span class="label">Current Mood:</span>
+              <span class="value">
+                <span class="mood-indicator"></span>${currentMood}
+              </span>
+            </div>
+            
+            <div class="info-row">
+              <span class="label">Request Time:</span>
+              <span class="value">${timestamp}</span>
+            </div>
+            
+            <div class="alert">
+              This student may need support. Please follow up as soon as possible.
+            </div>
+          </div>
+          <div class="wavy-border"></div>
+          <div class="footer">
+            <p>This is an automated notification from the M(in)dvincible app.</p>
+            <p>Please do not reply to this email.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    // Plain text alternative for email clients that don't support HTML
+    const textMessage = `M(in)dvincible: Student Check-in Request
+    
+Student: ${userName}
+Email: ${userEmail}
+Current Mood: ${currentMood}
+Request Time: ${timestamp}
+
+This student has requested to be checked in on. Please follow up as soon as possible.
+
+This is an automated notification from the M(in)dvincible app. Please do not reply to this email.`;
     
     console.log("Sending email to:", recipients);
     console.log("Email subject:", subject);
-    console.log("Email body:", messageBody);
     
     try {
       // Verify SMTP connection before sending
@@ -69,7 +232,8 @@ serve(async (req) => {
         from: user || "notifications@mindvincible.app",
         to: recipients.join(", "),
         subject: subject,
-        text: messageBody,
+        text: textMessage, // Plain text version
+        html: htmlMessage,  // HTML version
       });
       
       console.log("Email sent successfully:", info.messageId);
