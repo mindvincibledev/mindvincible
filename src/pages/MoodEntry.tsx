@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, AlertCircle } from 'lucide-react';
@@ -22,7 +23,6 @@ const MoodEntry = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [isRequestingCheckIn, setIsRequestingCheckIn] = useState(false);
   
   const { user, session } = useAuth();
   const navigate = useNavigate();
@@ -106,48 +106,13 @@ const MoodEntry = () => {
     }
   };
 
-  // Updated check-in request handler to include current mood
-  const handleCheckInRequest = async () => {
-    if (!user) return;
-    
-    try {
-      setIsRequestingCheckIn(true);
-      
-      console.log('Requesting check-in for user:', user.id);
-      
-      const { data, error } = await supabase.functions.invoke('check-in-request', {
-        body: {
-          userId: user.id,
-          userName: user.name,
-          userEmail: user.email,
-          currentMood: currentMood // Pass current mood to the function
-        },
-      });
-      
-      console.log('Check-in response:', data);
-
-      if (error) {
-        console.error('Check-in error:', error);
-        throw new Error(error.message || 'Failed to request check-in');
-      }
-      
-      toast({
-        title: "Check-in requested",
-        description: "A notification has been sent to our team. Someone will reach out to you soon.",
-        duration: 6000,
-      });
-      
-    } catch (err: any) {
-      console.error('Error requesting check-in:', err);
-      toast({
-        variant: "destructive",
-        title: "Failed to request check-in",
-        description: err.message || "There was an error sending your check-in request. Please try again or contact support directly.",
-        duration: 6000,
-      });
-    } finally {
-      setIsRequestingCheckIn(false);
-    }
+  // Dummy check-in request handler - just shows a toast notification
+  const handleDummyCheckInRequest = () => {
+    toast({
+      title: "Feature coming soon",
+      description: "The check-in request feature will be available in a future update.",
+      duration: 4000,
+    });
   };
 
   // Guard clause for unauthenticated users
@@ -323,17 +288,14 @@ const MoodEntry = () => {
                         transition={{ delay: 0.5 }}
                         className="mt-6"
                       >
-                        {/* Check-in request button */}
+                        {/* Dummy check-in request button */}
                         <Button
                           variant="outline"
                           className="w-full mb-4 py-3 text-red-600 border-red-200 hover:bg-red-50 flex items-center justify-center gap-2"
-                          onClick={handleCheckInRequest}
-                          disabled={isRequestingCheckIn}
+                          onClick={handleDummyCheckInRequest}
                         >
                           <AlertCircle className="h-5 w-5" />
-                          <span>
-                            {isRequestingCheckIn ? "Sending request..." : "I'd like to be checked in on"}
-                          </span>
+                          <span>I'd like to be checked in on</span>
                         </Button>
 
                         <Button 
