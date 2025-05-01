@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
+import * as nodemailer from "npm:nodemailer";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,16 +19,14 @@ serve(async (req) => {
     // Current timestamp in a readable format
     const timestamp = new Date().toLocaleString();
     
-    // Create SMTP client with the credentials
-    const client = new SmtpClient({
-      connection: {
-        hostname: Deno.env.get("SMTP_HOST") || "",
-        port: Number(Deno.env.get("SMTP_PORT")) || 465,
-        tls: true,
-        auth: {
-          username: Deno.env.get("SMTP_USER") || "",
-          password: Deno.env.get("SMTP_PASSWORD") || "",
-        },
+    // Create a transporter using SMTP
+    const transporter = nodemailer.createTransport({
+      host: Deno.env.get("SMTP_HOST") || "",
+      port: Number(Deno.env.get("SMTP_PORT")) || 465,
+      secure: true,
+      auth: {
+        user: Deno.env.get("SMTP_USER") || "",
+        pass: Deno.env.get("SMTP_PASSWORD") || "",
       },
     });
     
@@ -42,17 +40,14 @@ serve(async (req) => {
     console.log("Email body:", messageBody);
     
     // Send the email
-    await client.send({
+    const info = await transporter.sendMail({
       from: Deno.env.get("SMTP_USER") || "",
-      to: recipients,
+      to: recipients.join(", "),
       subject: subject,
-      content: messageBody,
+      text: messageBody,
     });
     
-    console.log("Email sent successfully");
-    
-    // Close the connection
-    await client.close();
+    console.log("Email sent successfully:", info.messageId);
     
     return new Response(
       JSON.stringify({ success: true, message: "Check-in request sent" }),
