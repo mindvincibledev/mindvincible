@@ -67,7 +67,7 @@ serve(async (req) => {
     const studentEmail = userData?.email || userEmail || "No email provided";
     const studentMood = currentMood || "Not specified";
     
-    // Generate the email content
+    // Generate the simplified email content
     const { subject, emailBody } = generateEmailContent(
       studentName,
       studentEmail,
@@ -104,19 +104,22 @@ serve(async (req) => {
     if (emailsSent > 0) {
       await updateCheckInRequestStatus(userId, true);
       console.log("Check-in request marked as sent");
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: "Check-in request sent successfully",
+          emailsSent
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     } else {
       console.error("No emails were sent successfully");
-      throw new Error("Failed to send notification emails");
+      return new Response(
+        JSON.stringify({ error: "Failed to send notification emails" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
-
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Check-in request sent successfully",
-        emailsSent
-      }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
   } catch (error) {
     console.error("Error in check-in request function:", error);
     
