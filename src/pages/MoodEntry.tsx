@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, AlertCircle } from 'lucide-react';
@@ -107,7 +106,7 @@ const MoodEntry = () => {
     }
   };
 
-  // Updated check-in request handler to send an email
+  // Updated check-in request handler with improved error handling
   const handleCheckInRequest = async () => {
     if (!user) return;
     
@@ -130,6 +129,11 @@ const MoodEntry = () => {
         throw new Error(error.message || 'Failed to request check-in');
       }
       
+      if (!data?.success) {
+        console.error('Error in check-in response:', data);
+        throw new Error(data?.error || 'Something went wrong with the check-in request');
+      }
+      
       toast({
         title: "Check-in requested",
         description: "A notification has been sent to our team. Someone will reach out to you soon.",
@@ -138,11 +142,17 @@ const MoodEntry = () => {
       
     } catch (err: any) {
       console.error('Error requesting check-in:', err);
+      
+      // More descriptive error message
+      const errorMessage = err.message?.includes('socket') 
+        ? "There was a problem connecting to the notification service. Please try again later or contact support."
+        : err.message || "There was an error sending your check-in request. Please try again or contact support directly.";
+      
       toast({
         variant: "destructive",
         title: "Failed to request check-in",
-        description: err.message || "There was an error sending your check-in request. Please try again or contact support directly.",
-        duration: 6000,
+        description: errorMessage,
+        duration: 8000,
       });
     } finally {
       setIsRequestingCheckIn(false);

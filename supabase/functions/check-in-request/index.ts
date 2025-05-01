@@ -19,15 +19,29 @@ serve(async (req) => {
     // Current timestamp in a readable format
     const timestamp = new Date().toLocaleString();
     
-    // Create a transporter using SMTP
+    // Get SMTP configuration from environment
+    const host = Deno.env.get("SMTP_HOST");
+    const port = Number(Deno.env.get("SMTP_PORT") || "587");
+    const user = Deno.env.get("SMTP_USER");
+    const pass = Deno.env.get("SMTP_PASSWORD");
+    
+    // Log SMTP configuration (without password)
+    console.log(`Attempting to connect to SMTP server: ${host}:${port} with user: ${user}`);
+    
+    // Create a transporter with improved configuration
     const transporter = nodemailer.createTransport({
-      host: Deno.env.get("SMTP_HOST") || "",
-      port: Number(Deno.env.get("SMTP_PORT")) || 465,
-      secure: true,
+      host: host,
+      port: port,
+      secure: port === 465, // true for 465, false for other ports
       auth: {
-        user: Deno.env.get("SMTP_USER") || "",
-        pass: Deno.env.get("SMTP_PASSWORD") || "",
+        user: user,
+        pass: pass,
       },
+      tls: {
+        // Do not fail on invalid certs
+        rejectUnauthorized: false
+      },
+      debug: true, // Enable debug mode
     });
     
     // Configure email data
@@ -39,28 +53,41 @@ serve(async (req) => {
     console.log("Email subject:", subject);
     console.log("Email body:", messageBody);
     
-    // Send the email
-    const info = await transporter.sendMail({
-      from: Deno.env.get("SMTP_USER") || "",
-      to: recipients.join(", "),
-      subject: subject,
-      text: messageBody,
-    });
-    
-    console.log("Email sent successfully:", info.messageId);
-    
-    return new Response(
-      JSON.stringify({ success: true, message: "Check-in request sent" }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    try {
+      // Verify SMTP connection before sending
+      await transporter.verify();
+      console.log("SMTP connection verified successfully");
+      
+      // Send the email
+      const info = await transporter.sendMail({
+        from: user || "notifications@mindvincible.app",
+        to: recipients.join(", "),
+        subject: subject,
+        text: messageBody,
+      });
+      
+      console.log("Email sent successfully:", info.messageId);
+      
+      return new Response(
+        JSON.stringify({ success: true, message: "Check-in request sent" }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    } catch (smtpError) {
+      console.error("SMTP Error:", smtpError);
+      throw new Error(`SMTP Error: ${smtpError.message}`);
+    }
   } catch (error) {
     console.error("Error sending check-in request:", error);
     
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ 
+        success: false, 
+        error: error.message,
+        details: "There was an error sending the check-in request. Please check your SMTP configuration."
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
