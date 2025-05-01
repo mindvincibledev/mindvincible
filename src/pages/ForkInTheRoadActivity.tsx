@@ -32,7 +32,7 @@ import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 const ForkInTheRoadActivity = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false); // Changed default to false
   const [decisionData, setDecisionData] = useState({
     choice: '',
     consideration_path: '',
@@ -54,7 +54,7 @@ const ForkInTheRoadActivity = () => {
     future_a: '',
     future_b: '',
     selection: '',
-    visibility: isVisible
+    visibility: false // Changed default to false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from "@/components/ui/label";
@@ -5,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from '@/components/ui/button';
 import { motion } from "framer-motion";
 import EmojiSlider from '@/components/ui/EmojiSlider';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 export interface ReflectionData {
   whatFeltEasy: string;
@@ -132,16 +134,11 @@ const ReflectionSection = ({ onSubmit, isSubmitting }: ReflectionSectionProps) =
         />
       </div>
       
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="visibility"
-          checked={visibility}
-          onCheckedChange={setVisibility}
-        />
-        <Label htmlFor="visibility" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Make visible to clinicians
-        </Label>
-      </div>
+      <VisibilityToggle
+        isVisible={visibility}
+        onToggle={setVisibility}
+        description="Make visible to clinicians"
+      />
 
       <Button
         onClick={handleSubmit}
