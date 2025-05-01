@@ -27,6 +27,7 @@ interface RequestData {
   userId: string;
   userName: string;
   userEmail: string;
+  currentMood?: string;
 }
 
 // Format the mood entries for the email
@@ -68,7 +69,7 @@ serve(async (req) => {
     const requestBody = await req.json();
     console.log("Request body:", JSON.stringify(requestBody));
     
-    const { userId, userName, userEmail } = requestBody as RequestData;
+    const { userId, userName, userEmail, currentMood } = requestBody as RequestData;
 
     if (!userId) {
       return new Response(
@@ -84,7 +85,7 @@ serve(async (req) => {
       .from("check_in_requests")
       .insert({
         user_id: userId,
-        notes: "Requested via mood entry page",
+        notes: `Requested via mood entry page. Current mood: ${currentMood || "Not specified"}`,
         alert_sent: false
       });
 
@@ -136,7 +137,7 @@ serve(async (req) => {
 
     // Get the clinician emails from environment variable
     const clinicianEmailsEnv = Deno.env.get("CLINICIAN_ALERT_EMAILS") || "";
-    const clinicianEmails = clinicianEmailsEnv.split(",");
+    const clinicianEmails = clinicianEmailsEnv.split(",").map(email => email.trim());
     console.log(`Found ${clinicianEmails.length} clinician email(s): ${clinicianEmailsEnv.replace(/@/g, '[at]')}`);
     
     if (!clinicianEmails || clinicianEmails.length === 0 || clinicianEmails[0] === "") {
@@ -144,7 +145,9 @@ serve(async (req) => {
       throw new Error("No clinician emails configured");
     }
 
-    const studentName = userData?.name || userEmail || userName || "Unknown student";
+    const studentName = userData?.name || userName || "Unknown student";
+    const studentEmail = userData?.email || userEmail || "No email provided";
+    const studentMood = currentMood || "Not specified";
     
     // Format the email
     const emailSubject = `URGENT: Check-in Request from ${studentName}`;
@@ -161,6 +164,7 @@ serve(async (req) => {
             .content { padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; }
             .footer { margin-top: 20px; font-size: 12px; color: #777; }
             .alert { background-color: #ffebee; border-left: 5px solid #f44336; padding: 15px; margin-bottom: 20px; }
+            .current-mood { font-weight: bold; color: #FF8A48; }
           </style>
         </head>
         <body>
@@ -171,11 +175,12 @@ serve(async (req) => {
             <div class="content">
               <div class="alert">
                 <strong>${studentName}</strong> has requested to be checked in on.
+                <p>Current mood: <span class="current-mood">${studentMood}</span></p>
               </div>
               
               <h3>Student Information:</h3>
               <p><strong>Name:</strong> ${studentName}</p>
-              <p><strong>Email:</strong> ${userData?.email || userEmail || "Not provided"}</p>
+              <p><strong>Email:</strong> ${studentEmail}</p>
               
               <h3>Recent Mood Entries:</h3>
               ${moodEntriesHtml}
@@ -191,7 +196,7 @@ serve(async (req) => {
     `;
 
     try {
-      // Create a new SMTP client using denomailer
+      // Configure client with more options for stability
       const client = new SMTPClient({
         connection: {
           hostname: smtpHost,
@@ -201,6 +206,11 @@ serve(async (req) => {
             username: smtpUsername,
             password: smtpPassword,
           }
+        },
+        // Set reasonable timeouts
+        pool: false, // Don't use connection pool to avoid potential issues
+        debug: {
+          log: true // Enable logging for troubleshooting
         }
       });
 
@@ -209,21 +219,28 @@ serve(async (req) => {
       // Send the email to all clinicians
       let emailsSent = 0;
       for (const email of clinicianEmails) {
-        if (email.trim()) {
+        if (email) {
           try {
-            console.log(`Attempting to send email to ${email.trim().replace(/@/g, '[at]')}`);
+            console.log(`Attempting to send email to ${email.replace(/@/g, '[at]')}`);
             
             await client.send({
               from: fromEmail,
-              to: email.trim(),
+              to: email,
               subject: emailSubject,
+              content: "This email requires HTML support to view",
               html: emailBody,
+              // Add text alternative to avoid content type issues
+              mail: {
+                headers: {
+                  "content-type": "text/html; charset=utf-8"
+                }
+              }
             });
             
-            console.log(`Email sent to ${email.trim().replace(/@/g, '[at]')}`);
+            console.log(`Email sent to ${email.replace(/@/g, '[at]')}`);
             emailsSent++;
           } catch (emailError) {
-            console.error(`Failed to send email to ${email.trim().replace(/@/g, '[at]')}:`, emailError);
+            console.error(`Failed to send email to ${email.replace(/@/g, '[at]')}:`, emailError);
           }
         }
       }

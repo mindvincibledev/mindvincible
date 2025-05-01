@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, AlertCircle } from 'lucide-react';
@@ -107,7 +106,7 @@ const MoodEntry = () => {
     }
   };
 
-  // Simplified check-in request handler
+  // Updated check-in request handler to include current mood
   const handleCheckInRequest = async () => {
     if (!user) return;
     
@@ -120,7 +119,8 @@ const MoodEntry = () => {
         body: {
           userId: user.id,
           userName: user.name,
-          userEmail: user.email
+          userEmail: user.email,
+          currentMood: currentMood // Pass current mood to the function
         },
       });
       
@@ -142,7 +142,7 @@ const MoodEntry = () => {
       toast({
         variant: "destructive",
         title: "Failed to request check-in",
-        description: err.message || "There was an error sending your check-in request. Please try again or contact support.",
+        description: err.message || "There was an error sending your check-in request. Please try again or contact support directly.",
         duration: 6000,
       });
     } finally {
