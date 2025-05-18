@@ -38,7 +38,7 @@ const Home = () => {
               }}
               className="mt-8 bg-gradient-to-br from-[#FF8A48] to-[#FC68B3] py-4 bg-clip-text text-center text-4xl font-bold tracking-tight text-transparent md:text-7xl"
             >
-              Welcome to <span className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">M(in)dvincible</span>
+              Welcome to <span className="text-primary">M(in)dvincible</span>
             </motion.h1>
             
             <motion.div
