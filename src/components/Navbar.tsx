@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, Heart, Archive, Book, Home, Users, BarChart3 } from 'lucide-react';
+import { Menu, X, LogOut, Heart, Archive, Book, Home, Users, BarChart3, AlertTriangle } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -114,6 +113,9 @@ const Navbar = () => {
             <Link to="/clinician-dashboard" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
               Dashboard
             </Link>
+            <Link to="/checkups" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
+              Checkups
+            </Link>
             <Link to="/shared-responses" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
               Shared Responses
             </Link>
@@ -203,6 +205,14 @@ const Navbar = () => {
             >
               <Users className="h-4 w-4 mr-2 inline-block" />
               Dashboard
+            </Link>
+            <Link 
+              to="/checkups" 
+              className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <AlertTriangle className="h-4 w-4 mr-2 inline-block" />
+              Checkups
             </Link>
             <Link 
               to="/shared-responses" 

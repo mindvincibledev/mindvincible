@@ -39,6 +39,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import UserProfile from "./components/UserProfile";
 import SharedResponses from "./pages/SharedResponses";
 import StudentSharedResponses from "./pages/StudentSharedResponses";
+import CheckupsPage from "./pages/CheckupsPage";
 
 // Update document title to correct app name
 document.title = "M(in)dvincible";
@@ -138,6 +139,11 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <ClinicianDashboard />
           </ProtectedRoute>
+        } />
+        <Route path="/checkups" element={
+          <ClinicianRoute>
+            <CheckupsPage />
+          </ClinicianRoute>
         } />
         <Route path="/shared-responses" element={
           <ClinicianRoute>
