@@ -24,27 +24,27 @@ const ResourcesHub = () => {
 
   // All the activities go inside Self Awareness now
   const selfAwarenessActivities = [
-    {
-      id: "digital-detox",
-      title: "Digital Detox",
-      description: "Give yourself a mental break by unplugging from electronic devices.",
+        {
+      id: "emotional-airbnb",
+      title: "Emotional Airbnb",
+      description: "Because understanding yourself is the ultimate glow-up ✨🧠",
       icon: <Layers className="h-8 w-8 text-[#FF8A48]" />, // Changed Layer to Layers
-      link: "/emotional-hacking/digital-detox",
-      color: "from-[#FC68B3] to-[#FF8A48]",
+      link: "/emotional-airbnb",
+      color: "from-[#FF8A48] to-[#FC68B3]",
       bgColor: "bg-[#FFF5F8]",
-      chartColor: "#FF8A48",
+      chartColor: "#FC68B3",
     },
-    {
-      id: "mirror-mirror",
-      title: "Mirror Mirror",
-      description: "Because how you speak to yourself matters.",
-      icon: <Layers className="h-8 w-8 text-[#FC68B3]" />, // Changed Layer to Layers
-      link: "/emotional-hacking/mirror-mirror",
-      color: "from-[#FC68B3] to-[#9b87f5]",
-      bgColor: "bg-[#E5DEFF]",
-      chartColor: "#9b87f5",
+        {
+      id: "emotional-hacking",
+      title: "Emotional Hacking",
+      description: "Learn tricks to stay chill when emotions get extra.",
+      icon: <Layers className="h-8 w-8 text-[#3DFDFF]" />, // Changed Layer to Layers
+      link: "/emotional-hacking",
+      color: "from-[#3DFDFF] to-[#2AC20E]",
+      bgColor: "bg-[#F0FFFE]",
+      chartColor: "#3DFDFF",
     },
-    {
+        {
       id: "power-of-hi",
       title: "Power of Hi",
       description: "Small moments. Big confidence.",
@@ -54,7 +54,17 @@ const ResourcesHub = () => {
       bgColor: "bg-[#E5FFF2]",
       chartColor: "#2AC20E",
     },
-    {
+        {
+      id: "mirror-mirror",
+      title: "Mirror Mirror",
+      description: "Because how you speak to yourself matters.",
+      icon: <Layers className="h-8 w-8 text-[#FC68B3]" />, // Changed Layer to Layers
+      link: "/emotional-hacking/mirror-mirror",
+      color: "from-[#FC68B3] to-[#9b87f5]",
+      bgColor: "bg-[#E5DEFF]",
+      chartColor: "#9b87f5",
+    },
+        {
       id: "fork-in-the-road",
       title: "Fork in Road",
       description: "Explore your options. Choose with clarity.",
@@ -65,24 +75,14 @@ const ResourcesHub = () => {
       chartColor: "#3DFDFF",
     },
     {
-      id: "emotional-airbnb",
-      title: "Emotional Airbnb",
-      description: "Because understanding yourself is the ultimate glow-up ✨🧠",
+      id: "digital-detox",
+      title: "Digital Detox",
+      description: "Give yourself a mental break by unplugging from electronic devices.",
       icon: <Layers className="h-8 w-8 text-[#FF8A48]" />, // Changed Layer to Layers
-      link: "/emotional-airbnb",
-      color: "from-[#FF8A48] to-[#FC68B3]",
+      link: "/emotional-hacking/digital-detox",
+      color: "from-[#FC68B3] to-[#FF8A48]",
       bgColor: "bg-[#FFF5F8]",
-      chartColor: "#FC68B3",
-    },
-    {
-      id: "emotional-hacking",
-      title: "Emotional Hacking",
-      description: "Learn tricks to stay chill when emotions get extra.",
-      icon: <Layers className="h-8 w-8 text-[#3DFDFF]" />, // Changed Layer to Layers
-      link: "/emotional-hacking",
-      color: "from-[#3DFDFF] to-[#2AC20E]",
-      bgColor: "bg-[#F0FFFE]",
-      chartColor: "#3DFDFF",
+      chartColor: "#FF8A48",
     }
   ];
 
