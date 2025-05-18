@@ -33,6 +33,11 @@ import MirrorMirrorActivity from "./pages/MirrorMirrorActivity";
 import ForkInTheRoadActivity from "./pages/ForkInTheRoadActivity";
 import ResourcesHub from "./pages/ResourcesHub";
 
+// Import self-confidence activities (these will be created later)
+import FlipTheScriptActivity from "./pages/self-confidence/FlipTheScriptActivity";
+import ConfidenceTreeActivity from "./pages/self-confidence/ConfidenceTreeActivity";
+import BatteryBoostActivity from "./pages/self-confidence/BatteryBoostActivity";
+
 // Import new dashboard pages
 import ClinicianDashboard from "./pages/ClinicianDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -241,6 +246,25 @@ const AppRoutes = () => {
         <Route path="/resources" element={
           <ProtectedRoute>
             <ResourcesHub />
+          </ProtectedRoute>
+        } />
+        
+        {/* Add Self Confidence activity routes */}
+        <Route path="/self-confidence/flip-the-script" element={
+          <ProtectedRoute>
+            <FlipTheScriptActivity />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/self-confidence/confidence-tree" element={
+          <ProtectedRoute>
+            <ConfidenceTreeActivity />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/self-confidence/battery-boost" element={
+          <ProtectedRoute>
+            <BatteryBoostActivity />
           </ProtectedRoute>
         } />
         

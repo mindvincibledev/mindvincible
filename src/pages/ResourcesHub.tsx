@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, ChevronDown, ChevronUp, Layers } from 'lucide-react';
+import { User, ChevronDown, ChevronUp, Layers, Award, BookOpen, Star } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +20,7 @@ const ResourcesHub = () => {
   const [weeklyStats, setWeeklyStats] = useState<{id: string, title: string, count: number, color: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [selfConfidenceProgress, setSelfConfidenceProgress] = useState(0);
   const [weekStartDate, setWeekStartDate] = useState<Date>(new Date());
   const [weekEndDate, setWeekEndDate] = useState<Date>(new Date());
 
@@ -84,6 +86,40 @@ const ResourcesHub = () => {
       bgColor: "bg-[#FFF5F8]",
       chartColor: "#FF8A48",
     }
+  ];
+
+  // New Self Confidence and Self Worth activities
+  const selfConfidenceActivities = [
+    {
+      id: "flip-the-script",
+      title: "Let's Flip the Script",
+      description: "Learn how to reframe your talk",
+      icon: <BookOpen className="h-8 w-8 text-[#FC68B3]" />,
+      link: "/self-confidence/flip-the-script",
+      color: "from-[#FC68B3] to-[#D5D5F1]",
+      bgColor: "bg-[#FFF5F8]",
+      chartColor: "#FC68B3",
+    },
+    {
+      id: "confidence-tree",
+      title: "Grow Your Confidence Tree",
+      description: "See how your confidence has grown — and where you want it to bloom next.",
+      icon: <Star className="h-8 w-8 text-[#F5DF4D]" />,
+      link: "/self-confidence/confidence-tree",
+      color: "from-[#F5DF4D] to-[#3DFDFF]",
+      bgColor: "bg-[#FEF7CD]",
+      chartColor: "#F5DF4D",
+    },
+    {
+      id: "battery-boost",
+      title: "Battery Boost",
+      description: "Can your scroll charge you up or leave you drained? Let's find out.",
+      icon: <Award className="h-8 w-8 text-[#3DFDFF]" />,
+      link: "/self-confidence/battery-boost",
+      color: "from-[#3DFDFF] to-[#2AC20E]",
+      bgColor: "bg-[#F0FFFE]",
+      chartColor: "#3DFDFF",
+    },
   ];
 
   const isActivityCompleted = (activityId: string): boolean => {
@@ -180,9 +216,17 @@ const ResourcesHub = () => {
 
   // Toggle self awareness module open/close
   const [selfAwarenessOpen, setSelfAwarenessOpen] = useState(true);
+  
+  // Toggle self confidence module open/close
+  const [selfConfidenceOpen, setSelfConfidenceOpen] = useState(true);
 
   // for 6/6 complete UI state
   const completedMainCount = selfAwarenessActivities.reduce((count, activity) => {
+    return isActivityCompleted(activity.id) ? count + 1 : count;
+  }, 0);
+  
+  // for self confidence activities completion count
+  const completedConfidenceCount = selfConfidenceActivities.reduce((count, activity) => {
     return isActivityCompleted(activity.id) ? count + 1 : count;
   }, 0);
 
@@ -194,6 +238,13 @@ const ResourcesHub = () => {
       }, 0);
       const progressPercentage = (completedCount / selfAwarenessActivities.length) * 100;
       setProgress(progressPercentage);
+      
+      // Calculate progress for self confidence activities
+      const completedConfidenceCount = selfConfidenceActivities.reduce((count, activity) => {
+        return isActivityCompleted(activity.id) ? count + 1 : count;
+      }, 0);
+      const confidenceProgressPercentage = (completedConfidenceCount / selfConfidenceActivities.length) * 100;
+      setSelfConfidenceProgress(confidenceProgressPercentage);
     }
   }, [weeklyCompletions]);
 
@@ -311,6 +362,93 @@ const ResourcesHub = () => {
                       </CardDescription>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {selfAwarenessActivities.map((activity, index) => {
+                          const completedThisWeek = user && isActivityCompleted(activity.id);
+
+                          return (
+                            <Card key={activity.id} className={`h-full ${activity.bgColor} border border-white/70`}>
+                              <CardHeader>
+                                <div className="flex items-center justify-between">
+                                  <div className="p-3 rounded-full bg-white shadow-md w-fit">
+                                    {activity.icon}
+                                  </div>
+                                  {completedThisWeek && (
+                                    <div className="text-xs font-medium px-3 py-1 rounded-full bg-[#2AC20E]/20 text-[#2AC20E] flex items-center">
+                                      <span className="mr-1">✓</span>
+                                      Completed this week
+                                    </div>
+                                  )}
+                                </div>
+                                <CardTitle className="text-lg font-bold mt-2">{activity.title}</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <CardDescription className="mb-5">{activity.description}</CardDescription>
+                                <Link to={activity.link}>
+                                  <Button
+                                    className={`w-full bg-gradient-to-r ${activity.color} text-white hover:opacity-90 flex items-center justify-center gap-2`}
+                                  >
+                                    <span>Open {activity.title}</span>
+                                  </Button>
+                                </Link>
+                              </CardContent>
+                            </Card>
+                          )
+                        })}
+                      </div>
+                    </CardContent>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Card>
+            
+            {/* Self Confidence and Self Worth module (expandable) */}
+            <Card className="mb-8 shadow-lg border border-[#D5D5F1]/20">
+              <CardHeader
+                className="flex flex-row items-center justify-between cursor-pointer"
+                onClick={() => setSelfConfidenceOpen(open => !open)}
+              >
+                <div className="flex items-center gap-4">
+                  <span className="p-3 rounded-full bg-[#FC68B3]/10">
+                    <Award className="h-8 w-8 text-[#FC68B3]" />
+                  </span>
+                  <CardTitle className="text-2xl text-black">Self Confidence & Self Worth</CardTitle>
+                </div>
+                <div>
+                  <Button 
+                    size="icon" 
+                    variant="ghost"
+                    tabIndex={-1}
+                    aria-label={selfConfidenceOpen ? "Collapse" : "Expand"}
+                  >
+                    {selfConfidenceOpen ? <ChevronUp className="h-6 w-6" /> : <ChevronDown className="h-6 w-6" />}
+                  </Button>
+                </div>
+              </CardHeader>
+              
+              {user && (
+                <div className="px-6 pb-2">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>
+                      <b className="font-bold">{completedConfidenceCount}/{selfConfidenceActivities.length}</b> Complete
+                    </span>
+                  </div>
+                  <Progress value={selfConfidenceProgress} className="h-3 bg-gray-200" />
+                </div>
+              )}
+              
+              <AnimatePresence>
+                {selfConfidenceOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <CardContent>
+                      <CardDescription className="mb-5 text-base text-gray-700">
+                        Build your confidence and recognize your self-worth with these engaging activities.
+                      </CardDescription>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {selfConfidenceActivities.map((activity, index) => {
                           const completedThisWeek = user && isActivityCompleted(activity.id);
 
                           return (
