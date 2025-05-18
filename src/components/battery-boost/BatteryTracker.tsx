@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -90,18 +91,6 @@ const BatteryTracker: React.FC<BatteryTrackerProps> = ({ onComplete, onAddPost }
       toast.success(`Battery ${currentChange.value > 0 ? 'charged' : 'drained'} by ${Math.abs(currentChange.value)}%`);
     }
   };
-
-  // Auto-complete when timer ends
-  useEffect(() => {
-    if (timeRemaining === 0 && !showNote) {
-      // Wait a moment before auto-completing for UX
-      const timer = setTimeout(() => {
-        onComplete(batteryPercentage);
-      }, 2000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [timeRemaining, batteryPercentage, onComplete, showNote]);
   
   const getBatteryColor = () => {
     if (batteryPercentage >= 70) return 'bg-gradient-to-t from-[#0ABFDF] to-[#2AC20E]';

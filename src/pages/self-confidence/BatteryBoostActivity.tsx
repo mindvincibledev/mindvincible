@@ -24,13 +24,6 @@ interface PostEntry {
   notes?: string;
 }
 
-interface BatteryEntry {
-  id: string;
-  starting_percentage: number;
-  final_percentage: number;
-  created_at: string;
-}
-
 const BatteryBoostActivity = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -41,7 +34,6 @@ const BatteryBoostActivity = () => {
   const [finalPercentage, setFinalPercentage] = useState<number>(50);
   const [activityEntryId, setActivityEntryId] = useState<string | null>(null);
   const [posts, setPosts] = useState<PostEntry[]>([]);
-  const [pastEntries, setPastEntries] = useState<BatteryEntry[]>([]);
   const [reflectionData, setReflectionData] = useState({
     feeling: '',
     accountsToUnfollow: '',
@@ -53,31 +45,6 @@ const BatteryBoostActivity = () => {
     sharedPostDescription: '',
     sharedPostImpact: '',
   });
-
-  // Fetch past entries when component mounts
-  useEffect(() => {
-    if (user) {
-      fetchPastEntries();
-    }
-  }, [user]);
-
-  const fetchPastEntries = async () => {
-    try {
-      if (user) {
-        const { data, error } = await supabase
-          .from('battery_boost_entries')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        setPastEntries(data || []);
-      }
-    } catch (error) {
-      console.error("Error fetching past entries:", error);
-    }
-  };
 
   // Create a new activity entry when first entering tracker section
   const createActivityEntry = async () => {
@@ -233,27 +200,20 @@ const BatteryBoostActivity = () => {
               activity_name: 'Battery Boost'
             }
           ]);
-        
-        // Refresh past entries to include the new one
-        fetchPastEntries();
       }
     } catch (error) {
       console.error("Error recording activity completion:", error);
     }
     
-    // Reset the activity
-    setCurrentSection('welcome');
-    toast.success("Great job completing the Battery Boost activity!", {
-      description: "Your progress has been saved.",
-      duration: 5000
-    });
+    // Navigate back to resources hub
+    navigate('/resources');
   };
   
   // Render current section
   const renderCurrentSection = () => {
     switch (currentSection) {
       case 'welcome':
-        return <WelcomeScreen onStart={handleWelcomeComplete} userEntries={pastEntries} />;
+        return <WelcomeScreen onStart={handleWelcomeComplete} />;
       
       case 'tracker':
         return <BatteryTracker onComplete={handleTrackerComplete} onAddPost={handleAddPost} />;
@@ -274,7 +234,7 @@ const BatteryBoostActivity = () => {
         );
       
       default:
-        return <WelcomeScreen onStart={handleWelcomeComplete} userEntries={pastEntries} />;
+        return <WelcomeScreen onStart={handleWelcomeComplete} />;
     }
   };
   
