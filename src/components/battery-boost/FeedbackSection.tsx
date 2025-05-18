@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Star, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 interface FeedbackSectionProps {
   initialBatteryLevel: number;
@@ -22,6 +23,7 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
   const [rating, setRating] = useState<number | null>(null);
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   const handleRatingClick = (value: number) => {
     setRating(value);
@@ -115,6 +117,14 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
               />
+              
+              <div className="pt-2">
+                <VisibilityToggle 
+                  isVisible={isVisible}
+                  onToggle={setIsVisible}
+                  description="Share this feedback with clinicians"
+                />
+              </div>
             </div>
           </div>
           
