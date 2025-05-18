@@ -12,13 +12,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { UserType } from '@/context/AuthContext';
+import { Database } from '@/integrations/supabase/types';
+
+// Define the mood type using the one from the database
+type MoodType = Database['public']['Enums']['mood_type'];
 
 interface StudentMoodData {
   id: string;
   name: string;
   latestConcerningMood: {
-    mood: string;
+    mood: MoodType;
     timestamp: string;
     notes?: string;
   };
@@ -101,8 +104,8 @@ const CheckupsPage = () => {
         return;
       }
       
-      // Define concerning moods
-      const concerningMoods = ['Sad', 'Overwhelmed', 'Anxious', 'Angry'];
+      // Define concerning moods - using the correct type
+      const concerningMoods: MoodType[] = ['Sad', 'Overwhelmed', 'Anxious', 'Angry'];
       
       // Fetch mood data and activity completions for each student in the past 24 hours
       const studentMoodPromises = studentsData.map(async (student) => {
@@ -143,7 +146,7 @@ const CheckupsPage = () => {
           },
           activitiesCompleted: activityData?.length || 0,
           hasCompletedActivities: activityData && activityData.length > 0
-        };
+        } as StudentMoodData; // Use type assertion here
       });
       
       // Wait for all promises to resolve
@@ -169,23 +172,23 @@ const CheckupsPage = () => {
     }
   };
 
-  const getMoodEmoji = (mood: string) => {
-    switch(mood.toLowerCase()) {
-      case 'sad': return '😔';
-      case 'angry': return '😡';
-      case 'anxious': return '😰';
-      case 'overwhelmed': return '😫';
+  const getMoodEmoji = (mood: MoodType) => {
+    switch(mood) {
+      case 'Sad': return '😔';
+      case 'Angry': return '😡';
+      case 'Anxious': return '😰';
+      case 'Overwhelmed': return '😫';
       default: return '😐';
     }
   };
   
   // Function to get background color based on mood
-  const getMoodBackground = (mood: string) => {
-    switch(mood.toLowerCase()) {
-      case 'sad': return 'bg-blue-100';
-      case 'angry': return 'bg-red-100';
-      case 'anxious': return 'bg-purple-100';
-      case 'overwhelmed': return 'bg-orange-100';
+  const getMoodBackground = (mood: MoodType) => {
+    switch(mood) {
+      case 'Sad': return 'bg-blue-100';
+      case 'Angry': return 'bg-red-100';
+      case 'Anxious': return 'bg-purple-100';
+      case 'Overwhelmed': return 'bg-orange-100';
       default: return 'bg-gray-100';
     }
   };
