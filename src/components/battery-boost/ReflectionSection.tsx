@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -132,7 +131,7 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
               
               <div className="space-y-2">
                 <label className="text-sm font-medium">Or describe how you feel in your own words:</label>
-                <textarea 
+                <Textarea 
                   className="w-full p-3 border border-gray-300 rounded-lg" 
                   value={feeling}
                   onChange={(e) => setFeeling(e.target.value)}
@@ -149,7 +148,7 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
               
               <div className="space-y-2">
                 <label className="text-sm font-medium">I might want to unfollow or see less of:</label>
-                <textarea 
+                <Textarea 
                   className="w-full p-3 border border-gray-300 rounded-lg" 
                   value={accountsToUnfollow}
                   onChange={(e) => setAccountsToUnfollow(e.target.value)}
@@ -166,7 +165,7 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
               
               <div className="space-y-2">
                 <label className="text-sm font-medium">I want to see more of:</label>
-                <textarea 
+                <Textarea 
                   className="w-full p-3 border border-gray-300 rounded-lg" 
                   value={accountsToFollow}
                   onChange={(e) => setAccountsToFollow(e.target.value)}
@@ -183,7 +182,7 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
               
               <div className="space-y-2">
                 <label className="text-sm font-medium">Next time I scroll, I'll:</label>
-                <textarea 
+                <Textarea 
                   className="w-full p-3 border border-gray-300 rounded-lg" 
                   value={nextScrollStrategy}
                   onChange={(e) => setNextScrollStrategy(e.target.value)}
