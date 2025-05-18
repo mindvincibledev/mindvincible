@@ -36,6 +36,95 @@ export type Database = {
         }
         Relationships: []
       }
+      battery_boost_entries: {
+        Row: {
+          accounts_to_follow_more: string | null
+          accounts_to_unfollow: string | null
+          created_at: string
+          feeling_after_scroll: string | null
+          final_percentage: number | null
+          id: string
+          next_scroll_strategy: string | null
+          shared_post_description: string | null
+          shared_post_impact: string | null
+          starting_percentage: number
+          updated_at: string
+          user_id: string
+          visible_to_clinicians: boolean
+        }
+        Insert: {
+          accounts_to_follow_more?: string | null
+          accounts_to_unfollow?: string | null
+          created_at?: string
+          feeling_after_scroll?: string | null
+          final_percentage?: number | null
+          id?: string
+          next_scroll_strategy?: string | null
+          shared_post_description?: string | null
+          shared_post_impact?: string | null
+          starting_percentage?: number
+          updated_at?: string
+          user_id: string
+          visible_to_clinicians?: boolean
+        }
+        Update: {
+          accounts_to_follow_more?: string | null
+          accounts_to_unfollow?: string | null
+          created_at?: string
+          feeling_after_scroll?: string | null
+          final_percentage?: number | null
+          id?: string
+          next_scroll_strategy?: string | null
+          shared_post_description?: string | null
+          shared_post_impact?: string | null
+          starting_percentage?: number
+          updated_at?: string
+          user_id?: string
+          visible_to_clinicians?: boolean
+        }
+        Relationships: []
+      }
+      battery_boost_posts: {
+        Row: {
+          created_at: string
+          entry_id: string
+          id: string
+          notes: string | null
+          percentage_change: number
+          post_category: string | null
+          post_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_id: string
+          id?: string
+          notes?: string | null
+          percentage_change: number
+          post_category?: string | null
+          post_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string
+          id?: string
+          notes?: string | null
+          percentage_change?: number
+          post_category?: string | null
+          post_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battery_boost_posts_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "battery_boost_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       check_in_requests: {
         Row: {
           alert_sent: boolean
