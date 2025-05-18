@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,6 +7,8 @@ import { BatteryFull, Smile, Frown, Meh, ChevronRight } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import EmojiSlider from "@/components/ui/EmojiSlider";
+import VisibilityToggle from "@/components/ui/VisibilityToggle";
 
 interface ReflectionSectionProps {
   finalPercentage: number;
@@ -24,6 +27,8 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
   const [accountsToFollow, setAccountsToFollow] = useState<string>("");
   const [nextScrollStrategy, setNextScrollStrategy] = useState<string>("");
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [moodValue, setMoodValue] = useState<number[]>([5]);
+  const [isVisible, setIsVisible] = useState<boolean>(true);
 
   const getBatteryColor = () => {
     if (finalPercentage >= 70) return 'from-[#0ABFDF] to-[#2AC20E]';
@@ -47,9 +52,19 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
     } else if (currentTab === "follow") {
       setCurrentTab("strategy");
     } else {
+      // Convert mood value to a descriptive feeling if slider was used
+      let moodDescription = feeling;
+      if (moodValue[0] <= 3) {
+        moodDescription = moodDescription || "Drained";
+      } else if (moodValue[0] >= 8) {
+        moodDescription = moodDescription || "Energized";
+      } else {
+        moodDescription = moodDescription || "Neutral";
+      }
+      
       // Submit all data
       onComplete({
-        feeling: selectedMood || feeling,
+        feeling: selectedMood || moodDescription,
         accountsToUnfollow,
         accountsToFollow,
         nextScrollStrategy
@@ -91,11 +106,19 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
 
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
           <ScrollArea className="w-full">
-            <TabsList className="w-full mb-6 overflow-x-auto flex whitespace-nowrap">
-              <TabsTrigger value="feeling" className="flex-1">How do you feel?</TabsTrigger>
-              <TabsTrigger value="unfollow" className="flex-1">Who to unfollow?</TabsTrigger>
-              <TabsTrigger value="follow" className="flex-1">Who to follow more?</TabsTrigger>
-              <TabsTrigger value="strategy" className="flex-1">Next scroll strategy</TabsTrigger>
+            <TabsList className="w-full mb-6 overflow-x-auto flex whitespace-nowrap bg-white/70 border-2 border-gray-200 shadow-md p-1 gap-1">
+              <TabsTrigger value="feeling" className="flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF8A48] data-[state=active]:to-[#FC68B3] data-[state=active]:text-white">
+                How do you feel?
+              </TabsTrigger>
+              <TabsTrigger value="unfollow" className="flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF8A48] data-[state=active]:to-[#FC68B3] data-[state=active]:text-white">
+                Who to unfollow?
+              </TabsTrigger>
+              <TabsTrigger value="follow" className="flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF8A48] data-[state=active]:to-[#FC68B3] data-[state=active]:text-white">
+                Who to follow more?
+              </TabsTrigger>
+              <TabsTrigger value="strategy" className="flex-1 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF8A48] data-[state=active]:to-[#FC68B3] data-[state=active]:text-white">
+                Next scroll strategy
+              </TabsTrigger>
             </TabsList>
           </ScrollArea>
 
@@ -129,15 +152,36 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
                 </button>
               </div>
               
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Or describe how you feel in your own words:</label>
-                <Textarea 
-                  className="w-full p-3 border border-gray-300 rounded-lg" 
-                  value={feeling}
-                  onChange={(e) => setFeeling(e.target.value)}
-                  placeholder="Describe how you feel after your scroll session..."
-                  rows={3}
-                />
+              <div className="space-y-4">
+                <div className="bg-white/70 p-4 rounded-lg shadow-sm">
+                  <p className="text-sm font-medium mb-2">Rate how you feel on the scale:</p>
+                  <EmojiSlider 
+                    value={moodValue}
+                    onValueChange={setMoodValue}
+                    minEmoji="😔"
+                    middleEmoji="😐"
+                    maxEmoji="😄"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Or describe how you feel in your own words:</label>
+                  <Textarea 
+                    className="w-full p-3 border border-gray-300 rounded-lg" 
+                    value={feeling}
+                    onChange={(e) => setFeeling(e.target.value)}
+                    placeholder="Describe how you feel after your scroll session..."
+                    rows={3}
+                  />
+                </div>
+                
+                <div className="pt-4">
+                  <VisibilityToggle 
+                    isVisible={isVisible}
+                    onToggle={setIsVisible}
+                    description="Share this reflection with clinicians"
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -155,6 +199,14 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
                   placeholder="List accounts, hashtags, or content types that negatively impacted your energy..."
                   rows={5}
                 />
+                
+                <div className="pt-4">
+                  <VisibilityToggle 
+                    isVisible={isVisible}
+                    onToggle={setIsVisible}
+                    description="Share this reflection with clinicians"
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -172,6 +224,14 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
                   placeholder="List accounts, hashtags, or content types that positively impacted your energy..."
                   rows={5}
                 />
+                
+                <div className="pt-4">
+                  <VisibilityToggle 
+                    isVisible={isVisible}
+                    onToggle={setIsVisible}
+                    description="Share this reflection with clinicians"
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -189,6 +249,14 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
                   placeholder="Share a strategy for having a more positive scroll experience next time..."
                   rows={5}
                 />
+                
+                <div className="pt-4">
+                  <VisibilityToggle 
+                    isVisible={isVisible}
+                    onToggle={setIsVisible}
+                    description="Share this reflection with clinicians"
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>

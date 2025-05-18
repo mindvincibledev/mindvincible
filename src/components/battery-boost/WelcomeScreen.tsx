@@ -64,10 +64,34 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, userEntries = []
         </motion.div>
         
         <Tabs defaultValue="scavenger" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="scavenger">Scavenger Hunt</TabsTrigger>
-            <TabsTrigger value="boost">Boost Others</TabsTrigger>
-            <TabsTrigger value="history">Your History</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 gap-2 p-1 mb-8 bg-white/70 border-2 border-gray-200 shadow-md">
+            <TabsTrigger 
+              value="scavenger"
+              className="font-medium text-base py-3 px-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF8A48] data-[state=active]:to-[#FC68B3] data-[state=active]:text-white"
+            >
+              <span className="flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                Scavenger Hunt
+              </span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="boost"
+              className="font-medium text-base py-3 px-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF8A48] data-[state=active]:to-[#FC68B3] data-[state=active]:text-white"
+            >
+              <span className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Boost Others
+              </span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="history"
+              className="font-medium text-base py-3 px-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF8A48] data-[state=active]:to-[#FC68B3] data-[state=active]:text-white"
+            >
+              <span className="flex items-center gap-2">
+                <BarChart className="w-4 h-4" />
+                Your History
+              </span>
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="scavenger" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
