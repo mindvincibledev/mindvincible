@@ -36,16 +36,20 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
   const [rating, setRating] = useState<number | null>(null);
   const [feedback, setFeedback] = useState('');
   const [showFeedback, setShowFeedback] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+
   const [activityEntryId, setActivityEntryId] = useState<string | null>(null);
   const { user } = useAuth();
+    const [activityCompleted, setActivityCompleted] = useState(false);
+    const [showCelebration, setShowCelebration] = useState(false);
+    const [activityId] = useState(() => uuidv4()); // Generate activity ID once when component mounts
+    const [isVisible, setIsVisible] = useState(false); // Changed default to false
 
   const handleRatingClick = (value: number) => {
     setRating(value);
   };
 
   const handleSubmitFeedback = () => {
-    setIsSubmitting(true);
+    handleActivityComplete()
         setShowFeedback(true);
     // Here you would normally send the feedback to your backend
     // setTimeout(() => {
@@ -55,6 +59,10 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
     // }, 1000);
   };
 
+    const handleActivityComplete = () => {
+    setActivityCompleted(true);
+    setShowFeedback(true);
+  };
   const handleReturnHome = () => {
     navigate('/resources');
   };
@@ -90,7 +98,8 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
               .update({ visibility: isVisible })
               .eq('activity_id', activityEntryId)
               .eq('user_id', user.id);
-                    setIsSubmitting(false);
+        setIsSubmitting(true);
+        setIsSubmitting(false);
       toast.success("Thank you for your feedback!");
       onComplete();
         
