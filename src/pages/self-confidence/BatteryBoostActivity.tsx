@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -44,6 +43,9 @@ const BatteryBoostActivity = () => {
   const [pastEntries, setPastEntries] = useState<BatteryEntry[]>([]);
   const [reflectionData, setReflectionData] = useState({
     feeling: '',
+    selectedVibes: [] as string[],
+    boostTopics: [] as string[],
+    drainPatterns: '',
     accountsToUnfollow: '',
     accountsToFollow: '',
     nextScrollStrategy: '',
@@ -159,7 +161,15 @@ const BatteryBoostActivity = () => {
     }
   };
 
-  const handleReflectionComplete = async (data) => {
+  const handleReflectionComplete = async (data: {
+    feeling: string;
+    selectedVibes: string[];
+    boostTopics: string[];
+    drainPatterns: string;
+    accountsToUnfollow: string;
+    accountsToFollow: string;
+    nextScrollStrategy: string;
+  }) => {
     setReflectionData(data);
     setCurrentSection('bonus');
     
@@ -170,6 +180,9 @@ const BatteryBoostActivity = () => {
           .from('battery_boost_entries')
           .update({
             feeling_after_scroll: data.feeling,
+            selected_vibes: data.selectedVibes,
+            boost_topics: data.boostTopics,
+            drain_patterns: data.drainPatterns,
             accounts_to_unfollow: data.accountsToUnfollow,
             accounts_to_follow_more: data.accountsToFollow,
             next_scroll_strategy: data.nextScrollStrategy

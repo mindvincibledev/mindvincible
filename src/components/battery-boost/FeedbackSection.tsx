@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import VisibilityToggle from '@/components/ui/VisibilityToggle';
@@ -10,15 +9,6 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-
-import { Link } from 'react-router-dom';
-
-import { ArrowLeft } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
-import Navbar from '@/components/Navbar';
-import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface FeedbackSectionProps {
   initialBatteryLevel: number;
@@ -36,9 +26,32 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [activityCompleted, setActivityCompleted] = useState(false);
   const { user } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
+  
+  // Fetch the current visibility setting when component mounts
+  useEffect(() => {
+    if (activityEntryId && user) {
+      const fetchVisibility = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('battery_boost_entries')
+            .select('visible_to_clinicians')
+            .eq('id', activityEntryId)
+            .eq('user_id', user.id)
+            .single();
+            
+          if (!error && data) {
+            setIsVisible(data.visible_to_clinicians);
+          }
+        } catch (error) {
+          console.error("Error fetching visibility:", error);
+        }
+      };
+      
+      fetchVisibility();
+    }
+  }, [activityEntryId, user]);
 
   const handleReturnHome = () => {
     navigate('/resources');
@@ -59,6 +72,7 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
     try {
       // First update the visibility in the battery_boost_entries table
       if (activityEntryId) {
+        console.log("Saving visibility status:", isVisible);
         const { error: visibilityError } = await supabase
           .from('battery_boost_entries')
           .update({ 
