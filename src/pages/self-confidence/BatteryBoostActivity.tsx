@@ -269,6 +269,7 @@ const BatteryBoostActivity = () => {
           <FeedbackSection 
             initialBatteryLevel={startingPercentage} 
             finalBatteryLevel={finalPercentage} 
+            activityEntryId={activityEntryId}
             onComplete={handleFeedbackComplete}
           />
         );
