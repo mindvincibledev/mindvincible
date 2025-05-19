@@ -1,11 +1,15 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Home, ArrowRight } from 'lucide-react';
+import { Star, Home, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface FeedbackSectionProps {
   initialBatteryLevel: number;
@@ -20,10 +24,20 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
 }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [rating, setRating] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState('');
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [activityEntryId, setActivityEntryId] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  const handleRatingClick = (value: number) => {
+    setRating(value);
+  };
 
   const handleSubmitFeedback = () => {
     setIsSubmitting(true);
-    
+        setShowFeedback(true);
     // Here you would normally send the feedback to your backend
     setTimeout(() => {
       setIsSubmitting(false);
@@ -35,6 +49,46 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
   const handleReturnHome = () => {
     navigate('/resources');
   };
+
+    const handleFeedback = async (feedback: string) => {
+      if (!user?.id) {
+        toast.error("You need to be logged in to complete this activity");
+        return;
+      }
+      
+      try {
+        // Record activity completion in the database
+        const { error } = await supabase
+          .from('activity_completions')
+          .insert({
+            user_id: user.id,
+            activity_id: 'battery-boost',
+            activity_name: 'Battery Boost',
+            feedback: feedback
+          });
+        
+        if (error) {
+          console.error("Error completing activity:", error);
+          toast.error("Failed to record activity completion");
+          return;
+        }
+        
+        toast.success("Activity completed successfully!");
+        setShowFeedback(false);
+  
+        const { error: updateError } = await supabase
+              .from('battery_boost_entries')
+              .update({ visibility: isVisible })
+              .eq('activity_id', activityEntryId)
+              .eq('user_id', user.id);
+        
+        // Navigate to resources hub after completion
+        navigate('/resources_hub');
+      } catch (error) {
+        console.error("Error completing activity:", error);
+        toast.error("Failed to record activity completion");
+      }
+    };
 
   return (
     <Card className="p-6 bg-white/90 backdrop-blur-lg shadow-xl border-none overflow-hidden">
@@ -80,6 +134,57 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
               </div>
             </div>
           </div>
+          <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
+          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                How was your experience?
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-4 py-6 px-4">
+                <Button 
+                  onClick={() => handleFeedback('positive')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👍</div>
+                  <span>Helpful</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('neutral')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">😐</div>
+                  <span>Neutral</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => handleFeedback('negative')} 
+                  variant="outline" 
+                  className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+                  disabled={isSubmitting}
+                >
+                  <div className="text-3xl mb-2">👎</div>
+                  <span>Not helpful</span>
+                </Button>
+              </div>
+
+              <div className="px-4">
+                <VisibilityToggle
+                  isVisible={isVisible}
+                  onToggle={setIsVisible}
+                  
+                />
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
             <Button
@@ -96,7 +201,7 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
               onClick={handleSubmitFeedback}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+              {isSubmitting ? 'Submitting...' : 'Complete Activity'}
             </Button>
           </div>
         </motion.div>
