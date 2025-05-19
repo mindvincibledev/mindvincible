@@ -40,6 +40,7 @@ export type Database = {
         Row: {
           accounts_to_follow_more: string | null
           accounts_to_unfollow: string | null
+          bonus_completed: boolean | null
           boost_topics: string[] | null
           created_at: string
           drain_patterns: string | null
@@ -48,6 +49,8 @@ export type Database = {
           id: string
           next_scroll_strategy: string | null
           selected_vibes: string[] | null
+          shared_post_description: string | null
+          shared_post_impact: string | null
           starting_percentage: number
           updated_at: string
           user_id: string
@@ -56,6 +59,7 @@ export type Database = {
         Insert: {
           accounts_to_follow_more?: string | null
           accounts_to_unfollow?: string | null
+          bonus_completed?: boolean | null
           boost_topics?: string[] | null
           created_at?: string
           drain_patterns?: string | null
@@ -64,6 +68,8 @@ export type Database = {
           id?: string
           next_scroll_strategy?: string | null
           selected_vibes?: string[] | null
+          shared_post_description?: string | null
+          shared_post_impact?: string | null
           starting_percentage?: number
           updated_at?: string
           user_id: string
@@ -72,6 +78,7 @@ export type Database = {
         Update: {
           accounts_to_follow_more?: string | null
           accounts_to_unfollow?: string | null
+          bonus_completed?: boolean | null
           boost_topics?: string[] | null
           created_at?: string
           drain_patterns?: string | null
@@ -80,6 +87,8 @@ export type Database = {
           id?: string
           next_scroll_strategy?: string | null
           selected_vibes?: string[] | null
+          shared_post_description?: string | null
+          shared_post_impact?: string | null
           starting_percentage?: number
           updated_at?: string
           user_id?: string

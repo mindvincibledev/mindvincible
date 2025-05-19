@@ -3,7 +3,7 @@ import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface VisibilityToggleProps {
   isVisible: boolean;

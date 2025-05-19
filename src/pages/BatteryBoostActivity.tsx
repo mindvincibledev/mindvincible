@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -11,9 +12,10 @@ import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import WelcomeScreen from '@/components/battery-boost/WelcomeScreen';
 import BatteryTracker from '@/components/battery-boost/BatteryTracker';
 import ReflectionSection from '@/components/battery-boost/ReflectionSection';
+import BonusChallenge from '@/components/battery-boost/BonusChallenge';
 import FeedbackSection from '@/components/battery-boost/FeedbackSection';
 
-type ActivitySection = 'welcome' | 'tracker' | 'reflection' | 'feedback';
+type ActivitySection = 'welcome' | 'tracker' | 'reflection' | 'bonus' | 'feedback';
 
 interface PostEntry {
   type: 'charging' | 'draining';
@@ -40,6 +42,20 @@ const BatteryBoostActivity = () => {
   const [activityEntryId, setActivityEntryId] = useState<string | null>(null);
   const [posts, setPosts] = useState<PostEntry[]>([]);
   const [pastEntries, setPastEntries] = useState<BatteryEntry[]>([]);
+  const [reflectionData, setReflectionData] = useState({
+    feeling: '',
+    selectedVibes: [] as string[],
+    boostTopics: [] as string[],
+    drainPatterns: '',
+    accountsToUnfollow: '',
+    accountsToFollow: '',
+    nextScrollStrategy: '',
+  });
+  const [bonusData, setBonusData] = useState({
+    completed: false,
+    sharedPostDescription: '',
+    sharedPostImpact: '',
+  });
   
   // Fetch past entries when component mounts
   useEffect(() => {
@@ -151,11 +167,22 @@ const BatteryBoostActivity = () => {
     }
   };
 
-  const handleReflectionComplete = async (data: any) => {
+  const handleReflectionComplete = async (data: {
+    feeling: string;
+    selectedVibes: string[];
+    boostTopics: string[];
+    drainPatterns: string;
+    accountsToUnfollow: string;
+    accountsToFollow: string;
+    nextScrollStrategy: string;
+  }) => {
+    setReflectionData(data);
+    setCurrentSection('bonus');
+    
     try {
       if (activityEntryId) {
         // Update entry with reflection data
-        await supabase
+        const { error } = await supabase
           .from('battery_boost_entries')
           .update({
             feeling_after_scroll: data.feeling,
@@ -167,12 +194,62 @@ const BatteryBoostActivity = () => {
             next_scroll_strategy: data.nextScrollStrategy
           })
           .eq('id', activityEntryId);
-        
-        setCurrentSection('feedback');
+          
+        if (error) {
+          console.error("Error saving reflection data:", error);
+          toast.error("Failed to save reflection data");
+        }
       }
     } catch (error) {
       console.error("Error saving reflection data:", error);
+      toast.error("Failed to save reflection data");
     }
+  };
+
+  const handleBonusComplete = async (
+    completed: boolean, 
+    sharedPostDescription?: string, 
+    sharedPostImpact?: string
+  ) => {
+    setBonusData({
+      completed,
+      sharedPostDescription: sharedPostDescription || '',
+      sharedPostImpact: sharedPostImpact || ''
+    });
+    
+    // If they completed the bonus challenge, add 30% to battery (max 100%)
+    const newFinalPercentage = completed 
+      ? Math.min(100, finalPercentage + 30)
+      : finalPercentage;
+    
+    if (completed && newFinalPercentage !== finalPercentage) {
+      setFinalPercentage(newFinalPercentage);
+    }
+    
+    try {
+      if (activityEntryId) {
+        // Update entry with bonus information
+        const { error } = await supabase
+          .from('battery_boost_entries')
+          .update({
+            final_percentage: newFinalPercentage,
+            bonus_completed: completed,
+            shared_post_description: sharedPostDescription,
+            shared_post_impact: sharedPostImpact
+          })
+          .eq('id', activityEntryId);
+          
+        if (error) {
+          console.error("Error saving bonus challenge data:", error);
+          toast.error("Failed to save bonus challenge data");
+        }
+      }
+    } catch (error) {
+      console.error("Error saving bonus challenge data:", error);
+      toast.error("Failed to save bonus challenge data");
+    }
+    
+    setCurrentSection('feedback');
   };
 
   const handleFeedbackComplete = async () => {
@@ -198,6 +275,9 @@ const BatteryBoostActivity = () => {
       
       case 'reflection':
         return <ReflectionSection finalPercentage={finalPercentage} onComplete={handleReflectionComplete} />;
+      
+      case 'bonus':
+        return <BonusChallenge onComplete={handleBonusComplete} />;
       
       case 'feedback':
         return (
