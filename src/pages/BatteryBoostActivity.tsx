@@ -12,8 +12,9 @@ import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import WelcomeScreen from '@/components/battery-boost/WelcomeScreen';
 import BatteryTracker from '@/components/battery-boost/BatteryTracker';
 import ReflectionSection from '@/components/battery-boost/ReflectionSection';
+import FeedbackSection from '@/components/battery-boost/FeedbackSection';
 
-type ActivitySection = 'welcome' | 'tracker' | 'reflection';
+type ActivitySection = 'welcome' | 'tracker' | 'reflection' | 'feedback';
 
 interface PostEntry {
   type: 'charging' | 'draining';
@@ -163,31 +164,39 @@ const BatteryBoostActivity = () => {
           })
           .eq('id', activityEntryId);
         
-        // Record activity completion
-        if (user) {
-          await supabase
-            .from('activity_completions')
-            .insert([
-              {
-                user_id: user.id,
-                activity_id: 'battery-boost',
-                activity_name: 'Battery Boost'
-              }
-            ]);
-        }
-        
-        // Reset the activity
-        setCurrentSection('welcome');
-        toast.success("Great job completing the Battery Boost activity!", {
-          description: "Your progress has been saved.",
-          duration: 5000
-        });
-        
-        // Refresh past entries to include the new one
-        fetchPastEntries();
+        setCurrentSection('feedback');
       }
     } catch (error) {
       console.error("Error saving reflection data:", error);
+    }
+  };
+
+  const handleFeedbackComplete = async () => {
+    try {
+      // Record activity completion
+      if (user) {
+        await supabase
+          .from('activity_completions')
+          .insert([
+            {
+              user_id: user.id,
+              activity_id: 'battery-boost',
+              activity_name: 'Battery Boost'
+            }
+          ]);
+      }
+      
+      // Reset the activity
+      setCurrentSection('welcome');
+      toast.success("Great job completing the Battery Boost activity!", {
+        description: "Your progress has been saved.",
+        duration: 5000
+      });
+      
+      // Refresh past entries to include the new one
+      fetchPastEntries();
+    } catch (error) {
+      console.error("Error recording activity completion:", error);
     }
   };
   
@@ -202,6 +211,15 @@ const BatteryBoostActivity = () => {
       
       case 'reflection':
         return <ReflectionSection finalPercentage={finalPercentage} onComplete={handleReflectionComplete} />;
+      
+      case 'feedback':
+        return (
+          <FeedbackSection 
+            initialBatteryLevel={startingPercentage} 
+            finalBatteryLevel={finalPercentage} 
+            onComplete={handleFeedbackComplete}
+          />
+        );
       
       default:
         return <WelcomeScreen onStart={handleWelcomeComplete} userEntries={pastEntries} />;

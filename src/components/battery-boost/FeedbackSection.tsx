@@ -3,10 +3,9 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Star, Home } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import VisibilityToggle from '@/components/ui/VisibilityToggle';
 
 interface FeedbackSectionProps {
   initialBatteryLevel: number;
@@ -20,14 +19,7 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
   onComplete 
 }) => {
   const navigate = useNavigate();
-  const [rating, setRating] = useState<number | null>(null);
-  const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-
-  const handleRatingClick = (value: number) => {
-    setRating(value);
-  };
 
   const handleSubmitFeedback = () => {
     setIsSubmitting(true);
@@ -53,36 +45,36 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
           transition={{ duration: 0.5 }}
           className="flex flex-col items-center"
         >
-          <h2 className="text-2xl font-bold mb-6 text-center">Activity Complete!</h2>
+          <h2 className="text-2xl font-bold mb-8 text-center">Activity Complete!</h2>
           
-          <div className="flex items-center justify-center space-x-6 mb-8">
+          <div className="flex items-center justify-center space-x-10 mb-10">
             <div className="text-center">
-              <p className="text-sm text-gray-500">Starting Battery</p>
-              <div className="relative h-24 w-12 mb-2 border-2 border-gray-800 rounded-lg overflow-hidden">
+              <p className="text-sm text-gray-500 mb-2 text-center">Starting Battery</p>
+              <div className="relative h-32 w-16 mb-2 border-2 border-gray-800 rounded-lg overflow-hidden">
                 <div 
                   className="absolute bottom-0 w-full bg-gradient-to-t from-[#F9A159] to-[#0ABFDF]"
                   style={{ height: `${initialBatteryLevel}%` }}
                 ></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-xs font-bold text-white mix-blend-difference">{initialBatteryLevel}%</p>
+                  <p className="text-sm font-bold text-white mix-blend-difference">{initialBatteryLevel}%</p>
                 </div>
-                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-6 h-2 bg-gray-800 rounded-t-lg"></div>
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-gray-800 rounded-t-lg"></div>
               </div>
             </div>
             
             <div className="text-2xl font-bold">→</div>
             
             <div className="text-center">
-              <p className="text-sm text-gray-500">Final Battery</p>
-              <div className="relative h-24 w-12 mb-2 border-2 border-gray-800 rounded-lg overflow-hidden">
+              <p className="text-sm text-gray-500 mb-2 text-center">Final Battery</p>
+              <div className="relative h-32 w-16 mb-2 border-2 border-gray-800 rounded-lg overflow-hidden">
                 <div 
                   className="absolute bottom-0 w-full bg-gradient-to-t from-[#0ABFDF] to-[#2AC20E]"
                   style={{ height: `${finalBatteryLevel}%` }}
                 ></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-xs font-bold text-white mix-blend-difference">{finalBatteryLevel}%</p>
+                  <p className="text-sm font-bold text-white mix-blend-difference">{finalBatteryLevel}%</p>
                 </div>
-                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-6 h-2 bg-gray-800 rounded-t-lg"></div>
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-gray-800 rounded-t-lg"></div>
               </div>
             </div>
           </div>
