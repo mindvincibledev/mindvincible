@@ -21,8 +21,7 @@ const VisibilityToggle = ({
     
     // Show toast notification when toggled
     if (value) {
-      toast({
-        title: "Sharing Enabled",
+      toast("Sharing Enabled", {
         description: "You're in control. You can turn sharing your response off anytime. Only your trusted school social worker will be able to see what you choose to share.",
         duration: 5000, // Show for 5 seconds
       });
