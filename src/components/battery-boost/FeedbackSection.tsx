@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Home } from 'lucide-react';
+import { Home, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -45,52 +45,54 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
           transition={{ duration: 0.5 }}
           className="flex flex-col items-center"
         >
-          <h2 className="text-2xl font-bold mb-8 text-center">Activity Complete!</h2>
+          <h2 className="text-2xl font-bold mb-10 text-center">Activity Complete!</h2>
           
-          <div className="flex items-center justify-center space-x-10 mb-10">
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-2 text-center">Starting Battery</p>
-              <div className="relative h-32 w-16 mb-2 border-2 border-gray-800 rounded-lg overflow-hidden">
+          <div className="flex items-center justify-center w-full mb-12">
+            <div className="flex flex-col items-center">
+              <p className="text-gray-600 mb-4 font-medium text-center">Starting Battery</p>
+              <div className="relative w-24 h-48 border-2 border-gray-800 rounded-2xl overflow-hidden">
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-10 h-2 bg-gray-800 rounded-t-lg"></div>
                 <div 
                   className="absolute bottom-0 w-full bg-gradient-to-t from-[#F9A159] to-[#0ABFDF]"
                   style={{ height: `${initialBatteryLevel}%` }}
                 ></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-sm font-bold text-white mix-blend-difference">{initialBatteryLevel}%</p>
+                  <p className="text-xl font-bold text-white mix-blend-difference">{initialBatteryLevel}%</p>
                 </div>
-                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-gray-800 rounded-t-lg"></div>
               </div>
             </div>
             
-            <div className="text-2xl font-bold">→</div>
+            <div className="mx-8 flex items-center">
+              <ArrowRight size={36} className="text-gray-700" />
+            </div>
             
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-2 text-center">Final Battery</p>
-              <div className="relative h-32 w-16 mb-2 border-2 border-gray-800 rounded-lg overflow-hidden">
+            <div className="flex flex-col items-center">
+              <p className="text-gray-600 mb-4 font-medium text-center">Final Battery</p>
+              <div className="relative w-24 h-48 border-2 border-gray-800 rounded-2xl overflow-hidden">
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-10 h-2 bg-gray-800 rounded-t-lg"></div>
                 <div 
                   className="absolute bottom-0 w-full bg-gradient-to-t from-[#0ABFDF] to-[#2AC20E]"
                   style={{ height: `${finalBatteryLevel}%` }}
                 ></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-sm font-bold text-white mix-blend-difference">{finalBatteryLevel}%</p>
+                  <p className="text-xl font-bold text-white mix-blend-difference">{finalBatteryLevel}%</p>
                 </div>
-                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-gray-800 rounded-t-lg"></div>
               </div>
             </div>
           </div>
           
-          <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4 w-full max-w-md">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
             <Button
               variant="outline"
-              className="flex-1 flex items-center justify-center gap-2"
+              className="flex items-center justify-center gap-2 py-6 text-lg"
               onClick={handleReturnHome}
             >
-              <Home className="h-4 w-4" />
+              <Home className="h-5 w-5" />
               Return to Resources
             </Button>
             
             <Button
-              className="flex-1 bg-gradient-to-r from-[#0ABFDF] to-[#F9A159] text-white"
+              className="bg-gradient-to-r from-[#33C3F0] to-[#F97316] text-white py-6 text-lg"
               onClick={handleSubmitFeedback}
               disabled={isSubmitting}
             >
