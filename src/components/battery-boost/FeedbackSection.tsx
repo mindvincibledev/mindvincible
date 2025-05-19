@@ -92,7 +92,7 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
         
         toast.success("Activity completed successfully!");
         setShowFeedback(false);
-  
+        console.log(isVisible)
         const { error: updateError } = await supabase
               .from('battery_boost_entries')
               .update({ visibility: isVisible })
