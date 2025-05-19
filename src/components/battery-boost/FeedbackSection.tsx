@@ -39,11 +39,11 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
     setIsSubmitting(true);
         setShowFeedback(true);
     // Here you would normally send the feedback to your backend
-    setTimeout(() => {
-      setIsSubmitting(false);
-      toast.success("Thank you for your feedback!");
-      onComplete();
-    }, 1000);
+    // setTimeout(() => {
+    //   setIsSubmitting(false);
+    //   toast.success("Thank you for your feedback!");
+    //   onComplete();
+    // }, 1000);
   };
 
   const handleReturnHome = () => {
