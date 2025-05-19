@@ -180,7 +180,7 @@ const BatteryBoostActivity = () => {
         setCurrentSection('welcome');
         toast.success("Great job completing the Battery Boost activity!", {
           description: "Your progress has been saved.",
-          duration: 5
+          duration: 5000
         });
         
         // Refresh past entries to include the new one
