@@ -12,10 +12,9 @@ import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import WelcomeScreen from '@/components/battery-boost/WelcomeScreen';
 import BatteryTracker from '@/components/battery-boost/BatteryTracker';
 import ReflectionSection from '@/components/battery-boost/ReflectionSection';
-import BonusChallenge from '@/components/battery-boost/BonusChallenge';
 import FeedbackSection from '@/components/battery-boost/FeedbackSection';
 
-type ActivitySection = 'welcome' | 'tracker' | 'reflection' | 'bonus' | 'feedback';
+type ActivitySection = 'welcome' | 'tracker' | 'reflection' | 'feedback';
 
 interface PostEntry {
   type: 'charging' | 'draining';
@@ -36,14 +35,9 @@ const BatteryBoostActivity = () => {
   const [posts, setPosts] = useState<PostEntry[]>([]);
   const [reflectionData, setReflectionData] = useState({
     feeling: '',
-    accountsToUnfollow: '',
-    accountsToFollow: '',
-    nextScrollStrategy: '',
-  });
-  const [bonusData, setBonusData] = useState({
-    completed: false,
-    sharedPostDescription: '',
-    sharedPostImpact: '',
+    selectedVibes: [] as string[],
+    boostTopics: [] as string[],
+    drainPatterns: '',
   });
 
   // Create a new activity entry when first entering tracker section
@@ -128,7 +122,7 @@ const BatteryBoostActivity = () => {
 
   const handleReflectionComplete = async (data) => {
     setReflectionData(data);
-    setCurrentSection('bonus');
+    setCurrentSection('feedback');
     
     try {
       if (activityEntryId) {
@@ -137,54 +131,15 @@ const BatteryBoostActivity = () => {
           .from('battery_boost_entries')
           .update({
             feeling_after_scroll: data.feeling,
-            accounts_to_unfollow: data.accountsToUnfollow,
-            accounts_to_follow_more: data.accountsToFollow,
-            next_scroll_strategy: data.nextScrollStrategy
+            selected_vibes: data.selectedVibes,
+            boost_topics: data.boostTopics,
+            drain_patterns: data.drainPatterns
           })
           .eq('id', activityEntryId);
       }
     } catch (error) {
       console.error("Error saving reflection data:", error);
     }
-  };
-
-  const handleBonusComplete = async (
-    completed: boolean, 
-    sharedPostDescription?: string, 
-    sharedPostImpact?: string
-  ) => {
-    setBonusData({
-      completed,
-      sharedPostDescription: sharedPostDescription || '',
-      sharedPostImpact: sharedPostImpact || ''
-    });
-    
-    // If they completed the bonus challenge, add 30% to battery (max 100%)
-    const newFinalPercentage = completed 
-      ? Math.min(100, finalPercentage + 30)
-      : finalPercentage;
-    
-    if (completed && newFinalPercentage !== finalPercentage) {
-      setFinalPercentage(newFinalPercentage);
-      
-      try {
-        if (activityEntryId) {
-          // Update entry with bonus information
-          await supabase
-            .from('battery_boost_entries')
-            .update({
-              final_percentage: newFinalPercentage,
-              shared_post_description: sharedPostDescription,
-              shared_post_impact: sharedPostImpact
-            })
-            .eq('id', activityEntryId);
-        }
-      } catch (error) {
-        console.error("Error saving bonus challenge data:", error);
-      }
-    }
-    
-    setCurrentSection('feedback');
   };
 
   const handleFeedbackComplete = async () => {
@@ -220,9 +175,6 @@ const BatteryBoostActivity = () => {
       
       case 'reflection':
         return <ReflectionSection finalPercentage={finalPercentage} onComplete={handleReflectionComplete} />;
-      
-      case 'bonus':
-        return <BonusChallenge onComplete={handleBonusComplete} />;
       
       case 'feedback':
         return (

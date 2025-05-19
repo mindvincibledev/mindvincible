@@ -45,8 +45,6 @@ export type Database = {
           final_percentage: number | null
           id: string
           next_scroll_strategy: string | null
-          shared_post_description: string | null
-          shared_post_impact: string | null
           starting_percentage: number
           updated_at: string
           user_id: string
@@ -60,8 +58,6 @@ export type Database = {
           final_percentage?: number | null
           id?: string
           next_scroll_strategy?: string | null
-          shared_post_description?: string | null
-          shared_post_impact?: string | null
           starting_percentage?: number
           updated_at?: string
           user_id: string
@@ -75,8 +71,6 @@ export type Database = {
           final_percentage?: number | null
           id?: string
           next_scroll_strategy?: string | null
-          shared_post_description?: string | null
-          shared_post_impact?: string | null
           starting_percentage?: number
           updated_at?: string
           user_id?: string
