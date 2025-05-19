@@ -84,12 +84,12 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
   const handleSubmit = () => {
     onComplete({
       feeling: getFeelingFromSlider(moodValue[0]),
-      selectedVibes,
+      selectedVibes: selectedVibes,
       boostTopics: selectedTopics,
-      drainPatterns,
-      accountsToUnfollow,
-      accountsToFollow,
-      nextScrollStrategy
+      drainPatterns: drainPatterns,
+      accountsToUnfollow: accountsToUnfollow,
+      accountsToFollow: accountsToFollow,
+      nextScrollStrategy: nextScrollStrategy
     });
   };
 
