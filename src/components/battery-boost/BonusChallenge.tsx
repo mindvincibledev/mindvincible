@@ -58,6 +58,7 @@ const BonusChallenge: React.FC<BonusChallengeProps> = ({ onComplete }) => {
                   <li>• Post a compliment about someone you appreciate</li>
                   <li>• Create a quick positive quote or affirmation</li>
                   <li>• Share something you're grateful for</li>
+                  <li></li>
                 </ul>
 
                 <p className="font-bold text-[#0ABFDF]">
