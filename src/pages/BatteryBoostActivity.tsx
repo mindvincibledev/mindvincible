@@ -78,14 +78,19 @@ const BatteryBoostActivity = () => {
       const { data, error } = await supabase
         .from('battery_boost_entries')
         .insert([
-          { user_id: user.id, starting_percentage: startingPercentage }
+          { 
+            user_id: user.id, 
+            starting_percentage: startingPercentage,
+            visible_to_clinicians: false // Default to not visible
+          }
         ])
-        .select()
-        .single();
+        .select();
       
       if (error) throw error;
       
-      setActivityEntryId(data.id);
+      if (data && data.length > 0) {
+        setActivityEntryId(data[0].id);
+      }
     } catch (error) {
       console.error("Error creating activity entry:", error);
       toast.error("Failed to save activity data");
@@ -172,32 +177,15 @@ const BatteryBoostActivity = () => {
   };
 
   const handleFeedbackComplete = async () => {
-    try {
-      // Record activity completion
-      if (user) {
-        await supabase
-          .from('activity_completions')
-          .insert([
-            {
-              user_id: user.id,
-              activity_id: 'battery-boost',
-              activity_name: 'Battery Boost'
-            }
-          ]);
-      }
-      
-      // Reset the activity
-      setCurrentSection('welcome');
-      toast.success("Great job completing the Battery Boost activity!", {
-        description: "Your progress has been saved.",
-        duration: 5000
-      });
-      
-      // Refresh past entries to include the new one
-      fetchPastEntries();
-    } catch (error) {
-      console.error("Error recording activity completion:", error);
-    }
+    // Reset the activity
+    setCurrentSection('welcome');
+    toast.success("Great job completing the Battery Boost activity!", {
+      description: "Your progress has been saved.",
+      duration: 5000
+    });
+    
+    // Refresh past entries to include the new one
+    fetchPastEntries();
   };
   
   // Render current section
@@ -216,7 +204,8 @@ const BatteryBoostActivity = () => {
         return (
           <FeedbackSection 
             initialBatteryLevel={startingPercentage} 
-            finalBatteryLevel={finalPercentage} 
+            finalBatteryLevel={finalPercentage}
+            activityEntryId={activityEntryId}
             onComplete={handleFeedbackComplete}
           />
         );

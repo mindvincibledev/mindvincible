@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import VisibilityToggle from '@/components/ui/VisibilityToggle';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Link } from 'react-router-dom';
 
 import { ArrowLeft } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid'; // We already have uuid installed
+import { v4 as uuidv4 } from 'uuid';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 
@@ -23,93 +23,85 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface FeedbackSectionProps {
   initialBatteryLevel: number;
   finalBatteryLevel: number;
+  activityEntryId: string | null;
   onComplete: () => void;
 }
 
 const FeedbackSection: React.FC<FeedbackSectionProps> = ({ 
   initialBatteryLevel, 
   finalBatteryLevel,
+  activityEntryId,
   onComplete 
 }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rating, setRating] = useState<number | null>(null);
-  const [feedback, setFeedback] = useState('');
   const [showFeedback, setShowFeedback] = useState(false);
-
-  const [activityEntryId, setActivityEntryId] = useState<string | null>(null);
+  const [activityCompleted, setActivityCompleted] = useState(false);
   const { user } = useAuth();
-    const [activityCompleted, setActivityCompleted] = useState(false);
-    const [showCelebration, setShowCelebration] = useState(false);
-    const [activityId] = useState(() => uuidv4()); // Generate activity ID once when component mounts
-    const [isVisible, setIsVisible] = useState(false); // Changed default to false
+  const [isVisible, setIsVisible] = useState(false);
 
-  const handleRatingClick = (value: number) => {
-    setRating(value);
-  };
-
-  const handleSubmitFeedback = () => {
-    handleActivityComplete()
-        setShowFeedback(true);
-    // Here you would normally send the feedback to your backend
-    // setTimeout(() => {
-    //   setIsSubmitting(false);
-    //   toast.success("Thank you for your feedback!");
-    //   onComplete();
-    // }, 1000);
-  };
-
-    const handleActivityComplete = () => {
-    setActivityCompleted(true);
-    setShowFeedback(true);
-  };
   const handleReturnHome = () => {
     navigate('/resources');
   };
 
-    const handleFeedback = async (feedback: string) => {
-      if (!user?.id) {
-        toast.error("You need to be logged in to complete this activity");
+  const handleSubmitFeedback = () => {
+    setShowFeedback(true);
+  };
+
+  const handleFeedback = async (feedbackType: string) => {
+    if (!user?.id) {
+      toast.error("You need to be logged in to complete this activity");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // First update the visibility in the battery_boost_entries table
+      if (activityEntryId) {
+        const { error: visibilityError } = await supabase
+          .from('battery_boost_entries')
+          .update({ 
+            visible_to_clinicians: isVisible 
+          })
+          .eq('id', activityEntryId)
+          .eq('user_id', user.id);
+          
+        if (visibilityError) {
+          console.error("Error updating visibility:", visibilityError);
+          toast.error("Failed to save visibility preference");
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      
+      // Then record activity completion with feedback
+      const { error } = await supabase
+        .from('activity_completions')
+        .insert({
+          user_id: user.id,
+          activity_id: 'battery-boost',
+          activity_name: 'Battery Boost',
+          feedback: feedbackType
+        });
+      
+      if (error) {
+        console.error("Error completing activity:", error);
+        toast.error("Failed to record activity completion");
+        setIsSubmitting(false);
         return;
       }
       
-      try {
-        // Record activity completion in the database
-        const { error } = await supabase
-          .from('activity_completions')
-          .insert({
-            user_id: user.id,
-            activity_id: 'battery-boost',
-            activity_name: 'Battery Boost',
-            feedback: feedback
-          });
-        
-        if (error) {
-          console.error("Error completing activity:", error);
-          toast.error("Failed to record activity completion");
-          return;
-        }
-        
-        toast.success("Activity completed successfully!");
-        setShowFeedback(false);
-        console.log(isVisible)
-        const { error: updateError } = await supabase
-              .from('battery_boost_entries')
-              .update({ visibility: isVisible })
-              .eq('activity_id', activityEntryId)
-              .eq('user_id', user.id);
-        setIsSubmitting(true);
-        setIsSubmitting(false);
-      toast.success("Thank you for your feedback!");
+      toast.success("Activity completed successfully!");
+      setShowFeedback(false);
       onComplete();
-        
-        // Navigate to resources hub after completion
-        navigate('/resources_hub');
-      } catch (error) {
-        console.error("Error completing activity:", error);
-        toast.error("Failed to record activity completion");
-      }
-    };
+    } catch (error) {
+      console.error("Error completing activity:", error);
+      toast.error("Failed to record activity completion");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Card className="p-6 bg-white/90 backdrop-blur-lg shadow-xl border-none overflow-hidden">
@@ -122,90 +114,90 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
         >
           <h2 className="text-2xl font-bold mb-10 text-center">Activity Complete!</h2>
           
-          <div className="flex items-center justify-center w-full mb-12">
-            <div className="flex flex-col items-center">
+          <div className="flex flex-col md:flex-row items-center justify-center w-full mb-12">
+            <div className="flex flex-col items-center mb-8 md:mb-0">
               <p className="text-gray-600 mb-4 font-medium text-center">Starting Battery</p>
-              <div className="relative w-24 h-48 border-2 border-gray-800 rounded-2xl overflow-hidden">
+              <div className="relative w-28 h-56 border-2 border-gray-800 rounded-2xl overflow-hidden">
                 <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-10 h-2 bg-gray-800 rounded-t-lg"></div>
                 <div 
                   className="absolute bottom-0 w-full bg-gradient-to-t from-[#F9A159] to-[#0ABFDF]"
                   style={{ height: `${initialBatteryLevel}%` }}
                 ></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-xl font-bold text-white mix-blend-difference">{initialBatteryLevel}%</p>
+                  <p className="text-2xl font-bold text-white mix-blend-difference">{initialBatteryLevel}%</p>
                 </div>
               </div>
             </div>
             
-            <div className="mx-8 flex items-center">
+            <div className="mx-4 md:mx-8 flex items-center justify-center w-12 md:w-16">
               <ArrowRight size={36} className="text-gray-700" />
             </div>
             
             <div className="flex flex-col items-center">
               <p className="text-gray-600 mb-4 font-medium text-center">Final Battery</p>
-              <div className="relative w-24 h-48 border-2 border-gray-800 rounded-2xl overflow-hidden">
+              <div className="relative w-28 h-56 border-2 border-gray-800 rounded-2xl overflow-hidden">
                 <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-10 h-2 bg-gray-800 rounded-t-lg"></div>
                 <div 
                   className="absolute bottom-0 w-full bg-gradient-to-t from-[#0ABFDF] to-[#2AC20E]"
                   style={{ height: `${finalBatteryLevel}%` }}
                 ></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-xl font-bold text-white mix-blend-difference">{finalBatteryLevel}%</p>
+                  <p className="text-2xl font-bold text-white mix-blend-difference">{finalBatteryLevel}%</p>
                 </div>
               </div>
             </div>
           </div>
-        <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
-          <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
-            <DialogHeader>
-              <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-                How was your experience?
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-4 py-6 px-4">
-                <Button 
-                  onClick={() => handleFeedback('positive')} 
-                  variant="outline" 
-                  className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
-                  disabled={isSubmitting}
-                >
-                  <div className="text-3xl mb-2">👍</div>
-                  <span>Helpful</span>
-                </Button>
-                
-                <Button 
-                  onClick={() => handleFeedback('neutral')} 
-                  variant="outline" 
-                  className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
-                  disabled={isSubmitting}
-                >
-                  <div className="text-3xl mb-2">😐</div>
-                  <span>Neutral</span>
-                </Button>
-                
-                <Button 
-                  onClick={() => handleFeedback('negative')} 
-                  variant="outline" 
-                  className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
-                  disabled={isSubmitting}
-                >
-                  <div className="text-3xl mb-2">👎</div>
-                  <span>Not helpful</span>
-                </Button>
-              </div>
-
-              <div className="px-4">
-                <VisibilityToggle
-                  isVisible={isVisible}
-                  onToggle={setIsVisible}
+          
+          <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
+            <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+              <DialogHeader>
+                <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                  How was your experience?
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-6">
+                <div className="grid grid-cols-3 gap-4 py-6 px-4">
+                  <Button 
+                    onClick={() => handleFeedback('positive')} 
+                    variant="outline" 
+                    className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
+                    disabled={isSubmitting}
+                  >
+                    <div className="text-3xl mb-2">👍</div>
+                    <span>Helpful</span>
+                  </Button>
                   
-                />
+                  <Button 
+                    onClick={() => handleFeedback('neutral')} 
+                    variant="outline" 
+                    className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+                    disabled={isSubmitting}
+                  >
+                    <div className="text-3xl mb-2">😐</div>
+                    <span>Neutral</span>
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleFeedback('negative')} 
+                    variant="outline" 
+                    className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+                    disabled={isSubmitting}
+                  >
+                    <div className="text-3xl mb-2">👎</div>
+                    <span>Not helpful</span>
+                  </Button>
+                </div>
+
+                <div className="px-4">
+                  <VisibilityToggle
+                    isVisible={isVisible}
+                    onToggle={setIsVisible}
+                  />
+                </div>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
             <Button
