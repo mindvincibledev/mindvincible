@@ -11,6 +11,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
+import { Link } from 'react-router-dom';
+
+import { ArrowLeft } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid'; // We already have uuid installed
+import Navbar from '@/components/Navbar';
+import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 interface FeedbackSectionProps {
   initialBatteryLevel: number;
   finalBatteryLevel: number;
@@ -81,6 +90,9 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
               .update({ visibility: isVisible })
               .eq('activity_id', activityEntryId)
               .eq('user_id', user.id);
+                    setIsSubmitting(false);
+      toast.success("Thank you for your feedback!");
+      onComplete();
         
         // Navigate to resources hub after completion
         navigate('/resources_hub');
@@ -134,7 +146,7 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
               </div>
             </div>
           </div>
-          <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
+        <Dialog open={showFeedback} onOpenChange={() => setShowFeedback(false)}>
           <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
             <DialogHeader>
               <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
