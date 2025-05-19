@@ -4,11 +4,9 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 import EmojiSlider from "@/components/ui/EmojiSlider";
-import VisibilityToggle from "@/components/ui/VisibilityToggle";
 import { CheckCircle } from 'lucide-react';
 
 interface ReflectionSectionProps {
@@ -18,6 +16,9 @@ interface ReflectionSectionProps {
     selectedVibes: string[];
     boostTopics: string[];
     drainPatterns: string;
+    accountsToUnfollow: string;
+    accountsToFollow: string;
+    nextScrollStrategy: string;
   }) => void;
 }
 
@@ -39,7 +40,9 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
   const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [drainPatterns, setDrainPatterns] = useState<string>("");
-  const [currentTab, setCurrentTab] = useState("feeling");
+  const [accountsToUnfollow, setAccountsToUnfollow] = useState<string>("");
+  const [accountsToFollow, setAccountsToFollow] = useState<string>("");
+  const [nextScrollStrategy, setNextScrollStrategy] = useState<string>("");
   
   const getBatteryColor = () => {
     if (finalPercentage >= 70) return 'from-[#0ABFDF] to-[#2AC20E]';
@@ -78,22 +81,16 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
     return "Excellent";
   };
 
-  const handleNextStep = () => {
-    if (currentTab === "feeling") {
-      setCurrentTab("vibes");
-    } else if (currentTab === "vibes") {
-      setCurrentTab("boost");
-    } else if (currentTab === "boost") {
-      setCurrentTab("drain");
-    } else {
-      // Submit all data
-      onComplete({
-        feeling: getFeelingFromSlider(moodValue[0]),
-        selectedVibes,
-        boostTopics: selectedTopics,
-        drainPatterns
-      });
-    }
+  const handleSubmit = () => {
+    onComplete({
+      feeling: getFeelingFromSlider(moodValue[0]),
+      selectedVibes,
+      boostTopics: selectedTopics,
+      drainPatterns,
+      accountsToUnfollow,
+      accountsToFollow,
+      nextScrollStrategy
+    });
   };
 
   return (
@@ -123,113 +120,120 @@ const ReflectionSection: React.FC<ReflectionSectionProps> = ({ finalPercentage, 
           </motion.div>
         </div>
 
-        <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-          <div className="w-full overflow-hidden">
-            <TabsList className="w-full mb-6 flex whitespace-nowrap overflow-x-auto p-1 gap-1 bg-white shadow-md border-2 border-gray-200">
-              <TabsTrigger value="feeling" className="flex-1 py-3 px-4 text-base font-medium">
-                How you feel?
-              </TabsTrigger>
-              <TabsTrigger value="vibes" className="flex-1 py-3 px-4 text-base font-medium">
-                Your vibes
-              </TabsTrigger>
-              <TabsTrigger value="boost" className="flex-1 py-3 px-4 text-base font-medium">
-                Energy boosters
-              </TabsTrigger>
-              <TabsTrigger value="drain" className="flex-1 py-3 px-4 text-base font-medium">
-                Energy drainers
-              </TabsTrigger>
-            </TabsList>
+        <div className="space-y-8">
+          {/* How do you feel section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-center">How do you feel after this scroll?</h3>
+            <div className="bg-white/70 p-6 rounded-lg shadow-sm">
+              <EmojiSlider 
+                value={moodValue}
+                onValueChange={setMoodValue}
+                minEmoji="😞"
+                middleEmoji="😐"
+                maxEmoji="😃"
+                label="Slide to match your mood"
+              />
+              <p className="text-center mt-4 text-lg">
+                {getFeelingFromSlider(moodValue[0])}
+              </p>
+            </div>
           </div>
 
-          <TabsContent value="feeling" className="mt-0">
-            <div className="space-y-6">
-              <p className="text-center text-lg font-medium mb-6">How do you feel after this scroll?</p>
-              
-              <div className="bg-white/70 p-6 rounded-lg shadow-sm">
-                <EmojiSlider 
-                  value={moodValue}
-                  onValueChange={setMoodValue}
-                  minEmoji="😞"
-                  middleEmoji="😐"
-                  maxEmoji="😃"
-                  label="Slide to match your mood"
-                />
-                <p className="text-center mt-4 text-lg">
-                  {getFeelingFromSlider(moodValue[0])}
-                </p>
-              </div>
+          {/* Vibes section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-center">What vibes did you experience?</h3>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {vibeOptions.map((vibe) => (
+                <Badge
+                  key={vibe}
+                  className={`cursor-pointer text-base py-2 px-4 ${
+                    selectedVibes.includes(vibe)
+                      ? "bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:from-[#FC68B3] hover:to-[#FF8A48] text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                  onClick={() => handleVibeToggle(vibe)}
+                >
+                  {selectedVibes.includes(vibe) && <CheckCircle className="w-4 h-4 mr-1 inline" />}
+                  {vibe}
+                </Badge>
+              ))}
             </div>
-          </TabsContent>
-          
-          <TabsContent value="vibes" className="mt-0">
-            <div className="space-y-6">
-              <p className="text-center text-lg font-medium mb-6">What vibes did you experience?</p>
-              
-              <div className="flex flex-wrap gap-2 justify-center">
-                {vibeOptions.map((vibe) => (
-                  <Badge
-                    key={vibe}
-                    className={`cursor-pointer text-base py-2 px-4 ${
-                      selectedVibes.includes(vibe)
-                        ? "bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] hover:from-[#FC68B3] hover:to-[#FF8A48] text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                    onClick={() => handleVibeToggle(vibe)}
-                  >
-                    {selectedVibes.includes(vibe) && <CheckCircle className="w-4 h-4 mr-1 inline" />}
-                    {vibe}
-                  </Badge>
-                ))}
-              </div>
+          </div>
+
+          {/* Topics section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-center">What types of posts boosted your energy the most?</h3>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {topicOptions.map((topic) => (
+                <Badge
+                  key={topic}
+                  className={`cursor-pointer text-base py-2 px-4 ${
+                    selectedTopics.includes(topic)
+                      ? "bg-gradient-to-r from-[#0ABFDF] to-[#2AC20E] hover:from-[#2AC20E] hover:to-[#0ABFDF] text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                  onClick={() => handleTopicToggle(topic)}
+                >
+                  {selectedTopics.includes(topic) && <CheckCircle className="w-4 h-4 mr-1 inline" />}
+                  {topic}
+                </Badge>
+              ))}
             </div>
-          </TabsContent>
-          
-          <TabsContent value="boost" className="mt-0">
-            <div className="space-y-6">
-              <p className="text-center text-lg font-medium mb-6">What types of posts boosted your energy the most?</p>
-              
-              <div className="flex flex-wrap gap-2 justify-center">
-                {topicOptions.map((topic) => (
-                  <Badge
-                    key={topic}
-                    className={`cursor-pointer text-base py-2 px-4 ${
-                      selectedTopics.includes(topic)
-                        ? "bg-gradient-to-r from-[#0ABFDF] to-[#2AC20E] hover:from-[#2AC20E] hover:to-[#0ABFDF] text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                    onClick={() => handleTopicToggle(topic)}
-                  >
-                    {selectedTopics.includes(topic) && <CheckCircle className="w-4 h-4 mr-1 inline" />}
-                    {topic}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="drain" className="mt-0">
-            <div className="space-y-6">
-              <p className="text-center text-lg font-medium mb-6">What patterns did you notice in the posts that drained you?</p>
-              
-              <div className="space-y-2">
-                <Textarea 
-                  className="w-full p-4 border border-gray-300 rounded-lg min-h-[150px]" 
-                  value={drainPatterns}
-                  onChange={(e) => setDrainPatterns(e.target.value)}
-                  placeholder="Share any patterns or common themes you noticed in posts that decreased your battery level..."
-                  rows={5}
-                />
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+
+          {/* Drain patterns section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-center">What patterns did you notice in the posts that drained you?</h3>
+            <Textarea 
+              className="w-full p-4 border border-gray-300 rounded-lg" 
+              value={drainPatterns}
+              onChange={(e) => setDrainPatterns(e.target.value)}
+              placeholder="Share any patterns or common themes you noticed in posts that decreased your battery level..."
+              rows={3}
+            />
+          </div>
+
+          {/* Accounts to unfollow */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-center">One account I want to unfollow is…</h3>
+            <Input 
+              className="w-full p-4 border border-gray-300 rounded-lg" 
+              value={accountsToUnfollow}
+              onChange={(e) => setAccountsToUnfollow(e.target.value)}
+              placeholder="@account_name"
+            />
+          </div>
+
+          {/* Accounts to follow more */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-center">One I want to see more of is…</h3>
+            <Input 
+              className="w-full p-4 border border-gray-300 rounded-lg" 
+              value={accountsToFollow}
+              onChange={(e) => setAccountsToFollow(e.target.value)}
+              placeholder="@account_name"
+            />
+          </div>
+
+          {/* Next scroll strategy */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-center">One thing I'll try next time I scroll is…</h3>
+            <Textarea 
+              className="w-full p-4 border border-gray-300 rounded-lg" 
+              value={nextScrollStrategy}
+              onChange={(e) => setNextScrollStrategy(e.target.value)}
+              placeholder="Share a strategy you'll try next time..."
+              rows={3}
+            />
+          </div>
+        </div>
         
-        <div className="flex justify-end mt-8">
+        <div className="flex justify-center mt-8">
           <Button 
-            onClick={handleNextStep}
+            onClick={handleSubmit}
             className="bg-gradient-to-r from-[#0ABFDF] to-[#F9A159] text-white px-8 py-2 rounded-full text-lg"
           >
-            {currentTab === "drain" ? "Complete" : "Continue"}
+            Complete
           </Button>
         </div>
       </CardContent>

@@ -12,15 +12,21 @@ import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import WelcomeScreen from '@/components/battery-boost/WelcomeScreen';
 import BatteryTracker from '@/components/battery-boost/BatteryTracker';
 import ReflectionSection from '@/components/battery-boost/ReflectionSection';
-import FeedbackSection from '@/components/battery-boost/FeedbackSection';
 
-type ActivitySection = 'welcome' | 'tracker' | 'reflection' | 'feedback';
+type ActivitySection = 'welcome' | 'tracker' | 'reflection';
 
 interface PostEntry {
   type: 'charging' | 'draining';
   percentage: number;
   category?: string;
   notes?: string;
+}
+
+interface BatteryEntry {
+  id: string;
+  starting_percentage: number;
+  final_percentage: number;
+  created_at: string;
 }
 
 const BatteryBoostActivity = () => {
@@ -33,12 +39,32 @@ const BatteryBoostActivity = () => {
   const [finalPercentage, setFinalPercentage] = useState<number>(50);
   const [activityEntryId, setActivityEntryId] = useState<string | null>(null);
   const [posts, setPosts] = useState<PostEntry[]>([]);
-  const [reflectionData, setReflectionData] = useState({
-    feeling: '',
-    selectedVibes: [] as string[],
-    boostTopics: [] as string[],
-    drainPatterns: '',
-  });
+  const [pastEntries, setPastEntries] = useState<BatteryEntry[]>([]);
+  
+  // Fetch past entries when component mounts
+  useEffect(() => {
+    if (user) {
+      fetchPastEntries();
+    }
+  }, [user]);
+
+  const fetchPastEntries = async () => {
+    try {
+      if (user) {
+        const { data, error } = await supabase
+          .from('battery_boost_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        setPastEntries(data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching past entries:", error);
+    }
+  };
 
   // Create a new activity entry when first entering tracker section
   const createActivityEntry = async () => {
@@ -120,10 +146,7 @@ const BatteryBoostActivity = () => {
     }
   };
 
-  const handleReflectionComplete = async (data) => {
-    setReflectionData(data);
-    setCurrentSection('feedback');
-    
+  const handleReflectionComplete = async (data: any) => {
     try {
       if (activityEntryId) {
         // Update entry with reflection data
@@ -133,42 +156,46 @@ const BatteryBoostActivity = () => {
             feeling_after_scroll: data.feeling,
             selected_vibes: data.selectedVibes,
             boost_topics: data.boostTopics,
-            drain_patterns: data.drainPatterns
+            drain_patterns: data.drainPatterns,
+            accounts_to_unfollow: data.accountsToUnfollow,
+            accounts_to_follow_more: data.accountsToFollow,
+            next_scroll_strategy: data.nextScrollStrategy
           })
           .eq('id', activityEntryId);
+        
+        // Record activity completion
+        if (user) {
+          await supabase
+            .from('activity_completions')
+            .insert([
+              {
+                user_id: user.id,
+                activity_id: 'battery-boost',
+                activity_name: 'Battery Boost'
+              }
+            ]);
+        }
+        
+        // Reset the activity
+        setCurrentSection('welcome');
+        toast.success("Great job completing the Battery Boost activity!", {
+          description: "Your progress has been saved.",
+          duration: 5000
+        });
+        
+        // Refresh past entries to include the new one
+        fetchPastEntries();
       }
     } catch (error) {
       console.error("Error saving reflection data:", error);
     }
-  };
-
-  const handleFeedbackComplete = async () => {
-    // Record activity completion in activity_completions table
-    try {
-      if (user) {
-        await supabase
-          .from('activity_completions')
-          .insert([
-            {
-              user_id: user.id,
-              activity_id: 'battery-boost',
-              activity_name: 'Battery Boost'
-            }
-          ]);
-      }
-    } catch (error) {
-      console.error("Error recording activity completion:", error);
-    }
-    
-    // Navigate back to resources hub
-    navigate('/resources');
   };
   
   // Render current section
   const renderCurrentSection = () => {
     switch (currentSection) {
       case 'welcome':
-        return <WelcomeScreen onStart={handleWelcomeComplete} />;
+        return <WelcomeScreen onStart={handleWelcomeComplete} userEntries={pastEntries} />;
       
       case 'tracker':
         return <BatteryTracker onComplete={handleTrackerComplete} onAddPost={handleAddPost} />;
@@ -176,17 +203,8 @@ const BatteryBoostActivity = () => {
       case 'reflection':
         return <ReflectionSection finalPercentage={finalPercentage} onComplete={handleReflectionComplete} />;
       
-      case 'feedback':
-        return (
-          <FeedbackSection 
-            initialBatteryLevel={startingPercentage} 
-            finalBatteryLevel={finalPercentage} 
-            onComplete={handleFeedbackComplete}
-          />
-        );
-      
       default:
-        return <WelcomeScreen onStart={handleWelcomeComplete} />;
+        return <WelcomeScreen onStart={handleWelcomeComplete} userEntries={pastEntries} />;
     }
   };
   

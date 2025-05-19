@@ -40,11 +40,14 @@ export type Database = {
         Row: {
           accounts_to_follow_more: string | null
           accounts_to_unfollow: string | null
+          boost_topics: string[] | null
           created_at: string
+          drain_patterns: string | null
           feeling_after_scroll: string | null
           final_percentage: number | null
           id: string
           next_scroll_strategy: string | null
+          selected_vibes: string[] | null
           starting_percentage: number
           updated_at: string
           user_id: string
@@ -53,11 +56,14 @@ export type Database = {
         Insert: {
           accounts_to_follow_more?: string | null
           accounts_to_unfollow?: string | null
+          boost_topics?: string[] | null
           created_at?: string
+          drain_patterns?: string | null
           feeling_after_scroll?: string | null
           final_percentage?: number | null
           id?: string
           next_scroll_strategy?: string | null
+          selected_vibes?: string[] | null
           starting_percentage?: number
           updated_at?: string
           user_id: string
@@ -66,11 +72,14 @@ export type Database = {
         Update: {
           accounts_to_follow_more?: string | null
           accounts_to_unfollow?: string | null
+          boost_topics?: string[] | null
           created_at?: string
+          drain_patterns?: string | null
           feeling_after_scroll?: string | null
           final_percentage?: number | null
           id?: string
           next_scroll_strategy?: string | null
+          selected_vibes?: string[] | null
           starting_percentage?: number
           updated_at?: string
           user_id?: string
