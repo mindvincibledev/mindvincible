@@ -43,13 +43,23 @@ const BonusChallenge: React.FC<BonusChallengeProps> = ({ onComplete }) => {
           
           {!showForm ? (
             <>
+            
               <div className="text-center mb-8 max-w-md">
                 <p className="text-lg mb-4">
-                  Want to boost someone else's battery?
+                  Want to boost someone else's battery? Create an uplifting post that might charge someone else's battery. 
+                Share positivity, encouragement, or your authentic self.
                 </p>
-                <p className="text-lg mb-6">
-                  Find one inspiring post and share it with a friend.
-                </p>
+
+
+                <h3 className="font-medium mb-2">Ideas to boost others:</h3>
+                <ul className="text-left space-y-2 max-w-md mx-auto">
+                  <li>• Find one inspiring post and share it with a friend.</li>
+                  <li>• Share a genuine moment from your day</li>
+                  <li>• Post a compliment about someone you appreciate</li>
+                  <li>• Create a quick positive quote or affirmation</li>
+                  <li>• Share something you're grateful for</li>
+                </ul>
+
                 <p className="font-bold text-[#0ABFDF]">
                   +30% bonus charge if you complete this challenge! 🎉
                 </p>

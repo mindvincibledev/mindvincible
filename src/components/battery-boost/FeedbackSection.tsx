@@ -87,47 +87,6 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({
             </div>
           </div>
           
-          <div className="w-full max-w-md mb-8">
-            <p className="text-center text-lg mb-4">How helpful was this activity?</p>
-            
-            <div className="flex justify-center space-x-2 mb-6">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => handleRatingClick(star)}
-                  className="focus:outline-none transition-transform hover:scale-110"
-                >
-                  <Star
-                    size={32}
-                    className={`${
-                      rating && star <= rating
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-gray-300'
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-            
-            <div className="space-y-4">
-              <textarea
-                className="w-full p-3 border border-gray-300 rounded-lg"
-                placeholder="Share any additional feedback about this activity..."
-                rows={4}
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-              />
-              
-              <div className="pt-2">
-                <VisibilityToggle 
-                  isVisible={isVisible}
-                  onToggle={setIsVisible}
-                  description="Share this feedback with clinicians"
-                />
-              </div>
-            </div>
-          </div>
-          
           <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4 w-full max-w-md">
             <Button
               variant="outline"
