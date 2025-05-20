@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -282,7 +281,7 @@ const BatteryBoostActivity = () => {
     });
     
     // Refresh past entries to include the new one
-    fetchPastEntries();
+    await fetchPastEntries();
   };
   
   // Render current section

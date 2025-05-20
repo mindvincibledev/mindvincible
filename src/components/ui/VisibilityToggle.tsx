@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -16,7 +15,18 @@ const VisibilityToggle = ({
   onToggle, 
   description = "Make this entry visible to clinicians" 
 }: VisibilityToggleProps) => {
+  const [localVisible, setLocalVisible] = React.useState(isVisible);
+
+  // Keep local state in sync with prop changes
+  React.useEffect(() => {
+    setLocalVisible(isVisible);
+  }, [isVisible]);
+
   const handleToggleChange = (value: boolean) => {
+    // Update local state immediately for responsive UI
+    setLocalVisible(value);
+    
+    // Call the parent's onToggle handler
     onToggle(value);
     
     // Show toast notification when toggled
@@ -25,6 +35,11 @@ const VisibilityToggle = ({
         description: "You're in control. You can turn sharing your response off anytime. Only your trusted school social worker will be able to see what you choose to share.",
         duration: 5000, // Show for 5 seconds
       });
+    } else {
+      toast("Sharing Disabled", {
+        description: "Your entry is now private.",
+        duration: 3000,
+      });
     }
   };
 
@@ -32,7 +47,7 @@ const VisibilityToggle = ({
     <div className="flex items-center space-x-2 relative">
       <Switch
         id="visibility"
-        checked={isVisible}
+        checked={localVisible}
         onCheckedChange={handleToggleChange}
         className="data-[state=checked]:bg-[#2AC20E]"
       />
@@ -42,7 +57,7 @@ const VisibilityToggle = ({
       
       {/* Visual feedback indicator with improved animation */}
       <AnimatePresence>
-        {isVisible && (
+        {localVisible && (
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,13 +50,14 @@ interface PastBatteryEntriesProps {
 }
 
 const PastBatteryEntries: React.FC<PastBatteryEntriesProps> = ({ 
-  entries = [], 
+  entries: propEntries = [], 
   onRefreshEntries 
 }) => {
   const { user } = useAuth();
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
   const [entriesWithPosts, setEntriesWithPosts] = useState<{[key: string]: BatteryPost[]}>({});
   const [loadingPosts, setLoadingPosts] = useState<{[key: string]: boolean}>({});
+  const [entries, setEntries] = useState<BatteryEntry[]>(propEntries);
 
   const fetchPostsForEntry = async (entryId: string) => {
     if (entriesWithPosts[entryId] || !user) return;
@@ -121,7 +123,11 @@ const PastBatteryEntries: React.FC<PastBatteryEntriesProps> = ({
       
       if (entryError) throw entryError;
       
+      // Immediately update the local state
+      setEntries(entries.filter(entry => entry.id !== entryId));
+      
       toast.success('Entry deleted successfully');
+      // Still call onRefreshEntries to sync with parent components if needed
       if (onRefreshEntries) onRefreshEntries();
     } catch (error) {
       console.error('Error deleting entry:', error);
@@ -133,21 +139,39 @@ const PastBatteryEntries: React.FC<PastBatteryEntriesProps> = ({
     if (!user) return;
     
     try {
+      // Immediately update local state for responsive UI
+      setEntries(entries.map(entry => 
+        entry.id === entryId ? { ...entry, visible_to_clinicians: isVisible } : entry
+      ));
+      
       const { error } = await supabase
         .from('battery_boost_entries')
         .update({ visible_to_clinicians: isVisible })
         .eq('id', entryId)
         .eq('user_id', user.id);
       
-      if (error) throw error;
+      if (error) {
+        // If the update fails, revert the local state
+        setEntries(entries.map(entry => 
+          entry.id === entryId ? { ...entry, visible_to_clinicians: !isVisible } : entry
+        ));
+        throw error;
+      }
       
       toast.success(`Entry is now ${isVisible ? 'visible' : 'private'} to clinicians`);
+      
+      // Still call onRefreshEntries to sync with parent components if needed
       if (onRefreshEntries) onRefreshEntries();
     } catch (error) {
       console.error('Error updating visibility:', error);
       toast.error('Failed to update visibility');
     }
   };
+
+  // Update local entries when prop entries change
+  React.useEffect(() => {
+    setEntries(propEntries);
+  }, [propEntries]);
 
   if (entries.length === 0) {
     return (
