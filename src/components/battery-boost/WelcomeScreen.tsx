@@ -3,18 +3,18 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BatteryMedium, Zap, BarChart } from 'lucide-react';
+import { BatteryMedium, Zap, BarChart3 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNavigate } from 'react-router-dom';
+import PastBatteryEntries from './PastBatteryEntries';
 
 interface WelcomeScreenProps {
   onStart: () => void;
   userEntries?: any[]; // Past entries from database
+  onRefreshEntries?: () => void;
 }
 
-const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, userEntries = [] }) => {
+const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, userEntries = [], onRefreshEntries }) => {
   const [activeTab, setActiveTab] = useState("scavenger");
-  const navigate = useNavigate();
   
   return (
     <Card className="p-6 bg-white/90 backdrop-blur-lg shadow-xl border-none overflow-hidden">
@@ -79,7 +79,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, userEntries = []
               className="font-medium text-base py-3 px-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF8A48] data-[state=active]:to-[#FC68B3] data-[state=active]:text-white"
             >
               <span className="flex items-center gap-2">
-                <BarChart className="w-4 h-4" />
+                <BarChart3 className="w-4 h-4" />
                 Your History
               </span>
             </TabsTrigger>
@@ -102,32 +102,9 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, userEntries = []
           </TabsContent>
           
           <TabsContent value="history" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <div className="text-center p-4">
-              <h2 className="text-xl font-semibold mb-4">Your Battery History</h2>
-              {userEntries.length > 0 ? (
-                <div className="space-y-4">
-                  <p className="mb-4">Review your past battery scavenger hunts and see your progress over time.</p>
-                  {/* History entries would be displayed here */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <BarChart className="h-32 w-full text-[#0ABFDF] opacity-50" />
-                    <p className="text-sm text-gray-500 mt-2">Your battery history visualization</p>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <p className="mb-6">You haven't completed any battery scavenger hunts yet. Start your first one to build your history!</p>
-                  <div className="bg-gray-50 p-4 rounded-lg mb-6 flex items-center justify-center">
-                    <BarChart className="h-24 w-full text-gray-300" />
-                  </div>
-                </div>
-              )}
-              <Button 
-                onClick={() => {/* Functionality to be implemented */}}
-                className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white hover:opacity-90 transition-all duration-300 px-8 py-4 text-lg rounded-full flex items-center gap-2"
-              >
-                <BarChart className="h-5 w-5" />
-                Coming Soon
-              </Button>
+            <div className="p-4">
+              <h2 className="text-xl font-semibold mb-4 text-center">Your Battery History</h2>
+              <PastBatteryEntries entries={userEntries} onRefreshEntries={onRefreshEntries} />
             </div>
           </TabsContent>
         </Tabs>

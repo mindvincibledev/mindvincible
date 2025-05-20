@@ -28,7 +28,18 @@ interface BatteryEntry {
   id: string;
   starting_percentage: number;
   final_percentage: number;
+  feeling_after_scroll?: string;
+  selected_vibes?: string[];
+  boost_topics?: string[];
+  drain_patterns?: string;
+  accounts_to_unfollow?: string;
+  accounts_to_follow_more?: string;
+  next_scroll_strategy?: string;
+  shared_post_description?: string;
+  shared_post_impact?: string;
+  bonus_completed?: boolean;
   created_at: string;
+  visible_to_clinicians: boolean;
 }
 
 const BatteryBoostActivity = () => {
@@ -42,6 +53,7 @@ const BatteryBoostActivity = () => {
   const [activityEntryId, setActivityEntryId] = useState<string | null>(null);
   const [posts, setPosts] = useState<PostEntry[]>([]);
   const [pastEntries, setPastEntries] = useState<BatteryEntry[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [reflectionData, setReflectionData] = useState({
     feeling: '',
     selectedVibes: [] as string[],
@@ -61,24 +73,33 @@ const BatteryBoostActivity = () => {
   useEffect(() => {
     if (user) {
       fetchPastEntries();
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
   const fetchPastEntries = async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      if (user) {
-        const { data, error } = await supabase
-          .from('battery_boost_entries')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        setPastEntries(data || []);
-      }
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('battery_boost_entries')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      setPastEntries(data || []);
     } catch (error) {
       console.error("Error fetching past entries:", error);
+      toast.error("Could not load your past entries");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -268,7 +289,13 @@ const BatteryBoostActivity = () => {
   const renderCurrentSection = () => {
     switch (currentSection) {
       case 'welcome':
-        return <WelcomeScreen onStart={handleWelcomeComplete} userEntries={pastEntries} />;
+        return (
+          <WelcomeScreen 
+            onStart={handleWelcomeComplete} 
+            userEntries={pastEntries}
+            onRefreshEntries={fetchPastEntries}
+          />
+        );
       
       case 'tracker':
         return <BatteryTracker onComplete={handleTrackerComplete} onAddPost={handleAddPost} />;
@@ -290,7 +317,13 @@ const BatteryBoostActivity = () => {
         );
       
       default:
-        return <WelcomeScreen onStart={handleWelcomeComplete} userEntries={pastEntries} />;
+        return (
+          <WelcomeScreen 
+            onStart={handleWelcomeComplete} 
+            userEntries={pastEntries}
+            onRefreshEntries={fetchPastEntries} 
+          />
+        );
     }
   };
   
@@ -319,7 +352,16 @@ const BatteryBoostActivity = () => {
             </p>
           </motion.div>
           
-          {renderCurrentSection()}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-pulse flex flex-col items-center">
+                <div className="h-12 w-12 mb-4 rounded-full bg-gray-300"></div>
+                <div className="h-4 w-48 bg-gray-300 rounded"></div>
+              </div>
+            </div>
+          ) : (
+            renderCurrentSection()
+          )}
         </div>
       </div>
     </BackgroundWithEmojis>
