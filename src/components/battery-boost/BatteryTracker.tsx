@@ -27,7 +27,7 @@ const getPostCategory = (change: number): string => {
 
 const BatteryTracker: React.FC<BatteryTrackerProps> = ({ onComplete, onAddPost }) => {
   const [batteryPercentage, setBatteryPercentage] = useState(50);
-  const [timeRemaining, setTimeRemaining] = useState(5 * 60); // 5 minutes in seconds
+  const [timeRemaining, setTimeRemaining] = useState(10); // 5 minutes in seconds
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [postNote, setPostNote] = useState('');
   const [showNote, setShowNote] = useState(false);
