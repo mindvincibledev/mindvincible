@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BatteryFull, BatteryLow, Plus, Minus, Clock } from 'lucide-react';
+import { Clock, Plus, Minus, Zap, BatteryMedium, BatteryFull, BatteryLow } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 
@@ -26,11 +27,12 @@ const getPostCategory = (change: number): string => {
 
 const BatteryTracker: React.FC<BatteryTrackerProps> = ({ onComplete, onAddPost }) => {
   const [batteryPercentage, setBatteryPercentage] = useState(50);
-  const [timeRemaining, setTimeRemaining] = useState(5); // 5 minutes in seconds
+  const [timeRemaining, setTimeRemaining] = useState(5 * 60); // 5 minutes in seconds
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [postNote, setPostNote] = useState('');
   const [showNote, setShowNote] = useState(false);
   const [currentChange, setCurrentChange] = useState<{type: 'charging' | 'draining', value: number, category: string} | null>(null);
+  const [showZaps, setShowZaps] = useState(false);
   
   // Timer effect
   useEffect(() => {
@@ -73,6 +75,10 @@ const BatteryTracker: React.FC<BatteryTrackerProps> = ({ onComplete, onAddPost }
       const newPercentage = Math.min(100, Math.max(0, batteryPercentage + currentChange.value));
       setBatteryPercentage(newPercentage);
       
+      // Show zap animation when percentage changes
+      setShowZaps(true);
+      setTimeout(() => setShowZaps(false), 1000);
+      
       // Log the post
       onAddPost(
         currentChange.type, 
@@ -108,6 +114,12 @@ const BatteryTracker: React.FC<BatteryTrackerProps> = ({ onComplete, onAddPost }
     if (batteryPercentage >= 40) return 'bg-gradient-to-t from-[#F9A159] to-[#0ABFDF]';
     return 'bg-gradient-to-t from-[#ff6b6b] to-[#F9A159]';
   };
+
+  const getBatteryIcon = () => {
+    if (batteryPercentage >= 70) return <BatteryFull className="h-6 w-6 text-[#2AC20E]" />;
+    if (batteryPercentage >= 30) return <BatteryMedium className="h-6 w-6 text-[#F9A159]" />;
+    return <BatteryLow className="h-6 w-6 text-[#ff6b6b]" />;
+  };
   
   return (
     <Card className="p-6 bg-white/90 backdrop-blur-lg shadow-xl border-none overflow-hidden">
@@ -116,15 +128,44 @@ const BatteryTracker: React.FC<BatteryTrackerProps> = ({ onComplete, onAddPost }
           <div className="flex flex-col items-center">
             <h2 className="text-2xl font-bold text-center mb-6">Create Your Battery Tracker</h2>
             
-            <div className="relative h-64 w-32 mb-8 border-4 border-gray-800 rounded-lg overflow-hidden">
-              <div 
-                className={`absolute bottom-0 w-full transition-all duration-1000 ${getBatteryColor()}`}
-                style={{ height: `${batteryPercentage}%` }}
-              ></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-2xl font-bold text-white mix-blend-difference">{batteryPercentage}%</p>
+            <div className="relative mb-8">
+              {/* Battery Container */}
+              <div className="relative h-64 w-40 border-4 border-gray-800 rounded-lg overflow-hidden">
+                <div 
+                  className={`absolute bottom-0 w-full transition-all duration-1000 ${getBatteryColor()}`}
+                  style={{ height: `${batteryPercentage}%` }}
+                ></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <p className="text-2xl font-bold text-white mix-blend-difference">{batteryPercentage}%</p>
+                </div>
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-16 h-5 bg-gray-800 rounded-t-lg"></div>
               </div>
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-16 h-5 bg-gray-800 rounded-t-lg"></div>
+
+              {/* Decorative zaps around the battery */}
+              <motion.div 
+                className="absolute -right-4 top-1/4"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <Zap className="h-8 w-8 text-[#FF8A48]" />
+              </motion.div>
+              <motion.div 
+                className="absolute -left-4 top-2/4"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.7 }}
+              >
+                <Zap className="h-8 w-8 text-[#FC68B3]" />
+              </motion.div>
+              <motion.div 
+                className="absolute -right-4 bottom-1/4"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.9 }}
+              >
+                <Zap className="h-8 w-8 text-[#3DFDFF]" />
+              </motion.div>
             </div>
             
             <div className="text-center mb-8 max-w-md mx-auto">
@@ -161,25 +202,65 @@ const BatteryTracker: React.FC<BatteryTrackerProps> = ({ onComplete, onAddPost }
               <h2 className="text-xl font-bold">Time Remaining: {formatTime(timeRemaining)}</h2>
             </div>
             
-            <div className="relative h-64 w-32 mb-8 border-4 border-gray-800 rounded-lg overflow-hidden">
-              <motion.div 
-                className={`absolute bottom-0 w-full ${getBatteryColor()}`}
-                initial={{ height: '50%' }}
-                animate={{ height: `${batteryPercentage}%` }}
-                transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-              ></motion.div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <motion.p 
-                  className="text-2xl font-bold text-white mix-blend-difference"
-                  key={batteryPercentage}
-                  initial={{ scale: 1.2 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 200, damping: 10 }}
-                >
-                  {batteryPercentage}%
-                </motion.p>
+            <div className="relative mb-8">
+              {/* Battery Container */}
+              <div className="relative h-64 w-40 border-4 border-gray-800 rounded-lg overflow-hidden">
+                <motion.div 
+                  className={`absolute bottom-0 w-full ${getBatteryColor()}`}
+                  initial={{ height: '50%' }}
+                  animate={{ height: `${batteryPercentage}%` }}
+                  transition={{ type: 'spring', stiffness: 120, damping: 20 }}
+                ></motion.div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.p 
+                    className="text-2xl font-bold text-white mix-blend-difference"
+                    key={batteryPercentage}
+                    initial={{ scale: 1.2 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 10 }}
+                  >
+                    {batteryPercentage}%
+                  </motion.p>
+                </div>
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-16 h-5 bg-gray-800 rounded-t-lg"></div>
+
+                {/* Zap animations that appear when battery changes */}
+                {showZaps && currentChange && (
+                  <>
+                    <motion.div 
+                      className="absolute"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1, x: [0, -10, 10, -5, 5, 0], y: [0, -10, 5, -5, 0] }}
+                      exit={{ opacity: 0, scale: 0 }}
+                      transition={{ duration: 0.8 }}
+                      style={{ 
+                        left: '10%',
+                        bottom: currentChange.type === 'charging' ? '30%' : '70%',
+                      }}
+                    >
+                      <Zap className={`h-8 w-8 ${currentChange.type === 'charging' ? 'text-[#2AC20E]' : 'text-[#ff6b6b]'}`} />
+                    </motion.div>
+                    <motion.div 
+                      className="absolute"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1, x: [0, 10, -10, 5, -5, 0], y: [0, -5, 10, -10, 0] }}
+                      exit={{ opacity: 0, scale: 0 }}
+                      transition={{ duration: 0.8, delay: 0.1 }}
+                      style={{ 
+                        right: '10%', 
+                        bottom: currentChange.type === 'charging' ? '40%' : '60%',
+                      }}
+                    >
+                      <Zap className={`h-8 w-8 ${currentChange.type === 'charging' ? 'text-[#2AC20E]' : 'text-[#ff6b6b]'}`} />
+                    </motion.div>
+                  </>
+                )}
               </div>
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-16 h-5 bg-gray-800 rounded-t-lg"></div>
+              
+              {/* Status indicator */}
+              <div className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-md">
+                {getBatteryIcon()}
+              </div>
             </div>
             
             {showNote ? (
