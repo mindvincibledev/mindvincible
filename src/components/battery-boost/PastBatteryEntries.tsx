@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,9 +72,15 @@ const PastBatteryEntries: React.FC<PastBatteryEntriesProps> = ({
       
       if (error) throw error;
       
+      // Fix: Cast the returned data to ensure it matches the BatteryPost type
+      const typedData: BatteryPost[] = data?.map(item => ({
+        ...item,
+        post_type: item.post_type as 'charging' | 'draining'
+      })) || [];
+
       setEntriesWithPosts(prev => ({
         ...prev,
-        [entryId]: data
+        [entryId]: typedData
       }));
     } catch (error) {
       console.error('Error fetching posts:', error);
