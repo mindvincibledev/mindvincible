@@ -15,7 +15,7 @@ import EmotionalHacking from './pages/EmotionalHacking';
 import PowerOfHiActivity from './pages/PowerOfHiActivity';
 import MirrorMirrorActivity from './pages/MirrorMirrorActivity';
 import ForkInTheRoadActivity from './pages/ForkInTheRoadActivity';
-import DigitalDetox from './components/emotional-hacking/DigitalDetox';
+import DigitalDetox from './pages/DigitalDetox';
 import FlipTheScriptActivity from './pages/self-confidence/FlipTheScriptActivity';
 import ConfidenceTreeActivity from './pages/self-confidence/ConfidenceTreeActivity';
 import BatteryBoostActivity from './pages/self-confidence/BatteryBoostActivity';
