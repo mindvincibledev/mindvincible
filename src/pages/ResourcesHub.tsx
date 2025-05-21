@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +17,7 @@ import ActivityStatsChart from '@/components/charts/ActivityStatsChart';
 const ResourcesHub = () => {
   const { user } = useAuth();
   const [weeklyCompletions, setWeeklyCompletions] = useState<any[]>([]);
-  const [weeklyStats, setWeeklyStats<{id: string, title: string, count: number, color: string}[]>([]);
+  const [weeklyStats, setWeeklyStats] = useState<{id: string, title: string, count: number, color: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalProgress, setTotalProgress] = useState(0);
   const [weekStartDate, setWeekStartDate] = useState<Date>(new Date());
