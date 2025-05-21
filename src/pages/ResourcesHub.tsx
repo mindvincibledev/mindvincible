@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,10 +16,9 @@ import ActivityStatsChart from '@/components/charts/ActivityStatsChart';
 const ResourcesHub = () => {
   const { user } = useAuth();
   const [weeklyCompletions, setWeeklyCompletions] = useState<any[]>([]);
-  const [weeklyStats, setWeeklyStats] = useState<{id: string, title: string, count: number, color: string}[]>([]);
+  const [weeklyStats, setWeeklyStats<{id: string, title: string, count: number, color: string}[]>([]);
   const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
-  const [selfConfidenceProgress, setSelfConfidenceProgress] = useState(0);
+  const [totalProgress, setTotalProgress] = useState(0);
   const [weekStartDate, setWeekStartDate] = useState<Date>(new Date());
   const [weekEndDate, setWeekEndDate] = useState<Date>(new Date());
 
@@ -122,6 +120,9 @@ const ResourcesHub = () => {
     },
   ];
 
+  // All activities combined for tracking
+  const allActivities = [...selfAwarenessActivities, ...selfConfidenceActivities];
+
   const isActivityCompleted = (activityId: string): boolean => {
     if (!weeklyCompletions || weeklyCompletions.length === 0) return false;
     
@@ -174,12 +175,21 @@ const ResourcesHub = () => {
       console.log("Weekly completions:", completions);
 
       // Process data for stats chart (all activities and sub-activities still go to chart)
-      const stats = [...selfAwarenessActivities.map(activity => ({
-        id: activity.id,
-        title: activity.title,
-        count: (completions || []).filter(c => c.activity_id === activity.id).length,
-        color: activity.chartColor
-      }))];
+      const stats = [
+        ...selfAwarenessActivities.map(activity => ({
+          id: activity.id,
+          title: activity.title,
+          count: (completions || []).filter(c => c.activity_id === activity.id).length,
+          color: activity.chartColor
+        })),
+        ...selfConfidenceActivities.map(activity => ({
+          id: activity.id,
+          title: activity.title,
+          count: (completions || []).filter(c => c.activity_id === activity.id).length,
+          color: activity.chartColor
+        }))
+      ];
+      
       stats.push(
         {
           id: 'grounding-technique',
@@ -196,16 +206,14 @@ const ResourcesHub = () => {
       );
       setWeeklyStats(stats);
 
-      // Calculate completed activities count
-      let completedCount = 0;
-      selfAwarenessActivities.forEach((activity) => {
-        const completed = isActivityCompleted(activity.id);
-        if (completed) completedCount++;
-      });
+      // Calculate total completed activities count across all sections
+      const totalCompletedCount = allActivities.reduce((count, activity) => {
+        return isActivityCompleted(activity.id) ? count + 1 : count;
+      }, 0);
       
-      // Update progress percentage
-      const progressPercentage = (completedCount / selfAwarenessActivities.length) * 100;
-      setProgress(progressPercentage);
+      // Update total progress percentage
+      const progressPercentage = (totalCompletedCount / allActivities.length) * 100;
+      setTotalProgress(progressPercentage);
       
     } catch (error: any) {
       console.error('Error fetching completions:', error);
@@ -220,31 +228,20 @@ const ResourcesHub = () => {
   // Toggle self confidence module open/close
   const [selfConfidenceOpen, setSelfConfidenceOpen] = useState(true);
 
-  // for 6/6 complete UI state
-  const completedMainCount = selfAwarenessActivities.reduce((count, activity) => {
-    return isActivityCompleted(activity.id) ? count + 1 : count;
-  }, 0);
-  
-  // for self confidence activities completion count
-  const completedConfidenceCount = selfConfidenceActivities.reduce((count, activity) => {
+  // Count completed activities for display
+  const completedCount = allActivities.reduce((count, activity) => {
     return isActivityCompleted(activity.id) ? count + 1 : count;
   }, 0);
 
   // Add useEffect to ensure the progress is recomputed when weeklyCompletions changes
   useEffect(() => {
     if (weeklyCompletions.length > 0) {
-      const completedCount = selfAwarenessActivities.reduce((count, activity) => {
+      const totalCompletedCount = allActivities.reduce((count, activity) => {
         return isActivityCompleted(activity.id) ? count + 1 : count;
       }, 0);
-      const progressPercentage = (completedCount / selfAwarenessActivities.length) * 100;
-      setProgress(progressPercentage);
       
-      // Calculate progress for self confidence activities
-      const completedConfidenceCount = selfConfidenceActivities.reduce((count, activity) => {
-        return isActivityCompleted(activity.id) ? count + 1 : count;
-      }, 0);
-      const confidenceProgressPercentage = (completedConfidenceCount / selfConfidenceActivities.length) * 100;
-      setSelfConfidenceProgress(confidenceProgressPercentage);
+      const progressPercentage = (totalCompletedCount / allActivities.length) * 100;
+      setTotalProgress(progressPercentage);
     }
   }, [weeklyCompletions]);
 
@@ -278,7 +275,7 @@ const ResourcesHub = () => {
               <div className="flex flex-col md:flex-row items-center justify-between mb-4">
                 <div className="flex items-center mb-4 md:mb-0">
                   <User className="h-6 w-6 text-[#FC68B3] mr-2" />
-                  <h2 className="text-xl font-semibold text-gray-800">Self Awareness Progress</h2>
+                  <h2 className="text-xl font-semibold text-gray-800">M(in)dvincible Progress</h2>
                 </div>
                 <Sheet>
                   <SheetTrigger asChild>
@@ -308,14 +305,14 @@ const ResourcesHub = () => {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>
-                    <b className="font-bold">{completedMainCount}/{selfAwarenessActivities.length}</b> Complete
+                    <b className="font-bold">{completedCount}/{allActivities.length}</b> Complete
                   </span>
                 </div>
                 
-                <Progress value={progress} className="h-3 bg-gray-200" />
+                <Progress value={totalProgress} className="h-3 bg-gray-200" />
                 
                 <p className="mt-2 text-sm text-gray-600">
-                  {progress < 100 ? 
+                  {totalProgress < 100 ? 
                     `Try to complete all activities this week (${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()})` : 
                     'Great job! You\'ve completed all activities this week!'
                   }
@@ -423,17 +420,6 @@ const ResourcesHub = () => {
                   </Button>
                 </div>
               </CardHeader>
-              
-              {user && (
-                <div className="px-6 pb-2">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>
-                      <b className="font-bold">{completedConfidenceCount}/{selfConfidenceActivities.length}</b> Complete
-                    </span>
-                  </div>
-                  <Progress value={selfConfidenceProgress} className="h-3 bg-gray-200" />
-                </div>
-              )}
               
               <AnimatePresence>
                 {selfConfidenceOpen && (
