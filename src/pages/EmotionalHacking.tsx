@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Eye, Wind, ArrowLeft } from 'lucide-react';
+import { Eye, Wind, ArrowLeft, Moon } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +30,17 @@ const activities = [
     bgColor: "bg-[#E5FFF2]",
     chartColor: "#3DFDFF",
     shortName: "Breathe"
+  },
+  {
+    id: "digital-detox",
+    title: "Digital Detox",
+    description: "Reconnect with yourself by disconnecting from your devices.",
+    icon: <Moon className="h-8 w-8 text-[#2AC20E]" />,
+    link: "/emotional-hacking/digital-detox",
+    color: "from-[#3DFDFF] to-[#2AC20E]",
+    bgColor: "bg-[#E5FFF2]",
+    chartColor: "#2AC20E",
+    shortName: "Detox"
   }
 ];
 
@@ -61,7 +72,7 @@ const EmotionalHacking = () => {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto"
           >
             {activities.map((activity, index) => (
               <motion.div

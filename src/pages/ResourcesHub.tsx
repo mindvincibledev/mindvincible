@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, ChevronDown, ChevronUp, Layers, Award, BookOpen, Star } from 'lucide-react';
+import { User, ChevronDown, ChevronUp, Layers, Award, BookOpen, Star, Video } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +25,7 @@ const ResourcesHub = () => {
 
   // All the activities go inside Self Awareness now
   const selfAwarenessActivities = [
-        {
+    {
       id: "emotional-airbnb",
       title: "Emotional Airbnb",
       description: "Because understanding yourself is the ultimate glow-up ✨🧠",
@@ -35,7 +35,7 @@ const ResourcesHub = () => {
       bgColor: "bg-[#FFF5F8]",
       chartColor: "#FC68B3",
     },
-        {
+    {
       id: "emotional-hacking",
       title: "Emotional Hacking",
       description: "Learn tricks to stay chill when emotions get extra.",
@@ -45,7 +45,7 @@ const ResourcesHub = () => {
       bgColor: "bg-[#F0FFFE]",
       chartColor: "#3DFDFF",
     },
-        {
+    {
       id: "power-of-hi",
       title: "Power of Hi",
       description: "Small moments. Big confidence.",
@@ -55,7 +55,7 @@ const ResourcesHub = () => {
       bgColor: "bg-[#E5FFF2]",
       chartColor: "#2AC20E",
     },
-        {
+    {
       id: "mirror-mirror",
       title: "Mirror Mirror",
       description: "Because how you speak to yourself matters.",
@@ -65,7 +65,7 @@ const ResourcesHub = () => {
       bgColor: "bg-[#E5DEFF]",
       chartColor: "#9b87f5",
     },
-        {
+    {
       id: "fork-in-the-road",
       title: "Fork in Road",
       description: "Explore your options. Choose with clarity.",
@@ -84,6 +84,16 @@ const ResourcesHub = () => {
       color: "from-[#FC68B3] to-[#FF8A48]",
       bgColor: "bg-[#FFF5F8]",
       chartColor: "#FF8A48",
+    },
+    {
+      id: "self-awareness-videos",
+      title: "Self Awareness Videos",
+      description: "Learn through watching videos about self awareness and emotional growth.",
+      icon: <Video className="h-8 w-8 text-[#F5DF4D]" />,
+      link: "/self-awareness-videos",
+      color: "from-[#F5DF4D] to-[#FF8A48]",
+      bgColor: "bg-[#FFFAE5]",
+      chartColor: "#F5DF4D",
     }
   ];
 
