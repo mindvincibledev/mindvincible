@@ -146,6 +146,7 @@ const DigitalDetox = () => {
       }
       
       toast.success('Activity completion recorded!');
+      navigate('/resources');
     } catch (err) {
       console.error('Error:', err);
     }
@@ -598,13 +599,6 @@ const DigitalDetox = () => {
                   </p>
                 </div>
                 
-                <div className="mb-6">
-                  <img 
-                    src="/lovable-uploads/2d3c8c79-869a-4a45-93df-090b11ed3962.png" 
-                    alt="Digital Detox" 
-                    className="mx-auto max-w-full h-auto rounded-lg"
-                  />
-                </div>
                 
                 {isDetoxActive ? (
                   <div className="flex flex-col items-center mt-10 mb-8">
