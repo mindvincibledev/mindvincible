@@ -36,7 +36,7 @@ const activities = [
     title: "Digital Detox",
     description: "Reconnect with yourself by disconnecting from your devices.",
     icon: <Moon className="h-8 w-8 text-[#2AC20E]" />,
-    link: "/digital-detox", // Updated link to the guided activity
+    link: "/emotional-hacking/digital-detox",
     color: "from-[#3DFDFF] to-[#2AC20E]",
     bgColor: "bg-[#E5FFF2]",
     chartColor: "#2AC20E",
