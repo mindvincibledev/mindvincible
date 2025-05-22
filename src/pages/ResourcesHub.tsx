@@ -29,61 +29,67 @@ const ResourcesHub = () => {
       id: "emotional-airbnb",
       title: "Emotional Airbnb",
       description: "Because understanding yourself is the ultimate glow-up ✨🧠",
-      icon: <Layers className="h-8 w-8 text-[#FF8A48]" />, // Changed Layer to Layers
+      icon: <Layers className="h-8 w-8 text-[#FF8A48]" />,
       link: "/emotional-airbnb",
       color: "from-[#FF8A48] to-[#FC68B3]",
       bgColor: "bg-[#FFF5F8]",
       chartColor: "#FC68B3",
+      countForProgress: true, // This activity counts for progress
     },
     {
       id: "emotional-hacking",
       title: "Emotional Hacking",
       description: "Learn tricks to stay chill when emotions get extra.",
-      icon: <Layers className="h-8 w-8 text-[#3DFDFF]" />, // Changed Layer to Layers
+      icon: <Layers className="h-8 w-8 text-[#3DFDFF]" />,
       link: "/emotional-hacking",
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#F0FFFE]",
       chartColor: "#3DFDFF",
+      countForProgress: true, // This activity counts for progress
     },
     {
       id: "power-of-hi",
       title: "Power of Hi",
       description: "Small moments. Big confidence.",
-      icon: <Layers className="h-8 w-8 text-[#2AC20E]" />, // Changed Layer to Layers
+      icon: <Layers className="h-8 w-8 text-[#2AC20E]" />,
       link: "/emotional-hacking/power-of-hi",
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#E5FFF2]",
       chartColor: "#2AC20E",
+      countForProgress: true, // This activity counts for progress
     },
     {
       id: "mirror-mirror",
       title: "Mirror Mirror",
       description: "Because how you speak to yourself matters.",
-      icon: <Layers className="h-8 w-8 text-[#FC68B3]" />, // Changed Layer to Layers
+      icon: <Layers className="h-8 w-8 text-[#FC68B3]" />,
       link: "/emotional-hacking/mirror-mirror",
       color: "from-[#FC68B3] to-[#9b87f5]",
       bgColor: "bg-[#E5DEFF]",
       chartColor: "#9b87f5",
+      countForProgress: true, // This activity counts for progress
     },
     {
       id: "fork-in-the-road",
       title: "Fork in Road",
       description: "Explore your options. Choose with clarity.",
-      icon: <Layers className="h-8 w-8 text-[#3DFDFF]" />, // Changed Layer to Layers
+      icon: <Layers className="h-8 w-8 text-[#3DFDFF]" />,
       link: "/emotional-hacking/fork-in-the-road",
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#E5FFF2]",
       chartColor: "#3DFDFF",
+      countForProgress: true, // This activity counts for progress
     },
     {
       id: "digital-detox",
       title: "Digital Detox",
       description: "Give yourself a mental break by unplugging from electronic devices.",
-      icon: <Layers className="h-8 w-8 text-[#FF8A48]" />, // Changed Layer to Layers
+      icon: <Layers className="h-8 w-8 text-[#FF8A48]" />,
       link: "/emotional-hacking/digital-detox",
       color: "from-[#FC68B3] to-[#FF8A48]",
       bgColor: "bg-[#FFF5F8]",
       chartColor: "#FF8A48",
+      countForProgress: true, // This activity counts for progress
     },
     {
       id: "self-awareness-videos",
@@ -94,6 +100,7 @@ const ResourcesHub = () => {
       color: "from-[#F5DF4D] to-[#FF8A48]",
       bgColor: "bg-[#FFFAE5]",
       chartColor: "#F5DF4D",
+      countForProgress: false, // This activity doesn't count for progress
     }
   ];
 
@@ -108,6 +115,7 @@ const ResourcesHub = () => {
       color: "from-[#FC68B3] to-[#D5D5F1]",
       bgColor: "bg-[#FFF5F8]",
       chartColor: "#FC68B3",
+      countForProgress: true, // This activity counts for progress
     },
     {
       id: "confidence-tree",
@@ -118,6 +126,7 @@ const ResourcesHub = () => {
       color: "from-[#F5DF4D] to-[#3DFDFF]",
       bgColor: "bg-[#FEF7CD]",
       chartColor: "#F5DF4D",
+      countForProgress: true, // This activity counts for progress
     },
     {
       id: "battery-boost",
@@ -128,11 +137,15 @@ const ResourcesHub = () => {
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#F0FFFE]",
       chartColor: "#3DFDFF",
+      countForProgress: true, // This activity counts for progress
     },
   ];
 
   // All activities combined for tracking
   const allActivities = [...selfAwarenessActivities, ...selfConfidenceActivities];
+  
+  // Filter activities that count for progress calculation - excluding self-awareness videos
+  const progressActivities = allActivities.filter(activity => activity.countForProgress);
 
   const isActivityCompleted = (activityId: string): boolean => {
     if (!weeklyCompletions || weeklyCompletions.length === 0) return false;
@@ -217,13 +230,13 @@ const ResourcesHub = () => {
       );
       setWeeklyStats(stats);
 
-      // Calculate total completed activities count across all sections
-      const totalCompletedCount = allActivities.reduce((count, activity) => {
+      // Calculate total completed activities count for only the activities that count for progress
+      const totalCompletedCount = progressActivities.reduce((count, activity) => {
         return isActivityCompleted(activity.id) ? count + 1 : count;
       }, 0);
       
-      // Update total progress percentage
-      const progressPercentage = (totalCompletedCount / allActivities.length) * 100;
+      // Update total progress percentage based only on activities that count for progress
+      const progressPercentage = (totalCompletedCount / progressActivities.length) * 100;
       setTotalProgress(progressPercentage);
       
     } catch (error: any) {
@@ -239,19 +252,19 @@ const ResourcesHub = () => {
   // Toggle self confidence module open/close
   const [selfConfidenceOpen, setSelfConfidenceOpen] = useState(true);
 
-  // Count completed activities for display
-  const completedCount = allActivities.reduce((count, activity) => {
+  // Count completed activities for display - only include activities that count for progress
+  const completedCount = progressActivities.reduce((count, activity) => {
     return isActivityCompleted(activity.id) ? count + 1 : count;
   }, 0);
 
-  // Add useEffect to ensure the progress is recomputed when weeklyCompletions changes
+  // Recalculate progress whenever weekly completions change
   useEffect(() => {
     if (weeklyCompletions.length > 0) {
-      const totalCompletedCount = allActivities.reduce((count, activity) => {
+      const totalCompletedCount = progressActivities.reduce((count, activity) => {
         return isActivityCompleted(activity.id) ? count + 1 : count;
       }, 0);
       
-      const progressPercentage = (totalCompletedCount / allActivities.length) * 100;
+      const progressPercentage = (totalCompletedCount / progressActivities.length) * 100;
       setTotalProgress(progressPercentage);
     }
   }, [weeklyCompletions]);
@@ -316,7 +329,7 @@ const ResourcesHub = () => {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>
-                    <b className="font-bold">{completedCount}/{allActivities.length}</b> Complete
+                    <b className="font-bold">{completedCount}/{progressActivities.length}</b> Complete
                   </span>
                 </div>
                 
