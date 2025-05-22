@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,6 +33,7 @@ import MirrorMirrorActivity from "./pages/MirrorMirrorActivity";
 import ForkInTheRoadActivity from "./pages/ForkInTheRoadActivity";
 import ResourcesHub from "./pages/ResourcesHub";
 import SelfAwarenessVideos from "./pages/SelfAwarenessVideos";
+import DigitalDetox from "./pages/DigitalDetox"; // Added import for DigitalDetox page
 
 
 // Import self-confidence activities (these will be created later)
@@ -125,8 +127,9 @@ const AppRoutes = () => {
     initSupabase();
   }, []);
 
-
- <>
+  // Fixed the return statement - it was missing before
+  return (
+    <>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={
@@ -243,7 +246,15 @@ const AppRoutes = () => {
             <ForkInTheRoadActivity />
           </ProtectedRoute>
         } />
-         <Route path="/self-awareness-videos" element={
+        
+        {/* Add Digital Detox route */}
+        <Route path="/emotional-hacking/digital-detox" element={
+          <ProtectedRoute>
+            <DigitalDetox />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/self-awareness-videos" element={
           <ProtectedRoute>
             <SelfAwarenessVideos />
           </ProtectedRoute>
