@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,7 +32,6 @@ import PowerOfHiActivity from "./pages/PowerOfHiActivity";
 import MirrorMirrorActivity from "./pages/MirrorMirrorActivity";
 import ForkInTheRoadActivity from "./pages/ForkInTheRoadActivity";
 import ResourcesHub from "./pages/ResourcesHub";
-import SelfAwarenessVideos from "./pages/SelfAwarenessVideos";
 
 // Import self-confidence activities (these will be created later)
 import FlipTheScriptActivity from "./pages/self-confidence/FlipTheScriptActivity";
@@ -124,8 +124,8 @@ const AppRoutes = () => {
     initSupabase();
   }, []);
 
-
- <>
+  return (
+    <>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={
@@ -217,11 +217,6 @@ const AppRoutes = () => {
             <GroundingTechniqueActivity />
           </ProtectedRoute>
         } />
-        <Route path="/self-awareness-videos" element={
-          <ProtectedRoute>
-            <SelfAwarenessVideos />
-          </ProtectedRoute>
-        } />
         {/* Add Mirror Mirror activity route */}
         <Route path="/emotional-hacking/mirror-mirror" element={
           <ProtectedRoute>
@@ -302,4 +297,5 @@ const App = () => (
     </AuthProvider>
   </QueryClientProvider>
 );
+
 export default App;
