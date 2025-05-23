@@ -171,7 +171,6 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
-          is_visible_to_clinicians: boolean
           prompt: string
           reflection_text: string
           tree_id: string
@@ -180,7 +179,6 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
-          is_visible_to_clinicians?: boolean
           prompt: string
           reflection_text: string
           tree_id: string
@@ -189,7 +187,6 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
-          is_visible_to_clinicians?: boolean
           prompt?: string
           reflection_text?: string
           tree_id?: string
