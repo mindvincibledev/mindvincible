@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, ChevronDown, ChevronUp, Layers, Award, BookOpen, Star, Video } from 'lucide-react';
+import { User, ChevronDown, ChevronUp, Layers, Award, BookOpen, Star, Video, Battery, TreePine } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BackgroundWithEmojis from '@/components/BackgroundWithEmojis';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,7 +33,7 @@ const ResourcesHub = () => {
       color: "from-[#FF8A48] to-[#FC68B3]",
       bgColor: "bg-[#FFF5F8]",
       chartColor: "#FC68B3",
-      countForProgress: true, // This activity counts for progress
+      countForProgress: true,
     },
     {
       id: "emotional-hacking",
@@ -45,7 +44,7 @@ const ResourcesHub = () => {
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#F0FFFE]",
       chartColor: "#3DFDFF",
-      countForProgress: true, // This activity counts for progress
+      countForProgress: true,
     },
     {
       id: "power-of-hi",
@@ -56,7 +55,7 @@ const ResourcesHub = () => {
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#E5FFF2]",
       chartColor: "#2AC20E",
-      countForProgress: true, // This activity counts for progress
+      countForProgress: true,
     },
     {
       id: "mirror-mirror",
@@ -67,7 +66,7 @@ const ResourcesHub = () => {
       color: "from-[#FC68B3] to-[#9b87f5]",
       bgColor: "bg-[#E5DEFF]",
       chartColor: "#9b87f5",
-      countForProgress: true, // This activity counts for progress
+      countForProgress: true,
     },
     {
       id: "fork-in-the-road",
@@ -78,7 +77,7 @@ const ResourcesHub = () => {
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#E5FFF2]",
       chartColor: "#3DFDFF",
-      countForProgress: true, // This activity counts for progress
+      countForProgress: true,
     },
     {
       id: "digital-detox",
@@ -89,7 +88,7 @@ const ResourcesHub = () => {
       color: "from-[#FC68B3] to-[#FF8A48]",
       bgColor: "bg-[#FFF5F8]",
       chartColor: "#FF8A48",
-      countForProgress: true, // This activity counts for progress
+      countForProgress: true,
     },
     {
       id: "self-awareness-videos",
@@ -100,7 +99,7 @@ const ResourcesHub = () => {
       color: "from-[#F5DF4D] to-[#FF8A48]",
       bgColor: "bg-[#FFFAE5]",
       chartColor: "#F5DF4D",
-      countForProgress: false, // This activity doesn't count for progress
+      countForProgress: false,
     }
   ];
 
@@ -115,29 +114,29 @@ const ResourcesHub = () => {
       color: "from-[#FC68B3] to-[#D5D5F1]",
       bgColor: "bg-[#FFF5F8]",
       chartColor: "#FC68B3",
-      countForProgress: true, // This activity counts for progress
+      countForProgress: true,
     },
     {
       id: "confidence-tree",
       title: "Confidence Tree",
       description: "See how your confidence has grown — and where you want it to bloom next.",
-      icon: <Star className="h-8 w-8 text-[#F5DF4D]" />,
+      icon: <TreePine className="h-8 w-8 text-[#F5DF4D]" />,
       link: "/self-confidence/confidence-tree",
       color: "from-[#F5DF4D] to-[#3DFDFF]",
       bgColor: "bg-[#FEF7CD]",
       chartColor: "#F5DF4D",
-      countForProgress: true, // This activity counts for progress
+      countForProgress: true,
     },
     {
       id: "battery-boost",
       title: "Battery Boost",
       description: "Can your scroll charge you up or leave you drained? Let's find out.",
-      icon: <Award className="h-8 w-8 text-[#3DFDFF]" />,
+      icon: <Battery className="h-8 w-8 text-[#3DFDFF]" />,
       link: "/self-confidence/battery-boost",
       color: "from-[#3DFDFF] to-[#2AC20E]",
       bgColor: "bg-[#F0FFFE]",
       chartColor: "#3DFDFF",
-      countForProgress: true, // This activity counts for progress
+      countForProgress: true,
     },
   ];
 

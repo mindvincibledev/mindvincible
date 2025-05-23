@@ -15,7 +15,9 @@ const ActivityDropdown: React.FC<ActivityDropdownProps> = ({ completedActivities
     'Fork in Road',
     'Emotional Airbnb',
     'Box Breathing',
-    '5-4-3-2-1: The Grounding Quest'
+    '5-4-3-2-1: The Grounding Quest',
+    'Battery Boost',
+    'Confidence Tree'
   ];
 
   const completedCount = completedActivities.length;

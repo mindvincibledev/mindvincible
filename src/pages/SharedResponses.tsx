@@ -18,6 +18,8 @@ interface StudentData {
     forkInRoadDecisions: number;
     groundingResponses: number;
     simpleHiChallenges: number;
+    batteryBoostEntries: number;
+    confidenceTreeReflections: number;
   };
 }
 
@@ -126,6 +128,24 @@ const SharedResponses = () => {
           
           if (hiError) console.error("Error fetching hi challenges count:", hiError);
 
+          // Count battery boost entries
+          const { count: batteryCount, error: batteryError } = await supabase
+            .from('battery_boost_entries')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', student.id)
+            .eq('visible_to_clinicians', true);
+          
+          if (batteryError) console.error("Error fetching battery boost count:", batteryError);
+
+          // Count confidence tree reflections
+          const { count: confidenceCount, error: confidenceError } = await supabase
+            .from('confidence_tree_reflections')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', student.id)
+            .eq('is_visible_to_clinicians', true);
+          
+          if (confidenceError) console.error("Error fetching confidence tree count:", confidenceError);
+
           return {
             id: student.id,
             name: student.name,
@@ -133,7 +153,9 @@ const SharedResponses = () => {
               emotionalAirbnb: airbnbCount || 0,
               forkInRoadDecisions: decisionCount || 0,
               groundingResponses: groundingCount || 0,
-              simpleHiChallenges: hiCount || 0
+              simpleHiChallenges: hiCount || 0,
+              batteryBoostEntries: batteryCount || 0,
+              confidenceTreeReflections: confidenceCount || 0
             }
           };
         })
@@ -154,8 +176,15 @@ const SharedResponses = () => {
 
   // Calculate total number of shared responses for a student
   const getTotalResponses = (student: StudentData) => {
-    const { emotionalAirbnb, forkInRoadDecisions, groundingResponses, simpleHiChallenges } = student.activityCounts;
-    return emotionalAirbnb + forkInRoadDecisions + groundingResponses + simpleHiChallenges;
+    const { 
+      emotionalAirbnb, 
+      forkInRoadDecisions, 
+      groundingResponses, 
+      simpleHiChallenges, 
+      batteryBoostEntries, 
+      confidenceTreeReflections 
+    } = student.activityCounts;
+    return emotionalAirbnb + forkInRoadDecisions + groundingResponses + simpleHiChallenges + batteryBoostEntries + confidenceTreeReflections;
   };
 
   return (
@@ -211,6 +240,14 @@ const SharedResponses = () => {
                         <div className="flex justify-between">
                           <span>Power of Hi</span>
                           <span className="font-semibold">{student.activityCounts.simpleHiChallenges} entries</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Battery Boost</span>
+                          <span className="font-semibold">{student.activityCounts.batteryBoostEntries} entries</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Confidence Tree</span>
+                          <span className="font-semibold">{student.activityCounts.confidenceTreeReflections} entries</span>
                         </div>
                         
                         <div className="pt-3 border-t border-gray-200 mt-3">
