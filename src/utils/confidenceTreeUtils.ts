@@ -3,7 +3,7 @@
  * Utility functions for the Confidence Tree activity
  */
 
-import { Branch, Leaf, TreeData } from '@/types/confidenceTree';
+import { Branch, Leaf, TreeData, TreeStats } from '@/types/confidenceTree';
 
 // Generate a unique ID for branches and leaves
 export const generateId = (prefix: string): string => {
@@ -11,7 +11,7 @@ export const generateId = (prefix: string): string => {
 };
 
 // Calculate statistics for a tree
-export const calculateTreeStats = (tree: TreeData) => {
+export const calculateTreeStats = (tree: TreeData): TreeStats => {
   if (!tree || !tree.branches) {
     return {
       totalBranches: 0,
@@ -106,6 +106,18 @@ export const getReflectionSuggestions = (tree: TreeData) => {
     suggestions.push("Consider starring leaves that represent areas you want to grow.");
   }
   
+  // Add branch-specific suggestions if we have enough branches
+  if (tree.branches.length >= 3) {
+    suggestions.push("Look at your different branches. Which area provides you with the most confidence?");
+    suggestions.push("Which branch would you like to add more positive leaves to in the future?");
+  }
+  
+  // Limit to 3 random suggestions
+  if (suggestions.length > 3) {
+    const shuffled = [...suggestions].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 3);
+  }
+  
   return suggestions;
 };
 
@@ -128,4 +140,9 @@ export const exportTreeAsText = (tree: TreeData): string => {
   });
   
   return output;
+};
+
+// Check if a branch has reached the maximum number of leaves
+export const hasReachedMaxLeaves = (branch: Branch, maxLeaves: number = 15): boolean => {
+  return branch.leaves.length >= maxLeaves;
 };

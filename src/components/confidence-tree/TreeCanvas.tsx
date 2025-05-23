@@ -259,7 +259,7 @@ const TreeCanvas = ({
       // Calculate branch distribution
       const totalAngleSpan = Math.min(150, 30 * branchCount); // Max 150 degrees
       const startAngle = (270 - totalAngleSpan / 2) * (Math.PI / 180);
-      const angleStep = totalAngleSpan / (branchCount - 1) * (Math.PI / 180);
+      const angleStep = branchCount > 1 ? (totalAngleSpan / (branchCount - 1)) * (Math.PI / 180) : 0;
       
       treeData.branches.forEach((branch, index) => {
         let angle;
@@ -312,7 +312,18 @@ const TreeCanvas = ({
         
         // Draw leaves for this branch
         if (branch.leaves.length > 0) {
-          drawLeaves(ctx, branch, endX, endY, angle, simplified, newLeafPositions);
+          drawLeaves(
+            ctx, 
+            branch, 
+            trunkX, 
+            trunkY - trunkHeight, 
+            endX, 
+            endY, 
+            angle, 
+            branchLength, 
+            simplified, 
+            newLeafPositions
+          );
         }
       });
     }
@@ -324,28 +335,43 @@ const TreeCanvas = ({
   
   // Draw leaves on a branch
   const drawLeaves = (
-    ctx: CanvasRenderingContext2D, 
+    ctx: CanvasRenderingContext2D,
     branch: Branch,
-    branchEndX: number,
-    branchEndY: number,
+    startX: number,
+    startY: number, 
+    endX: number,
+    endY: number,
     branchAngle: number,
+    branchLength: number,
     simplified: boolean,
     leafPositions: Map<string, { x: number, y: number, radius: number, branchId: string }>
   ) => {
     const leafCount = branch.leaves.length;
-    const leafBaseSize = simplified ? 6 : 10;
+    const maxLeaves = 15;  // Maximum number of leaves per branch
+    const actualLeafCount = Math.min(leafCount, maxLeaves);
     
-    // Calculate leaf distribution around branch end
-    const spreadAngle = Math.PI / 3; // 60 degrees spread
-    const startAngle = branchAngle - spreadAngle / 2;
-    const angleStep = spreadAngle / (leafCount + 1);
+    // Leaf size
+    const leafBaseSize = simplified ? 5 : 8;
     
-    branch.leaves.forEach((leaf, index) => {
-      const angle = startAngle + (index + 1) * angleStep;
-      const distance = simplified ? 15 + (index * 3) : 25 + (index * 6);
+    // Distribute leaves along the branch
+    for (let i = 0; i < actualLeafCount; i++) {
+      const leaf = branch.leaves[i];
       
-      const leafX = branchEndX + Math.cos(angle) * distance;
-      const leafY = branchEndY + Math.sin(angle) * distance;
+      // Calculate position along the branch
+      // Start from 20% of the branch length to avoid crowding at the trunk
+      // and go up to 90% to leave space for the branch label
+      const leafPosition = 0.2 + (i / maxLeaves) * 0.7;
+      
+      // Calculate leaf position on the branch
+      const leafX = startX + Math.cos(branchAngle) * (branchLength * leafPosition);
+      const leafY = startY + Math.sin(branchAngle) * (branchLength * leafPosition);
+      
+      // Alternate leaves on either side of the branch
+      const sideAngle = branchAngle + (i % 2 === 0 ? Math.PI/2 : -Math.PI/2);
+      const sideDistance = simplified ? 4 + (i % 3) : 8 + (i % 4);
+      
+      const finalLeafX = leafX + Math.cos(sideAngle) * sideDistance;
+      const finalLeafY = leafY + Math.sin(sideAngle) * sideDistance;
       
       // Vary leaf size slightly
       const sizeVariation = 0.8 + Math.random() * 0.4;
@@ -363,8 +389,8 @@ const TreeCanvas = ({
         case 'mixed':
           // Create a radial gradient for mixed leaves
           const gradient = ctx.createRadialGradient(
-            leafX, leafY, 0,
-            leafX, leafY, leafSize
+            finalLeafX, finalLeafY, 0,
+            finalLeafX, finalLeafY, leafSize
           );
           gradient.addColorStop(0, '#2AC20E');
           gradient.addColorStop(1, '#8B4513');
@@ -372,26 +398,43 @@ const TreeCanvas = ({
           break;
       }
       
+      // Draw leaf stem
+      ctx.strokeStyle = '#6B3F10';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(leafX, leafY);
+      ctx.lineTo(finalLeafX, finalLeafY);
+      ctx.stroke();
+      
       // Draw leaf
       ctx.fillStyle = leafColor;
+      // Draw leaf as an oval shape
       ctx.beginPath();
-      ctx.arc(leafX, leafY, leafSize, 0, 2 * Math.PI);
+      ctx.ellipse(
+        finalLeafX, 
+        finalLeafY, 
+        leafSize * 1.2, // Width of the oval
+        leafSize * 0.8, // Height of the oval
+        sideAngle, // Rotation to align with stem
+        0, 
+        2 * Math.PI
+      );
       ctx.fill();
       
       // Add star to starred leaves
       if (leaf.starred && !simplified) {
         ctx.fillStyle = '#FFF';
-        drawStar(ctx, leafX, leafY, 5, leafSize / 2, leafSize / 4);
+        drawStar(ctx, finalLeafX, finalLeafY, 5, leafSize / 2, leafSize / 4);
       }
       
       // Store leaf position
       leafPositions.set(leaf.id, {
-        x: leafX,
-        y: leafY,
+        x: finalLeafX,
+        y: finalLeafY,
         radius: leafSize,
         branchId: branch.id
       });
-    });
+    }
   };
   
   // Helper function to draw a star
