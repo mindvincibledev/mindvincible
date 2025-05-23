@@ -167,6 +167,71 @@ export type Database = {
         }
         Relationships: []
       }
+      confidence_tree_reflections: {
+        Row: {
+          created_at: string | null
+          id: string
+          prompt: string
+          reflection_text: string
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          prompt: string
+          reflection_text: string
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          prompt?: string
+          reflection_text?: string
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "confidence_tree_reflections_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "confidence_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      confidence_trees: {
+        Row: {
+          branches: Json
+          created_at: string | null
+          id: string
+          is_shared: boolean | null
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          branches?: Json
+          created_at?: string | null
+          id?: string
+          is_shared?: boolean | null
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          branches?: Json
+          created_at?: string | null
+          id?: string
+          is_shared?: boolean | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       emotional_airbnb: {
         Row: {
           appearance_description_text: string | null

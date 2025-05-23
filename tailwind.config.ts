@@ -59,6 +59,13 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // App-specific theme colors
+        "app-orange": "#FF8A48",
+        "app-lavender": "#D5D5F1",
+        "app-cyan": "#3DFDFF",
+        "app-yellow": "#F5DF4D",
+        "app-pink": "#FC68B3",
+        "app-green": "#2AC20E",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -78,15 +85,6 @@ const config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-      },
-      // Add app-specific theme colors
-      colors: {
-        "app-orange": "#FF8A48",
-        "app-lavender": "#D5D5F1",
-        "app-cyan": "#3DFDFF",
-        "app-yellow": "#F5DF4D",
-        "app-pink": "#FC68B3",
-        "app-green": "#2AC20E",
       },
     },
   },

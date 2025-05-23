@@ -18,29 +18,8 @@ import TreeCanvas from '@/components/confidence-tree/TreeCanvas';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-// Define types for our component
-interface TreeData {
-  id?: string;
-  user_id?: string;
-  name: string;
-  branches: Branch[];
-  created_at?: string;
-  is_shared?: boolean;
-}
-
-interface Branch {
-  id: string;
-  name: string;
-  leaves: Leaf[];
-}
-
-interface Leaf {
-  id: string;
-  text: string;
-  type: 'positive' | 'negative' | 'mixed';
-  starred?: boolean;
-}
+import { TreeData, Branch, Leaf as LeafType } from '@/types/confidenceTree';
+import { createNewBranch, createNewLeaf } from '@/utils/confidenceTreeUtils';
 
 const ConfidenceTreeActivity = () => {
   const { user } = useAuth();
@@ -64,7 +43,7 @@ const ConfidenceTreeActivity = () => {
   const [showReflectionMode, setShowReflectionMode] = useState(false);
   const [promptIndex, setPromptIndex] = useState(0);
   const [reflectionText, setReflectionText] = useState('');
-  const [selectedLeafToRelease, setSelectedLeafToRelease] = useState<Leaf | null>(null);
+  const [selectedLeafToRelease, setSelectedLeafToRelease] = useState<LeafType | null>(null);
   const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [treeToEdit, setTreeToEdit] = useState<TreeData | null>(null);
@@ -230,11 +209,7 @@ const ConfidenceTreeActivity = () => {
       return;
     }
 
-    const newBranch: Branch = {
-      id: `branch-${Date.now()}`,
-      name: newBranchName,
-      leaves: []
-    };
+    const newBranch = createNewBranch(newBranchName);
 
     setCurrentTree({
       ...currentTree,
@@ -260,11 +235,7 @@ const ConfidenceTreeActivity = () => {
       return;
     }
 
-    const newLeaf: Leaf = {
-      id: `leaf-${Date.now()}`,
-      text: newLeafText,
-      type: newLeafType
-    };
+    const newLeaf = createNewLeaf(newLeafText, newLeafType);
 
     const updatedBranches = currentTree.branches.map(branch => 
       branch.id === selectedBranch.id 
