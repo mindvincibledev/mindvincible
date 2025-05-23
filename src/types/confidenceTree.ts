@@ -1,4 +1,3 @@
-
 /**
  * Types for the Confidence Tree activity
  */
@@ -67,4 +66,33 @@ export const prepareTreeDataForSupabase = (treeData: TreeData): any => {
     ...treeData,
     branches: treeData.branches
   };
+};
+
+// Generate a unique ID for branches and leaves
+export const generateId = (prefix: string): string => {
+  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+};
+
+// Create a new branch
+export const createNewBranch = (name: string): Branch => {
+  return {
+    id: generateId('branch'),
+    name,
+    leaves: []
+  };
+};
+
+// Create a new leaf
+export const createNewLeaf = (text: string, type: 'positive' | 'negative' | 'mixed'): Leaf => {
+  return {
+    id: generateId('leaf'),
+    text,
+    type,
+    starred: false
+  };
+};
+
+// Check if a branch has reached the maximum number of leaves
+export const hasReachedMaxLeaves = (branch: Branch, maxLeaves: number = 15): boolean => {
+  return branch.leaves.length >= maxLeaves;
 };
