@@ -116,7 +116,7 @@ const ConfidenceTreeActivity = () => {
         .insert({
           user_id: user.id,
           activity_id: 'confidence-tree',
-          activity_name: 'Grow Your Confidence Tree',
+          activity_name: 'Confidence Tree',
           feedback: feedbackType
         });
       
@@ -518,7 +518,7 @@ const ConfidenceTreeActivity = () => {
             className="text-center mb-8"
           >
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#F5DF4D] to-[#3DFDFF] bg-clip-text text-transparent mb-4">
-              Grow Your Confidence Tree
+              Confidence Tree
             </h1>
             <p className="text-gray-800 text-lg max-w-2xl mx-auto">
               See how your confidence has grown — and where you want it to bloom next.
