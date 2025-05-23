@@ -20,14 +20,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { TreeData, Branch, Leaf as LeafType, parseTreeDataFromSupabase, prepareTreeDataForSupabase, ConfidenceTreeReflection } from '@/types/confidenceTree';
 import { createNewBranch, createNewLeaf } from '@/utils/confidenceTreeUtils';
 import PastReflections from '@/components/confidence-tree/PastReflections';
-
-
 import { calculateLeafPositions, drawLeafShape, getLeafColor } from '@/utils/confidenceTreeUtils';
 import VisibilityToggle from '@/components/ui/VisibilityToggle';
-import { Home, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-
-
 
 const ConfidenceTreeActivity = () => {
   const { user } = useAuth();
@@ -40,7 +34,6 @@ const ConfidenceTreeActivity = () => {
     branches: []
   });
 
-  
   // Dialog states
   const [showBranchDialog, setShowBranchDialog] = useState(false);
   const [showLeafDialog, setShowLeafDialog] = useState(false);
@@ -58,9 +51,9 @@ const ConfidenceTreeActivity = () => {
   const [treeToEdit, setTreeToEdit] = useState<TreeData | null>(null);
   const [nameDialogOpen, setNameDialogOpen] = useState(false);
   const [showPostSaveReflection, setShowPostSaveReflection] = useState(false);
-      const [isSubmitting, setIsSubmitting] = useState(false);
-      const [showFeedback, setShowFeedback] = useState(false);
-      const [isVisible, setIsVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   // New state for branch selection in reflection
   const [selectedBranchForReflection, setSelectedBranchForReflection] = useState<string>('');
@@ -109,44 +102,40 @@ const ConfidenceTreeActivity = () => {
   };
 
   const handleFeedback = async (feedbackType: string) => {
-        if (!user?.id) {
-          toast.error("You need to be logged in to complete this activity");
-          return;
-        }
-        
-        
-        setIsSubmitting(true);
-        
-        try {
-          // First update the visibility in the battery_boost_entries table
-
-          // Then record activity completion with feedback
-          const { error } = await supabase
-            .from('activity_completions')
-            .insert({
-              user_id: user.id,
-              activity_id: 'confidence-tree',
-              activity_name: 'Grow Your Confidence Tree',
-              feedback: feedbackType
-            });
-          
-          if (error) {
-            console.error("Error completing activity:", error);
-            toast.error("Failed to record activity completion");
-            setIsSubmitting(false);
-            return;
-          }
-          
-          toast.success("Activity completed successfully!");
-          setShowFeedback(false);
-        } catch (error) {
-          console.error("Error completing activity:", error);
-          toast.error("Failed to record activity completion");
-        } finally {
-          setIsSubmitting(false);
-        }
-      };
-
+    if (!user?.id) {
+      toast.error("You need to be logged in to complete this activity");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Record activity completion with feedback
+      const { error } = await supabase
+        .from('activity_completions')
+        .insert({
+          user_id: user.id,
+          activity_id: 'confidence-tree',
+          activity_name: 'Grow Your Confidence Tree',
+          feedback: feedbackType
+        });
+      
+      if (error) {
+        console.error("Error completing activity:", error);
+        toast.error("Failed to record activity completion");
+        setIsSubmitting(false);
+        return;
+      }
+      
+      toast.success("Activity completed successfully!");
+      setShowFeedback(false);
+    } catch (error) {
+      console.error("Error completing activity:", error);
+      toast.error("Failed to record activity completion");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Save tree to database
   const saveTree = async () => {
@@ -182,10 +171,8 @@ const ConfidenceTreeActivity = () => {
         setTreeToEdit(null);
         
       } else {
-        // Creating a new tree
+        // Creating a new tree - show feedback dialog first
         setShowFeedback(true);
-
-            
         
         const { error } = await supabase
           .from('confidence_trees')
@@ -455,7 +442,7 @@ const ConfidenceTreeActivity = () => {
     setNameDialogOpen(true);
   };
 
-  // Handle post-save reflection prompt
+  // Effect to handle post-save reflection prompt
   useEffect(() => {
     if (showPostSaveReflection) {
       const timer = setTimeout(() => {
@@ -671,6 +658,16 @@ const ConfidenceTreeActivity = () => {
                     </div>
                   ) : (
                     <div>
+                      {!editMode && (
+                        <div className="mb-6">
+                          <VisibilityToggle
+                            isVisible={isVisible}
+                            onToggle={setIsVisible}
+                            description="Share this tree with clinicians"
+                          />
+                        </div>
+                      )}
+                      
                       <div className="bg-[#F9F6EB] p-6 rounded-lg mb-8 border border-[#E6DFC6] relative overflow-hidden">
                         <motion.div
                           className="absolute -bottom-3 -right-3 w-20 h-20 opacity-10"
@@ -1161,16 +1158,53 @@ const ConfidenceTreeActivity = () => {
                 <Button variant="outline" onClick={() => setNameDialogOpen(false)}>Cancel</Button>
                 <Button 
                   onClick={() => {
-                    showFeedback(true);
                     setNameDialogOpen(false);
                     saveTree();
-                    
-                    
                   }}
                   disabled={saving}
                   className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
                 >
                   {saving ? 'Saving...' : 'Save Tree'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Feedback Dialog */}
+          <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>How was this activity?</DialogTitle>
+                <DialogDescription>
+                  Your feedback helps us improve the experience for everyone.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-3 py-4">
+                <Button
+                  onClick={() => handleFeedback('positive')}
+                  disabled={isSubmitting}
+                  className="bg-green-500 hover:bg-green-600 text-white"
+                >
+                  😊 Great! I enjoyed it
+                </Button>
+                <Button
+                  onClick={() => handleFeedback('neutral')}
+                  disabled={isSubmitting}
+                  variant="outline"
+                >
+                  😐 It was okay
+                </Button>
+                <Button
+                  onClick={() => handleFeedback('negative')}
+                  disabled={isSubmitting}
+                  variant="outline"
+                >
+                  😞 I didn't like it
+                </Button>
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setShowFeedback(false)}>
+                  Skip
                 </Button>
               </DialogFooter>
             </DialogContent>
