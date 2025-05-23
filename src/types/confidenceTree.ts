@@ -42,7 +42,7 @@ export interface ConfidenceTreeReflection {
   prompt?: string;
   created_at?: string;
   is_visible_to_clinicians?: boolean;
-  confidence_trees?: TreeData; // Add this field to support join queries with confidence_trees
+  confidence_trees?: Partial<TreeData>; // Updated to Partial<TreeData> to allow for partial tree data
 }
 
 // Helper function to parse tree data from Supabase

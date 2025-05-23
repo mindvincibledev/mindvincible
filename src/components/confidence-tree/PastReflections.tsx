@@ -52,7 +52,22 @@ const PastReflections = ({ userId, trees, currentTreeId }: PastReflectionsProps)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setReflections(data || []);
+      
+      // Transform the data to match our ConfidenceTreeReflection type
+      const typedReflections: ConfidenceTreeReflection[] = (data || []).map(item => ({
+        id: item.id,
+        tree_id: item.tree_id,
+        user_id: item.user_id,
+        reflection_text: item.reflection_text,
+        prompt: item.prompt,
+        created_at: item.created_at,
+        is_visible_to_clinicians: item.is_visible_to_clinicians,
+        confidence_trees: item.confidence_trees ? {
+          name: item.confidence_trees.name
+        } : undefined
+      }));
+      
+      setReflections(typedReflections);
     } catch (error) {
       console.error('Error fetching reflections:', error);
       toast({
