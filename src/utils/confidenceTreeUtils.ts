@@ -146,3 +146,104 @@ export const exportTreeAsText = (tree: TreeData): string => {
 export const hasReachedMaxLeaves = (branch: Branch, maxLeaves: number = 15): boolean => {
   return branch.leaves.length >= maxLeaves;
 };
+
+// Calculate leaf distribution positions along a branch
+export const calculateLeafPositions = (
+  leafCount: number,
+  branchLength: number,
+  branchAngle: number,
+  maxLeaves: number = 15
+): Array<{position: number, side: 'left' | 'right', offsetDistance: number}> => {
+  const positions = [];
+  const actualLeafCount = Math.min(leafCount, maxLeaves);
+  
+  // Start positioning leaves at 20% of the branch length
+  // End at 95% to leave room for the branch tip
+  const startPos = 0.2;
+  const endPos = 0.95;
+  const availableLength = endPos - startPos;
+  
+  // If we have only one leaf, put it in the middle of the available space
+  if (actualLeafCount === 1) {
+    positions.push({
+      position: startPos + (availableLength / 2),
+      side: 'right',
+      offsetDistance: 8 + Math.random() * 4
+    });
+    return positions;
+  }
+  
+  // For multiple leaves, distribute them evenly
+  for (let i = 0; i < actualLeafCount; i++) {
+    // Calculate position along branch (0.0 to 1.0)
+    const position = startPos + (i / (actualLeafCount - 1)) * availableLength;
+    
+    // Alternate sides with some randomness
+    const side: 'left' | 'right' = Math.random() > 0.5 ? 'left' : 'right';
+    
+    // Vary the offset distance slightly for natural look
+    const baseDistance = 8; // Base distance from branch
+    const randomVariation = Math.random() * 6; // Random variation 0-6
+    const offsetDistance = baseDistance + randomVariation;
+    
+    positions.push({ position, side, offsetDistance });
+  }
+  
+  return positions;
+};
+
+// Draw a leaf shape
+export const drawLeafShape = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  angle: number,
+  color: string | CanvasGradient
+) => {
+  // Save the current context state
+  ctx.save();
+  
+  // Translate to the leaf position
+  ctx.translate(x, y);
+  
+  // Rotate to the leaf angle
+  ctx.rotate(angle);
+  
+  // Set the fill style
+  ctx.fillStyle = color;
+  
+  // Begin the leaf path
+  ctx.beginPath();
+  
+  // Draw leaf shape (teardrop shape)
+  ctx.moveTo(0, -size * 0.5); // Start at the top
+  
+  // Left side curve
+  ctx.bezierCurveTo(
+    -size * 0.8, -size * 0.3, // Control point 1
+    -size * 0.8, size * 0.3,  // Control point 2
+    0, size * 0.8            // End point
+  );
+  
+  // Right side curve
+  ctx.bezierCurveTo(
+    size * 0.8, size * 0.3,  // Control point 1
+    size * 0.8, -size * 0.3, // Control point 2
+    0, -size * 0.5           // Back to start point
+  );
+  
+  ctx.closePath();
+  ctx.fill();
+  
+  // Draw leaf vein
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(0, -size * 0.5);
+  ctx.lineTo(0, size * 0.8);
+  ctx.stroke();
+  
+  // Restore the context
+  ctx.restore();
+};

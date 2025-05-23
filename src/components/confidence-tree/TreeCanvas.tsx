@@ -1,6 +1,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { calculateLeafPositions, drawLeafShape } from '@/utils/confidenceTreeUtils';
 
 interface TreeData {
   id?: string;
@@ -225,25 +226,8 @@ const TreeCanvas = ({
     const newBranchPositions = new Map();
     const newLeafPositions = new Map();
     
-    // Draw trunk
-    ctx.fillStyle = '#8B4513'; // Brown color
-    ctx.beginPath();
-    ctx.moveTo(trunkX - trunkWidth / 2, trunkY);
-    ctx.lineTo(trunkX - trunkWidth / 2, trunkY - trunkHeight);
-    ctx.lineTo(trunkX + trunkWidth / 2, trunkY - trunkHeight);
-    ctx.lineTo(trunkX + trunkWidth / 2, trunkY);
-    ctx.closePath();
-    ctx.fill();
-    
-    // Add texture to trunk (vertical lines)
-    ctx.strokeStyle = '#6B3F10';
-    ctx.lineWidth = 1;
-    for (let i = 1; i < trunkWidth; i += 3) {
-      ctx.beginPath();
-      ctx.moveTo(trunkX - trunkWidth / 2 + i, trunkY);
-      ctx.lineTo(trunkX - trunkWidth / 2 + i, trunkY - trunkHeight);
-      ctx.stroke();
-    }
+    // Draw trunk with texture
+    drawTrunk(ctx, trunkX, trunkY, trunkWidth, trunkHeight);
     
     // Add tree name/label if not simplified
     if (!simplified) {
@@ -277,42 +261,26 @@ const TreeCanvas = ({
         const endX = trunkX + Math.cos(angle) * branchLength;
         const endY = (trunkY - trunkHeight) + Math.sin(angle) * branchLength;
         
-        // Draw branch
-        ctx.strokeStyle = '#8B4513';
-        ctx.lineWidth = simplified ? 3 : 6;
-        ctx.beginPath();
-        ctx.moveTo(trunkX, trunkY - trunkHeight);
-        ctx.lineTo(endX, endY);
-        ctx.stroke();
+        // Draw branch with texture
+        drawBranch(ctx, trunkX, trunkY - trunkHeight, endX, endY, simplified ? 3 : 6);
         
         // Store branch position for interactivity
         newBranchPositions.set(branch.id, {
           x: trunkX,
           y: trunkY - trunkHeight,
           width: branchLength,
-          height: ctx.lineWidth,
+          height: simplified ? 3 : 6,
           angle: angle
         });
         
         // Add branch label if not simplified
         if (!simplified) {
-          const labelX = trunkX + Math.cos(angle) * (branchLength + 10);
-          const labelY = (trunkY - trunkHeight) + Math.sin(angle) * (branchLength + 10);
-          
-          // Background for text
-          ctx.fillStyle = 'rgba(255,255,255,0.7)';
-          const textWidth = ctx.measureText(branch.name).width;
-          ctx.fillRect(labelX - textWidth/2 - 4, labelY - 14, textWidth + 8, 20);
-          
-          ctx.fillStyle = '#333';
-          ctx.font = '12px Poppins, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(branch.name, labelX, labelY);
+          drawBranchLabel(ctx, branch.name, angle, branchLength, trunkX, trunkY - trunkHeight);
         }
         
         // Draw leaves for this branch
         if (branch.leaves.length > 0) {
-          drawLeaves(
+          drawLeavesOnBranch(
             ctx, 
             branch, 
             trunkX, 
@@ -333,8 +301,108 @@ const TreeCanvas = ({
     setLeafPositions(newLeafPositions);
   };
   
+  // Draw the trunk with wood texture
+  const drawTrunk = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) => {
+    // Draw trunk base
+    ctx.fillStyle = '#8B4513'; // Brown color
+    ctx.beginPath();
+    ctx.moveTo(x - width / 2, y);
+    ctx.lineTo(x - width / 2, y - height);
+    ctx.lineTo(x + width / 2, y - height);
+    ctx.lineTo(x + width / 2, y);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Add texture to trunk (vertical lines)
+    ctx.strokeStyle = '#6B3F10';
+    ctx.lineWidth = 1;
+    for (let i = 1; i < width; i += 3) {
+      ctx.beginPath();
+      ctx.moveTo(x - width / 2 + i, y);
+      ctx.lineTo(x - width / 2 + i, y - height);
+      ctx.stroke();
+    }
+  };
+  
+  // Draw a branch with texture
+  const drawBranch = (
+    ctx: CanvasRenderingContext2D,
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+    width: number
+  ) => {
+    // Create gradient for more realistic branch
+    const gradient = ctx.createLinearGradient(startX, startY, endX, endY);
+    gradient.addColorStop(0, '#8B4513');    // Dark brown at trunk
+    gradient.addColorStop(1, '#A67C52');    // Lighter at end
+    
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    
+    // Draw main branch
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+    
+    // Add wood grain texture
+    ctx.strokeStyle = 'rgba(107, 63, 16, 0.4)'; // Dark brown, semi-transparent
+    ctx.lineWidth = 1;
+    
+    // Get angle of branch
+    const angle = Math.atan2(endY - startY, endX - startX);
+    const branchLength = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+    
+    // Add subtle grain lines along the branch
+    for (let i = 0; i < branchLength; i += 6) {
+      const x1 = startX + Math.cos(angle) * i;
+      const y1 = startY + Math.sin(angle) * i;
+      
+      // Draw small line across the branch
+      const perpAngle = angle + Math.PI/2;
+      const grainWidth = width * 0.7;
+      
+      ctx.beginPath();
+      ctx.moveTo(x1 - Math.cos(perpAngle) * grainWidth/2, y1 - Math.sin(perpAngle) * grainWidth/2);
+      ctx.lineTo(x1 + Math.cos(perpAngle) * grainWidth/2, y1 + Math.sin(perpAngle) * grainWidth/2);
+      ctx.stroke();
+    }
+  };
+  
+  // Draw branch label
+  const drawBranchLabel = (
+    ctx: CanvasRenderingContext2D,
+    branchName: string,
+    angle: number,
+    branchLength: number,
+    trunkX: number,
+    trunkY: number
+  ) => {
+    const labelX = trunkX + Math.cos(angle) * (branchLength + 10);
+    const labelY = trunkY + Math.sin(angle) * (branchLength + 10);
+    
+    // Background for text
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    const textWidth = ctx.measureText(branchName).width;
+    ctx.fillRect(labelX - textWidth/2 - 4, labelY - 14, textWidth + 8, 20);
+    
+    ctx.fillStyle = '#333';
+    ctx.font = '12px Poppins, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(branchName, labelX, labelY);
+  };
+  
   // Draw leaves on a branch
-  const drawLeaves = (
+  const drawLeavesOnBranch = (
     ctx: CanvasRenderingContext2D,
     branch: Branch,
     startX: number,
@@ -348,32 +416,40 @@ const TreeCanvas = ({
   ) => {
     const leafCount = branch.leaves.length;
     const maxLeaves = 15;  // Maximum number of leaves per branch
-    const actualLeafCount = Math.min(leafCount, maxLeaves);
     
     // Leaf size
-    const leafBaseSize = simplified ? 5 : 8;
+    const leafBaseSize = simplified ? 6 : 10;
     
-    // Distribute leaves along the branch
-    for (let i = 0; i < actualLeafCount; i++) {
+    // Calculate leaf positions along the branch
+    const leafPositionData = calculateLeafPositions(leafCount, branchLength, branchAngle, maxLeaves);
+    
+    // Draw each leaf
+    leafPositionData.forEach((posData, i) => {
+      if (i >= branch.leaves.length) return;
+      
       const leaf = branch.leaves[i];
       
       // Calculate position along the branch
-      // Start from 20% of the branch length to avoid crowding at the trunk
-      // and go up to 90% to leave space for the branch label
-      const leafPosition = 0.2 + (i / maxLeaves) * 0.7;
+      const leafPositionRatio = posData.position;
+      const leafX = startX + Math.cos(branchAngle) * (branchLength * leafPositionRatio);
+      const leafY = startY + Math.sin(branchAngle) * (branchLength * leafPositionRatio);
       
-      // Calculate leaf position on the branch
-      const leafX = startX + Math.cos(branchAngle) * (branchLength * leafPosition);
-      const leafY = startY + Math.sin(branchAngle) * (branchLength * leafPosition);
+      // Calculate offset perpendicular to branch
+      const perpAngle = branchAngle + (posData.side === 'left' ? Math.PI/2 : -Math.PI/2);
+      const offsetDistance = posData.offsetDistance;
       
-      // Alternate leaves on either side of the branch
-      const sideAngle = branchAngle + (i % 2 === 0 ? Math.PI/2 : -Math.PI/2);
-      const sideDistance = simplified ? 4 + (i % 3) : 8 + (i % 4);
+      const finalLeafX = leafX + Math.cos(perpAngle) * offsetDistance;
+      const finalLeafY = leafY + Math.sin(perpAngle) * offsetDistance;
       
-      const finalLeafX = leafX + Math.cos(sideAngle) * sideDistance;
-      const finalLeafY = leafY + Math.sin(sideAngle) * sideDistance;
+      // Draw stem connecting leaf to branch
+      ctx.strokeStyle = '#6B3F10';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(leafX, leafY);
+      ctx.lineTo(finalLeafX, finalLeafY);
+      ctx.stroke();
       
-      // Vary leaf size slightly
+      // Vary leaf size slightly for natural look
       const sizeVariation = 0.8 + Math.random() * 0.4;
       const leafSize = leafBaseSize * sizeVariation;
       
@@ -398,28 +474,11 @@ const TreeCanvas = ({
           break;
       }
       
-      // Draw leaf stem
-      ctx.strokeStyle = '#6B3F10';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(leafX, leafY);
-      ctx.lineTo(finalLeafX, finalLeafY);
-      ctx.stroke();
+      // Calculate leaf angle (perpendicular to branch + slight random variation)
+      const leafAngle = perpAngle + (Math.random() * 0.4 - 0.2);
       
-      // Draw leaf
-      ctx.fillStyle = leafColor;
-      // Draw leaf as an oval shape
-      ctx.beginPath();
-      ctx.ellipse(
-        finalLeafX, 
-        finalLeafY, 
-        leafSize * 1.2, // Width of the oval
-        leafSize * 0.8, // Height of the oval
-        sideAngle, // Rotation to align with stem
-        0, 
-        2 * Math.PI
-      );
-      ctx.fill();
+      // Draw the leaf
+      drawLeafShape(ctx, finalLeafX, finalLeafY, leafSize, leafAngle, leafColor);
       
       // Add star to starred leaves
       if (leaf.starred && !simplified) {
@@ -427,14 +486,14 @@ const TreeCanvas = ({
         drawStar(ctx, finalLeafX, finalLeafY, 5, leafSize / 2, leafSize / 4);
       }
       
-      // Store leaf position
+      // Store leaf position for interactivity
       leafPositions.set(leaf.id, {
         x: finalLeafX,
         y: finalLeafY,
         radius: leafSize,
         branchId: branch.id
       });
-    }
+    });
   };
   
   // Helper function to draw a star
