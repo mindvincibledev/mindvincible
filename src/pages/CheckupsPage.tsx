@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, X, AlertTriangle } from 'lucide-react';
@@ -51,7 +50,7 @@ const CheckupsPage = () => {
     }
     
     try {
-      // Check if user is clinician
+      // Check if user is admin
       const { data: userData, error } = await supabase
         .from('users')
         .select('user_type')
@@ -60,8 +59,8 @@ const CheckupsPage = () => {
       
       if (error) throw error;
       
-      // Only clinicians (user_type=1) should access this page
-      if (userData.user_type !== 1) {
+      // Only admins (user_type=0) should access this page
+      if (userData.user_type !== 0) {
         toast({
           variant: "destructive",
           title: "Access Denied",
@@ -69,8 +68,8 @@ const CheckupsPage = () => {
         });
         
         // Redirect based on user type
-        if (userData.user_type === 0) {
-          navigate('/admin-dashboard');
+        if (userData.user_type === 1) {
+          navigate('/clinician-dashboard');
         } else {
           navigate('/home');
         }

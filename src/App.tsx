@@ -152,6 +152,58 @@ const ClinicianRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Admin route component - ensures only admins can access certain pages
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingRole, setCheckingRole] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('user_type')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) throw error;
+        
+        if (data?.user_type === 0) { // 0 = Admin
+          setIsAdmin(true);
+        } else {
+          navigate('/home');
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        navigate('/home');
+      } finally {
+        setCheckingRole(false);
+      }
+    };
+    
+    if (!loading) {
+      checkAdminStatus();
+    }
+  }, [user, loading, navigate]);
+  
+  if (loading || checkingRole) {
+    return <div>Loading...</div>;
+  }
+  
+  if (!isAdmin) {
+    return null;
+  }
+  
+  return <>{children}</>;
+};
+
 const AppRoutes = () => {
   useEffect(() => {
     // Initialize Supabase integrations
@@ -181,9 +233,9 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         <Route path="/checkups" element={
-          <ClinicianRoute>
+          <AdminRoute>
             <CheckupsPage />
-          </ClinicianRoute>
+          </AdminRoute>
         } />
         <Route path="/shared-responses" element={
           <ClinicianRoute>
