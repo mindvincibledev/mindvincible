@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, startOfDay, endOfDay } from 'date-fns';
@@ -11,17 +12,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users } from 'lucide-react';
-import ActivityDropdown from '@/components/ActivityDropdown';
 import { Database } from '@/integrations/supabase/types';
 
 type MoodType = Database['public']['Enums']['mood_type'];
+
+interface ActivityCompletion {
+  activity_name: string;
+  completed_at: string;
+}
 
 interface StudentActivityData {
   id: string;
   name: string;
   mood: MoodType;
   moodTimestamp: string;
-  completedActivities: string[];
+  completedActivities: ActivityCompletion[];
 }
 
 const StudentCenter = () => {
@@ -115,17 +120,21 @@ const StudentCenter = () => {
           return null;
         }
         
-        // Get activities completed after the mood entry
+        // Get activities completed after the mood entry, ordered by completion time
         const { data: activityData, error: activityError } = await supabase
           .from('activity_completions')
-          .select('activity_name')
+          .select('activity_name, completed_at')
           .eq('user_id', student.id)
           .gte('completed_at', moodData[0].created_at)
-          .lte('completed_at', endOfToday);
+          .lte('completed_at', endOfToday)
+          .order('completed_at', { ascending: true }); // Order by completion time
           
         if (activityError) throw activityError;
         
-        const completedActivities = activityData?.map(activity => activity.activity_name) || [];
+        const completedActivities = activityData?.map(activity => ({
+          activity_name: activity.activity_name,
+          completed_at: activity.completed_at
+        })) || [];
         
         return {
           id: student.id,
@@ -188,6 +197,11 @@ const StudentCenter = () => {
     return format(date, 'MMM d, h:mm a');
   };
 
+  const formatActivityTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return format(date, 'h:mm a');
+  };
+
   return (
     <BackgroundWithEmojis>
       <div className="min-h-screen relative">
@@ -247,7 +261,7 @@ const StudentCenter = () => {
                           <TableHead className="w-[200px]">Student Name</TableHead>
                           <TableHead>Mood</TableHead>
                           <TableHead>Reported At</TableHead>
-                          <TableHead className="w-[250px]">Activities Completed</TableHead>
+                          <TableHead className="w-[300px]">Activities Completed</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -266,7 +280,20 @@ const StudentCenter = () => {
                               {formatDate(student.moodTimestamp)}
                             </TableCell>
                             <TableCell>
-                              <ActivityDropdown completedActivities={student.completedActivities} />
+                              {student.completedActivities.length === 0 ? (
+                                <span className="text-gray-500 italic">No activities completed</span>
+                              ) : (
+                                <div className="space-y-1">
+                                  {student.completedActivities.map((activity, index) => (
+                                    <div key={index} className="flex items-center justify-between text-sm">
+                                      <span className="text-gray-800">{activity.activity_name}</span>
+                                      <span className="text-gray-500 text-xs ml-2">
+                                        {formatActivityTime(activity.completed_at)}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}
