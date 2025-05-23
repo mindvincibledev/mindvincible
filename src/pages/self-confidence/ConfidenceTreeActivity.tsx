@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,7 +17,7 @@ import TreeCanvas from '@/components/confidence-tree/TreeCanvas';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { TreeData, Branch, Leaf as LeafType } from '@/types/confidenceTree';
+import { TreeData, Branch, Leaf as LeafType, parseTreeDataFromSupabase, prepareTreeDataForSupabase } from '@/types/confidenceTree';
 import { createNewBranch, createNewLeaf } from '@/utils/confidenceTreeUtils';
 
 const ConfidenceTreeActivity = () => {
@@ -77,7 +76,9 @@ const ConfidenceTreeActivity = () => {
       
       if (error) throw error;
       
-      setTrees(data || []);
+      // Parse the data to ensure proper typing
+      const parsedTrees = (data || []).map(tree => parseTreeDataFromSupabase(tree));
+      setTrees(parsedTrees);
     } catch (error) {
       console.error('Error fetching trees:', error);
       toast.error('Failed to load your trees');
@@ -100,13 +101,16 @@ const ConfidenceTreeActivity = () => {
 
     setSaving(true);
     try {
+      // Prepare tree data for Supabase
+      const treeData = prepareTreeDataForSupabase(currentTree);
+      
       // If we're editing an existing tree
       if (editMode && treeToEdit?.id) {
         const { error } = await supabase
           .from('confidence_trees')
           .update({
-            name: currentTree.name,
-            branches: currentTree.branches,
+            name: treeData.name,
+            branches: treeData.branches,
           })
           .eq('id', treeToEdit.id);
         
@@ -122,8 +126,8 @@ const ConfidenceTreeActivity = () => {
           .from('confidence_trees')
           .insert({
             user_id: user.id,
-            name: currentTree.name,
-            branches: currentTree.branches,
+            name: treeData.name,
+            branches: treeData.branches,
             is_shared: false
           });
         

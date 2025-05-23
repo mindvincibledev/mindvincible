@@ -3,12 +3,15 @@
  * Types for the Confidence Tree activity
  */
 
+import { Json } from '@/integrations/supabase/types';
+
 export interface TreeData {
   id?: string;
   user_id?: string;
   name: string;
   branches: Branch[];
   created_at?: string;
+  updated_at?: string;
   is_shared?: boolean;
 }
 
@@ -42,3 +45,22 @@ export interface TreeStats {
   mixedLeaves: number;
   starredLeaves: number;
 }
+
+// Type conversion utilities for Supabase data
+export const parseTreeDataFromSupabase = (supabaseData: any): TreeData => {
+  return {
+    ...supabaseData,
+    branches: Array.isArray(supabaseData.branches) 
+      ? supabaseData.branches 
+      : typeof supabaseData.branches === 'string'
+        ? JSON.parse(supabaseData.branches)
+        : []
+  };
+};
+
+export const prepareTreeDataForSupabase = (treeData: TreeData): any => {
+  return {
+    ...treeData,
+    branches: treeData.branches
+  };
+};
