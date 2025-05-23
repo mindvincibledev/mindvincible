@@ -170,7 +170,13 @@ const PastReflections = ({ userId, trees, currentTreeId }: PastReflectionsProps)
             </p>
             <Button 
               variant="outline" 
-              onClick={() => document.querySelector('[data-value="reflect"]')?.click()}
+              onClick={() => {
+                // Fix: Use querySelector to get the element and add a null check
+                const reflectTab = document.querySelector('[data-value="reflect"]');
+                if (reflectTab instanceof HTMLElement) {
+                  reflectTab.click();
+                }
+              }}
             >
               Start Reflecting
             </Button>
