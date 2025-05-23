@@ -167,9 +167,6 @@ const StudentCenter = () => {
       case 'Overwhelmed': return '😫';
       case 'Excited': return '🤩';
       case 'Calm': return '😌';
-      case 'Frustrated': return '😤';
-      case 'Grateful': return '🙏';
-      case 'Confident': return '😎';
       default: return '😐';
     }
   };
@@ -183,9 +180,6 @@ const StudentCenter = () => {
       case 'Overwhelmed': return 'bg-orange-100';
       case 'Excited': return 'bg-pink-100';
       case 'Calm': return 'bg-green-100';
-      case 'Frustrated': return 'bg-red-200';
-      case 'Grateful': return 'bg-emerald-100';
-      case 'Confident': return 'bg-indigo-100';
       default: return 'bg-gray-100';
     }
   };
