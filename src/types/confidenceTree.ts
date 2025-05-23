@@ -35,6 +35,8 @@ export interface ConfidenceTreeReflection {
   reflection_text: string;
   prompt: string;
   created_at?: string;
+  is_visible_to_clinicians?: boolean;
+  confidence_trees?: Partial<TreeData>;
 }
 
 export interface TreeStats {

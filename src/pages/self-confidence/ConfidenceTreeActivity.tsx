@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { TreeData, Branch, Leaf as LeafType, parseTreeDataFromSupabase, prepareTreeDataForSupabase, ConfidenceTreeReflection } from '@/types/confidenceTree';
 import { createNewBranch, createNewLeaf } from '@/utils/confidenceTreeUtils';
+import PastReflections from '@/components/confidence-tree/PastReflections';
 
 const ConfidenceTreeActivity = () => {
   const { user } = useAuth();
@@ -540,7 +540,7 @@ const ConfidenceTreeActivity = () => {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger 
                 value="builder"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#F5DF4D] data-[state=active]:to-[#3DFDFF]"
@@ -552,6 +552,12 @@ const ConfidenceTreeActivity = () => {
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FC68B3] data-[state=active]:to-[#FF8A48]"
               >
                 My Growth Garden
+              </TabsTrigger>
+              <TabsTrigger 
+                value="reflections"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3DFDFF] data-[state=active]:to-[#2AC20E]"
+              >
+                Past Reflections
               </TabsTrigger>
             </TabsList>
             
@@ -828,6 +834,10 @@ const ConfidenceTreeActivity = () => {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+            
+            <TabsContent value="reflections">
+              <PastReflections />
             </TabsContent>
           </Tabs>
           
