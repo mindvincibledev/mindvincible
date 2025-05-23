@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, startOfDay, endOfDay } from 'date-fns';
@@ -55,16 +54,16 @@ const StudentCenter = () => {
       
       if (error) throw error;
       
-      // Only clinicians (user_type=1) should access this page
-      if (userData.user_type !== 1) {
+      // Only admins (user_type=0) should access this page
+      if (userData.user_type !== 0) {
         toast({
           variant: "destructive",
           title: "Access Denied",
           description: "You don't have permission to access this page.",
         });
         
-        if (userData.user_type === 0) {
-          navigate('/admin-dashboard');
+        if (userData.user_type === 1) {
+          navigate('/clinician-dashboard');
         } else {
           navigate('/home');
         }
