@@ -114,28 +114,12 @@ const ConfidenceTreeActivity = () => {
           return;
         }
         
+        
         setIsSubmitting(true);
         
         try {
           // First update the visibility in the battery_boost_entries table
-          if (treeToEdit.id) {
-            console.log("Saving visibility status:", isVisible);
-            const { error: visibilityError } = await supabase
-              .from('confidence_trees')
-              .update({ 
-                is_shared: isVisible 
-              })
-              .eq('id', treeToEdit.id)
-              .eq('user_id', user.id);
-              
-            if (visibilityError) {
-              console.error("Error updating visibility:", visibilityError);
-              toast.error("Failed to save visibility preference");
-              setIsSubmitting(false);
-              return;
-            }
-          }
-          
+
           // Then record activity completion with feedback
           const { error } = await supabase
             .from('activity_completions')
@@ -199,13 +183,17 @@ const ConfidenceTreeActivity = () => {
         
       } else {
         // Creating a new tree
+        setShowFeedback(true);
+
+            
+        
         const { error } = await supabase
           .from('confidence_trees')
           .insert({
             user_id: user.id,
             name: treeData.name,
             branches: treeData.branches,
-            is_shared: false
+            is_shared: isVisible
           });
         
         if (error) throw error;
