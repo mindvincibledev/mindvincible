@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,6 +48,7 @@ const ConfidenceTreeActivity = () => {
   const [editMode, setEditMode] = useState(false);
   const [treeToEdit, setTreeToEdit] = useState<TreeData | null>(null);
   const [nameDialogOpen, setNameDialogOpen] = useState(false);
+  const [showPostSaveReflection, setShowPostSaveReflection] = useState(false);
 
   // Reflections questions for the user
   const reflectionPrompts = [
@@ -134,6 +136,11 @@ const ConfidenceTreeActivity = () => {
         if (error) throw error;
         
         toast.success('Tree saved successfully');
+      }
+      
+      // Check if tree meets reflection criteria
+      if (checkForReflectionMode(currentTree)) {
+        setShowPostSaveReflection(true);
       }
       
       // Reset the current tree and fetch the updated list
@@ -234,8 +241,9 @@ const ConfidenceTreeActivity = () => {
       return;
     }
 
-    if (selectedBranch.leaves.length >= 5) {
-      toast.warning('Maximum 5 leaves allowed per branch for clarity');
+    // Update limit from 5 to 15 leaves per branch
+    if (selectedBranch.leaves.length >= 15) {
+      toast.warning('Maximum 15 leaves allowed per branch');
       return;
     }
 
@@ -255,12 +263,6 @@ const ConfidenceTreeActivity = () => {
     setNewLeafText('');
     setShowLeafDialog(false);
     toast.success('Added a new leaf!');
-
-    // Check if we should enter reflection mode
-    const updatedTree = { ...currentTree, branches: updatedBranches };
-    if (checkForReflectionMode(updatedTree)) {
-      setShowReflectionMode(true);
-    }
   };
 
   // Handle leaf actions (star, release)
@@ -322,10 +324,56 @@ const ConfidenceTreeActivity = () => {
     setActiveTab('builder');
   };
 
+  // Start reflection mode for a previously saved tree
+  const startReflectionForTree = (tree: TreeData) => {
+    setCurrentTree({ ...tree });
+    setTreeToEdit(tree);
+    setShowReflectionMode(true);
+    setActiveTab('builder');
+  };
+
   // Prompt user for tree name before saving
   const openNameDialog = () => {
     setNameDialogOpen(true);
   };
+
+  // Handle post-save reflection prompt
+  useEffect(() => {
+    if (showPostSaveReflection) {
+      const timer = setTimeout(() => {
+        toast.info(
+          <div>
+            <p className="font-medium">Time to reflect on your tree!</p>
+            <p className="text-sm">Your tree has enough branches and leaves to reflect on.</p>
+            <div className="mt-3 flex justify-end gap-2">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => setShowPostSaveReflection(false)}
+              >
+                Not now
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={() => {
+                  // Find the most recently created tree
+                  if (trees.length > 0) {
+                    startReflectionForTree(trees[0]);
+                    setShowPostSaveReflection(false);
+                  }
+                }}
+              >
+                Reflect now
+              </Button>
+            </div>
+          </div>,
+          { duration: 10000 }
+        );
+        
+        return () => clearTimeout(timer);
+      }, 1000);
+    }
+  }, [showPostSaveReflection, trees]);
 
   // Effect to fetch trees when component mounts
   useEffect(() => {
@@ -450,7 +498,7 @@ const ConfidenceTreeActivity = () => {
                 <CardHeader className="border-b">
                   <div className="flex justify-between items-center">
                     <CardTitle className="text-2xl">
-                      {editMode ? 'Edit Your Tree' : 'Build Your Tree'}
+                      {editMode ? 'Edit Your Tree' : showReflectionMode ? 'Reflect on Your Tree' : 'Build Your Tree'}
                     </CardTitle>
                     {!showReflectionMode && (
                       <Button 
@@ -485,14 +533,16 @@ const ConfidenceTreeActivity = () => {
                         >
                           Reflect on My Tree
                         </Button>
-                        <Button
-                          onClick={openNameDialog}
-                          variant="outline"
-                          className="border-green-500 text-green-600 hover:bg-green-50"
-                        >
-                          <Save size={16} className="mr-2" />
-                          Save My Tree
-                        </Button>
+                        {editMode && (
+                          <Button
+                            onClick={openNameDialog}
+                            variant="outline"
+                            className="border-green-500 text-green-600 hover:bg-green-50"
+                          >
+                            <Save size={16} className="mr-2" />
+                            Update My Tree
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -546,25 +596,27 @@ const ConfidenceTreeActivity = () => {
                                   <CardHeader className="py-3 px-4">
                                     <CardTitle className="text-base flex justify-between items-center">
                                       <span>{branch.name}</span>
-                                      <span className="text-sm text-gray-500">{branch.leaves.length}/5 leaves</span>
+                                      <span className="text-sm text-gray-500">{branch.leaves.length}/15 leaves</span>
                                     </CardTitle>
                                   </CardHeader>
                                   <CardContent className="p-4">
-                                    <div className="flex flex-wrap gap-2 min-h-16">
-                                      {branch.leaves.map(leaf => (
-                                        <div 
-                                          key={leaf.id}
-                                          className={`rounded-full px-3 py-1 text-xs text-white flex items-center
-                                            ${leaf.type === 'positive' ? 'bg-green-500' : 
-                                              leaf.type === 'negative' ? 'bg-amber-700' : 'bg-gradient-to-r from-green-500 to-amber-700'}`}
-                                        >
-                                          <span className="mr-1 truncate max-w-24" title={leaf.text}>
-                                            {leaf.text.length > 20 ? `${leaf.text.substring(0, 20)}...` : leaf.text}
-                                          </span>
-                                          {leaf.starred && <Star size={10} className="ml-1" fill="white" />}
-                                        </div>
-                                      ))}
-                                    </div>
+                                    <ScrollArea className="h-44 pr-4">
+                                      <div className="flex flex-wrap gap-2">
+                                        {branch.leaves.map(leaf => (
+                                          <div 
+                                            key={leaf.id}
+                                            className={`rounded-full px-3 py-1 text-xs text-white flex items-center mb-2
+                                              ${leaf.type === 'positive' ? 'bg-green-500' : 
+                                                leaf.type === 'negative' ? 'bg-amber-700' : 'bg-gradient-to-r from-green-500 to-amber-700'}`}
+                                          >
+                                            <span className="mr-1 truncate max-w-32" title={leaf.text}>
+                                              {leaf.text.length > 30 ? `${leaf.text.substring(0, 30)}...` : leaf.text}
+                                            </span>
+                                            {leaf.starred && <Star size={10} className="ml-1" fill="white" />}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </ScrollArea>
                                     <Button
                                       onClick={() => {
                                         setSelectedBranch(branch);
@@ -573,7 +625,7 @@ const ConfidenceTreeActivity = () => {
                                       variant="ghost" 
                                       size="sm"
                                       className="w-full mt-3 text-green-600 border border-green-200 hover:bg-green-50"
-                                      disabled={branch.leaves.length >= 5}
+                                      disabled={branch.leaves.length >= 15}
                                     >
                                       <Plus size={16} className="mr-1" />
                                       Add Leaf
@@ -612,72 +664,89 @@ const ConfidenceTreeActivity = () => {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {trees.map(tree => (
-                        <Card key={tree.id} className="overflow-hidden border border-gray-200">
-                          <div className="h-40 relative overflow-hidden bg-gradient-to-b from-[#F9F6EB] to-[#E6DFC6]">
-                            <TreeCanvas treeData={tree} interactiveMode="view" simplified />
-                            <div className="absolute top-2 right-2 flex gap-2">
-                              <Button
-                                variant="outline" 
-                                size="icon" 
-                                className="bg-white rounded-full w-8 h-8 p-1 shadow-sm"
-                                onClick={() => toggleTreeSharing(tree)}
-                              >
-                                {tree.is_shared ? (
-                                  <Eye size={16} className="text-blue-500" />
-                                ) : (
-                                  <EyeOff size={16} className="text-gray-500" />
-                                )}
-                              </Button>
-                              <Button
-                                variant="outline" 
-                                size="icon" 
-                                className="bg-white rounded-full w-8 h-8 p-1 shadow-sm"
-                                onClick={() => editTree(tree)}
-                              >
-                                <Edit size={16} className="text-amber-500" />
-                              </Button>
-                              <Button
-                                variant="outline" 
-                                size="icon" 
-                                className="bg-white rounded-full w-8 h-8 p-1 shadow-sm"
-                                onClick={() => {
-                                  if (confirm("Are you sure you want to delete this tree?")) {
-                                    deleteTree(tree.id!);
-                                  }
-                                }}
-                              >
-                                <Trash2 size={16} className="text-red-500" />
-                              </Button>
-                            </div>
-                          </div>
-                          <CardHeader className="py-3 px-4">
-                            <CardTitle className="text-lg">{tree.name}</CardTitle>
-                            <CardDescription className="text-sm">
-                              Created on {new Date(tree.created_at!).toLocaleDateString()}
-                              <span className="ml-2">
-                                {tree.is_shared ? (
-                                  <span className="text-blue-500 text-xs bg-blue-50 px-2 py-0.5 rounded-full">Shared</span>
-                                ) : (
-                                  <span className="text-gray-500 text-xs bg-gray-100 px-2 py-0.5 rounded-full">Private</span>
-                                )}
-                              </span>
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent className="p-4">
-                            <div className="flex flex-wrap gap-1">
-                              {tree.branches.map(branch => (
-                                <span 
-                                  key={branch.id}
-                                  className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full"
+                      {trees.map(tree => {
+                        // Check if this tree qualifies for reflection mode
+                        const canReflect = checkForReflectionMode(tree);
+                        
+                        return (
+                          <Card key={tree.id} className="overflow-hidden border border-gray-200">
+                            <div className="h-40 relative overflow-hidden bg-gradient-to-b from-[#F9F6EB] to-[#E6DFC6]">
+                              <TreeCanvas treeData={tree} interactiveMode="view" simplified />
+                              <div className="absolute top-2 right-2 flex gap-2">
+                                <Button
+                                  variant="outline" 
+                                  size="icon" 
+                                  className="bg-white rounded-full w-8 h-8 p-1 shadow-sm"
+                                  onClick={() => toggleTreeSharing(tree)}
                                 >
-                                  {branch.name}: {branch.leaves.length} {branch.leaves.length === 1 ? 'leaf' : 'leaves'}
-                                </span>
-                              ))}
+                                  {tree.is_shared ? (
+                                    <Eye size={16} className="text-blue-500" />
+                                  ) : (
+                                    <EyeOff size={16} className="text-gray-500" />
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="outline" 
+                                  size="icon" 
+                                  className="bg-white rounded-full w-8 h-8 p-1 shadow-sm"
+                                  onClick={() => editTree(tree)}
+                                >
+                                  <Edit size={16} className="text-amber-500" />
+                                </Button>
+                                <Button
+                                  variant="outline" 
+                                  size="icon" 
+                                  className="bg-white rounded-full w-8 h-8 p-1 shadow-sm"
+                                  onClick={() => {
+                                    if (confirm("Are you sure you want to delete this tree?")) {
+                                      deleteTree(tree.id!);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 size={16} className="text-red-500" />
+                                </Button>
+                              </div>
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                            <CardHeader className="py-3 px-4">
+                              <CardTitle className="text-lg">{tree.name}</CardTitle>
+                              <CardDescription className="text-sm">
+                                Created on {new Date(tree.created_at!).toLocaleDateString()}
+                                <span className="ml-2">
+                                  {tree.is_shared ? (
+                                    <span className="text-blue-500 text-xs bg-blue-50 px-2 py-0.5 rounded-full">Shared</span>
+                                  ) : (
+                                    <span className="text-gray-500 text-xs bg-gray-100 px-2 py-0.5 rounded-full">Private</span>
+                                  )}
+                                </span>
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent className="p-4">
+                              <div className="flex flex-wrap gap-1 mb-4">
+                                {tree.branches.map(branch => (
+                                  <span 
+                                    key={branch.id}
+                                    className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full"
+                                  >
+                                    {branch.name}: {branch.leaves.length} {branch.leaves.length === 1 ? 'leaf' : 'leaves'}
+                                  </span>
+                                ))}
+                              </div>
+                              
+                              {canReflect && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full mt-2 bg-gradient-to-r from-[#F5DF4D]/10 to-[#3DFDFF]/10 border-[#F5DF4D]"
+                                  onClick={() => startReflectionForTree(tree)}
+                                >
+                                  <Leaf size={14} className="mr-2" />
+                                  Reflect on this Tree
+                                </Button>
+                              )}
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                     </div>
                   )}
                 </CardContent>
@@ -810,29 +879,31 @@ const ConfidenceTreeActivity = () => {
                 {promptIndex === 1 && (
                   <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                     <p className="text-sm text-gray-600 mb-2">Select any brown leaves you want to let go of:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {currentTree.branches.map(branch => 
-                        branch.leaves
-                          .filter(leaf => leaf.type === 'negative')
-                          .map(leaf => (
-                            <Button 
-                              key={leaf.id} 
-                              variant="outline"
-                              size="sm"
-                              className={`text-xs border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800
-                                ${selectedLeafToRelease?.id === leaf.id ? 'ring-2 ring-amber-500' : ''}`}
-                              onClick={() => setSelectedLeafToRelease(
-                                selectedLeafToRelease?.id === leaf.id ? null : leaf
-                              )}
-                            >
-                              {leaf.text.length > 15 ? `${leaf.text.substring(0, 15)}...` : leaf.text}
-                              {selectedLeafToRelease?.id === leaf.id && (
-                                <X size={12} className="ml-1" />
-                              )}
-                            </Button>
-                          ))
-                      )}
-                    </div>
+                    <ScrollArea className="h-32 pr-4">
+                      <div className="flex flex-wrap gap-2">
+                        {currentTree.branches.map(branch => 
+                          branch.leaves
+                            .filter(leaf => leaf.type === 'negative')
+                            .map(leaf => (
+                              <Button 
+                                key={leaf.id} 
+                                variant="outline"
+                                size="sm"
+                                className={`text-xs border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 mb-2
+                                  ${selectedLeafToRelease?.id === leaf.id ? 'ring-2 ring-amber-500' : ''}`}
+                                onClick={() => setSelectedLeafToRelease(
+                                  selectedLeafToRelease?.id === leaf.id ? null : leaf
+                                )}
+                              >
+                                {leaf.text.length > 15 ? `${leaf.text.substring(0, 15)}...` : leaf.text}
+                                {selectedLeafToRelease?.id === leaf.id && (
+                                  <X size={12} className="ml-1" />
+                                )}
+                              </Button>
+                            ))
+                        )}
+                      </div>
+                    </ScrollArea>
                   </div>
                 )}
               </div>
