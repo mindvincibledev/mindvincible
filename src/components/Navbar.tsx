@@ -1,218 +1,336 @@
-
-import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, User, Heart, Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, LogOut, Heart, Archive, Book, Home, Users, BarChart3, AlertTriangle } from 'lucide-react';
+import { Button } from './ui/button';
 import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { UserType } from '@/context/AuthContext';
 
 const Navbar = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [userType, setUserType] = useState<UserType | null>(null);
   const { user, signOut } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSignOut = async () => {
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    // Fetch user type if user is logged in
+    if (user) {
+      fetchUserType();
+    }
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [user]);
+
+  const fetchUserType = async () => {
     try {
-      await signOut();
-      navigate('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
+      const { data, error } = await supabase
+        .from('users')
+        .select('user_type')
+        .eq('id', user?.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching user type:', error);
+        return;
+      }
+      
+      if (data) {
+        setUserType(data.user_type as UserType);
+      }
+    } catch (err) {
+      console.error('Error getting user type:', err);
     }
   };
 
-  // Check if user is clinician or admin
-  const isClinicianOrAdmin = user && (user.user_type === 0 || user.user_type === 1);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
-  // Don't show navbar on landing page
-  if (location.pathname === '/') {
-    return null;
-  }
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+      });
+      navigate('/');
+    } catch (error) {
+      console.error("Error logging out:", error);
+      toast({
+        variant: "destructive",
+        title: "Logout failed",
+        description: "There was a problem logging you out. Please try again.",
+      });
+    }
+  };
 
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/home" className="flex items-center space-x-2">
-            <Heart className="h-8 w-8 text-[#FC68B3]" />
-            <span className="text-xl font-bold text-gray-800">M(in)dvincible</span>
-          </Link>
+  const getNavLinks = () => {
+    if (!user) {
+      return location.pathname !== '/login' ? (
+        <Link to="/login">
+          <Button variant="default" className="ml-4 transition-transform hover:scale-105">
+            Login
+          </Button>
+        </Link>
+      ) : null;
+    }
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link
-              to="/home"
-              className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium"
-            >
-              Home
+    switch(userType) {
+      case UserType.Admin:
+        return (
+          <>
+            <Link to="/admin-dashboard" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
+              Dashboard
             </Link>
-            
-            {/* Show mood entry only for students */}
-            {!isClinicianOrAdmin && (
-              <Link
-                to="/mood-entry"
-                className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium"
-              >
-                Mood Entry
-              </Link>
-            )}
-            
-            <Link
-              to="/journal"
-              className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium"
+            <Button 
+              className="ml-4 flex items-center gap-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-white transition-transform hover:scale-105" 
+              onClick={handleLogout}
             >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </>
+        );
+      
+      case UserType.Clinician:
+        return (
+          <>
+            <Link to="/clinician-dashboard" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
+              Dashboard
+            </Link>
+            <Link to="/checkups" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
+              Checkups
+            </Link>
+            <Link to="/shared-responses" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
+              Shared Responses
+            </Link>
+            <Button 
+              className="ml-4 flex items-center gap-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-white transition-transform hover:scale-105" 
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </>
+        );
+      
+      case UserType.Student:
+      default:
+        return (
+          <>
+            <Link to="/dashboard" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
+              Dashboard
+            </Link>
+            <Link to="/mood-entry" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
+              Mood Entry
+            </Link>
+            <Link to="/mood-jar" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
+              Mood Jar
+            </Link>
+            <Link to="/journal" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
               Journal
             </Link>
-            
-            <Link
-              to="/emotional-hacking"
-              className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium"
+            <Button 
+              className="ml-4 flex items-center gap-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 text-white transition-transform hover:scale-105" 
+              onClick={handleLogout}
             >
-              Activities
-            </Link>
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </>
+        );
+    }
+  };
 
-            {/* User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                  <User className="h-4 w-4" />
-                  <span className="max-w-24 truncate">{user?.name || 'User'}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild>
-                  <Link to="/profile" className="flex items-center w-full">
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                
-                {/* Show dashboard options based on user type */}
-                {user?.user_type === 1 && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/clinician-dashboard" className="flex items-center w-full">
-                      <Heart className="mr-2 h-4 w-4" />
-                      Clinician Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-                
-                {user?.user_type === 0 && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin-dashboard" className="flex items-center w-full">
-                      <Heart className="mr-2 h-4 w-4" />
-                      Admin Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-                
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+  const getMobileNavLinks = () => {
+    if (!user) {
+      return location.pathname !== '/login' ? (
+        <Link 
+          to="/login" 
+          className="px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-md transition-all hover:scale-105"
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Login
+        </Link>
+      ) : null;
+    }
+
+    switch(userType) {
+      case UserType.Admin:
+        return (
+          <>
+            <Link 
+              to="/admin-dashboard" 
+              className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <BarChart3 className="h-4 w-4 mr-2 inline-block" />
+              Dashboard
+            </Link>
+            <button 
+              className="px-4 py-2 text-left text-white bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 rounded-md transition-all hover:scale-105 flex items-center"
+              onClick={() => {
+                handleLogout();
+                setIsMenuOpen(false);
+              }}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </button>
+          </>
+        );
+      
+      case UserType.Clinician:
+        return (
+          <>
+            <Link 
+              to="/clinician-dashboard" 
+              className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Users className="h-4 w-4 mr-2 inline-block" />
+              Dashboard
+            </Link>
+            <Link 
+              to="/checkups" 
+              className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <AlertTriangle className="h-4 w-4 mr-2 inline-block" />
+              Checkups
+            </Link>
+            <Link 
+              to="/shared-responses" 
+              className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Book className="h-4 w-4 mr-2 inline-block" />
+              Shared Responses
+            </Link>
+            <button 
+              className="px-4 py-2 text-left text-white bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 rounded-md transition-all hover:scale-105 flex items-center"
+              onClick={() => {
+                handleLogout();
+                setIsMenuOpen(false);
+              }}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </button>
+          </>
+        );
+      
+      case UserType.Student:
+      default:
+        return (
+          <>
+            <Link 
+              to="/dashboard" 
+              className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Dashboard
+            </Link>
+            <Link 
+              to="/mood-entry" 
+              className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Heart className="h-4 w-4 mr-2 inline-block" />
+              Mood Entry
+            </Link>
+            <Link 
+              to="/mood-jar" 
+              className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Archive className="h-4 w-4 mr-2 inline-block" />
+              Mood Jar
+            </Link>
+            <Link 
+              to="/journal" 
+              className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Book className="h-4 w-4 mr-2 inline-block" />
+              Journal
+            </Link>
+            <button 
+              className="px-4 py-2 text-left text-white bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] hover:opacity-90 rounded-md transition-all hover:scale-105 flex items-center"
+              onClick={() => {
+                handleLogout();
+                setIsMenuOpen(false);
+              }}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </button>
+          </>
+        );
+    }
+  };
+ const getHomeLink = () => {
+    if (!user) return '/';
+    
+    switch (userType) {
+      case UserType.Admin:
+        return '/admin-dashboard';
+      case UserType.Clinician:
+        return '/clinician-dashboard';
+      case UserType.Student:
+      default:
+        return '/home';
+    }
+  };
+
+  return (
+    <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-[#fcfcfc] shadow-md">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex justify-between items-center">
+          <Link to={getHomeLink()} className="text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+            M(in)dvincible
+          </Link>
 
           {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+          <div className="block md:hidden">
+            <button
+              onClick={toggleMenu}
+              className="text-white focus:outline-none"
+            >
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex md:items-center">
+            {getNavLinks()}
+          </div>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
-            <div className="flex flex-col space-y-3">
-              <Link
-                to="/home"
-                className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium px-2 py-1"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Home
-              </Link>
-              
-              {/* Show mood entry only for students */}
-              {!isClinicianOrAdmin && (
-                <Link
-                  to="/mood-entry"
-                  className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium px-2 py-1"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Mood Entry
-                </Link>
-              )}
-              
-              <Link
-                to="/journal"
-                className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium px-2 py-1"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Journal
-              </Link>
-              
-              <Link
-                to="/emotional-hacking"
-                className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium px-2 py-1"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Activities
-              </Link>
-
-              <hr className="border-gray-200" />
-              
-              <Link
-                to="/profile"
-                className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium px-2 py-1"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Profile
-              </Link>
-              
-              {/* Show dashboard options based on user type */}
-              {user?.user_type === 1 && (
-                <Link
-                  to="/clinician-dashboard"
-                  className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium px-2 py-1"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Clinician Dashboard
-                </Link>
-              )}
-              
-              {user?.user_type === 0 && (
-                <Link
-                  to="/admin-dashboard"
-                  className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium px-2 py-1"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Admin Dashboard
-                </Link>
-              )}
-              
-              <button
-                onClick={() => {
-                  handleSignOut();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-gray-700 hover:text-[#FC68B3] transition-colors font-medium px-2 py-1 text-left"
-              >
-                Sign out
-              </button>
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+<div className="md:hidden bg-[#fcfcfc] bg-opacity-95 backdrop-blur-md mt-3 py-4 px-2 rounded-lg shadow-lg animate-fade-in">
+            <div className="flex flex-col space-y-4">
+              {getMobileNavLinks()}
             </div>
           </div>
         )}
