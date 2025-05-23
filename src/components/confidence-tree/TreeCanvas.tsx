@@ -1,8 +1,6 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { calculateLeafPositions, drawLeafShape, getLeafColor } from '@/utils/confidenceTreeUtils';
-import VisibilityToggle from '@/components/ui/VisibilityToggle';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, Home, ArrowRight } from 'lucide-react';
@@ -628,56 +626,6 @@ const TreeCanvas = ({
           </motion.div>
         </>
       )}
-               <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
-            <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
-              <DialogHeader>
-                <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
-                  How was your experience?
-                </DialogTitle>
-              </DialogHeader>
-              
-              <div className="space-y-6">
-                <div className="grid grid-cols-3 gap-4 py-6 px-4">
-                  <Button 
-                    onClick={() => handleFeedback('positive')} 
-                    variant="outline" 
-                    className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
-                    disabled={isSubmitting}
-                  >
-                    <div className="text-3xl mb-2">👍</div>
-                    <span>Helpful</span>
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => handleFeedback('neutral')} 
-                    variant="outline" 
-                    className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
-                    disabled={isSubmitting}
-                  >
-                    <div className="text-3xl mb-2">😐</div>
-                    <span>Neutral</span>
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => handleFeedback('negative')} 
-                    variant="outline" 
-                    className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
-                    disabled={isSubmitting}
-                  >
-                    <div className="text-3xl mb-2">👎</div>
-                    <span>Not helpful</span>
-                  </Button>
-                </div>
-
-                <div className="px-4">
-                  <VisibilityToggle
-                    isVisible={isVisible}
-                    onToggle={setIsVisible}
-                  />
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
     </div>
   );
 };
