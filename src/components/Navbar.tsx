@@ -116,6 +116,9 @@ const Navbar = () => {
             <Link to="/clinician-dashboard" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
               Dashboard
             </Link>
+            <Link to="/student-center" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
+              Student Center
+            </Link>
             <Link to="/shared-responses" className="bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium hover:opacity-90 mx-4 transition-transform hover:scale-110 hover:translate-y-[-2px]">
               Shared Responses
             </Link>
@@ -213,6 +216,14 @@ const Navbar = () => {
             >
               <Users className="h-4 w-4 mr-2 inline-block" />
               Dashboard
+            </Link>
+            <Link 
+              to="/student-center" 
+              className="px-4 py-2 bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent font-medium rounded-md transition-all hover:scale-105 hover:translate-y-[-2px]"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Users className="h-4 w-4 mr-2 inline-block" />
+              Student Center
             </Link>
             <Link 
               to="/shared-responses" 

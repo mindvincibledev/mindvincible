@@ -204,6 +204,9 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Import new StudentCenter page
+import StudentCenter from "./pages/StudentCenter";
+
 const AppRoutes = () => {
   useEffect(() => {
     // Initialize Supabase integrations
@@ -231,6 +234,11 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <ClinicianDashboard />
           </ProtectedRoute>
+        } />
+        <Route path="/student-center" element={
+          <ClinicianRoute>
+            <StudentCenter />
+          </ClinicianRoute>
         } />
         <Route path="/checkups" element={
           <AdminRoute>
