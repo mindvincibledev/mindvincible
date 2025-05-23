@@ -119,7 +119,7 @@ const ResourcesHub = () => {
     },
     {
       id: "confidence-tree",
-      title: "Grow Your Confidence Tree",
+      title: "Confidence Tree",
       description: "See how your confidence has grown — and where you want it to bloom next.",
       icon: <Star className="h-8 w-8 text-[#F5DF4D]" />,
       link: "/self-confidence/confidence-tree",
