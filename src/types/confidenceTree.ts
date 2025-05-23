@@ -1,3 +1,4 @@
+
 /**
  * Data types and interfaces for the Confidence Tree activity
  */
@@ -40,7 +41,8 @@ export interface ConfidenceTreeReflection {
   reflection_text?: string;
   prompt?: string;
   created_at?: string;
-  is_visible_to_clinicians?: boolean; // Added this field to match the database schema
+  is_visible_to_clinicians?: boolean;
+  confidence_trees?: TreeData; // Add this field to support join queries with confidence_trees
 }
 
 // Helper function to parse tree data from Supabase
