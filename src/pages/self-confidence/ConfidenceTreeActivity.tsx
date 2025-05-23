@@ -27,6 +27,8 @@ import VisibilityToggle from '@/components/ui/VisibilityToggle';
 import { Home, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+
+
 const ConfidenceTreeActivity = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('builder');
@@ -106,6 +108,60 @@ const ConfidenceTreeActivity = () => {
     }
   };
 
+  const handleFeedback = async (feedbackType: string) => {
+        if (!user?.id) {
+          toast.error("You need to be logged in to complete this activity");
+          return;
+        }
+        
+        setIsSubmitting(true);
+        
+        try {
+          // First update the visibility in the battery_boost_entries table
+          if (treeToEdit.id) {
+            console.log("Saving visibility status:", isVisible);
+            const { error: visibilityError } = await supabase
+              .from('confidence_trees')
+              .update({ 
+                is_shared: isVisible 
+              })
+              .eq('id', treeToEdit.id)
+              .eq('user_id', user.id);
+              
+            if (visibilityError) {
+              console.error("Error updating visibility:", visibilityError);
+              toast.error("Failed to save visibility preference");
+              setIsSubmitting(false);
+              return;
+            }
+          }
+          
+          // Then record activity completion with feedback
+          const { error } = await supabase
+            .from('activity_completions')
+            .insert({
+              user_id: user.id,
+              activity_id: 'confidence-tree',
+              activity_name: 'Grow Your Confidence Tree',
+              feedback: feedbackType
+            });
+          
+          if (error) {
+            console.error("Error completing activity:", error);
+            toast.error("Failed to record activity completion");
+            setIsSubmitting(false);
+            return;
+          }
+          
+          toast.success("Activity completed successfully!");
+          setShowFeedback(false);
+        } catch (error) {
+          console.error("Error completing activity:", error);
+          toast.error("Failed to record activity completion");
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
 
 
   // Save tree to database
