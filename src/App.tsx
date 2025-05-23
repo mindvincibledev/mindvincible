@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -64,6 +63,38 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Student-only route component - ensures only students can access certain pages like mood entry
+const StudentRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) {
+      // If user is not a student (user_type 2), redirect to appropriate dashboard
+      if (user.user_type === 0) { // Admin
+        navigate('/admin-dashboard');
+      } else if (user.user_type === 1) { // Clinician
+        navigate('/clinician-dashboard');
+      }
+    }
+  }, [user, loading, navigate]);
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  // Only allow students (user_type 2) to access
+  if (user.user_type !== 2) {
+    return null;
   }
   
   return <>{children}</>;
@@ -170,9 +201,9 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         <Route path="/mood-entry" element={
-          <ProtectedRoute>
+          <StudentRoute>
             <MoodEntry />
-          </ProtectedRoute>
+          </StudentRoute>
         } />
         <Route path="/mood-jar" element={
           <ProtectedRoute>

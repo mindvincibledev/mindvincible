@@ -13,12 +13,13 @@ const MoodReminderNotification = () => {
   const { user } = useAuth();
   const location = useLocation();
   
-  // Don't show on mood entry page
+  // Don't show on mood entry page or for clinicians/admins
   const isMoodEntryPage = location.pathname === '/mood-entry';
+  const isClinicianOrAdmin = user && (user.user_type === 0 || user.user_type === 1); // Admin or Clinician
   
   // Check if the user has already logged a mood for today
   useEffect(() => {
-    if (!user || isMoodEntryPage) return;
+    if (!user || isMoodEntryPage || isClinicianOrAdmin) return;
     
     const checkMoodEntry = async () => {
       try {
@@ -55,10 +56,10 @@ const MoodReminderNotification = () => {
     const intervalId = setInterval(checkMoodEntry, 10 * 60 * 1000);
     
     return () => clearInterval(intervalId);
-  }, [user, isMoodEntryPage, location.pathname]);
+  }, [user, isMoodEntryPage, location.pathname, isClinicianOrAdmin]);
   
-  // Don't render anything if no reminder needed, user not logged in, or on the mood entry page
-  if (!showReminder || !user || isMoodEntryPage) return null;
+  // Don't render anything if no reminder needed, user not logged in, on the mood entry page, or user is clinician/admin
+  if (!showReminder || !user || isMoodEntryPage || isClinicianOrAdmin) return null;
   
   return (
     <AnimatePresence>
