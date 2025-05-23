@@ -2,6 +2,15 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { calculateLeafPositions, drawLeafShape, getLeafColor } from '@/utils/confidenceTreeUtils';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Star, Home, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface TreeData {
   id?: string;
@@ -44,7 +53,10 @@ const TreeCanvas = ({
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const [hoveredElement, setHoveredElement] = useState<{ type: 'branch' | 'leaf', id: string, text: string } | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-  
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showFeedback, setShowFeedback] = useState(false);
+    const { user } = useAuth();
+    const [isVisible, setIsVisible] = useState(false);
   // Track branch and leaf positions for interactivity
   const [branchPositions, setBranchPositions] = useState<Map<string, { x: number, y: number, width: number, height: number, angle: number }>>(new Map());
   const [leafPositions, setLeafPositions] = useState<Map<string, { x: number, y: number, radius: number, branchId: string }>>(new Map());
@@ -64,6 +76,61 @@ const TreeCanvas = ({
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
   }, [simplified]);
+
+    const handleFeedback = async (feedbackType: string) => {
+      if (!user?.id) {
+        toast.error("You need to be logged in to complete this activity");
+        return;
+      }
+      
+      setIsSubmitting(true);
+      
+      try {
+        // First update the visibility in the battery_boost_entries table
+        if (treeData.id) {
+          console.log("Saving visibility status:", isVisible);
+          const { error: visibilityError } = await supabase
+            .from('confidence_trees')
+            .update({ 
+              is_shared: isVisible 
+            })
+            .eq('id', treeData.id)
+            .eq('user_id', user.id);
+            
+          if (visibilityError) {
+            console.error("Error updating visibility:", visibilityError);
+            toast.error("Failed to save visibility preference");
+            setIsSubmitting(false);
+            return;
+          }
+        }
+        
+        // Then record activity completion with feedback
+        const { error } = await supabase
+          .from('activity_completions')
+          .insert({
+            user_id: user.id,
+            activity_id: 'confidence-tree',
+            activity_name: 'Grow Your Confidence Tree',
+            feedback: feedbackType
+          });
+        
+        if (error) {
+          console.error("Error completing activity:", error);
+          toast.error("Failed to record activity completion");
+          setIsSubmitting(false);
+          return;
+        }
+        
+        toast.success("Activity completed successfully!");
+        setShowFeedback(false);
+      } catch (error) {
+        console.error("Error completing activity:", error);
+        toast.error("Failed to record activity completion");
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
 
   // Draw tree when component renders or data changes
   useEffect(() => {
@@ -614,6 +681,56 @@ const TreeCanvas = ({
           </motion.div>
         </>
       )}
+               <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
+            <DialogContent className="bg-gradient-to-r from-[#3DFDFF]/10 to-[#FC68B3]/10 backdrop-blur-md border-none shadow-xl max-w-md mx-auto">
+              <DialogHeader>
+                <DialogTitle className="text-center text-2xl font-bold bg-gradient-to-r from-[#FC68B3] to-[#FF8A48] bg-clip-text text-transparent">
+                  How was your experience?
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-6">
+                <div className="grid grid-cols-3 gap-4 py-6 px-4">
+                  <Button 
+                    onClick={() => handleFeedback('positive')} 
+                    variant="outline" 
+                    className="flex flex-col items-center p-4 hover:bg-emerald-100 hover:border-emerald-200 transition-colors h-auto"
+                    disabled={isSubmitting}
+                  >
+                    <div className="text-3xl mb-2">👍</div>
+                    <span>Helpful</span>
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleFeedback('neutral')} 
+                    variant="outline" 
+                    className="flex flex-col items-center p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors h-auto"
+                    disabled={isSubmitting}
+                  >
+                    <div className="text-3xl mb-2">😐</div>
+                    <span>Neutral</span>
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleFeedback('negative')} 
+                    variant="outline" 
+                    className="flex flex-col items-center p-4 hover:bg-red-50 hover:border-red-200 transition-colors h-auto"
+                    disabled={isSubmitting}
+                  >
+                    <div className="text-3xl mb-2">👎</div>
+                    <span>Not helpful</span>
+                  </Button>
+                </div>
+
+                <div className="px-4">
+                  <VisibilityToggle
+                    isVisible={isVisible}
+                    onToggle={setIsVisible}
+                  />
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
     </div>
   );
 };

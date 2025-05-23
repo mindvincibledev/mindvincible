@@ -21,6 +21,12 @@ import { TreeData, Branch, Leaf as LeafType, parseTreeDataFromSupabase, prepareT
 import { createNewBranch, createNewLeaf } from '@/utils/confidenceTreeUtils';
 import PastReflections from '@/components/confidence-tree/PastReflections';
 
+
+import { calculateLeafPositions, drawLeafShape, getLeafColor } from '@/utils/confidenceTreeUtils';
+import VisibilityToggle from '@/components/ui/VisibilityToggle';
+import { Home, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 const ConfidenceTreeActivity = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('builder');
@@ -32,6 +38,7 @@ const ConfidenceTreeActivity = () => {
     branches: []
   });
 
+  
   // Dialog states
   const [showBranchDialog, setShowBranchDialog] = useState(false);
   const [showLeafDialog, setShowLeafDialog] = useState(false);
@@ -49,6 +56,9 @@ const ConfidenceTreeActivity = () => {
   const [treeToEdit, setTreeToEdit] = useState<TreeData | null>(null);
   const [nameDialogOpen, setNameDialogOpen] = useState(false);
   const [showPostSaveReflection, setShowPostSaveReflection] = useState(false);
+      const [isSubmitting, setIsSubmitting] = useState(false);
+      const [showFeedback, setShowFeedback] = useState(false);
+      const [isVisible, setIsVisible] = useState(false);
 
   // New state for branch selection in reflection
   const [selectedBranchForReflection, setSelectedBranchForReflection] = useState<string>('');
@@ -95,6 +105,8 @@ const ConfidenceTreeActivity = () => {
       setLoading(false);
     }
   };
+
+
 
   // Save tree to database
   const saveTree = async () => {
@@ -1107,6 +1119,9 @@ const ConfidenceTreeActivity = () => {
                   onClick={() => {
                     setNameDialogOpen(false);
                     saveTree();
+                    showFeedback(true);
+                    handle
+                    
                   }}
                   disabled={saving}
                   className="bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-white"
