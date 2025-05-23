@@ -18,7 +18,7 @@ import TreeCanvas from '@/components/confidence-tree/TreeCanvas';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { TreeData, Branch, Leaf as LeafType, parseTreeDataFromSupabase, prepareTreeDataForSupabase } from '@/types/confidenceTree';
+import { TreeData, Branch, Leaf as LeafType, parseTreeDataFromSupabase, prepareTreeDataForSupabase, ConfidenceTreeReflection } from '@/types/confidenceTree';
 import { createNewBranch, createNewLeaf } from '@/utils/confidenceTreeUtils';
 
 const ConfidenceTreeActivity = () => {
@@ -50,6 +50,10 @@ const ConfidenceTreeActivity = () => {
   const [nameDialogOpen, setNameDialogOpen] = useState(false);
   const [showPostSaveReflection, setShowPostSaveReflection] = useState(false);
 
+  // New state for branch selection in reflection
+  const [selectedBranchForReflection, setSelectedBranchForReflection] = useState<string>('');
+  const [savingReflection, setSavingReflection] = useState(false);
+
   // Reflections questions for the user
   const reflectionPrompts = [
     "Which branch is the strongest? Why?",
@@ -59,8 +63,11 @@ const ConfidenceTreeActivity = () => {
 
   // Function to check if we should enter reflection mode
   const checkForReflectionMode = (tree: TreeData) => {
+    if (!tree || !tree.branches) return false;
+    
     const hasBranches = tree.branches.length >= 3;
     const hasLeavesOnEachBranch = tree.branches.every(branch => branch.leaves.length > 0);
+    
     return hasBranches && hasLeavesOnEachBranch;
   };
 
@@ -297,15 +304,70 @@ const ConfidenceTreeActivity = () => {
   };
 
   // Submit reflection for a prompt
-  const submitReflection = () => {
+  const submitReflection = async () => {
     if (!reflectionText.trim()) {
       toast.error('Please enter your reflection');
       return;
     }
 
-    // Here you could save the reflection to the database if needed
+    // If the first prompt requires a branch selection
+    if (promptIndex === 0 && !selectedBranchForReflection) {
+      toast.error('Please select a branch');
+      return;
+    }
+
+    // Save the reflection to the database
+    if (user && treeToEdit?.id) {
+      setSavingReflection(true);
+      try {
+        const { error } = await supabase
+          .from('confidence_tree_reflections')
+          .insert({
+            tree_id: treeToEdit.id,
+            user_id: user.id,
+            reflection_text: reflectionText,
+            prompt: reflectionPrompts[promptIndex]
+          });
+
+        if (error) throw error;
+        
+        // Handle leaf release if we're on the wilted leaves prompt
+        if (promptIndex === 1 && selectedLeafToRelease) {
+          const branchWithLeaf = currentTree.branches.find(branch => 
+            branch.leaves.some(leaf => leaf.id === selectedLeafToRelease.id)
+          );
+          
+          if (branchWithLeaf) {
+            handleLeafAction(branchWithLeaf.id, selectedLeafToRelease.id, 'release');
+            
+            // Update the tree in the database after releasing the leaf
+            const updatedTreeData = prepareTreeDataForSupabase(currentTree);
+            await supabase
+              .from('confidence_trees')
+              .update({
+                branches: updatedTreeData.branches
+              })
+              .eq('id', treeToEdit.id);
+          }
+          
+          setSelectedLeafToRelease(null);
+        }
+        
+      } catch (error) {
+        console.error('Error saving reflection:', error);
+        toast.error('Failed to save your reflection');
+      } finally {
+        setSavingReflection(false);
+      }
+    }
+    
     toast.success('Reflection saved!');
     setReflectionText('');
+    
+    // Reset branch selection if moving from first prompt
+    if (promptIndex === 0) {
+      setSelectedBranchForReflection('');
+    }
     
     // Move to the next prompt or close dialog if done
     if (promptIndex < reflectionPrompts.length - 1) {
@@ -590,6 +652,21 @@ const ConfidenceTreeActivity = () => {
                               Click on a branch to add leaves. Each leaf represents things they've said or done that affected your confidence.
                             </p>
                             
+                            <div className="flex gap-4 justify-center mb-6">
+                              <div className="flex items-center gap-1">
+                                <span className="inline-block w-3 h-3 bg-[#2AC20E] rounded-full"></span>
+                                <span className="text-sm">Positive 🍃</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="inline-block w-3 h-3 bg-[#8B4513] rounded-full"></span>
+                                <span className="text-sm">Hurtful 🍂</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="inline-block w-3 h-3 bg-[#D2691E] rounded-full"></span>
+                                <span className="text-sm">Mixed 🍁</span>
+                              </div>
+                            </div>
+                            
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                               {currentTree.branches.map(branch => (
                                 <Card key={branch.id} className="bg-white">
@@ -822,21 +899,21 @@ const ConfidenceTreeActivity = () => {
                       <RadioGroupItem value="positive" id="positive" className="border-green-500" />
                       <Label htmlFor="positive" className="flex items-center">
                         <span className="inline-block w-4 h-4 bg-green-500 rounded-full mr-2"></span>
-                        Positive
+                        Positive 🍃
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="negative" id="negative" className="border-amber-700" />
                       <Label htmlFor="negative" className="flex items-center">
                         <span className="inline-block w-4 h-4 bg-amber-700 rounded-full mr-2"></span>
-                        Hurtful
+                        Hurtful 🍂
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="mixed" id="mixed" className="border-orange-400" />
                       <Label htmlFor="mixed" className="flex items-center">
-                        <span className="inline-block w-4 h-4 bg-gradient-to-r from-green-500 to-amber-700 rounded-full mr-2"></span>
-                        Mixed
+                        <span className="inline-block w-4 h-4 bg-[#D2691E] rounded-full mr-2"></span>
+                        Mixed 🍁
                       </Label>
                     </div>
                   </RadioGroup>
@@ -849,7 +926,7 @@ const ConfidenceTreeActivity = () => {
                   className={`text-white ${
                     newLeafType === 'positive' ? 'bg-green-500 hover:bg-green-600' : 
                     newLeafType === 'negative' ? 'bg-amber-700 hover:bg-amber-800' : 
-                    'bg-gradient-to-r from-green-500 to-amber-700 hover:from-green-600 hover:to-amber-800'
+                    'bg-[#D2691E] hover:bg-[#A0522D]'
                   }`}
                 >
                   Add Leaf
@@ -868,6 +945,35 @@ const ConfidenceTreeActivity = () => {
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">
+                {promptIndex === 0 && (
+                  <div className="mb-4">
+                    <Label className="block mb-2 text-sm">Select a branch:</Label>
+                    <div className="space-y-2 mb-4">
+                      {currentTree.branches.map(branch => (
+                        <div key={branch.id} className="flex items-center">
+                          <input
+                            type="radio"
+                            id={`branch-${branch.id}`}
+                            name="branch-selection"
+                            value={branch.id}
+                            checked={selectedBranchForReflection === branch.id}
+                            onChange={() => setSelectedBranchForReflection(branch.id)}
+                            className="mr-2"
+                          />
+                          <label htmlFor={`branch-${branch.id}`} className="flex-1">
+                            <div className="flex justify-between items-center">
+                              <span>{branch.name}</span>
+                              <span className="text-xs text-gray-500">
+                                {branch.leaves.length} {branch.leaves.length === 1 ? 'leaf' : 'leaves'}
+                              </span>
+                            </div>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
                 <Textarea
                   value={reflectionText}
                   onChange={(e) => setReflectionText(e.target.value)}
@@ -889,15 +995,49 @@ const ConfidenceTreeActivity = () => {
                                 key={leaf.id} 
                                 variant="outline"
                                 size="sm"
-                                className={`text-xs border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 mb-2
+                                className={`text-xs border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 mb-2 flex items-center gap-1
                                   ${selectedLeafToRelease?.id === leaf.id ? 'ring-2 ring-amber-500' : ''}`}
                                 onClick={() => setSelectedLeafToRelease(
                                   selectedLeafToRelease?.id === leaf.id ? null : leaf
                                 )}
                               >
+                                <span className="inline-block w-3 h-3 bg-amber-700 rounded-full mr-1"></span>
                                 {leaf.text.length > 15 ? `${leaf.text.substring(0, 15)}...` : leaf.text}
                                 {selectedLeafToRelease?.id === leaf.id && (
                                   <X size={12} className="ml-1" />
+                                )}
+                              </Button>
+                            ))
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                )}
+                
+                {promptIndex === 2 && (
+                  <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-2">Select leaves you want to grow more of:</p>
+                    <ScrollArea className="h-32 pr-4">
+                      <div className="flex flex-wrap gap-2">
+                        {currentTree.branches.map(branch => 
+                          branch.leaves
+                            .filter(leaf => leaf.type === 'positive')
+                            .map(leaf => (
+                              <Button 
+                                key={leaf.id} 
+                                variant="outline"
+                                size="sm"
+                                className={`text-xs border border-green-200 bg-green-50 hover:bg-green-100 text-green-800 mb-2 flex items-center gap-1
+                                  ${leaf.starred ? 'ring-2 ring-green-500' : ''}`}
+                                onClick={() => {
+                                  // Mark leaf for growth (star it)
+                                  handleLeafAction(branch.id, leaf.id, 'star')
+                                }}
+                              >
+                                <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-1"></span>
+                                {leaf.text.length > 15 ? `${leaf.text.substring(0, 15)}...` : leaf.text}
+                                {leaf.starred && (
+                                  <Star size={12} className="ml-1 fill-green-500" />
                                 )}
                               </Button>
                             ))
@@ -922,24 +1062,13 @@ const ConfidenceTreeActivity = () => {
                   {promptIndex > 0 ? 'Previous' : 'Cancel'}
                 </Button>
                 <Button 
-                  onClick={() => {
-                    // If we're on the "wilted leaves" prompt and a leaf is selected
-                    if (promptIndex === 1 && selectedLeafToRelease) {
-                      const branchWithLeaf = currentTree.branches.find(branch => 
-                        branch.leaves.some(leaf => leaf.id === selectedLeafToRelease.id)
-                      );
-                      
-                      if (branchWithLeaf) {
-                        handleLeafAction(branchWithLeaf.id, selectedLeafToRelease.id, 'release');
-                      }
-                      
-                      setSelectedLeafToRelease(null);
-                    }
-                    submitReflection();
-                  }}
-                  className="bg-gradient-to-r from-[#F5DF4D] to-[#3DFDFF] text-black"
+                  onClick={submitReflection}
+                  disabled={savingReflection}
+                  className={`${promptIndex < reflectionPrompts.length - 1 
+                    ? 'bg-gradient-to-r from-[#F5DF4D] to-[#3DFDFF] text-black' 
+                    : 'bg-gradient-to-r from-[#3DFDFF] to-[#2AC20E] text-black'}`}
                 >
-                  {promptIndex < reflectionPrompts.length - 1 ? 'Next' : 'Finish Reflection'}
+                  {savingReflection ? 'Saving...' : promptIndex < reflectionPrompts.length - 1 ? 'Next' : 'Finish Reflection'}
                 </Button>
               </DialogFooter>
             </DialogContent>

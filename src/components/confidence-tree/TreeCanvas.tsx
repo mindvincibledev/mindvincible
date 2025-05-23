@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { calculateLeafPositions, drawLeafShape } from '@/utils/confidenceTreeUtils';
+import { calculateLeafPositions, drawLeafShape, getLeafColor } from '@/utils/confidenceTreeUtils';
 
 interface TreeData {
   id?: string;
@@ -453,26 +453,8 @@ const TreeCanvas = ({
       const sizeVariation = 0.8 + Math.random() * 0.4;
       const leafSize = leafBaseSize * sizeVariation;
       
-      // Determine leaf color based on type
-      let leafColor;
-      switch (leaf.type) {
-        case 'positive':
-          leafColor = '#2AC20E';
-          break;
-        case 'negative':
-          leafColor = '#8B4513';
-          break;
-        case 'mixed':
-          // Create a radial gradient for mixed leaves
-          const gradient = ctx.createRadialGradient(
-            finalLeafX, finalLeafY, 0,
-            finalLeafX, finalLeafY, leafSize
-          );
-          gradient.addColorStop(0, '#2AC20E');
-          gradient.addColorStop(1, '#8B4513');
-          leafColor = gradient;
-          break;
-      }
+      // Get the appropriate color based on leaf type (positive, negative, mixed)
+      const leafColor = getLeafColor(leaf.type);
       
       // Calculate leaf angle (perpendicular to branch + slight random variation)
       const leafAngle = perpAngle + (Math.random() * 0.4 - 0.2);

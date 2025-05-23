@@ -247,3 +247,18 @@ export const drawLeafShape = (
   // Restore the context
   ctx.restore();
 };
+
+// Get the appropriate color for a leaf type
+export const getLeafColor = (type: 'positive' | 'negative' | 'mixed'): string | CanvasGradient => {
+  switch (type) {
+    case 'positive':
+      return '#2AC20E'; // Green for positive leaves
+    case 'negative':
+      return '#8B4513'; // Brown for negative/hurtful leaves
+    case 'mixed':
+      // For mixed leaves, we could use an amber/orange color
+      return '#D2691E'; // Amber/orange for mixed feelings
+    default:
+      return '#2AC20E';
+  }
+};
