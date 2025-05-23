@@ -1117,10 +1117,10 @@ const ConfidenceTreeActivity = () => {
                 <Button variant="outline" onClick={() => setNameDialogOpen(false)}>Cancel</Button>
                 <Button 
                   onClick={() => {
+                    showFeedback(true);
                     setNameDialogOpen(false);
                     saveTree();
-                    showFeedback(true);
-                    handle
+                    
                     
                   }}
                   disabled={saving}
