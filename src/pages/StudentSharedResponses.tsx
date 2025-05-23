@@ -56,6 +56,8 @@ const StudentSharedResponses = () => {
   const [forkInRoadEntries, setForkInRoadEntries] = useState<Activity[]>([]);
   const [groundingEntries, setGroundingEntries] = useState<Activity[]>([]);
   const [hiChallengeEntries, setHiChallengeEntries] = useState<Activity[]>([]);
+  const [batteryBoostEntries, setBatteryBoostEntries] = useState<Activity[]>([]);
+  const [confidenceTreeEntries, setConfidenceTreeEntries] = useState<Activity[]>([]);
   
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -182,7 +184,27 @@ const StudentSharedResponses = () => {
         .order('created_at', { ascending: false });
       
       if (hiChallengesError) throw hiChallengesError;
+
+      // Fetch battery boost entries
+      const { data: batteryBoostData, error: batteryBoostError } = await supabase
+        .from('battery_boost_entries')
+        .select('*')
+        .eq('user_id', studentId)
+        .eq('visible_to_clinicians', true)
+        .order('created_at', { ascending: false });
       
+      if (batteryBoostError) throw batteryBoostError;
+      
+      // Fetch confidence tree reflections
+      const { data: confidenceTreeData, error: confidenceTreeError } = await supabase
+        .from('confidence_tree_reflections')
+        .select('*')
+        .eq('user_id', studentId)
+        .eq('is_visible_to_clinicians', true)
+        .order('created_at', { ascending: false });
+      
+      if (confidenceTreeError) throw confidenceTreeError;
+
       setEmotionalAirbnbEntries(airbnbData || []);
       
       // Map decision_id to id for fork in road entries to make them compatible with Activity type
@@ -194,6 +216,8 @@ const StudentSharedResponses = () => {
       setForkInRoadEntries(formattedDecisionsData);
       setGroundingEntries(groundingData || []);
       setHiChallengeEntries(hiChallengesData || []);
+      setBatteryBoostEntries(batteryBoostData || []);
+      setConfidenceTreeEntries(confidenceTreeData || []);
       
       setLoading(false);
     } catch (error) {
@@ -296,7 +320,6 @@ const StudentSharedResponses = () => {
     );
   };
   
-  // Render Fork in the Road entries
   const renderForkInRoadEntries = () => {
     if (forkInRoadEntries.length === 0) {
       return (
@@ -671,6 +694,195 @@ const StudentSharedResponses = () => {
     );
   };
 
+  const renderBatteryBoostEntries = () => {
+    if (batteryBoostEntries.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No shared Battery Boost entries found.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {batteryBoostEntries.map((entry) => (
+          <Accordion type="single" collapsible key={entry.id}>
+            <AccordionItem value={entry.id}>
+              <AccordionTrigger className="bg-white/80 hover:bg-white p-4 rounded-lg">
+                <div className="flex items-center justify-between w-full pr-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-[#FC68B3]" />
+                    <span>{formatDate(entry.created_at)}</span>
+                    <span className="ml-2 text-[#FC68B3">
+                      Battery: {entry.starting_percentage}% → {entry.final_percentage || 'N/A'}%
+                    </span>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="bg-white/90 p-4 rounded-lg">
+                <div className="space-y-4">
+                  {entry.starting_percentage && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Starting Battery Percentage</h4>
+                      <p>{entry.starting_percentage}%</p>
+                    </div>
+                  )}
+                  
+                  {entry.final_percentage && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Final Battery Percentage</h4>
+                      <p>{entry.final_percentage}%</p>
+                    </div>
+                  )}
+                  
+                  {entry.boost_topics && entry.boost_topics.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Boost Topics</h4>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {entry.boost_topics.map((topic: string, i: number) => (
+                          <span key={i} className="bg-[#2AC20E]/10 text-[#2AC20E] text-xs px-2 py-1 rounded-full">
+                            {topic}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {entry.selected_vibes && entry.selected_vibes.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Selected Vibes</h4>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {entry.selected_vibes.map((vibe: string, i: number) => (
+                          <span key={i} className="bg-[#3DFDFF]/10 text-[#3DFDFF] text-xs px-2 py-1 rounded-full">
+                            {vibe}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {entry.drain_patterns && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Drain Patterns</h4>
+                      <p>{entry.drain_patterns}</p>
+                    </div>
+                  )}
+                  
+                  {entry.accounts_to_follow_more && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Accounts to Follow More</h4>
+                      <p>{entry.accounts_to_follow_more}</p>
+                    </div>
+                  )}
+                  
+                  {entry.accounts_to_unfollow && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Accounts to Unfollow</h4>
+                      <p>{entry.accounts_to_unfollow}</p>
+                    </div>
+                  )}
+                  
+                  {entry.feeling_after_scroll && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Feeling After Scroll</h4>
+                      <p>{entry.feeling_after_scroll}</p>
+                    </div>
+                  )}
+                  
+                  {entry.next_scroll_strategy && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Next Scroll Strategy</h4>
+                      <p>{entry.next_scroll_strategy}</p>
+                    </div>
+                  )}
+                  
+                  {entry.shared_post_description && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Shared Post Description</h4>
+                      <p>{entry.shared_post_description}</p>
+                    </div>
+                  )}
+                  
+                  {entry.shared_post_impact && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Shared Post Impact</h4>
+                      <p>{entry.shared_post_impact}</p>
+                    </div>
+                  )}
+                  
+                  {entry.bonus_completed && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Bonus Challenge</h4>
+                      <p className="text-[#2AC20E]">Completed ✓</p>
+                    </div>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        ))}
+      </div>
+    );
+  };
+
+  const renderConfidenceTreeEntries = () => {
+    if (confidenceTreeEntries.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No shared Confidence Tree reflections found.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {confidenceTreeEntries.map((entry) => (
+          <Accordion type="single" collapsible key={entry.id}>
+            <AccordionItem value={entry.id}>
+              <AccordionTrigger className="bg-white/80 hover:bg-white p-4 rounded-lg">
+                <div className="flex items-center justify-between w-full pr-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-[#FC68B3]" />
+                    <span>{formatDate(entry.created_at)}</span>
+                    {entry.prompt && (
+                      <span className="ml-2 text-[#FC68B3] truncate max-w-xs">
+                        Prompt: {entry.prompt.substring(0, 50)}...
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="bg-white/90 p-4 rounded-lg">
+                <div className="space-y-4">
+                  {entry.prompt && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Reflection Prompt</h4>
+                      <p className="bg-gray-50 p-3 rounded-lg italic">{entry.prompt}</p>
+                    </div>
+                  )}
+                  
+                  {entry.reflection_text && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Reflection Response</h4>
+                      <p className="bg-white p-3 rounded-lg border-l-4 border-[#FC68B3]">{entry.reflection_text}</p>
+                    </div>
+                  )}
+                  
+                  {entry.tree_id && (
+                    <div>
+                      <h4 className="font-medium text-[#FC68B3]">Associated Tree ID</h4>
+                      <p className="text-sm text-gray-600">{entry.tree_id}</p>
+                    </div>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        ))}
+      </div>
+    );
+  };
+
   // Rest of the component rendering
   return (
     <BackgroundWithEmojis>
@@ -705,7 +917,7 @@ const StudentSharedResponses = () => {
             </div>
           ) : (
             <Tabs defaultValue="emotional-airbnb" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-8">
+              <TabsList className="grid w-full grid-cols-6 mb-8">
                 <TabsTrigger value="emotional-airbnb">
                   Emotional Airbnb ({emotionalAirbnbEntries.length})
                 </TabsTrigger>
@@ -717,6 +929,12 @@ const StudentSharedResponses = () => {
                 </TabsTrigger>
                 <TabsTrigger value="power-of-hi">
                   Power of Hi ({hiChallengeEntries.length})
+                </TabsTrigger>
+                <TabsTrigger value="battery-boost">
+                  Battery Boost ({batteryBoostEntries.length})
+                </TabsTrigger>
+                <TabsTrigger value="confidence-tree">
+                  Confidence Tree ({confidenceTreeEntries.length})
                 </TabsTrigger>
               </TabsList>
               
@@ -750,6 +968,22 @@ const StudentSharedResponses = () => {
                   Power of Hi Challenges
                 </h2>
                 {renderHiChallenges()}
+              </TabsContent>
+
+              <TabsContent value="battery-boost" className="bg-white/50 backdrop-blur-sm p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4 flex items-center">
+                  <FileText className="h-5 w-5 mr-2 text-[#FC68B3]" />
+                  Battery Boost Entries
+                </h2>
+                {renderBatteryBoostEntries()}
+              </TabsContent>
+              
+              <TabsContent value="confidence-tree" className="bg-white/50 backdrop-blur-sm p-6 rounded-lg">
+                <h2 className="text-xl font-semibold mb-4 flex items-center">
+                  <FileText className="h-5 w-5 mr-2 text-[#FC68B3]" />
+                  Confidence Tree Reflections
+                </h2>
+                {renderConfidenceTreeEntries()}
               </TabsContent>
             </Tabs>
           )}
