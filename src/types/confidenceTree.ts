@@ -1,19 +1,6 @@
-
 /**
- * Types for the Confidence Tree activity
+ * Data types and interfaces for the Confidence Tree activity
  */
-
-import { Json } from '@/integrations/supabase/types';
-
-export interface TreeData {
-  id?: string;
-  user_id?: string;
-  name: string;
-  branches: Branch[];
-  created_at?: string;
-  updated_at?: string;
-  is_shared?: boolean;
-}
 
 export interface Branch {
   id: string;
@@ -25,20 +12,16 @@ export interface Leaf {
   id: string;
   text: string;
   type: 'positive' | 'negative' | 'mixed';
-  starred?: boolean;
+  starred: boolean;
 }
 
-export interface ConfidenceTreeReflection {
+export interface TreeData {
   id?: string;
-  tree_id: string;
-  user_id: string;
-  reflection_text: string;
-  prompt: string;
+  name: string;
+  branches: Branch[];
+  user_id?: string;
   created_at?: string;
-  is_visible_to_clinicians?: boolean;
-  confidence_trees?: {
-    name: string;
-  };
+  updated_at?: string;
 }
 
 export interface TreeStats {
@@ -50,28 +33,47 @@ export interface TreeStats {
   starredLeaves: number;
 }
 
-// Type conversion utilities for Supabase data
-export const parseTreeDataFromSupabase = (supabaseData: any): TreeData => {
+export interface ConfidenceTreeReflection {
+  id?: string;
+  tree_id?: string;
+  user_id?: string;
+  reflection_text?: string;
+  prompt?: string;
+  created_at?: string;
+  is_visible_to_clinicians?: boolean; // Added this field to match the database schema
+}
+
+// Helper function to parse tree data from Supabase
+export const parseTreeDataFromSupabase = (data: any): TreeData => {
   return {
-    ...supabaseData,
-    branches: Array.isArray(supabaseData.branches) 
-      ? supabaseData.branches 
-      : typeof supabaseData.branches === 'string'
-        ? JSON.parse(supabaseData.branches)
-        : []
+    id: data.id,
+    name: data.name,
+    branches: data.branches,
+    user_id: data.user_id,
+    created_at: data.created_at,
+    updated_at: data.updated_at
   };
 };
 
-export const prepareTreeDataForSupabase = (treeData: TreeData): any => {
+// Helper function to prepare tree data for Supabase
+export const prepareTreeDataForSupabase = (tree: TreeData): any => {
   return {
-    ...treeData,
-    branches: treeData.branches
+    name: tree.name,
+    branches: tree.branches
   };
 };
 
 // Generate a unique ID for branches and leaves
 export const generateId = (prefix: string): string => {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+};
+
+// Create a new empty tree
+export const createNewTree = (name: string = "My Confidence Tree"): TreeData => {
+  return {
+    name,
+    branches: []
+  };
 };
 
 // Create a new branch

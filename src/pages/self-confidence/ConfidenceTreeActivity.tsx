@@ -1,18 +1,23 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from "@/components/ui/use-toast";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import BuildTree from '@/components/confidence-tree/BuildTree';
 import ReflectionSection from '@/components/confidence-tree/ReflectionSection';
 import PastReflections from '@/components/confidence-tree/PastReflections';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 import {
   TreeData,
   parseTreeDataFromSupabase,
   prepareTreeDataForSupabase,
-  ConfidenceTreeReflection
+  ConfidenceTreeReflection,
+  createNewTree
 } from '@/types/confidenceTree';
 
 const ConfidenceTreeActivity = () => {
@@ -63,13 +68,7 @@ const ConfidenceTreeActivity = () => {
         setTreeToEdit(mostRecent);
       } else {
         // Create a new tree if none exists
-        const newTree: TreeData = {
-          name: "My Confidence Tree",
-          branches: [],
-          user_id: user.id
-        };
-        setCurrentTree(newTree);
-        setTreeToEdit(newTree);
+        createNewEmptyTree();
       }
     } catch (error) {
       console.error('Error loading trees:', error);
@@ -81,6 +80,17 @@ const ConfidenceTreeActivity = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Create a new empty tree
+  const createNewEmptyTree = () => {
+    const newTree: TreeData = {
+      name: "My Confidence Tree",
+      branches: [],
+      user_id: user?.id
+    };
+    setCurrentTree(newTree);
+    setTreeToEdit(newTree);
   };
 
   // Function to handle tree changes
@@ -124,12 +134,16 @@ const ConfidenceTreeActivity = () => {
         
         if (data && data.length > 0) {
           const newTree = parseTreeDataFromSupabase(data[0]);
-          setCurrentTree(newTree);
-          setTreeToEdit(newTree);
-          setUserTrees([...userTrees, newTree]);
+          // Update the trees list
+          setUserTrees(prevTrees => [...prevTrees, newTree]);
+          
+          // Reset to a new empty tree after successfully saving
+          createNewEmptyTree();
+          toast({ 
+            title: 'Success', 
+            description: 'Your tree has been created! You can now create another tree or view your saved trees.'
+          });
         }
-        
-        toast({ title: 'Success', description: 'Your tree has been created' });
       }
     } catch (error) {
       console.error('Error saving tree:', error);
@@ -270,62 +284,91 @@ const ConfidenceTreeActivity = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold text-center mb-8 text-[#FF8A48]">Grow Your Confidence Tree</h1>
-      
-      <Tabs defaultValue="build" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-8">
-          <TabsTrigger value="build" className="text-lg">Build Tree</TabsTrigger>
-          <TabsTrigger value="reflect" className="text-lg">Reflect</TabsTrigger>
-          <TabsTrigger value="past-reflections" className="text-lg">My Reflections</TabsTrigger>
-        </TabsList>
+    <div className="min-h-screen bg-[#D5D5F1]/10 pt-16 pb-8">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Back button */}
+        <div className="mb-6">
+          <Link to="/resources" className="flex items-center text-[#FF8A48] hover:text-[#FF8A48]/80 transition-colors">
+            <ArrowLeft className="mr-2 h-5 w-5" />
+            <span>Back to Resources Hub</span>
+          </Link>
+        </div>
         
-        <TabsContent value="build">
-          {currentTree && (
-            <BuildTree 
-              treeData={currentTree} 
-              onTreeChange={handleTreeChange}
-              onSave={saveTree}
-              loading={loading}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="reflect">
-          {currentTree && treeToEdit && (
-            <ReflectionSection 
-              treeData={currentTree}
-              treeId={treeToEdit.id || ''}
-              onShowPrompt={() => {
-                setShowPromptDialog(true);
-                setPromptIndex(0);
-              }}
-              showPromptDialog={showPromptDialog}
-              setShowPromptDialog={setShowPromptDialog}
-              reflectionPrompts={reflectionPrompts}
-              promptIndex={promptIndex}
-              reflectionText={reflectionText}
-              setReflectionText={setReflectionText}
-              submitReflection={submitReflection}
-              savingReflection={savingReflection}
-              selectedBranchForReflection={selectedBranchForReflection}
-              setSelectedBranchForReflection={setSelectedBranchForReflection}
-              selectedLeafToRelease={selectedLeafToRelease}
-              setSelectedLeafToRelease={setSelectedLeafToRelease}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="past-reflections">
-          {treeToEdit && (
-            <PastReflections 
-              userId={user?.id || ''}
-              trees={userTrees}
-              currentTreeId={treeToEdit.id || ''}
-            />
-          )}
-        </TabsContent>
-      </Tabs>
+        <Card className="p-6 bg-white/90 backdrop-blur-lg shadow-xl border-none overflow-hidden">
+          <h1 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-[#FF8A48] to-[#FC68B3] bg-clip-text text-transparent">
+            Grow Your Confidence Tree
+          </h1>
+          
+          <Tabs defaultValue="build" value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-3 mb-8">
+              <TabsTrigger 
+                value="build" 
+                className="text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF8A48] data-[state=active]:to-[#FC68B3] data-[state=active]:text-white"
+              >
+                Build Tree
+              </TabsTrigger>
+              <TabsTrigger 
+                value="reflect" 
+                className="text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF8A48] data-[state=active]:to-[#FC68B3] data-[state=active]:text-white"
+              >
+                Reflect
+              </TabsTrigger>
+              <TabsTrigger 
+                value="past-reflections" 
+                className="text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FF8A48] data-[state=active]:to-[#FC68B3] data-[state=active]:text-white"
+              >
+                My Reflections
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="build">
+              {currentTree && (
+                <BuildTree 
+                  treeData={currentTree} 
+                  onTreeChange={handleTreeChange}
+                  onSave={saveTree}
+                  loading={loading}
+                />
+              )}
+            </TabsContent>
+            
+            <TabsContent value="reflect">
+              {currentTree && treeToEdit && (
+                <ReflectionSection 
+                  treeData={currentTree}
+                  treeId={treeToEdit.id || ''}
+                  onShowPrompt={() => {
+                    setShowPromptDialog(true);
+                    setPromptIndex(0);
+                  }}
+                  showPromptDialog={showPromptDialog}
+                  setShowPromptDialog={setShowPromptDialog}
+                  reflectionPrompts={reflectionPrompts}
+                  promptIndex={promptIndex}
+                  reflectionText={reflectionText}
+                  setReflectionText={setReflectionText}
+                  submitReflection={submitReflection}
+                  savingReflection={savingReflection}
+                  selectedBranchForReflection={selectedBranchForReflection}
+                  setSelectedBranchForReflection={setSelectedBranchForReflection}
+                  selectedLeafToRelease={selectedLeafToRelease}
+                  setSelectedLeafToRelease={setSelectedLeafToRelease}
+                />
+              )}
+            </TabsContent>
+            
+            <TabsContent value="past-reflections">
+              {treeToEdit && (
+                <PastReflections 
+                  userId={user?.id || ''}
+                  trees={userTrees}
+                  currentTreeId={treeToEdit.id || ''}
+                />
+              )}
+            </TabsContent>
+          </Tabs>
+        </Card>
+      </div>
     </div>
   );
 };

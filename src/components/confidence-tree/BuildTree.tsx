@@ -100,6 +100,28 @@ const BuildTree = ({ treeData, onTreeChange, onSave, loading }: BuildTreeProps) 
     setShowLeafDialog(true);
   };
 
+  const handleSaveTree = () => {
+    if (!treeData.name.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a name for your tree',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    if (treeData.branches.length === 0) {
+      toast({
+        title: 'Error',
+        description: 'Please add at least one branch to your tree',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    onSave();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -117,7 +139,7 @@ const BuildTree = ({ treeData, onTreeChange, onSave, loading }: BuildTreeProps) 
           </Button>
           
           <Button 
-            onClick={onSave} 
+            onClick={handleSaveTree} 
             className="bg-[#2AC20E] hover:bg-[#2AC20E]/80 text-white"
             disabled={loading}
           >
